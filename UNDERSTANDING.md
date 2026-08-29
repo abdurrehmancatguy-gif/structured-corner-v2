@@ -50,20 +50,34 @@ colour carries information rather than decorating: seven families, seven
 identities, and a bottle keeps its colour from the collection grid through the
 PDP into the cart line and onto the gift-box preview.
 
-| Scent family | Reads as |
-|---|---|
-| Oud & Woods | Deep resinous brown-green |
-| Amber & Spice | Burnt amber |
-| Musk & Clean | Cool pale slate |
-| Floral Veil | Rose |
-| Fresh & Citrus | Bright herbal green |
-| Sweet & Gourmand | Plum |
-| Reserve | Near-black with gold — the halo tier, visibly apart |
+Ground: `#FAF8F4`, a warm off-white.
 
-Hues are **proposed, not settled**. Each family ships two stops: an *ink* dark
-enough for text at WCAG AA on the light ground, and a *wash* for fills that
-never carries text — otherwise half of seven colours fail a contrast check the
-moment a label is set in them.
+Each family ships two stops: an **ink** that carries text, and a **wash** for
+fills that never carries text. Measured contrast below — AA needs 4.5:1:
+
+| Scent family | Ink | on ground | Wash | ink on wash |
+|---|---|---|---|---|
+| Oud & Woods | `#3E4A33` | 8.87 | `#EDEFE6` | 8.10 |
+| Amber & Spice | `#94480F` | 6.20 | `#F8EADC` | 5.57 |
+| Musk & Clean | `#44555F` | 7.30 | `#E9EEF1` | 6.63 |
+| Floral Veil | `#9B3A5B` | 6.29 | `#F9E7EC` | 5.61 |
+| Fresh & Citrus | `#4B6B1C` | 5.79 | `#EFF3E2` | 5.44 |
+| Sweet & Gourmand | `#6D2F5C` | 8.95 | `#F3E6F0` | 7.86 |
+| Reserve | `#26221D` | 14.90 | `#E8E4DC` | 12.46 |
+
+Every ink passes AA on the ground *and* on its own wash, so a label may sit on
+either without a per-family exception. The narrowest is Fresh & Citrus at 5.44,
+which still leaves room to darken a tint later without breaking a check.
+
+**Gold is not a text colour.** `#A07C3C` reaches 3.64 against the ground and
+4.10 against Reserve ink — both short of AA. Gold is for rules, borders and
+foil; the halo tier's gold is drawn, never written. A darker `#8A6A2E` passes
+on the ground (4.73) but then fails on Reserve (3.15), so there is no single
+gold that works as text everywhere, and pretending otherwise would put an
+unreadable price on the most expensive product in the shop.
+
+Values are measured, but **not yet approved** — the hues themselves are still
+the owner's call.
 
 ### Scarcity cues must be true
 Low-stock messaging ("3 left") is wanted, driven by **real inventory**:
