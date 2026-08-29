@@ -1,14 +1,19 @@
 # BGS Corner — project instructions and current understanding
 
 BGS Corner General Trading LLC, Dubai. A fragrance-only UAE ecommerce store:
-house-blended attars, ouds, EDP sprays and bakhoor.
+house-blended attars, ouds, EDP sprays and bakhoor. UAE-only delivery,
+Dubai-first with a same-day option.
 
-**Status: design phase.** No application code exists in this repository yet,
-by instruction. This file is the standing record of what has been decided and
-what is understood, so the next session starts where this one stopped.
+**This is a standalone project.** It does not continue, fork or inherit from
+any earlier BGS website. Nothing is carried across — no code, no catalogue, no
+design. The build brief is the only source.
 
-Source specification: the owner's build brief, `~/Downloads/BGSecommercebuildbrief.md`.
-Section numbers below (§4, §6.1, §15…) refer to it.
+**Status: design phase.** No application code exists yet, by instruction. This
+file is the standing record of what has been decided and what is understood,
+so the next session starts where this one stopped.
+
+Source specification: the owner's build brief. Section numbers below
+(§4, §6.1, §15…) refer to it.
 
 ---
 
@@ -17,14 +22,12 @@ Section numbers below (§4, §6.1, §15…) refer to it.
 These constrain everything else in this file.
 
 1. **Never push without explicit consent.** Commit locally; leave it there.
-   This repository is public and a push is the step that cannot be quietly
+   This repository is public, and a push is the step that cannot be quietly
    undone. Creating a remote counts as publishing too.
 2. **Never pull information from other websites without consent.** No
    competitor research, no reference material, no fetching. Ask first.
-3. **Never import a database or catalogue from anywhere else.** The workbook
-   catalogue, the Firestore data and the seed products in the sibling repos
-   stay there. A design-phase repository carries decisions, not inherited data
-   nobody has re-checked.
+3. **Never import a database or catalogue from anywhere else.** This project
+   starts empty and stays that way until the owner supplies real data.
 4. **Never invent anything to fill a gap.** No placeholder statistics, no
    fictional products, no invented prices or turnaround promises. Where a real
    figure is missing, the space stays empty until someone supplies it.
@@ -33,18 +36,19 @@ These constrain everything else in this file.
 
 ## 2. Design direction
 
+Owner decisions, layered on top of the brief.
+
 ### Light theme
-The site is light-themed. Every earlier BGS build defaulted to obsidian and
-brass; this one does not. Light is the ground, not a mode bolted on after —
+The site is light-themed. Light is the ground, not a mode bolted on after —
 contrast, shadow and metallics are designed against a pale surface from the
 first screen rather than inverted from a dark one.
 
 ### A wide palette, earned from the taxonomy
-The site uses a broad range of colour, against the single-accent convention.
-The palette is driven by §4's `scent_family`, so colour carries information
-rather than decorating: seven families, seven identities, and a bottle keeps
-its colour from the collection grid through the PDP into the cart line and
-onto the gift-box preview.
+The site uses a broad range of colour, against the single-accent convention
+most fragrance houses follow. The palette is driven by §4's `scent_family`, so
+colour carries information rather than decorating: seven families, seven
+identities, and a bottle keeps its colour from the collection grid through the
+PDP into the cart line and onto the gift-box preview.
 
 | Scent family | Reads as |
 |---|---|
@@ -61,28 +65,25 @@ enough for text at WCAG AA on the light ground, and a *wash* for fills that
 never carries text — otherwise half of seven colours fail a contrast check the
 moment a label is set in them.
 
-Colour is a product attribute, so it also fills the CSS-drawn product
-stand-ins: a card shows the kind of thing it sells, tinted by what it smells
-like, with no photograph required.
-
 ### Scarcity cues must be true
 Low-stock messaging ("3 left") is wanted, driven by **real inventory**:
 
 - The number shown is the number in stock. Read, not chosen.
 - A threshold decides when the cue appears, set in admin, not in code.
 - Above the threshold, nothing is shown. Silence is the default.
-- Enquiry-priced products show no cue — there is no count to be honest about.
+- Quote-flow products show no cue — there is no count to be honest about.
 
 A fabricated "3 left" is a false statement to a customer about a material fact
 in a purchase decision, and the easiest claim in the build to disprove.
 
 ### Premium products are never discounted
-Products marked `margin_role: halo` (§4) are excluded from every path that
-reduces a price: the §6.1 volume ladder, coupon codes, campaign percentages,
-loyalty redemption and gift-with-purchase thresholds alike.
+Products marked `margin_role: halo` (§4) — Majlis OUD, Platinum Musk OUD — are
+excluded from every path that reduces a price: the §6.1 volume ladder, coupon
+codes, campaign percentages, loyalty redemption and the gift-with-purchase
+threshold alike.
 
 Enforced **structurally, not by policy** — one predicate every discount surface
-must ask before touching a line, so a mechanism added later cannot forget. A
+must ask before touching a line, so a mechanism added later cannot forget it. A
 halo product does not decline a discount; it has no arithmetic path to one.
 
 ---
@@ -90,12 +91,22 @@ halo product does not decline a discount; it has no arithmetic path to one.
 ## 3. What the brief requires
 
 ### The commercial thesis
-A fragrance-only UAE store, Dubai-first with same-day. The basket must average
-**AED 160+** against ~AED 50 kiosk items. Three levers do that work: tiered
-bundle pricing, gifting as the primary use case, and WhatsApp retention through
-GoHighLevel. Contribution is ~AED 56/order at that AOV against ~AED 20
-delivery — which is where free delivery ≥ AED 150, AED 12 below, and same-day
-Dubai +AED 25 come from. Those are margin arithmetic, not preferences.
+The basket must average **AED 160+** against ~AED 50 kiosk items. Three levers
+do that work: tiered bundle pricing, gifting as the primary use case, and
+WhatsApp retention through GoHighLevel. Contribution is ~AED 56/order at that
+AOV against ~AED 20 delivery — which is where free delivery ≥ AED 150, AED 12
+below, and same-day Dubai +AED 25 come from. Margin arithmetic, not preference.
+
+Languages: English + Arabic at launch, full RTL, hreflang'd. Currency AED, with
+a VAT-ready price and invoice architecture (registration expected ~month 9).
+
+### The stack (§2)
+Next.js App Router + TypeScript + Tailwind, SSR/ISR on every indexable page.
+Node/TypeScript API over **PostgreSQL** (Prisma). Vercel-class hosting, managed
+Postgres, media on a Cloudinary/Mux-class CDN. Payments through hosted fields
+or official SDKs only, so raw card numbers never touch the server. One repo,
+modular: `catalog`, `cart`, `checkout`, `orders`, `gifting`, `loyalty`,
+`content`, `admin`, `integrations`.
 
 ### The spine: one scent taxonomy (§4)
 A single structured vocabulary on every product, EN + AR, powering filters, the
@@ -113,8 +124,8 @@ SEO landing pages. Get it wrong and six modules are wrong.
 ### Hard blockers (the brief's MUSTs)
 - Halo products structurally undiscountable — not merely un-discounted.
 - Fixed sets can never oversell their components.
-- COD defended: AED 8 fee, disabled above AED 300 and on QR-video orders and
-  for customers with a prior refusal; orders enter `cod_pending` and ship only
+- COD defended: AED 8 fee, disabled above AED 300, on QR-video orders, and for
+  customers with a prior refusal; orders enter `cod_pending` and ship only
   after confirmation.
 - Guest checkout works end to end; accounts optional.
 - **A typed event outbox.** Every commerce action emits to it
@@ -127,142 +138,72 @@ SEO landing pages. Get it wrong and six modules are wrong.
 - Build-a-Gift-Box: 3 or 6 slots, live visual, one cart line, itemised.
 - Sample credit-back: any 3ml purchase issues a single-use voucher of its own
   value, 60-day expiry, redeemable on any bottle ≥ AED 75.
-- Referral, even if loyalty tiers slip: friend AED 20 off first order ≥99;
+- Referral, even if loyalty tiers slip: friend AED 20 off a first order ≥ 99;
   referrer credited only after the friend's delivery + 3 days.
 - Faceted filters: multi-select, URL-persistent, AR + EN, taxonomy-driven.
 - Scent quiz: 5 questions under 60s, consent captured unchecked by default.
 
+### Gifting is the differentiator (§7)
+Premium box, wrap and handwritten card, a free QR video message that
+auto-deletes after 90 days, scheduled delivery dates, same-day Dubai gated on
+the cutoff, ship-to-recipient with hidden prices, send-a-gift links for kiosk
+QR cards, and a corporate gifting page that opens a GHL pipeline opportunity.
+
 ### Division of responsibility (§13)
 The **store** owns products, orders, inventory, payments, vouchers and consent
 capture. **GHL** owns messaging orchestration, pipelines and campaigns. No
-commerce state lives only in GHL. Consent is two-way: one opt-out silences
-both systems, and the store's ledger is the legal record.
+commerce state lives only in GHL. Consent is two-way: one opt-out silences both
+systems, and the store's ledger is the legal record.
+
+### Analytics before the first ad dirham (§12)
+Meta Pixel + Conversions API fed server-side from the event outbox, GA4
+enhanced ecommerce, Google Ads enhanced conversions, an auto-generated Merchant
+Center feed, UTM templates on owned links, and a consent-mode banner that
+declines non-essential by default.
 
 ### SEO and performance are acceptance criteria, not aspirations
 - SSR/ISR for every indexable route; no content behind client-only JS.
 - Whitelisted single-facet URLs indexable with unique copy; all multi-facet
-  combinations `noindex,follow` + canonical to base, to prevent crawl explosion.
-- Slug 301 history, hreflang en-AE ↔ ar-AE, schema, sitemaps.
+  combinations `noindex,follow` + canonical to base, preventing crawl explosion.
+- Slug 301 history, hreflang en-AE ↔ ar-AE, schema, sitemaps, redirect manager.
+- Programmatic landing pages and an editorial module, both admin-creatable.
 - **Mobile on throttled 4G: LCP < 2.5s, CLS < 0.1, INP < 200ms** on home,
   collection and PDP. Hero poster ≤ 1.5MB. JS < 300KB gzipped per template.
 
 ### The admin portal is part of the build (§16)
-Ten modules, role-gated, mobile-usable. The real acceptance test: a
-non-technical person can add a taxonomy'd product, receive stock with a batch,
-clear a COD queue, publish an occasion landing page, generate an influencer
-code and read the dashboard — with no developer.
+Ten modules, role-gated, mobile-usable, because ops happens at the kiosk. The
+real acceptance test: a non-technical person can add a taxonomy'd product,
+receive stock with a batch, clear a COD queue, publish an occasion landing
+page, generate an influencer code and read the dashboard — with no developer.
+
+### Out of scope for launch
+Subscriptions, GCC shipping, multi-currency, a native app, full Tagalog and
+Spanish locales, engraving. The architecture must not preclude them.
 
 ---
 
-## 4. Decisions taken
+## 4. Build order
 
-| Question | Decision |
-|---|---|
-| Which repo | `structured-corner-v2` — this one, fresh. `bgscorner-final` remains the reference build. |
-| Catalogue | Real data wins over the brief's §3 price table. Build the *engine* (fixed-price sets with component inventory); do not seed invented SKUs. |
-| Analytics | Server-side first, off the §13 event outbox, with a consent banner. First-party remains the source of truth. |
-| Loyalty name | The brief says "BGS One"; a later commit in `bgscorner-final` renamed it "BGS X". The rename is the newer decision and wins unless the owner says otherwise. |
+The brief's own sequence (§2.1), which nothing so far gives reason to change:
 
----
-
-## 5. Open conflicts between the brief and reality
-
-Unresolved. Each needs an owner decision before the affected module is built.
-
-1. **The catalogue.** The brief specifies a fragrance-only launch set at fixed
-   prices (3ml/6ml attars at 45/75, EDP at 89, Discovery Trio 129, Majlis OUD
-   650/1,295). The real shop, per `bgscorner-final`'s workbook import, is 76
-   products — 44 published — with house perfumes at AED 70 and oud sold *by
-   enquiry* because it is priced by weight in conversation. These are
-   different stores. The brief's AOV engine assumes fixed prices throughout.
-2. **Analytics.** §12 mandates Meta Pixel + Conversions API and GA4 before the
-   first ad dirham. `bgscorner-final` is deliberately first-party only, with no
-   third-party script. Resolved above in favour of server-side, but the owner
-   has not confirmed.
-3. **Stack.** The brief specifies PostgreSQL/Prisma on Vercel. The existing
-   build is Firestore on Netlify. Undecided for this repository.
+1. Data model, catalogue and taxonomy (§3–4)
+2. Storefront core — collections, PDP, search and filters
+3. Cart, checkout, payments, couriers
+4. Bundles, gifting, quiz, vouchers
+5. Admin portal (§16)
+6. SEO and performance hardening (§14–15)
+7. GHL and analytics integration (§12–13)
+8. QA against the acceptance checklist (§17)
 
 ---
 
-## 6. State of play in the sibling repositories
-
-Read-only context. Nothing is copied out without consent (rule 3).
-
-**`bgscorner-final`** — 70 commits, the reference build. Next.js 16 App Router,
-TypeScript strict, Tailwind v4, money as integer fils, Firestore, Netlify.
-Already carries brief work:
-
-- §4 scent taxonomy, with publishing blocked when it is incomplete
-- Halo discount guard through a single `isDiscountable` predicate
-- §6.1 tier ladder and §6.5 gift threshold as pure functions shared by cart
-  and server, so the preview and the charge cannot disagree
-- EN/AR with compile-checked dictionaries; RTL via CSS logical properties
-- Admin: products, orders, stock, coupons, loyalty, reviews, analytics, settings
-- Payments: Stripe, Tabby, Tamara, COD, bank transfer
-- A GHL bridge where a CRM failure never costs an order
-
-**Missing there** (and therefore still unbuilt anywhere): all of §7 gifting —
-build-a-box, wrap and card, QR video message, scheduled delivery,
-ship-to-recipient, corporate gifting; the §6.4 credit-back voucher; the §8.3
-quiz; §10.3 COD rules; §10.4 same-day cutoff gating; §11 referral; the §13
-event outbox; §14.4 faceted indexing policy and §14.5 landing pages.
-
-**`bgscorner-v2`** — content CMS, FAQ admin, rotating utility bar, marketplace
-chrome. Diverged from `final`; has none of the brief work.
-
----
-
-## 7. What the nine prototypes are worth
-
-Seven static prototypes exist alongside the two commerce builds. Five are
-variations on a scroll-scrubbed canvas film hero.
-
-**The constraint that settles it:** the film packs run from 4.4MB to 22.9MB,
-in folders from 22MB to 150MB. A hero that paints only after a multi-megabyte
-stream cannot pass §15's LCP gate, and scroll-jacking fights the two things the
-brief puts on the home page — a mobile filter drawer and a live countdown.
-Keep the footage; discard the delivery mechanism. §5 asks for a poster-first
-video hero and §9 for a 15s PDP slot, both ordinary streamed video.
-
-Worth taking:
-
-- **`bgs-corner-web`** (132KB, zero image files) — the CSS-drawn product
-  stand-in. Its premise is that there is no photography and the fragrance
-  supplies two colour stops. Already ported into `bgscorner-final` and
-  improved. Extend it: key the drawing off §4 `format` rather than category,
-  and add a box drawing, because build-a-box needs a live visual of slots
-  filling and no photograph of that box exists. Its single-variable `--fw`
-  scaling is exactly what a slot preview needs at three sizes.
-- **`BGS-CORNER`** — the information architecture: collection filtered by
-  family and sorted; PDP running formats → notes pyramid → specs → related.
-  That is §9's reading order minus the commerce, and its `{top, heart, base}`
-  note shape is §4's `notes_pyramid`. Take the order, rebuild the mechanism —
-  §8.1 needs nine facets, not two controls.
-- **`corner-60-fps`** — one technique: choose an asset tier from viewport × DPR,
-  `saveData`, `effectiveType` and real AVIF decode support, download exactly
-  one, and deliberately do not preload, because preloading a runtime decision
-  makes every visitor on another tier download twice.
-- **`corner-40-fps`** — one principle: its recolour runs offline so the browser
-  does no work. Every media transform happens at upload time, never at request
-  time.
-- **`cornersiteaccordingtoshakirunc`** — headline and wordmark as live text
-  tinted through `background-clip`, not images of text: an SEO and
-  accessibility win, and necessary for Arabic, where an image of a headline
-  cannot reflow RTL. Its `archive/` pattern is the instinct behind §14.7's
-  redirect manager and slug 301 history.
-
-**Deliberately left behind:** the scroll-scrubbed hero in all five variants,
-and both fictional catalogues — `bgs-corner-web` sells "Ambre Nocturne" at AED
-1,450 in an edition of 240 bottles; `BGS-CORNER` sells "Nuit d'Or" at the same
-price. None of it exists. See rule 4.
-
----
-
-## 8. Open questions
+## 5. Open questions
 
 1. The seven family hues need real values, contrast-checked on the light ground.
-2. Conflict 1 (catalogue) needs an owner decision before pricing, bundles or
-   the quiz can be built on top of it.
-3. Stack for this repository: Firestore, or Postgres as the brief specifies.
-4. Whether the brief document itself should be amended with the design-phase
+2. The §3 catalogue needs real product data from the owner — names, variants,
+   prices and taxonomy values. Nothing is invented to stand in (rule 4).
+3. Payment provider: Stripe, or Telr/PayTabs. Plus which BNPL — Tabby, Tamara,
+   or both.
+4. Courier: the brief names Jeebly plus one backup, which is unnamed.
+5. Whether the brief document itself should be amended with the design-phase
    decisions in §2 above, or left as the original spec.
