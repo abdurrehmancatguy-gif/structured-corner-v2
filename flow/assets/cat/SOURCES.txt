@@ -1,0 +1,16 @@
+Category tile backgrounds — sourced from Pexels, September 2026.
+Pexels License: free for commercial use, no attribution required.
+https://www.pexels.com/license/
+
+  oud.jpg     photos/7797738   Oud Oils
+  res.jpg     photos/6638269   Reserve  (gold, premium)
+  bak.jpg     photos/34470639  Bakhoor
+  musk.jpg    photos/6915310   EDP Sprays  (bottles, unbranded)
+  floral.jpg  photos/1303087   Gift Sets
+  fresh.jpg   photos/7269476   Discovery
+  amber.jpg   photos/9127154   Shop by Occasion
+  sweet.jpg   photos/29873585  Corporate Gifting  (wrapped gifts)
+
+These are placeholders for BGS Corner's own photography. Rejected during
+selection: images showing other brands' labels, and "oud" results returning
+the musical instrument rather than the wood.

@@ -1,0 +1,155 @@
+[
+ {
+  "sku": "6297000197739",
+  "name": "Be Mine",
+  "gender": "Women",
+  "price": 85,
+  "stock": 8,
+  "top": "Citrus, lemon",
+  "heart": "Rose, jasmine-like white florals",
+  "base": "Soft sweet tonka-like accord",
+  "story": [
+   "A tender invitation to be remembered.",
+   "Bright citrus opens, then rose and white florals take their time.",
+   "A soft tonka warmth settles close to the skin.",
+   "Made for the hours when nobody else is in the room."
+  ],
+  "ing": "Denatured Ethyl Alcohol, Aqua, Parfum, Linalool, Limonene, Benzyl Salicylate, Citronellol, Hexyl Cinnamal, Geraniol, Coumarin, Citral"
+ },
+ {
+  "sku": "6297000197777",
+  "name": "Vibe",
+  "gender": "Unisex",
+  "price": 85,
+  "stock": 10,
+  "top": "Lemon, citrus",
+  "heart": "Rose, jasmine-like florals, clove spice",
+  "base": "Soft sweet tonka-like accord",
+  "story": [
+   "Made for the rhythm of now.",
+   "Sparkling lemon meets rosy florals and a turn of clove.",
+   "The sweetness underneath keeps it moving.",
+   "Day into night, without changing a thing."
+  ],
+  "ing": "Denatured Ethyl Alcohol, Aqua, Parfum, Citronellol, Linalool, Coumarin, Limonene, Amyl Cinnamyl Alcohol, Geraniol, Eugenol, Citral, Farnesol"
+ },
+ {
+  "sku": "6297000197814",
+  "name": "Pride of Arabia",
+  "gender": "Unisex",
+  "price": 85,
+  "stock": 8,
+  "top": "Citrus, green violet leaf",
+  "heart": "Violet, lily-of-the-valley, rose",
+  "base": "Soft powdery violet and woody undertone",
+  "story": [
+   "Inspired by the confidence and heritage of Arabia.",
+   "Citrus and green violet leaf open clean and unhurried.",
+   "Violet, muguet and rose gather in the middle.",
+   "A soft powdery wood carries it, quietly grand."
+  ],
+  "ing": "Denatured Ethyl Alcohol, Aqua, Parfum, Linalool, Alpha-Isomethyl Ionone, Geraniol, Cinnamyl Alcohol, Limonene, Methyl-2-Octynoate, Hydroxy Citronellal, Citronellol, Citral"
+ },
+ {
+  "sku": "6297000197784",
+  "name": "Suit Up",
+  "gender": "Men",
+  "price": 85,
+  "stock": 4,
+  "top": "Citrus, lemon",
+  "heart": "Rose, cinnamon, clove",
+  "base": "Sweet tonka-like warmth",
+  "story": [
+   "The finishing touch before you step out.",
+   "Crisp citrus, then rose turned warm with cinnamon and clove.",
+   "Tonka underneath, polished rather than sweet.",
+   "For the entrance you only get to make once."
+  ],
+  "ing": "Denatured Ethyl Alcohol, Aqua, Parfum, Linalool, Coumarin, Limonene, Citronellol, Eugenol, Cinnamal, Citral, Geraniol, Isoeugenol"
+ },
+ {
+  "sku": "6297000197807",
+  "name": "The Writer",
+  "gender": "Men",
+  "price": 85,
+  "stock": 1,
+  "top": "Lemon, citrus",
+  "heart": "Rose/floral, clove spice",
+  "base": "Warm balsamic amber",
+  "story": [
+   "A fragrance for stories that linger after the last page.",
+   "Luminous lemon opens, then rose and clove spice.",
+   "Warm balsamic amber settles in and stays.",
+   "Thoughtful, unhurried, quietly magnetic."
+  ],
+  "ing": "Denatured Ethyl Alcohol, Aqua, Parfum, Citronellol, Linalool, Geraniol, Farnesol, Limonene, Eugenol, Benzyl Benzoate, Benzyl Cinnamate, Isoeugenol, Citral"
+ },
+ {
+  "sku": "6297000197760",
+  "name": "Edward the Black Prince",
+  "gender": "Men",
+  "price": 85,
+  "stock": 6,
+  "top": "Bright citrus",
+  "heart": "Aromatic floral/lavender, clove",
+  "base": "Warm spice",
+  "story": [
+   "Dark, noble and commanding.",
+   "Bright citrus cuts through aromatic lavender and clove.",
+   "Warm spice closes in behind it.",
+   "A trail that announces itself, then holds its tongue."
+  ],
+  "ing": "Denatured Ethyl Alcohol, Aqua, Parfum, Eugenol, Limonene, Linalool, Isoeugenol"
+ },
+ {
+  "sku": "6297000197753",
+  "name": "Amore",
+  "gender": "Women",
+  "price": 85,
+  "stock": 13,
+  "top": "Lemon, citrus",
+  "heart": "Aromatic floral/lavender, clove",
+  "base": "Warm spice",
+  "story": [
+   "A celebration of love in all its warmth.",
+   "Lemon-bright freshness opens the door.",
+   "Aromatic florals and clove fill the room.",
+   "It finishes softly spiced, and lingers longer than expected."
+  ],
+  "ing": "Denatured Ethyl Alcohol, Aqua, Parfum, Limonene, Linalool, Isoeugenol, Citral, Eugenol"
+ },
+ {
+  "sku": "6297000197746",
+  "name": "Soleil Frais",
+  "gender": "Unisex",
+  "price": 85,
+  "stock": 3,
+  "top": "Bright lemon, citrus",
+  "heart": "Clean citrus",
+  "base": null,
+  "story": [
+   "Like cool sunlight on a clear morning.",
+   "Clean lemon and bright citrus, and very little else.",
+   "Nothing heavy, nothing asking for attention.",
+   "The one you reach for when the day is already warm."
+  ],
+  "ing": "Denatured Ethyl Alcohol, Aqua, Parfum, Limonene"
+ },
+ {
+  "sku": "6297000197791",
+  "name": "Barcelona",
+  "gender": "Unisex",
+  "price": 85,
+  "stock": 5,
+  "top": "Citrus, lemon",
+  "heart": "Aromatic floral/lavender, rose",
+  "base": "Soft sweet tonka-like warmth",
+  "story": [
+   "A tribute to a city alive with colour, art and late-night energy.",
+   "Citrus opens sharp, the way the light does there.",
+   "Aromatic florals and rose fill the middle.",
+   "A gentle sweetness carries it into the evening."
+  ],
+  "ing": "Denatured Ethyl Alcohol, Aqua, Parfum, Linalool, Coumarin, Limonene, Geraniol, Citral"
+ }
+]

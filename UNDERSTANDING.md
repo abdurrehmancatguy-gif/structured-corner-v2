@@ -26,8 +26,12 @@ These constrain everything else in this file.
    undone. Creating a remote counts as publishing too.
 2. **Never pull information from other websites without consent.** No
    competitor research, no reference material, no fetching. Ask first.
-3. **Never import a database or catalogue from anywhere else.** This project
-   starts empty and stays that way until the owner supplies real data.
+3. **Never pull anything from another repository.** Not code, not data, not
+   design, not copy, not context. The other BGS repositories in `~/github`
+   (`bgscorner-final`, `bgscorner-v2`, and the older static prototypes) are
+   off limits entirely &mdash; they are not reference material for this project and
+   are not to be read, surveyed or cited. This project starts empty and stays
+   that way until the owner supplies what goes in it.
 4. **Never invent anything to fill a gap.** No placeholder statistics, no
    fictional products, no invented prices or turnaround promises. Where a real
    figure is missing, the space stays empty until someone supplies it.
