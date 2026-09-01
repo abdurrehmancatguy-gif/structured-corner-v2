@@ -1,0 +1,238 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&display=swap">
+  <style>
+    body { margin:0; background:#F2EDE2; color:#14110D;
+           font-family:'Jost','Avenir Next',Helvetica,Arial,sans-serif; }
+    * { box-sizing:border-box; }
+    a { color:#8A5A14; text-decoration:none; } a:hover { color:#14110D; }
+    .ser { font-family:'Times New Roman',Times,serif; font-weight:400; }
+    .cap { font-size:9.5px; letter-spacing:.22em; text-transform:uppercase; font-weight:500; }
+    .rule { height:1px; background:linear-gradient(90deg,#C58A2D,rgba(197,138,45,0)); }
+    img { display:block; max-width:100%; }
+  </style>
+</helmet>
+
+<div style="width:390px; background:#F2EDE2; overflow:hidden;">
+
+  <!-- utility -->
+  <div style="background:#0E0C0A; padding:9px 16px; display:flex; align-items:center; justify-content:center; gap:8px;">
+    <span class="cap" style="color:#C58A2D;">Order in 3h 47m</span>
+    <span style="width:3px; height:3px; background:#70420D; display:block;"></span>
+    <span class="cap" style="color:#8C8377;">Delivered today in Dubai</span>
+  </div>
+
+  <!-- header -->
+  <div style="display:flex; align-items:center; justify-content:space-between; padding:15px 18px; background:#0E0C0A;">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E8E0D2" stroke-width="1.3"><path d="M3 7h18M3 12h18M3 17h18"/></svg>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <svg width="21" height="21" viewBox="0 0 100 100" fill="none">
+        <circle cx="50" cy="50" r="42" stroke="#C58A2D" stroke-width="7"/>
+        <path d="M50 12a38 38 0 0 0 0 76" stroke="#C58A2D" stroke-width="7" fill="none"/>
+        <path d="M50 50h34" stroke="#C58A2D" stroke-width="7"/>
+        <path d="M26 34q24 16 0 32" stroke="#C58A2D" stroke-width="6" fill="none"/>
+      </svg>
+      <span class="ser" style="font-size:21px; letter-spacing:.14em; color:#F2EDE2;">BGS</span>
+    </div>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E8E0D2" stroke-width="1.3"><path d="M6 8h12l-1.2 12H7.2z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+  </div>
+
+  <!-- hero -->
+  <div style="position:relative; background:#0E0C0A;">
+    <img src="hero-kiosk.jpg" alt="The BGS Corner kiosk in Deira" style="width:100%; height:430px; object-fit:cover; opacity:.92;">
+    <div style="position:absolute; inset:0; background:linear-gradient(180deg,rgba(14,12,10,.15) 0%,rgba(14,12,10,.55) 55%,#0E0C0A 100%);"></div>
+    <div style="position:absolute; left:0; right:0; bottom:0; padding:0 22px 28px 22px;">
+      <span class="cap" style="color:#C58A2D;">The House of Oud &middot; Deira</span>
+      <h1 class="ser" style="margin:12px 0 14px 0; font-size:40px; line-height:1.08; color:#F5F0E6; font-weight:400;">
+        Some things<br>are worth<br>the walk in.
+      </h1>
+      <div style="width:52px; height:1px; background:#C58A2D; margin-bottom:16px;"></div>
+      <p style="margin:0 0 20px 0; font-size:13.5px; line-height:1.7; color:#B7AE9F; font-weight:300;">
+        Attars blended by hand on 17th Street, poured into 3ml and 6ml, and numbered before
+        they leave the counter.
+      </p>
+      <div style="display:flex; gap:10px;">
+        <span style="background:#C58A2D; color:#0E0C0A; padding:14px 22px; font-size:12px; letter-spacing:.14em; text-transform:uppercase; min-height:46px; display:flex; align-items:center;">Find your scent</span>
+        <span style="border:1px solid #6A5C44; color:#E8E0D2; padding:14px 22px; font-size:12px; letter-spacing:.14em; text-transform:uppercase; min-height:46px; display:flex; align-items:center;">Gift box</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- sculptural editions -->
+  <div style="padding:34px 0 0 0;">
+    <div style="padding:0 22px;">
+      <span class="cap" style="color:#8A5A14;">01 &nbsp;/&nbsp; Sculptural editions</span>
+      <h2 class="ser" style="margin:12px 0 8px 0; font-size:29px; line-height:1.18;">Six objects that<br>hold a scent.</h2>
+      <p style="margin:0 0 20px 0; font-size:13px; line-height:1.65; color:#6E6558; font-weight:300;">
+        Diamond cap, sculpted crystal, visible gold, black collector case.
+      </p>
+    </div>
+
+    <div style="display:flex; gap:12px; padding:0 22px 6px 22px; overflow:hidden;">
+
+      <div style="width:168px; flex-shrink:0;">
+        <div style="position:relative; background:#0E0C0A;">
+          <img src="falcon.jpg" alt="Falcon sculptural edition" style="width:168px; height:214px; object-fit:cover;">
+          <span class="cap" style="position:absolute; top:9px; left:9px; background:#0E0C0A; color:#C58A2D; padding:4px 7px;">3 left</span>
+        </div>
+        <div class="rule" style="margin:10px 0 9px 0;"></div>
+        
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <span class="cap" style="color:#9A8F7E;">Attar &middot; 12ml &middot; Unisex</span>
+          <span class="ser" style="font-size:19px;">Falcon</span>
+          <span style="font-size:12px; color:#6E6558; letter-spacing:.04em;">Oud &middot; Saffron &middot; Leather</span>
+          <span style="font-size:14px;">AED 1,295</span>
+          <span class="cap" style="color:#9A8F7E;">Never discounted</span>
+        </div>
+      </div>
+
+      <div style="width:168px; flex-shrink:0;">
+        <div style="position:relative; background:#0E0C0A;">
+          <img src="oudtree.jpg" alt="Oud Tree sculptural edition" style="width:168px; height:214px; object-fit:cover;">
+        </div>
+        <div class="rule" style="margin:10px 0 9px 0;"></div>
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <span class="cap" style="color:#9A8F7E;">Attar &middot; 12ml &middot; Unisex</span>
+          <span class="ser" style="font-size:19px;">Oud Tree</span>
+          <span style="font-size:12px; color:#6E6558; letter-spacing:.04em;">Agarwood &middot; Resin &middot; Smoke</span>
+          <span style="font-size:14px;">AED 1,295</span>
+          <span class="cap" style="color:#9A8F7E;">Never discounted</span>
+        </div>
+      </div>
+
+      <div style="width:168px; flex-shrink:0;">
+        <div style="position:relative; background:#0E0C0A;">
+          <img src="horse.jpg" alt="Arabian Horse sculptural edition" style="width:168px; height:214px; object-fit:cover;">
+        </div>
+        <div class="rule" style="margin:10px 0 9px 0;"></div>
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <span class="cap" style="color:#9A8F7E;">Attar &middot; 12ml &middot; Unisex</span>
+          <span class="ser" style="font-size:19px;">Arabian Horse</span>
+          <span style="font-size:12px; color:#6E6558; letter-spacing:.04em;">Amber &middot; Musk &middot; Cedar</span>
+          <span style="font-size:14px;">AED 1,295</span>
+        </div>
+      </div>
+    </div>
+    <div style="padding:14px 22px 0 22px; display:flex; gap:6px; align-items:center;">
+      <span style="width:26px; height:2px; background:#C58A2D; display:block;"></span>
+      <span style="width:10px; height:2px; background:#D8CFBE; display:block;"></span>
+      <span style="width:10px; height:2px; background:#D8CFBE; display:block;"></span>
+      <span class="cap" style="color:#9A8F7E; margin-left:auto;">All six &rarr;</span>
+    </div>
+  </div>
+
+  <!-- the house attars -->
+  <div style="padding:38px 22px 0 22px;">
+    <span class="cap" style="color:#8A5A14;">02 &nbsp;/&nbsp; The house attars</span>
+    <h2 class="ser" style="margin:12px 0 18px 0; font-size:29px; line-height:1.18;">Eleven blends,<br>seven families.</h2>
+
+    <div style="display:flex; flex-direction:column;">
+      <div style="display:grid; grid-template-columns:4px minmax(0,1fr) auto; gap:14px; align-items:center; padding:15px 0; border-bottom:1px solid #DFD6C4;">
+        <span style="background:#3E4A33; height:34px; display:block;"></span>
+        <div style="display:flex; flex-direction:column; gap:3px;">
+          <span class="ser" style="font-size:19px;">Oud &amp; Woods</span>
+          <span style="font-size:11.5px; color:#8A8074; letter-spacing:.05em;">Imperial Crown, Dark Leather &middot; 9 pieces</span>
+        </div>
+        <span class="cap" style="color:#9A8F7E;">From 45</span>
+      </div>
+      <div style="display:grid; grid-template-columns:4px minmax(0,1fr) auto; gap:14px; align-items:center; padding:15px 0; border-bottom:1px solid #DFD6C4;">
+        <span style="background:#94480F; height:34px; display:block;"></span>
+        <div style="display:flex; flex-direction:column; gap:3px;">
+          <span class="ser" style="font-size:19px;">Amber &amp; Spice</span>
+          <span style="font-size:11.5px; color:#8A8074; letter-spacing:.05em;">Royal Amber &middot; 7 pieces</span>
+        </div>
+        <span class="cap" style="color:#9A8F7E;">From 45</span>
+      </div>
+      <div style="display:grid; grid-template-columns:4px minmax(0,1fr) auto; gap:14px; align-items:center; padding:15px 0; border-bottom:1px solid #DFD6C4;">
+        <span style="background:#44555F; height:34px; display:block;"></span>
+        <div style="display:flex; flex-direction:column; gap:3px;">
+          <span class="ser" style="font-size:19px;">Musk &amp; Clean</span>
+          <span style="font-size:11.5px; color:#8A8074; letter-spacing:.05em;">Majestic Musk, Musk Bloom &middot; 6 pieces</span>
+        </div>
+        <span class="cap" style="color:#9A8F7E;">From 45</span>
+      </div>
+      <div style="display:grid; grid-template-columns:4px minmax(0,1fr) auto; gap:14px; align-items:center; padding:15px 0; border-bottom:1px solid #DFD6C4;">
+        <span style="background:#9B3A5B; height:34px; display:block;"></span>
+        <div style="display:flex; flex-direction:column; gap:3px;">
+          <span class="ser" style="font-size:19px;">Floral Veil</span>
+          <span style="font-size:11.5px; color:#8A8074; letter-spacing:.05em;">Golden Bloom, Belle Aura &middot; 8 pieces</span>
+        </div>
+        <span class="cap" style="color:#9A8F7E;">From 45</span>
+      </div>
+      <div style="display:grid; grid-template-columns:4px minmax(0,1fr) auto; gap:14px; align-items:center; padding:15px 0; border-bottom:1px solid #DFD6C4;">
+        <span style="background:#4B6B1C; height:34px; display:block;"></span>
+        <div style="display:flex; flex-direction:column; gap:3px;">
+          <span class="ser" style="font-size:19px;">Fresh &amp; Citrus</span>
+          <span style="font-size:11.5px; color:#8A8074; letter-spacing:.05em;">Desert Breeze &middot; 5 pieces</span>
+        </div>
+        <span class="cap" style="color:#9A8F7E;">From 45</span>
+      </div>
+      <div style="display:grid; grid-template-columns:4px minmax(0,1fr) auto; gap:14px; align-items:center; padding:15px 0; border-bottom:1px solid #DFD6C4;">
+        <span style="background:#6D2F5C; height:34px; display:block;"></span>
+        <div style="display:flex; flex-direction:column; gap:3px;">
+          <span class="ser" style="font-size:19px;">Sweet &amp; Gourmand</span>
+          <span style="font-size:11.5px; color:#8A8074; letter-spacing:.05em;">Parisian Muse, Velvet Spell &middot; 6 pieces</span>
+        </div>
+        <span class="cap" style="color:#9A8F7E;">From 45</span>
+      </div>
+      <div style="display:grid; grid-template-columns:4px minmax(0,1fr) auto; gap:14px; align-items:center; padding:15px 0;">
+        <span style="background:#C58A2D; height:34px; display:block;"></span>
+        <div style="display:flex; flex-direction:column; gap:3px;">
+          <span class="ser" style="font-size:19px;">Reserve</span>
+          <span style="font-size:11.5px; color:#8A8074; letter-spacing:.05em;">Majlis OUD, Platinum Musk &middot; 3 pieces</span>
+        </div>
+        <span class="cap" style="color:#8A5A14;">From 399</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- gift -->
+  <div style="margin:38px 0 0 0; background:#0E0C0A; padding:34px 22px;">
+    <span class="cap" style="color:#C58A2D;">03 &nbsp;/&nbsp; Gifting</span>
+    <h2 class="ser" style="margin:12px 0 14px 0; font-size:29px; line-height:1.18; color:#F5F0E6;">Three scents,<br>one wrapped box.</h2>
+    <div style="width:52px; height:1px; background:#C58A2D; margin-bottom:16px;"></div>
+    <p style="margin:0 0 20px 0; font-size:13px; line-height:1.7; color:#9A9083; font-weight:300;">
+      Choose three or six, add a handwritten card, and record a message they open by scanning
+      the card inside. Prices never appear on a gift receipt.
+    </p>
+    <img src="kiosk-wide.jpg" alt="Flacons on the counter" style="width:100%; height:150px; object-fit:cover; margin-bottom:20px;">
+    <span style="border:1px solid #C58A2D; color:#F5F0E6; padding:15px 26px; font-size:12px; letter-spacing:.14em; text-transform:uppercase; display:inline-flex; align-items:center; min-height:48px;">Build a box &mdash; from 129</span>
+  </div>
+
+  <!-- trust -->
+  <div style="padding:26px 22px; display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:16px 14px;">
+    <div style="display:flex; flex-direction:column; gap:4px;"><span class="cap" style="color:#8A5A14;">Alcohol&#8209;free</span><span style="font-size:11.5px; color:#6E6558;">Oil, not spirit</span></div>
+    <div style="display:flex; flex-direction:column; gap:4px;"><span class="cap" style="color:#8A5A14;">Numbered batches</span><span style="font-size:11.5px; color:#6E6558;">Printed on the bottle</span></div>
+    <div style="display:flex; flex-direction:column; gap:4px;"><span class="cap" style="color:#8A5A14;">Free over 150</span><span style="font-size:11.5px; color:#6E6558;">Across the UAE</span></div>
+    <div style="display:flex; flex-direction:column; gap:4px;"><span class="cap" style="color:#8A5A14;">Cash on delivery</span><span style="font-size:11.5px; color:#6E6558;">Under AED 300</span></div>
+  </div>
+
+  <!-- footer -->
+  <div style="background:#0E0C0A; padding:28px 22px 30px 22px; display:flex; flex-direction:column; gap:10px;">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <svg width="19" height="19" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="42" stroke="#C58A2D" stroke-width="7"/><path d="M50 12a38 38 0 0 0 0 76" stroke="#C58A2D" stroke-width="7"/><path d="M50 50h34" stroke="#C58A2D" stroke-width="7"/><path d="M26 34q24 16 0 32" stroke="#C58A2D" stroke-width="6" fill="none"/></svg>
+      <span class="ser" style="font-size:18px; letter-spacing:.14em; color:#F2EDE2;">BGS</span>
+    </div>
+    <span style="font-size:11.5px; color:#7E7568; line-height:1.7;">4th &amp; 17th Street Corner, Riggat Al Buteen<br>Near Deira Clock Tower, Dubai</span>
+    <span class="cap" style="color:#C58A2D;">Open daily 11 AM &ndash; 11 PM</span>
+  </div>
+
+  <!-- tab bar -->
+  <div style="background:#F2EDE2; border-top:1px solid #DFD6C4; display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); padding:10px 0 13px 0;">
+    <div style="display:flex; flex-direction:column; align-items:center; gap:5px; min-height:44px;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#14110D" stroke-width="1.4"><path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/></svg><span class="cap">Home</span></div>
+    <div style="display:flex; flex-direction:column; align-items:center; gap:5px; min-height:44px;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#9A8F7E" stroke-width="1.4"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/></svg><span class="cap" style="color:#9A8F7E;">Search</span></div>
+    <div style="display:flex; flex-direction:column; align-items:center; gap:5px; min-height:44px;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#9A8F7E" stroke-width="1.4"><path d="M4 9h16v11H4z"/><path d="M4 9l2-4h12l2 4M12 5v15"/></svg><span class="cap" style="color:#9A8F7E;">Gifts</span></div>
+    <div style="display:flex; flex-direction:column; align-items:center; gap:5px; min-height:44px;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#9A8F7E" stroke-width="1.4"><path d="M6 8h12l-1.2 12H7.2z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span class="cap" style="color:#9A8F7E;">Bag</span></div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

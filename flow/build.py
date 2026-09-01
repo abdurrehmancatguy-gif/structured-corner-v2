@@ -171,7 +171,7 @@ home = """
   </div></div></div>
   <div class="over slide" data-slide><div class="wrap"><div class="box">
     <span class="eyebrow gold">Start here</span>
-    <h1>Discovery Trio<br>&mdash; AED 129.</h1>
+    <h1>Discovery Trio<br>, AED 129.</h1>
     <p>Three 3 ml ouds. What you spend comes back as credit on your first full bottle.</p>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <a class="btn gold" href="gift-box.html">Choose three</a>
@@ -183,7 +183,7 @@ home = """
     <h1>Three scents,<br>one wrapped box.</h1>
     <p>Add a handwritten card and a recorded message. Prices never show on a gift receipt.</p>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <a class="btn gold" href="gift-box.html">Build a box</a>
+      <a class="btn gold" href="gift-box.html">Build a gift box</a>
       <a class="btn ghost" href="corporate.html">Corporate gifting</a>
     </div>
   </div></div></div>
@@ -226,8 +226,8 @@ home = """
 </div></section>
 
 <section><div class="wrap"><div class="band">
-  <div><span class="eyebrow gold-d">Acquisition offer &middot; brief &sect;6.4</span>
-    <h3>Discovery Trio &mdash; AED 129</h3>
+  <div><span class="eyebrow gold-d">Start here</span>
+    <h3>Discovery Trio, AED 129</h3>
     <p>Three 3 ml ouds. Whatever you spend comes back as a single-use voucher on any bottle over AED 75, valid 60 days.</p></div>
   <a class="btn gold" href="gift-box.html">Choose three</a>
 </div></div></section>
@@ -292,7 +292,7 @@ FACETS = [("Scent family",["Oud &amp; Woods","Amber &amp; Spice","Musk &amp; Cle
           ("Availability",["Ready today"])]
 def facet(t, rows):
     return '<div class="fbox"><h4>%s</h4>%s</div>' % (t, "".join(
-        '<label><input type="checkbox">%s<span class="ct">%s</span></label>' % (n, slot("&mdash;")) for n in rows))
+        '<label><input type="checkbox">%s<span class="ct">%s</span></label>' % (n, slot(",")) for n in rows))
 
 collection = """
 <section><div class="wrap">
@@ -327,7 +327,7 @@ collection = """
   </div>
 </div></section>
 """ % dict(facets="".join(facet(t,r) for t,r in FACETS), chev=sv("chev",13,2),
-           cards=oudoil_cards(), s=slot("&mdash;"), filt=sv("filter",15,1.9))
+           cards=oudoil_cards(), s=slot(","), filt=sv("filter",15,1.9))
 
 # ---------------------------------------------------------------- PDP
 product = """
@@ -356,9 +356,9 @@ product = """
       </div>
       <div style="display:flex;gap:10px;margin-bottom:12px">
         <span class="stepper" data-stepper><button type="button" data-step="-1" aria-label="Decrease quantity">&minus;</button><i data-qty>1</i><button type="button" data-step="1" aria-label="Increase quantity">+</button></span>
-        <a class="btn solid" style="flex-grow:1" href="cart.html">Add to bag &mdash; AED 75</a></div>
+        <a class="btn solid" style="flex-grow:1" href="cart.html">Add to bag: AED 75</a></div>
       <a class="btn block" href="gift-box.html" style="margin-bottom:12px">Send as a gift</a>
-      <div class="note">Try the 3 ml first &mdash; the AED 45 comes back as a voucher on any bottle over AED 75, issued the day it is delivered.</div>
+      <div class="note">Try the 3 ml first, the AED 45 comes back as a voucher on any bottle over AED 75, issued the day it is delivered.</div>
       <div class="kv" style="margin-top:16px">
         <div><span>%(truck)s Delivery</span><span>Free over AED 150 &middot; same-day before 2 PM</span></div>
         <div><span>%(cash)s Payment</span><span>Card &middot; Apple Pay &middot; Tabby &middot; Tamara &middot; COD</span></div>
@@ -377,14 +377,14 @@ product = """
     <div><span class="eyebrow">Heart</span><p style="margin:8px 0 0">%(n2)s</p></div>
     <div><span class="eyebrow">Base</span><p style="margin:8px 0 0">%(n3)s</p></div>
   </div>
-  <div class="note" style="margin-top:20px">The brief defines <code>notes_pyramid</code> and <code>wears_like</code> as required product fields, but no values exist for the ouds in either spreadsheet &mdash; the ingredients sheet covers the EDP sprays only.</div>
+  <div class="note" style="margin-top:20px">Note values are not yet recorded for the oud oils. The EDP sprays carry theirs.</div>
 </div></section>
 <section><div class="wrap">
   <div class="sec-h"><h2>Complete the ritual</h2><a href="collection.html">More &rarr;</a></div>
   <div class="grid g4">%(rel)s</div>
 </div></section>
 """ % dict(fam=slot("family"), tone=slot("tone"), gen=slot("gender"), rev=slot("no reviews yet"),
-   desc=slot("product description &mdash; not in any source file"), lon=slot("not set"), sil=slot("not set"),
+   desc=slot("product description, not in any source file"), lon=slot("not set"), sil=slot("not set"),
    bat=slot("not set"), av=slot("Available Units column is empty in the sheet"),
    truck=sv("truck",16), cash=sv("cash",16), n1=slot("top notes"), n2=slot("heart notes"), n3=slot("base notes"),
    rel=oudoil_cards(4))
@@ -415,7 +415,7 @@ giftbox = """
         <a class="btn solid block" href="cart.html" style="margin-top:12px">Fill 1 more slot</a>
       </div>
       <div class="sum" style="margin-top:16px;background:#fff">
-        <span class="eyebrow">Gift options &middot; brief &sect;7</span>
+        <span class="eyebrow">Gift options</span>
         <div class="kv" style="margin-top:10px">
           <div><span>Wrap &amp; handwritten card</span><span>+AED 10</span></div>
           <div><span>QR video message &middot; 60s</span><span style="color:var(--green);font-weight:600">Free</span></div>
@@ -457,7 +457,7 @@ cart = """
         <div class="prog" style="margin-top:14px"><div class="lb"><span data-p3txt>Add 3 more items to save 15%%</span><b data-p3lb style="color:var(--gold-d)">3 of 6</b></div><div class="tr"><i class="part" data-p3 style="width:50%%"></i></div></div>
       </div>
       %(l1)s%(l2)s%(l3)s%(l4)s
-      <div class="note" style="margin-top:16px">The 10%% volume discount applies to the three eligible items only. Majlis OUD is <code>margin_role: halo</code> &mdash; the brief requires that a percentage discount on it be structurally impossible, not merely withheld.</div>
+      <div class="note" style="margin-top:16px">The 10%% volume discount applies to the three eligible items only. Majlis OUD is a Reserve piece. It is never discounted, on any offer, at any basket size.</div>
     </div>
     <div><div class="sum">
       <div class="r"><span>Subtotal</span><span data-subtotal>AED 845</span></div>
@@ -485,7 +485,7 @@ checkout = """
     <div>
       <span class="eyebrow">1 &middot; Contact</span>
       <div class="grid g2" style="margin:10px 0 18px"><span class="field">Full name</span><span class="field">Phone &middot; UAE</span><span class="field" style="grid-column:1/-1">Email</span></div>
-      <label style="display:flex;gap:9px;font-size:13px;color:var(--body);margin-bottom:26px"><input type="checkbox">Send me order updates on WhatsApp <span class="norm">&mdash; unticked by default, consent logged</span></label>
+      <label style="display:flex;gap:9px;font-size:13px;color:var(--body);margin-bottom:26px"><input type="checkbox">Send me order updates on WhatsApp <span class="norm">, unticked by default, consent logged</span></label>
       <span class="eyebrow">2 &middot; Delivery</span>
       <div class="kv" style="margin:10px 0 26px">
         <div><span><b>Standard</b> &middot; free over AED 150</span><span>AED 12 below</span></div>
@@ -518,13 +518,13 @@ confirmed = """
     <div><span>Delivery</span><span>Free &middot; same-day if placed before 2 PM</span></div>
     <div><span>Includes VAT at 5%%</span><span>AED 39.31</span></div>
     <div><span>Tax registration number</span><span>%(trn)s</span></div>
-    <div><span>Credit back</span><span>AED 45 voucher issues on <code>order.delivered</code></span></div>
+    <div><span>Credit back</span><span>AED 45 voucher, issued the day it is delivered</span></div>
     <div><span>Review request</span><span>Delivery + 3 days</span></div>
     <div><span>Referral</span><span>Friend AED 20 off &middot; you credited after their delivery + 3 days</span></div>
   </div>
   <div style="display:flex;gap:12px;margin-top:24px"><a class="btn solid" href="track-order.html">Track this order</a><a class="btn" href="index.html">Keep shopping</a></div>
 </div></section>
-""" % dict(check=sv("check",26,2.6), num=slot("generated at checkout"), trn=slot("TRN &mdash; registration expected ~month 9"))
+""" % dict(check=sv("check",26,2.6), num=slot("generated at checkout"), trn=slot("TRN, registration expected ~month 9"))
 corporate = """
 <section><div class="wrap">
   <div class="sec-h"><div><h2 style="font-size:26px">Corporate gifting</h2>
@@ -555,7 +555,7 @@ track = """
     <div><span>Shipped</span><span>Courier reference appears here</span></div>
     <div><span>Delivered</span><span>Credit-back voucher issues at this point</span></div>
   </div>
-  <div class="note" style="margin-top:20px">Order updates can also come by WhatsApp &mdash; the opt-in is on the confirmation page, unticked by default.</div>
+  <div class="note" style="margin-top:20px">Order updates can also come by WhatsApp, the opt-in is on the confirmation page, unticked by default.</div>
 </div></section>
 """
 
@@ -740,13 +740,13 @@ quiz = """
     </div>
 
     <div class="note" style="margin-bottom:26px">These facets are estimated from the fragrance-allergen
-    declarations printed on the package, not from an official note pyramid &mdash; the method is set out in the
+    declarations printed on the package, not from an official note pyramid, the method is set out in the
     ingredients sheet. Eight of the nine sprays are not yet named on their packaging, so the barcode identifies
     them until you tell us the names.</div>
 
     <div class="band" style="margin-bottom:26px">
       <div><span class="eyebrow gold-d">Not ready to commit</span>
-        <h3>Discovery Trio &mdash; AED 129</h3>
+        <h3>Discovery Trio, AED 129</h3>
         <p>Three 3 ml ouds, including one from the family above. What you spend comes back as credit on your first full bottle.</p></div>
       <a class="btn gold" href="gift-box.html">Choose three</a>
     </div>
@@ -790,17 +790,17 @@ def emit_catalogue():
     return len(cat)
 
 
-PAGES = [("index.html","Oud Oils, Bakhoor &amp; EDP Sprays &mdash; Blended in Dubai",home,"","Home"),
-         ("collection.html","Oud Oils &mdash; Alcohol-Free Perfume Oil in 3 ml and 6 ml",collection,"Oud Oils","Shop"),
+PAGES = [("index.html","Oud Oils, Bakhoor &amp; EDP Sprays: Blended in Dubai",home,"","Home"),
+         ("collection.html","Oud Oils: Alcohol-Free Perfume Oil in 3 ml and 6 ml",collection,"Oud Oils","Shop"),
          ("product.html","Royal Amber",product,"Oud Oils","Shop"),
-         ("gift-box.html","Build a Gift Box &mdash; Three or Six Scents, Wrapped",giftbox,"Gift Sets","Gifts"),
+         ("gift-box.html","Build a Gift Box: Three or Six Scents, Wrapped",giftbox,"Gift Sets","Gifts"),
          ("cart.html","Your Bag",cart,"","Bag"),
-         ("checkout.html","Checkout &mdash; Guest Checkout, COD and Tabby",checkout,"","Bag"),
+         ("checkout.html","Checkout: Guest Checkout, COD and Tabby",checkout,"","Bag"),
          ("confirmed.html","Order Confirmed",confirmed,"","Bag"),
          ("track-order.html","Track Your Order",track,"","Home"),
-         ("account.html","Your Account &mdash; BGS One, Wallet and Referrals",account,"","Account"),
-         ("quiz.html","Test Your Scent &mdash; Five Questions, One Minute",quiz,"","Home"),
-         ("corporate.html","Corporate Gifting &mdash; Co-Branded Oud and Bakhoor",corporate,"Corporate Gifting","Home")]
+         ("account.html","Your Account: BGS One, Wallet and Referrals",account,"","Account"),
+         ("quiz.html","Test Your Scent: Five Questions, One Minute",quiz,"","Home"),
+         ("corporate.html","Corporate Gifting: Co-Branded Oud and Bakhoor",corporate,"Corporate Gifting","Home")]
 print("catalogue:", emit_catalogue(), "products")
 for fn, t, b, on, tab in PAGES:
     pathlib.Path(fn).write_text(shell(t, b, on, tab, strip_here=(fn != "index.html")))

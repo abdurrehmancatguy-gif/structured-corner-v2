@@ -833,3 +833,22 @@ footer .wm{color:#fff}
 @media (max-width:900px){
   .cs a .circle{box-shadow:0 7px 14px -5px rgba(23,19,16,.30),0 1px 3px -1px rgba(23,19,16,.18)}
 }
+
+/* ---------- quiz banner: plum, the one hue the page does not otherwise use ----------
+   Everything else here is warm neutral, gold or near-black. A cool jewel tone
+   separates it from the hero (which is dark too, but a different hue entirely)
+   and from every card on the page. */
+.quizband{
+  background:#58234B;
+  background-image:
+    radial-gradient(120% 140% at 12% 0%, rgba(255,255,255,.10), transparent 55%),
+    repeating-linear-gradient(135deg, rgba(255,255,255,.028), rgba(255,255,255,.028) 9px, transparent 9px, transparent 18px);
+  border:1px solid #6d3160}
+.quizband h3{color:#fff}
+.quizband p{color:#E4D4DE}
+.quizband .eyebrow{color:#E9B7D8}
+
+/* the gold button was white-on-gold at 3.88:1 — under AA for its size.
+   Dark ink on the same gold is 4.77:1 and passes. */
+.btn.gold{color:var(--ink)}
+.btn.gold:hover{background:#b8862a;border-color:#b8862a}

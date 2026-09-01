@@ -1,0 +1,284 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Jost:wght@300;400;500;600&display=swap">
+  <style>
+    body { margin:0; background:#FAF8F4; color:#26221D;
+           font-family:'Jost','Helvetica Neue',Arial,sans-serif; }
+    * { box-sizing:border-box; }
+    a { color:#8F4A14; text-decoration:none; }
+    a:hover { color:#26221D; }
+    .lbl { font-size:11px; letter-spacing:.16em; text-transform:uppercase; font-weight:500; }
+    .dsp { font-family:'Bodoni Moda',Georgia,'Times New Roman',serif; font-weight:400; }
+    .chip { cursor:pointer; user-select:none; }
+  </style>
+</helmet>
+
+<div style="width:1440px; background:#FAF8F4;">
+
+  <div style="display:flex; align-items:center; justify-content:space-between; padding:22px 48px; border-bottom:1px solid #E3DDD2;">
+    <div style="display:flex; align-items:baseline; gap:9px;">
+      <span class="dsp" style="font-size:25px; letter-spacing:.16em;">BGS</span>
+      <span class="lbl" style="color:#6B635A; letter-spacing:.3em;">Corner</span>
+    </div>
+    <span class="lbl" style="color:#6B635A;">Step 1 of 3 &nbsp;&middot;&nbsp; Fill the box</span>
+    <span class="lbl" style="border:1px solid #E3DDD2; padding:5px 9px;">AR</span>
+  </div>
+
+  <div style="padding:34px 48px 16px 48px;">
+    <h1 class="dsp" style="margin:0 0 8px 0; font-size:40px;">Build a gift box</h1>
+    <p style="margin:0; font-size:15px; color:#6B635A; max-width:560px; line-height:1.6; font-weight:300;">
+      Choose the box, then fill it. It arrives as one wrapped parcel with every scent listed
+      on the card inside.
+    </p>
+  </div>
+
+  <div style="display:grid; grid-template-columns:452px minmax(0,1fr); gap:44px; padding:16px 48px 56px 48px;">
+
+    <!-- box -->
+    <div style="display:flex; flex-direction:column; gap:20px;">
+      <div style="display:flex; gap:10px;">
+        <span class="chip" style="border:{{b3.border}}; background:{{b3.bg}}; color:{{b3.fg}}; padding:13px 22px; font-size:14px; min-height:48px; display:flex; align-items:center; gap:8px;" onClick="{{pick3}}">3 slots <span class="lbl" style="opacity:.7;">AED 25 box</span></span>
+        <span class="chip" style="border:{{b6.border}}; background:{{b6.bg}}; color:{{b6.fg}}; padding:13px 22px; font-size:14px; min-height:48px; display:flex; align-items:center; gap:8px;" onClick="{{pick6}}">6 slots <span class="lbl" style="opacity:.7;">AED 25 box</span></span>
+      </div>
+
+      <div style="background:#EFE9DC; border:1px solid #D8CDB8; padding:26px;">
+        <div style="border:1px dashed #C3B69C; padding:22px; background:#F6F1E6;">
+          <div style="display:grid; grid-template-columns:{{gridCols}}; gap:12px;">
+            <sc-for list="{{slots}}" as="s" hint-placeholder-count="3">
+              <div class="chip" style="background:{{s.bg}}; border:1px solid {{s.border}}; height:150px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:8px;" onClick="{{s.clear}}">
+                <sc-if value="{{s.filled}}" hint-placeholder-val="{{ true }}">
+                  <svg width="40" height="62" viewBox="0 0 56 86" fill="none">
+                    <rect x="23" y="3" width="10" height="10" rx="1" fill="#A07C3C"/>
+                    <path d="M16 26q0-8 6-8h12q6 0 6 8v50q0 6-6 6H22q-6 0-6-6z" fill="#fff" stroke="{{s.ink}}" stroke-width="1.3"/>
+                    <path d="M16 50v26q0 6 6 6h12q6 0 6-6V50z" fill="{{s.ink}}" opacity=".8"/>
+                  </svg>
+                  <span class="lbl" style="color:{{s.ink}}; text-align:center; line-height:1.4;">{{s.name}}</span>
+                </sc-if>
+                <sc-if value="{{s.empty}}" hint-placeholder-val="{{ false }}">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B8AC96" stroke-width="1.6"><path d="M12 5v14M5 12h14"/></svg>
+                  <span class="lbl" style="color:#B8AC96;">Empty</span>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:#fff; border:1px solid #E3DDD2; padding:20px; display:flex; flex-direction:column; gap:13px;">
+        <div style="display:flex; justify-content:space-between; font-size:14px;">
+          <span style="color:#6B635A;">{{countLabel}}</span><span>AED {{contentsTotal}}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:14px;">
+          <span style="color:#6B635A;">Premium box</span><span>AED 25</span>
+        </div>
+        <sc-if value="{{hasTier}}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex; justify-content:space-between; font-size:14px; color:#4B6B1C;">
+            <span>Volume discount &middot; {{tierPct}}%</span><span>&minus; AED {{tierAmount}}</span>
+          </div>
+        </sc-if>
+        <div style="border-top:1px solid #E3DDD2; padding-top:13px; display:flex; justify-content:space-between; align-items:baseline;">
+          <span class="lbl">Total</span><span class="dsp" style="font-size:28px;">AED {{total}}</span>
+        </div>
+        <span style="font-size:12.5px; color:#8A8177; line-height:1.5;">{{hint}}</span>
+        <span style="background:{{ctaBg}}; color:{{ctaFg}}; padding:16px; text-align:center; font-size:15px; min-height:52px; display:flex; align-items:center; justify-content:center;">{{ctaLabel}}</span>
+      </div>
+    </div>
+
+    <!-- picker -->
+    <div style="display:flex; flex-direction:column; gap:18px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #E3DDD2; padding-bottom:13px;">
+        <span class="lbl">Choose your scents</span>
+        <span style="font-size:13px; color:#6B635A;">{{remainingLabel}}</span>
+      </div>
+
+      <div style="background:#F8EADC; border-left:3px solid #94480F; padding:14px 18px;">
+        <span style="font-size:13.5px; color:#7A3B0C; line-height:1.5;">{{pairingHint}}</span>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:14px;">
+        <sc-for list="{{options}}" as="o" hint-placeholder-count="12">
+          <div class="chip" style="background:#fff; border:1px solid {{o.border}}; opacity:{{o.opacity}};" onClick="{{o.add}}">
+            <div style="background:{{o.wash}}; height:112px; display:flex; align-items:center; justify-content:center; position:relative;">
+              <sc-if value="{{o.chosen}}" hint-placeholder-val="{{ false }}">
+                <span style="position:absolute; top:8px; right:8px; background:{{o.ink}}; width:20px; height:20px; border-radius:11px; display:flex; align-items:center; justify-content:center;">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 12l5 5L19 7"/></svg>
+                </span>
+              </sc-if>
+              <svg width="34" height="52" viewBox="0 0 56 86" fill="none">
+                <rect x="23" y="3" width="10" height="10" rx="1" fill="#A07C3C"/>
+                <path d="M16 26q0-8 6-8h12q6 0 6 8v50q0 6-6 6H22q-6 0-6-6z" fill="#fff" stroke="{{o.ink}}" stroke-width="1.4"/>
+                <path d="M16 50v26q0 6 6 6h12q6 0 6-6V50z" fill="{{o.ink}}" opacity=".8"/>
+              </svg>
+            </div>
+            <div style="padding:12px; display:flex; flex-direction:column; gap:5px;">
+              <span class="lbl" style="color:{{o.ink}};">{{o.tone}}</span>
+              <span class="dsp" style="font-size:16px; line-height:1.25;">{{o.name}}</span>
+              <span style="font-size:12.5px; color:#6B635A;">AED {{o.price}}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"$preview":{"width":1440,"height":1180}}'>
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    this.state = { size: 3, picked: [] };
+  }
+
+  catalogue() {
+    return [
+      { id:'imperial-crown', name:'Imperial Crown', tone:'Bold',       fam:'oud-woods',      price:75 },
+      { id:'dark-leather',   name:'Dark Leather',   tone:'Mysterious', fam:'oud-woods',      price:75 },
+      { id:'royal-amber',    name:'Royal Amber',    tone:'Warm',       fam:'amber-spice',    price:75 },
+      { id:'golden-bloom',   name:'Golden Bloom',   tone:'Soft',       fam:'floral-veil',    price:75 },
+      { id:'majestic-musk',  name:'Majestic Musk',  tone:'Soft',       fam:'musk-clean',     price:75 },
+      { id:'musk-bloom',     name:'Musk Bloom',     tone:'Fresh',      fam:'musk-clean',     price:75 },
+      { id:'belle-aura',     name:'Belle Aura',     tone:'Modern',     fam:'floral-veil',    price:75 },
+      { id:'magnolia-veil',  name:'Magnolia Veil',  tone:'Soft',       fam:'floral-veil',    price:75 },
+      { id:'parisian-muse',  name:'Parisian Muse',  tone:'Modern',     fam:'sweet-gourmand', price:75 },
+      { id:'velvet-spell',   name:'Velvet Spell',   tone:'Mysterious', fam:'sweet-gourmand', price:75 },
+      { id:'desert-breeze',  name:'Desert Breeze',  tone:'Fresh',      fam:'fresh-citrus',   price:75 },
+      { id:'mattar',         name:'Mattar Bakhoor', tone:'Warm',       fam:'amber-spice',    price:45 }
+    ];
+  }
+
+  inks() {
+    return {
+      'oud-woods':      { ink:'#3E4A33', wash:'#EDEFE6' },
+      'amber-spice':    { ink:'#94480F', wash:'#F8EADC' },
+      'musk-clean':     { ink:'#44555F', wash:'#E9EEF1' },
+      'floral-veil':    { ink:'#9B3A5B', wash:'#F9E7EC' },
+      'fresh-citrus':   { ink:'#4B6B1C', wash:'#EFF3E2' },
+      'sweet-gourmand': { ink:'#6D2F5C', wash:'#F3E6F0' }
+    };
+  }
+
+  money(n) {
+    return (Math.round(n * 100) / 100).toFixed(2).replace(/\.00$/, '');
+  }
+
+  renderVals() {
+    const self = this;
+    const pal = this.inks();
+    const size = this.state.size;
+    const picked = this.state.picked;
+    const all = this.catalogue();
+
+    const byId = {};
+    all.forEach(function (p) { byId[p.id] = p; });
+
+    const slots = [];
+    for (let i = 0; i < size; i++) {
+      const id = picked[i];
+      if (id) {
+        const p = byId[id];
+        slots.push({
+          filled: true, empty: false, name: p.name, ink: pal[p.fam].ink,
+          bg: pal[p.fam].wash, border: pal[p.fam].ink,
+          clear: function () {
+            self.setState({ picked: picked.filter(function (x, j) { return j !== i; }) });
+          }
+        });
+      } else {
+        slots.push({
+          filled: false, empty: true, name: '', ink: '#B8AC96',
+          bg: '#FBF8F1', border: '#DCD2BE', clear: function () {}
+        });
+      }
+    }
+
+    const full = picked.length >= size;
+    const options = all.map(function (p) {
+      const chosen = picked.indexOf(p.id) !== -1;
+      const c = pal[p.fam];
+      return {
+        name: p.name, tone: p.tone, price: p.price,
+        ink: c.ink, wash: c.wash,
+        chosen: chosen,
+        border: chosen ? c.ink : '#E3DDD2',
+        opacity: (full && !chosen) ? '0.45' : '1',
+        add: function () {
+          if (chosen) {
+            self.setState({ picked: picked.filter(function (x) { return x !== p.id; }) });
+          } else if (!full) {
+            self.setState({ picked: picked.concat([p.id]) });
+          }
+        }
+      };
+    });
+
+    const contents = picked.reduce(function (sum, id) { return sum + byId[id].price; }, 0);
+    const n = picked.length;
+    const pct = n >= 6 ? 15 : (n >= 3 ? 10 : 0);
+    const tierAmount = contents * pct / 100;
+    const total = contents + 25 - tierAmount;
+
+    const tones = picked.map(function (id) { return byId[id].tone; });
+    let hint;
+    if (n === 0) {
+      hint = 'Nothing in the box yet. Tap a bottle to drop it in.';
+    } else if (!full) {
+      hint = 'Tap a filled slot to take it back out.';
+    } else {
+      hint = 'The card inside lists every scent by name.';
+    }
+
+    let pairing;
+    if (n === 0) {
+      pairing = 'A box reads best with contrast — pick one bold, then something soft to sit beside it.';
+    } else if (tones.indexOf('Bold') !== -1 && tones.indexOf('Soft') === -1) {
+      pairing = 'You have bold covered. A soft one — Majestic Musk or Golden Bloom — will balance it.';
+    } else if (tones.indexOf('Soft') !== -1 && tones.indexOf('Bold') === -1) {
+      pairing = 'Soft so far. Imperial Crown or Dark Leather would give the box a spine.';
+    } else if (full) {
+      pairing = 'Good spread of tones. Add the matching bakhoor and the majlis smells of it too.';
+    } else {
+      pairing = 'Nicely balanced. One more and the volume discount lands.';
+    }
+
+    return {
+      slots: slots,
+      options: options,
+      gridCols: size === 3 ? 'repeat(3, minmax(0,1fr))' : 'repeat(3, minmax(0,1fr))',
+      b3: {
+        border: size === 3 ? '1.5px solid #26221D' : '1px solid #CFC7BA',
+        bg: size === 3 ? '#fff' : 'transparent',
+        fg: size === 3 ? '#26221D' : '#6B635A'
+      },
+      b6: {
+        border: size === 6 ? '1.5px solid #26221D' : '1px solid #CFC7BA',
+        bg: size === 6 ? '#fff' : 'transparent',
+        fg: size === 6 ? '#26221D' : '#6B635A'
+      },
+      pick3: function () { self.setState({ size: 3, picked: picked.slice(0, 3) }); },
+      pick6: function () { self.setState({ size: 6 }); },
+      countLabel: n === 1 ? '1 scent' : (n + ' scents'),
+      contentsTotal: self.money(contents),
+      hasTier: pct > 0,
+      tierPct: pct,
+      tierAmount: self.money(tierAmount),
+      total: self.money(total),
+      hint: hint,
+      pairingHint: pairing,
+      remainingLabel: full ? 'Box full' : ((size - n) + ' of ' + size + ' slots left'),
+      ctaLabel: full ? 'Continue to gift options' : ('Fill ' + (size - n) + ' more'),
+      ctaBg: full ? '#26221D' : '#E7E1D6',
+      ctaFg: full ? '#FAF8F4' : '#9A9186'
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "title": "Front page · phone", "x": 0, "y": 0, "w": 390, "h": 2320 }
+  ],
+  "annotations": [
+    { "id": "note-source", "x": 480, "y": 0, "w": 430,
+      "text": "BUILT FROM YOUR OWN IDENTITY, NOT MY GUESS\n\nLast attempt invented a typeface and drew cartoon bottles. This one uses what you already have:\n\n• Times New Roman for the wordmark and headlines — that is what BGS-box-font-style-guide.md documents off the actual box, high confidence.\n• Gold #C58A2D with #F8D982 highlight and #70420D shadow — the box guide's embossed palette, not the flat gold I used before.\n• Ivory #F2EDE2 ground with black sections — lifted straight from pages 3 and 5 of BGS_Corner_Portfolio.pdf.\n• The circular BGS monogram, redrawn from BGS LOGO.pdf.\n\nEvery photograph is cropped from your portfolio PDF. No stock, nothing invented." },
+    { "id": "note-competitors", "x": 480, "y": 560, "w": 430,
+      "text": "WHAT THE FOUR COMPETITORS GAVE\n\nAJMAL — the card anatomy, and it is the best thing on any of these sites: an eyebrow reading FORMAT / SIZE / GENDER, then the name, then price, then three scent notes as plain text. That is the brief's §4 taxonomy doing visible work on a card. I have used it here.\n\nSWISS ARABIAN — size chips sitting on the card itself (75 ML / 25 ML) so a shopper picks a variant without opening the product. Right for 3ml/6ml attars.\n\nRASASI — barely a shop; ABOUT / PRODUCTS / STORES / BLOG, split ORIENTAL vs OCCIDENTAL. Its one good idea is the hook: \"Discover your personality\" — a quiz as the front door, which is the brief's §8.3.\n\nARABIAN OUD — client-rendered, extracted nothing readable. Not studied. I am not going to pretend otherwise." },
+    { "id": "note-choices", "x": 480, "y": 1180, "w": 430,
+      "text": "THE THREE DECISIONS\n\nLIGHT, BUT NOT PALE. You asked for light. The portfolio's own light pages are warm ivory against black photographic panels, so the page alternates: ivory for reading, black where a photograph or the gift offer carries it. Pastel boxes were the mistake last time.\n\nCOLOUR COMES FROM THE FAMILIES, AS A 4PX RULE. Seven colours, used as a spine beside each family row rather than as fills. On an ivory ground with gold, seven pastel panels fight the brand; seven thin bars read as an index.\n\nSCARCITY STAYS HONEST. \"3 LEFT\" on Falcon is a real count. \"NEVER DISCOUNTED\" sits under the Reserve prices — the halo rule stated to the customer rather than hidden in the checkout." },
+    { "id": "note-open", "x": 480, "y": 1780, "w": 430,
+      "text": "STILL OPEN\n\n• The six sculptural editions are real products from your portfolio, but I do not have their prices. AED 1,295 is carried over from the brief's Majlis OUD 12ml line and is a PLACEHOLDER — tell me the real ones.\n• Scent notes on those cards (Oud · Saffron · Leather) are mine, not yours.\n• Only the front page is designed. Collection, product, gift box and cart come next, once this direction is right.\n• If the black sections are still too dark for what you meant by light-themed, say so and I will take the hero to ivory with the photograph inset." }
+  ],
+  "launch": { "view": "focused", "file": "Main.dc.html" }
+}

@@ -152,7 +152,7 @@
   if (key && document.querySelector(".pdp")) {
     var pr = CAT[key];
     if (pr) {
-      document.title = pr.name + " \u2014 " + pr.meta.replace(/&middot;/g, "\u00b7").replace(/<[^>]*>/g, "") + " | BGS Corner";
+      document.title = pr.name + ": " + pr.meta.replace(/&middot;/g, "\u00b7").replace(/<[^>]*>/g, "") + " | BGS Corner";
       T(".buy h1", pr.name);
       var crumb = document.querySelector("section .eyebrow");
       if (crumb) crumb.textContent = "Home / " + pr.crumb + " / " + pr.name;
@@ -175,7 +175,7 @@
         }
       });
       document.querySelectorAll(".buy .btn.solid").forEach(function (b) {
-        b.textContent = "Add to bag \u2014 AED " + pr.price;
+        b.textContent = "Add to bag: AED " + pr.price;
       });
 
       var sizeWrap = document.querySelector(".buy .sizes");

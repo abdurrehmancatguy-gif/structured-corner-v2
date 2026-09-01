@@ -1,0 +1,303 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Jost:wght@300;400;500;600&display=swap">
+  <style>
+    body { margin:0; background:#FAF8F4; color:#26221D;
+           font-family:'Jost','Helvetica Neue',Arial,sans-serif; }
+    * { box-sizing:border-box; }
+    a { color:#8F4A14; text-decoration:none; }
+    a:hover { color:#26221D; }
+    .lbl { font-size:11px; letter-spacing:.16em; text-transform:uppercase; font-weight:500; }
+    .dsp { font-family:'Bodoni Moda',Georgia,'Times New Roman',serif; font-weight:400; }
+    .chip { cursor:pointer; user-select:none; }
+  </style>
+</helmet>
+
+<div style="width:1440px; background:#FAF8F4;">
+
+  <div style="background:#26221D; color:#F3EFE7; height:38px; display:flex; align-items:center; justify-content:center; gap:10px;">
+    <span style="font-size:13px;">Free UAE delivery over AED 150</span>
+  </div>
+
+  <div style="display:flex; align-items:center; justify-content:space-between; padding:22px 48px; border-bottom:1px solid #E3DDD2;">
+    <div style="display:flex; align-items:baseline; gap:9px;">
+      <span class="dsp" style="font-size:25px; letter-spacing:.16em;">BGS</span>
+      <span class="lbl" style="color:#6B635A; letter-spacing:.3em;">Corner</span>
+    </div>
+    <div style="display:flex; gap:30px;">
+      <span style="font-size:14px;">Shop by Occasion</span><span style="font-size:14px;">Shop by Scent</span>
+      <span style="font-size:14px;">Gift Sets</span><span style="font-size:14px;">Discovery</span>
+      <span style="font-size:14px; color:#8F4A14;">Corporate Gifting</span>
+    </div>
+    <span class="lbl" style="border:1px solid #E3DDD2; padding:5px 9px;">AR</span>
+  </div>
+
+  <!-- breadcrumb + intro -->
+  <div style="padding:26px 48px 0 48px;">
+    <span class="lbl" style="color:#6B635A;">Home &nbsp;/&nbsp; Collections &nbsp;/&nbsp; Attars</span>
+    <h1 class="dsp" style="margin:12px 0 8px 0; font-size:40px;">Attar oils</h1>
+    <p style="margin:0; font-size:15px; color:#6B635A; max-width:640px; line-height:1.6; font-weight:300;">
+      Alcohol&#8209;free perfume oil, blended in Deira and poured in 3ml and 6ml. Wear a drop at
+      the wrist; it will still be there tonight.
+    </p>
+  </div>
+
+  <div style="display:grid; grid-template-columns:264px minmax(0,1fr); gap:36px; padding:30px 48px 56px 48px;">
+
+    <!-- facet rail -->
+    <div style="display:flex; flex-direction:column; gap:26px;">
+
+      <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #E3DDD2; padding-bottom:12px;">
+        <span class="lbl">Filter <sc-if value="{{hasFilters}}" hint-placeholder-val="{{ true }}"><span style="color:#8F4A14;">&middot; {{filterCount}}</span></sc-if></span>
+        <span class="chip lbl" style="color:#8F4A14;" onClick="{{clearAll}}">Clear</span>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:11px;">
+        <span class="lbl" style="color:#6B635A;">Scent family</span>
+        <sc-for list="{{families}}" as="f" hint-placeholder-count="7">
+          <div class="chip" style="display:flex; align-items:center; gap:10px; min-height:32px;" onClick="{{f.toggle}}">
+            <span style="width:15px; height:15px; border:1px solid {{f.box}}; background:{{f.fill}}; display:inline-block;"></span>
+            <span style="font-size:14px; color:{{f.text}};">{{f.name}}</span>
+            <span class="lbl" style="color:#9A9186; margin-left:auto;">{{f.count}}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:11px;">
+        <span class="lbl" style="color:#6B635A;">Tone</span>
+        <div style="display:flex; flex-wrap:wrap; gap:7px;">
+          <sc-for list="{{tones}}" as="t" hint-placeholder-count="6">
+            <span class="chip lbl" style="border:1px solid {{t.border}}; background:{{t.bg}}; color:{{t.fg}}; padding:8px 11px;" onClick="{{t.toggle}}">{{t.name}}</span>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:11px;">
+        <span class="lbl" style="color:#6B635A;">Availability</span>
+        <div class="chip" style="display:flex; align-items:center; gap:10px; min-height:44px; border:1px solid {{readyBorder}}; background:{{readyBg}}; padding:0 12px;" onClick="{{toggleReady}}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{readyFg}}" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          <span style="font-size:14px; color:{{readyFg}};">Ready today</span>
+        </div>
+        <span style="font-size:12px; color:#9A9186; line-height:1.5;">Order before 2:00 PM for same&#8209;day Dubai.</span>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:11px;">
+        <span class="lbl" style="color:#6B635A;">Price</span>
+        <div style="display:flex; flex-wrap:wrap; gap:7px;">
+          <sc-for list="{{prices}}" as="p" hint-placeholder-count="4">
+            <span class="chip lbl" style="border:1px solid {{p.border}}; background:{{p.bg}}; color:{{p.fg}}; padding:8px 11px;" onClick="{{p.toggle}}">{{p.name}}</span>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <!-- results -->
+    <div style="display:flex; flex-direction:column; gap:18px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #E3DDD2; padding-bottom:14px;">
+        <span style="font-size:14px; color:#6B635A;">{{resultCount}} pieces</span>
+        <div style="display:flex; align-items:center; gap:9px;">
+          <span class="lbl" style="color:#6B635A;">Sort</span>
+          <span style="font-size:14px; border-bottom:1px solid #A07C3C; padding-bottom:2px;">Featured</span>
+        </div>
+      </div>
+
+      <sc-if value="{{empty}}" hint-placeholder-val="{{ false }}">
+        <div style="border:1px solid #E3DDD2; background:#fff; padding:56px; text-align:center;">
+          <p class="dsp" style="margin:0 0 8px 0; font-size:24px;">Nothing matches all of that.</p>
+          <p style="margin:0; font-size:14px; color:#6B635A;">Try loosening the tone, or clear the filters.</p>
+        </div>
+      </sc-if>
+
+      <div style="display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:20px;">
+        <sc-for list="{{items}}" as="p" hint-placeholder-count="9">
+          <div style="background:#fff; border:1px solid {{p.cardBorder}};">
+            <div style="background:{{p.wash}}; height:196px; display:flex; align-items:center; justify-content:center; position:relative;">
+              <sc-if value="{{p.low}}" hint-placeholder-val="{{ true }}">
+                <span class="lbl" style="position:absolute; top:11px; left:11px; background:{{p.ink}}; color:#fff; padding:4px 8px;">{{p.stock}} left</span>
+              </sc-if>
+              <sc-if value="{{p.sameDay}}" hint-placeholder-val="{{ true }}">
+                <span class="lbl" style="position:absolute; top:11px; right:11px; background:#fff; border:1px solid {{p.ink}}; color:{{p.ink}}; padding:4px 8px;">Today</span>
+              </sc-if>
+              <svg width="62" height="96" viewBox="0 0 56 86" fill="none">
+                <rect x="23" y="3" width="10" height="10" rx="1" fill="#A07C3C"/>
+                <rect x="25" y="13" width="6" height="5" fill="#A07C3C" opacity=".5"/>
+                <path d="M16 26q0-8 6-8h12q6 0 6 8v50q0 6-6 6H22q-6 0-6-6z" fill="#fff" stroke="{{p.ink}}" stroke-width="1.1"/>
+                <path d="M16 50v26q0 6 6 6h12q6 0 6-6V50z" fill="{{p.ink}}" opacity=".8"/>
+              </svg>
+            </div>
+            <div style="padding:15px; display:flex; flex-direction:column; gap:7px;">
+              <span class="lbl" style="color:{{p.ink}};">{{p.familyName}} &middot; {{p.tone}}</span>
+              <span class="dsp" style="font-size:19px;">{{p.name}}</span>
+              <span style="font-size:13px; color:#6B635A;">{{p.priceLabel}}</span>
+              <sc-if value="{{p.halo}}" hint-placeholder-val="{{ false }}">
+                <span class="lbl" style="color:#9A9186;">Never discounted</span>
+              </sc-if>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"$preview":{"width":1440,"height":1620}}'>
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    this.state = { fams: [], tones: [], bands: [], ready: false };
+  }
+
+  catalogue() {
+    return [
+      { name:'Imperial Crown',  fam:'oud-woods',      tone:'Bold',       price:75,  stock:12, sameDay:true  },
+      { name:'Dark Leather',    fam:'oud-woods',      tone:'Mysterious', price:75,  stock:3,  sameDay:true  },
+      { name:'Royal Amber',     fam:'amber-spice',    tone:'Warm',       price:75,  stock:8,  sameDay:true  },
+      { name:'Golden Bloom',    fam:'floral-veil',    tone:'Soft',       price:75,  stock:15, sameDay:true  },
+      { name:'Majestic Musk',   fam:'musk-clean',     tone:'Soft',       price:75,  stock:6,  sameDay:true  },
+      { name:'Musk Bloom',      fam:'musk-clean',     tone:'Fresh',      price:75,  stock:20, sameDay:false },
+      { name:'Belle Aura',      fam:'floral-veil',    tone:'Modern',     price:75,  stock:2,  sameDay:true  },
+      { name:'Magnolia Veil',   fam:'floral-veil',    tone:'Soft',       price:75,  stock:11, sameDay:true  },
+      { name:'Parisian Muse',   fam:'sweet-gourmand', tone:'Modern',     price:75,  stock:9,  sameDay:true  },
+      { name:'Velvet Spell',    fam:'sweet-gourmand', tone:'Mysterious', price:75,  stock:4,  sameDay:false },
+      { name:'Desert Breeze',   fam:'fresh-citrus',   tone:'Fresh',      price:75,  stock:18, sameDay:true  },
+      { name:'Pride of Arabia', fam:'oud-woods',      tone:'Bold',       price:89,  stock:7,  sameDay:true,  edp:true },
+      { name:'Amore',           fam:'floral-veil',    tone:'Soft',       price:89,  stock:10, sameDay:true,  edp:true },
+      { name:'The Writer',      fam:'musk-clean',     tone:'Modern',     price:89,  stock:5,  sameDay:false, edp:true },
+      { name:'Majlis OUD',      fam:'reserve',        tone:'Mysterious', price:650, stock:2,  sameDay:false, halo:true }
+    ];
+  }
+
+  palette() {
+    return {
+      'oud-woods':      { name:'Oud & Woods',      ink:'#3E4A33', wash:'#EDEFE6' },
+      'amber-spice':    { name:'Amber & Spice',    ink:'#94480F', wash:'#F8EADC' },
+      'musk-clean':     { name:'Musk & Clean',     ink:'#44555F', wash:'#E9EEF1' },
+      'floral-veil':    { name:'Floral Veil',      ink:'#9B3A5B', wash:'#F9E7EC' },
+      'fresh-citrus':   { name:'Fresh & Citrus',   ink:'#4B6B1C', wash:'#EFF3E2' },
+      'sweet-gourmand': { name:'Sweet & Gourmand', ink:'#6D2F5C', wash:'#F3E6F0' },
+      'reserve':        { name:'Reserve',          ink:'#26221D', wash:'#E8E4DC' }
+    };
+  }
+
+  toggleIn(key, value) {
+    const cur = this.state[key];
+    const next = cur.indexOf(value) === -1
+      ? cur.concat([value])
+      : cur.filter(function (v) { return v !== value; });
+    this.setState({ [key]: next });
+  }
+
+  bands() {
+    return [
+      { id:'u50',  name:'Under 50',  test:function (p) { return p.price < 50; } },
+      { id:'50t',  name:'50 – 100',  test:function (p) { return p.price >= 50 && p.price <= 100; } },
+      { id:'100t', name:'100 – 200', test:function (p) { return p.price > 100 && p.price <= 200; } },
+      { id:'200p', name:'200+',      test:function (p) { return p.price > 200; } }
+    ];
+  }
+
+  renderVals() {
+    const self = this;
+    const pal = this.palette();
+    const st = this.state;
+    const all = this.catalogue();
+    const bands = this.bands();
+
+    const matches = all.filter(function (p) {
+      if (st.fams.length && st.fams.indexOf(p.fam) === -1) return false;
+      if (st.tones.length && st.tones.indexOf(p.tone) === -1) return false;
+      if (st.ready && !p.sameDay) return false;
+      if (st.bands.length) {
+        const ok = bands.some(function (b) {
+          return st.bands.indexOf(b.id) !== -1 && b.test(p);
+        });
+        if (!ok) return false;
+      }
+      return true;
+    });
+
+    const famKeys = ['oud-woods','amber-spice','musk-clean','floral-veil','fresh-citrus','sweet-gourmand','reserve'];
+    const families = famKeys.map(function (k) {
+      const on = st.fams.indexOf(k) !== -1;
+      return {
+        name: pal[k].name,
+        count: all.filter(function (p) { return p.fam === k; }).length,
+        box: on ? pal[k].ink : '#CFC7BA',
+        fill: on ? pal[k].ink : 'transparent',
+        text: on ? pal[k].ink : '#26221D',
+        toggle: function () { self.toggleIn('fams', k); }
+      };
+    });
+
+    const toneNames = ['Bold','Soft','Warm','Fresh','Mysterious','Modern'];
+    const tones = toneNames.map(function (t) {
+      const on = st.tones.indexOf(t) !== -1;
+      return {
+        name: t,
+        border: on ? '#26221D' : '#CFC7BA',
+        bg: on ? '#26221D' : 'transparent',
+        fg: on ? '#FAF8F4' : '#6B635A',
+        toggle: function () { self.toggleIn('tones', t); }
+      };
+    });
+
+    const prices = bands.map(function (b) {
+      const on = st.bands.indexOf(b.id) !== -1;
+      return {
+        name: b.name,
+        border: on ? '#26221D' : '#CFC7BA',
+        bg: on ? '#26221D' : 'transparent',
+        fg: on ? '#FAF8F4' : '#6B635A',
+        toggle: function () { self.toggleIn('bands', b.id); }
+      };
+    });
+
+    const items = matches.map(function (p) {
+      const c = pal[p.fam];
+      return {
+        name: p.name,
+        familyName: c.name,
+        tone: p.tone,
+        ink: c.ink,
+        wash: c.wash,
+        cardBorder: p.halo ? '#26221D' : '#E3DDD2',
+        stock: p.stock,
+        low: p.stock <= 5,
+        sameDay: !!p.sameDay,
+        halo: !!p.halo,
+        priceLabel: p.halo
+          ? '6ml AED 650 · 12ml AED 1,295'
+          : (p.edp ? '50ml AED 89' : '3ml AED 45 · 6ml AED 75')
+      };
+    });
+
+    const filterCount = st.fams.length + st.tones.length + st.bands.length + (st.ready ? 1 : 0);
+
+    return {
+      families: families,
+      tones: tones,
+      prices: prices,
+      items: items,
+      resultCount: matches.length,
+      empty: matches.length === 0,
+      filterCount: filterCount,
+      hasFilters: filterCount > 0,
+      readyBorder: st.ready ? '#3E4A33' : '#CFC7BA',
+      readyBg: st.ready ? '#EDEFE6' : 'transparent',
+      readyFg: st.ready ? '#3E4A33' : '#6B635A',
+      toggleReady: function () { self.setState({ ready: !st.ready }); },
+      clearAll: function () { self.setState({ fams: [], tones: [], bands: [], ready: false }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

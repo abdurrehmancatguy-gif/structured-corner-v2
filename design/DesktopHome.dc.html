@@ -1,0 +1,205 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Jost:wght@300;400;500;600&display=swap">
+  <style>
+    body { margin:0; background:#FAF8F4; color:#26221D;
+           font-family:'Jost','Helvetica Neue',Arial,sans-serif; }
+    * { box-sizing:border-box; }
+    a { color:#8F4A14; text-decoration:none; }
+    a:hover { color:#26221D; }
+    .lbl { font-size:11px; letter-spacing:.16em; text-transform:uppercase; font-weight:500; }
+    .dsp { font-family:'Bodoni Moda',Georgia,'Times New Roman',serif; font-weight:400; }
+  </style>
+</helmet>
+
+<div style="width:1440px; background:#FAF8F4;">
+
+  <!-- utility bar : rotating, message 1 of 3 with live countdown -->
+  <div style="background:#26221D; color:#F3EFE7; height:38px; display:flex; align-items:center; justify-content:center; gap:10px;">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A07C3C" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+    <span style="font-size:13px; letter-spacing:.02em;">Order by 2:00 PM &rarr; delivered today in Dubai</span>
+    <span class="lbl" style="color:#A07C3C; font-variant-numeric:tabular-nums;">03 : 47 : 12</span>
+  </div>
+
+  <!-- header -->
+  <div style="display:flex; align-items:center; justify-content:space-between; padding:22px 56px; border-bottom:1px solid #E3DDD2;">
+    <div style="display:flex; align-items:baseline; gap:9px;">
+      <span class="dsp" style="font-size:25px; letter-spacing:.16em;">BGS</span>
+      <span class="lbl" style="color:#6B635A; letter-spacing:.3em;">Corner</span>
+    </div>
+    <div style="display:flex; gap:30px; align-items:center;">
+      <span style="font-size:14px; display:flex; align-items:center; gap:5px;">Shop by Occasion
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#26221D" stroke-width="2.4"><path d="M5 9l7 7 7-7"/></svg></span>
+      <span style="font-size:14px;">Shop by Scent</span>
+      <span style="font-size:14px;">Gift Sets</span>
+      <span style="font-size:14px;">Discovery</span>
+      <span style="font-size:14px;">Our Story</span>
+      <span style="font-size:14px; color:#8F4A14;">Corporate Gifting</span>
+    </div>
+    <div style="display:flex; gap:20px; align-items:center;">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#26221D" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/></svg>
+      <span class="lbl" style="border:1px solid #E3DDD2; padding:5px 9px;">AR</span>
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#26221D" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+      <div style="position:relative;">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#26221D" stroke-width="1.6"><path d="M6 8h12l-1.2 12H7.2z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+        <span style="position:absolute; top:-6px; right:-8px; background:#8F4A14; color:#fff; font-size:10px; width:16px; height:16px; border-radius:9px; display:flex; align-items:center; justify-content:center;">2</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- hero -->
+  <div style="display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); min-height:520px;">
+    <div style="padding:84px 56px 84px 56px; display:flex; flex-direction:column; justify-content:center; gap:26px;">
+      <span class="lbl" style="color:#8F4A14;">Blended in Deira &middot; Small batch</span>
+      <h1 class="dsp" style="margin:0; font-size:60px; line-height:1.04; letter-spacing:-.01em;">The attar you<br>will be remembered by.</h1>
+      <p style="margin:0; font-size:16px; line-height:1.65; color:#6B635A; max-width:430px; font-weight:300;">
+        Eleven house blends, poured by hand into 3ml and 6ml. Alcohol&#8209;free, oil&#8209;based,
+        and made to last the length of a long evening.
+      </p>
+      <div style="display:flex; gap:14px; padding-top:6px;">
+        <span style="background:#26221D; color:#FAF8F4; padding:15px 30px; font-size:14px; letter-spacing:.04em; min-height:48px; display:flex; align-items:center;">Find your scent</span>
+        <span style="border:1px solid #26221D; padding:15px 30px; font-size:14px; letter-spacing:.04em; min-height:48px; display:flex; align-items:center;">Build a gift box</span>
+      </div>
+      <span style="font-size:13px; color:#6B635A;">Free UAE delivery over AED 150 &middot; Cash on delivery available</span>
+    </div>
+    <div style="background:linear-gradient(160deg,#F3EEE3 0%,#E8DFCE 55%,#DED2BC 100%); display:flex; align-items:center; justify-content:center; position:relative;">
+      <div style="position:absolute; inset:0; background:radial-gradient(circle at 62% 38%, rgba(255,255,255,.55), transparent 58%);"></div>
+      <svg width="150" height="232" viewBox="0 0 56 86" fill="none" style="position:relative;">
+        <rect x="23" y="3" width="10" height="10" rx="1" fill="#A07C3C"/>
+        <rect x="25" y="13" width="6" height="5" fill="#A07C3C" opacity=".5"/>
+        <path d="M16 26q0-8 6-8h12q6 0 6 8v50q0 6-6 6H22q-6 0-6-6z" fill="#F6EDDC" stroke="#3E4A33" stroke-width="1.1"/>
+        <path d="M16 50v26q0 6 6 6h12q6 0 6-6V50z" fill="#94480F" opacity=".82"/>
+        <path d="M20 30q0-6 4-6" stroke="#fff" stroke-width="1.6" opacity=".7" stroke-linecap="round"/>
+      </svg>
+      <span class="lbl" style="position:absolute; bottom:26px; right:26px; color:#6B635A;">Seasonal film &middot; poster first</span>
+    </div>
+  </div>
+
+  <!-- occasion tiles -->
+  <div style="padding:64px 56px 10px 56px;">
+    <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:24px;">
+      <h2 class="dsp" style="margin:0; font-size:32px;">Shop by occasion</h2>
+      <span style="font-size:13px; color:#6B635A;">Gifting is most of what we do</span>
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(6, minmax(0,1fr)); gap:14px;">
+      <div style="background:#EDEFE6; border:1px solid #E3DDD2; padding:22px 16px; min-height:118px; display:flex; flex-direction:column; justify-content:space-between;"><span class="dsp" style="font-size:19px;">The Eid Edit</span><span class="lbl" style="color:#3E4A33;">18 pieces</span></div>
+      <div style="background:#F9E7EC; border:1px solid #E3DDD2; padding:22px 16px; min-height:118px; display:flex; flex-direction:column; justify-content:space-between;"><span class="dsp" style="font-size:19px;">Wedding Favours</span><span class="lbl" style="color:#9B3A5B;">From 20 units</span></div>
+      <div style="background:#E9EEF1; border:1px solid #E3DDD2; padding:22px 16px; min-height:118px; display:flex; flex-direction:column; justify-content:space-between;"><span class="dsp" style="font-size:19px;">Corporate</span><span class="lbl" style="color:#44555F;">Quote in 1 day</span></div>
+      <div style="background:#F8EADC; border:1px solid #E3DDD2; padding:22px 16px; min-height:118px; display:flex; flex-direction:column; justify-content:space-between;"><span class="dsp" style="font-size:19px;">Under AED 100</span><span class="lbl" style="color:#94480F;">24 pieces</span></div>
+      <div style="background:#F3E6F0; border:1px solid #E3DDD2; padding:22px 16px; min-height:118px; display:flex; flex-direction:column; justify-content:space-between;"><span class="dsp" style="font-size:19px;">Birthday</span><span class="lbl" style="color:#6D2F5C;">With a card</span></div>
+      <div style="background:#EFF3E2; border:1px solid #E3DDD2; padding:22px 16px; min-height:118px; display:flex; flex-direction:column; justify-content:space-between;"><span class="dsp" style="font-size:19px;">Dubai in a Bottle</span><span class="lbl" style="color:#4B6B1C;">AED 79</span></div>
+    </div>
+  </div>
+
+  <!-- trust strip -->
+  <div style="margin:52px 56px; border-top:1px solid #E3DDD2; border-bottom:1px solid #E3DDD2; padding:22px 0; display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:20px;">
+    <div style="display:flex; gap:11px; align-items:center;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#A07C3C" stroke-width="1.6"><path d="M12 3l7 4v6c0 4.2-3 7-7 8-4-1-7-3.8-7-8V7z"/></svg><span style="font-size:13px;">Blended in Dubai</span></div>
+    <div style="display:flex; gap:11px; align-items:center;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#A07C3C" stroke-width="1.6"><path d="M5 12l5 5L19 7"/></svg><span style="font-size:13px;">Alcohol&#8209;free attars</span></div>
+    <div style="display:flex; gap:11px; align-items:center;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#A07C3C" stroke-width="1.6"><path d="M3 7h11v9H3z"/><path d="M14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg><span style="font-size:13px;">Same&#8209;day across Dubai</span></div>
+    <div style="display:flex; gap:11px; align-items:center;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#A07C3C" stroke-width="1.6"><path d="M4 12a8 8 0 1 1 3 6"/><path d="M4 8v5h5"/></svg><span style="font-size:13px;">Exchange on sealed items</span></div>
+  </div>
+
+  <!-- product rail -->
+  <div style="padding:0 56px;">
+    <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:24px;">
+      <h2 class="dsp" style="margin:0; font-size:32px;">This week&rsquo;s drop</h2>
+      <span style="font-size:13px; border-bottom:1px solid #A07C3C; padding-bottom:2px;">All 11 attars</span>
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:20px;">
+
+      <div style="background:#fff; border:1px solid #E3DDD2;">
+        <div style="background:#F8EADC; height:210px; display:flex; align-items:center; justify-content:center; position:relative;">
+          <span class="lbl" style="position:absolute; top:12px; left:12px; background:#94480F; color:#fff; padding:4px 8px;">3 left</span>
+          <svg width="66" height="102" viewBox="0 0 56 86" fill="none"><rect x="23" y="3" width="10" height="10" rx="1" fill="#A07C3C"/><rect x="25" y="13" width="6" height="5" fill="#A07C3C" opacity=".5"/><path d="M16 26q0-8 6-8h12q6 0 6 8v50q0 6-6 6H22q-6 0-6-6z" fill="#fff" stroke="#94480F" stroke-width="1.1"/><path d="M16 50v26q0 6 6 6h12q6 0 6-6V50z" fill="#94480F" opacity=".8"/></svg>
+        </div>
+        <div style="padding:16px; display:flex; flex-direction:column; gap:8px;">
+          <span class="lbl" style="color:#94480F;">Amber &amp; Spice &middot; Warm</span>
+          <span class="dsp" style="font-size:20px;">Royal Amber</span>
+          <span style="font-size:13px; color:#6B635A;">3ml AED 45 &middot; 6ml AED 75</span>
+        </div>
+      </div>
+
+      <div style="background:#fff; border:1px solid #E3DDD2;">
+        <div style="background:#EDEFE6; height:210px; display:flex; align-items:center; justify-content:center; position:relative;">
+          <span class="lbl" style="position:absolute; top:12px; left:12px; background:#fff; border:1px solid #3E4A33; color:#3E4A33; padding:4px 8px;">Ready today</span>
+          <svg width="66" height="102" viewBox="0 0 56 86" fill="none"><rect x="23" y="3" width="10" height="10" rx="1" fill="#A07C3C"/><rect x="25" y="13" width="6" height="5" fill="#A07C3C" opacity=".5"/><path d="M16 26q0-8 6-8h12q6 0 6 8v50q0 6-6 6H22q-6 0-6-6z" fill="#fff" stroke="#3E4A33" stroke-width="1.1"/><path d="M16 50v26q0 6 6 6h12q6 0 6-6V50z" fill="#3E4A33" opacity=".8"/></svg>
+        </div>
+        <div style="padding:16px; display:flex; flex-direction:column; gap:8px;">
+          <span class="lbl" style="color:#3E4A33;">Oud &amp; Woods &middot; Bold</span>
+          <span class="dsp" style="font-size:20px;">Imperial Crown</span>
+          <span style="font-size:13px; color:#6B635A;">3ml AED 45 &middot; 6ml AED 75</span>
+        </div>
+      </div>
+
+      <div style="background:#fff; border:1px solid #E3DDD2;">
+        <div style="background:#EFF3E2; height:210px; display:flex; align-items:center; justify-content:center; position:relative;">
+          <span class="lbl" style="position:absolute; top:12px; left:12px; background:#fff; border:1px solid #4B6B1C; color:#4B6B1C; padding:4px 8px;">Summer&#8209;safe</span>
+          <svg width="66" height="102" viewBox="0 0 56 86" fill="none"><rect x="23" y="3" width="10" height="10" rx="1" fill="#A07C3C"/><rect x="25" y="13" width="6" height="5" fill="#A07C3C" opacity=".5"/><path d="M16 26q0-8 6-8h12q6 0 6 8v50q0 6-6 6H22q-6 0-6-6z" fill="#fff" stroke="#4B6B1C" stroke-width="1.1"/><path d="M16 50v26q0 6 6 6h12q6 0 6-6V50z" fill="#4B6B1C" opacity=".75"/></svg>
+        </div>
+        <div style="padding:16px; display:flex; flex-direction:column; gap:8px;">
+          <span class="lbl" style="color:#4B6B1C;">Fresh &amp; Citrus &middot; Fresh</span>
+          <span class="dsp" style="font-size:20px;">Desert Breeze</span>
+          <span style="font-size:13px; color:#6B635A;">3ml AED 45 &middot; 6ml AED 75</span>
+        </div>
+      </div>
+
+      <div style="background:#fff; border:1px solid #26221D;">
+        <div style="background:#E8E4DC; height:210px; display:flex; align-items:center; justify-content:center; position:relative;">
+          <span class="lbl" style="position:absolute; top:12px; left:12px; background:#26221D; color:#E8E4DC; padding:4px 8px;">Reserve</span>
+          <svg width="66" height="102" viewBox="0 0 56 86" fill="none"><rect x="23" y="3" width="10" height="10" rx="1" fill="#A07C3C"/><rect x="25" y="13" width="6" height="5" fill="#A07C3C" opacity=".7"/><path d="M16 26q0-8 6-8h12q6 0 6 8v50q0 6-6 6H22q-6 0-6-6z" fill="#fff" stroke="#26221D" stroke-width="1.1"/><path d="M16 50v26q0 6 6 6h12q6 0 6-6V50z" fill="#26221D" opacity=".9"/></svg>
+        </div>
+        <div style="padding:16px; display:flex; flex-direction:column; gap:8px;">
+          <span class="lbl" style="color:#26221D;">Reserve &middot; Mysterious</span>
+          <span class="dsp" style="font-size:20px;">Majlis OUD</span>
+          <span style="font-size:13px; color:#6B635A;">6ml AED 650 &middot; 12ml AED 1,295</span>
+          <span class="lbl" style="color:#6B635A;">Never discounted</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- discovery band -->
+  <div style="margin:56px; background:#26221D; color:#F3EFE7; padding:44px 48px; display:flex; align-items:center; justify-content:space-between; gap:40px;">
+    <div style="display:flex; flex-direction:column; gap:12px; max-width:620px;">
+      <span class="lbl" style="color:#A07C3C;">Start here</span>
+      <h2 class="dsp" style="margin:0; font-size:36px;">Discovery Trio &mdash; AED 129</h2>
+      <p style="margin:0; font-size:15px; line-height:1.6; color:#C8C0B4; font-weight:300;">
+        Three 3ml attars, yours to choose or ours to pick. Whatever you spend on it comes
+        back as credit on your first full bottle.
+      </p>
+    </div>
+    <span style="background:#FAF8F4; color:#26221D; padding:16px 34px; font-size:14px; letter-spacing:.04em; white-space:nowrap; min-height:48px; display:flex; align-items:center;">Build your trio</span>
+  </div>
+
+  <!-- scent families -->
+  <div style="padding:0 56px 64px 56px;">
+    <h2 class="dsp" style="margin:0 0 24px 0; font-size:32px;">Shop by scent family</h2>
+    <div style="display:grid; grid-template-columns:repeat(7, minmax(0,1fr)); gap:10px;">
+      <div style="background:#EDEFE6; border-top:3px solid #3E4A33; padding:20px 14px; min-height:104px; display:flex; flex-direction:column; justify-content:space-between;"><span style="font-size:15px; color:#3E4A33;">Oud &amp; Woods</span><span class="lbl" style="color:#6B635A;">9</span></div>
+      <div style="background:#F8EADC; border-top:3px solid #94480F; padding:20px 14px; min-height:104px; display:flex; flex-direction:column; justify-content:space-between;"><span style="font-size:15px; color:#94480F;">Amber &amp; Spice</span><span class="lbl" style="color:#6B635A;">7</span></div>
+      <div style="background:#E9EEF1; border-top:3px solid #44555F; padding:20px 14px; min-height:104px; display:flex; flex-direction:column; justify-content:space-between;"><span style="font-size:15px; color:#44555F;">Musk &amp; Clean</span><span class="lbl" style="color:#6B635A;">6</span></div>
+      <div style="background:#F9E7EC; border-top:3px solid #9B3A5B; padding:20px 14px; min-height:104px; display:flex; flex-direction:column; justify-content:space-between;"><span style="font-size:15px; color:#9B3A5B;">Floral Veil</span><span class="lbl" style="color:#6B635A;">8</span></div>
+      <div style="background:#EFF3E2; border-top:3px solid #4B6B1C; padding:20px 14px; min-height:104px; display:flex; flex-direction:column; justify-content:space-between;"><span style="font-size:15px; color:#4B6B1C;">Fresh &amp; Citrus</span><span class="lbl" style="color:#6B635A;">5</span></div>
+      <div style="background:#F3E6F0; border-top:3px solid #6D2F5C; padding:20px 14px; min-height:104px; display:flex; flex-direction:column; justify-content:space-between;"><span style="font-size:15px; color:#6D2F5C;">Sweet &amp; Gourmand</span><span class="lbl" style="color:#6B635A;">6</span></div>
+      <div style="background:#E8E4DC; border-top:3px solid #26221D; padding:20px 14px; min-height:104px; display:flex; flex-direction:column; justify-content:space-between;"><span style="font-size:15px; color:#26221D;">Reserve</span><span class="lbl" style="color:#6B635A;">3</span></div>
+    </div>
+  </div>
+
+  <!-- footer -->
+  <div style="border-top:1px solid #E3DDD2; padding:40px 56px; display:flex; justify-content:space-between; align-items:center;">
+    <span class="lbl" style="color:#6B635A;">BGS Corner General Trading LLC &middot; Deira, Dubai</span>
+    <div style="display:flex; gap:26px;"><span style="font-size:13px; color:#6B635A;">Delivery &amp; returns</span><span style="font-size:13px; color:#6B635A;">Corporate gifting</span><span style="font-size:13px; color:#6B635A;">WhatsApp us</span></div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>
