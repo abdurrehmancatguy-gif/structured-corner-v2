@@ -1,0 +1,19 @@
+{
+  "store": {
+    "name": "BGS Corner",
+    "legal_name": "BGS Corner General Trading LLC",
+    "location": "Dubai, UAE",
+    "currency": "AED",
+    "vat_rate_percent": 5,
+    "vat_inclusive": true,
+    "free_delivery_over": 150,
+    "delivery_fee": 12,
+    "sameday_fee": 25,
+    "sameday_cutoff": "2:00 PM",
+    "cod_max_order": 300,
+    "cod_fee": 8,
+    "giftbox_fee": 25,
+    "giftbox_volume_discount_at": 3,
+    "giftbox_volume_discount_percent": 10
+  }
+}

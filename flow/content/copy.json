@@ -1,0 +1,57 @@
+{
+  "strip": {
+    "countdown_line": "Order by 2:00 PM for delivery today in Dubai",
+    "right_links": [
+      {
+        "label": "Free UAE delivery over AED 150",
+        "href": ""
+      },
+      {
+        "label": "Cash on delivery",
+        "href": ""
+      },
+      {
+        "label": "Track order",
+        "href": "track-order.html"
+      }
+    ]
+  },
+  "search_placeholder": "Search ouds, oud, bakhoor…",
+  "usp": [
+    {
+      "title": "Free delivery over AED 150",
+      "sub": "AED 12 below · UAE only",
+      "icon": "truck"
+    },
+    {
+      "title": "Same-day in Dubai",
+      "sub": "Before 2:00 PM · +AED 25",
+      "icon": "clock"
+    },
+    {
+      "title": "Cash on delivery",
+      "sub": "Under AED 300 · AED 8 fee",
+      "icon": "cash"
+    },
+    {
+      "title": "Alcohol-free ouds",
+      "sub": "Oil based · batch numbered",
+      "icon": "leaf"
+    }
+  ],
+  "quiz_banner": {
+    "eyebrow": "Five questions · under a minute",
+    "heading": "Find the blend that suits you",
+    "body": "Tell us when you will wear it and what you are drawn to. We will point you at the closest thing we make.",
+    "cta_label": "Test your scent",
+    "cta_href": "quiz.html"
+  },
+  "collection_intros": {
+    "all": "Every blend in the shop: oud oils, Reserve, bakhoor, EDP sprays and gift sets.",
+    "oud-oils": "Alcohol-free perfume oil in 3 ml and 6 ml.",
+    "reserve": "The two blends that sit outside every discount the shop runs.",
+    "bakhoor": "Bakhoor for the home, in 20 g to 50 g tins.",
+    "edp": "Eau de parfum sprays, 50 ml, with declared note profiles.",
+    "gift-sets": "Wrapped sets, built from the house blends."
+  }
+}

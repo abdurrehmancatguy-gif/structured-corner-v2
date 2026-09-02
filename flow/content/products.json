@@ -1,0 +1,597 @@
+{
+  "be-mine": {
+    "name": "Be Mine",
+    "category": "edp",
+    "price": 85,
+    "stock": 8,
+    "gender": "Her",
+    "size": "50 ml",
+    "top": "Citrus, lemon",
+    "heart": "Rose, jasmine-like white florals",
+    "base": "Soft sweet tonka-like accord",
+    "ingredients": "Denatured Ethyl Alcohol, Aqua, Parfum, Linalool, Limonene, Benzyl Salicylate, Citronellol, Hexyl Cinnamal, Geraniol, Coumarin, Citral",
+    "barcode": "6297000197739",
+    "story": [
+      "A tender invitation to be remembered.",
+      "Bright citrus opens, then rose and white florals take their time.",
+      "A soft tonka warmth settles close to the skin.",
+      "Made for the hours when nobody else is in the room."
+    ],
+    "never_discount": false,
+    "published": true,
+    "order": 1
+  },
+  "vibe": {
+    "name": "Vibe",
+    "category": "edp",
+    "price": 85,
+    "stock": 10,
+    "gender": "Unisex",
+    "size": "50 ml",
+    "top": "Lemon, citrus",
+    "heart": "Rose, jasmine-like florals, clove spice",
+    "base": "Soft sweet tonka-like accord",
+    "ingredients": "Denatured Ethyl Alcohol, Aqua, Parfum, Citronellol, Linalool, Coumarin, Limonene, Amyl Cinnamyl Alcohol, Geraniol, Eugenol, Citral, Farnesol",
+    "barcode": "6297000197777",
+    "story": [
+      "Made for the rhythm of now.",
+      "Sparkling lemon meets rosy florals and a turn of clove.",
+      "The sweetness underneath keeps it moving.",
+      "Day into night, without changing a thing."
+    ],
+    "never_discount": false,
+    "published": true,
+    "order": 2
+  },
+  "pride-of-arabia": {
+    "name": "Pride of Arabia",
+    "category": "edp",
+    "price": 85,
+    "stock": 8,
+    "gender": "Unisex",
+    "size": "50 ml",
+    "top": "Citrus, green violet leaf",
+    "heart": "Violet, lily-of-the-valley, rose",
+    "base": "Soft powdery violet and woody undertone",
+    "ingredients": "Denatured Ethyl Alcohol, Aqua, Parfum, Linalool, Alpha-Isomethyl Ionone, Geraniol, Cinnamyl Alcohol, Limonene, Methyl-2-Octynoate, Hydroxy Citronellal, Citronellol, Citral",
+    "barcode": "6297000197814",
+    "story": [
+      "Inspired by the confidence and heritage of Arabia.",
+      "Citrus and green violet leaf open clean and unhurried.",
+      "Violet, muguet and rose gather in the middle.",
+      "A soft powdery wood carries it, quietly grand."
+    ],
+    "never_discount": false,
+    "published": true,
+    "order": 3
+  },
+  "suit-up": {
+    "name": "Suit Up",
+    "category": "edp",
+    "price": 85,
+    "stock": 4,
+    "gender": "Him",
+    "size": "50 ml",
+    "top": "Citrus, lemon",
+    "heart": "Rose, cinnamon, clove",
+    "base": "Sweet tonka-like warmth",
+    "ingredients": "Denatured Ethyl Alcohol, Aqua, Parfum, Linalool, Coumarin, Limonene, Citronellol, Eugenol, Cinnamal, Citral, Geraniol, Isoeugenol",
+    "barcode": "6297000197784",
+    "story": [
+      "The finishing touch before you step out.",
+      "Crisp citrus, then rose turned warm with cinnamon and clove.",
+      "Tonka underneath, polished rather than sweet.",
+      "For the entrance you only get to make once."
+    ],
+    "never_discount": false,
+    "published": true,
+    "order": 4
+  },
+  "the-writer": {
+    "name": "The Writer",
+    "category": "edp",
+    "price": 85,
+    "stock": 1,
+    "gender": "Him",
+    "size": "50 ml",
+    "top": "Lemon, citrus",
+    "heart": "Rose/floral, clove spice",
+    "base": "Warm balsamic amber",
+    "ingredients": "Denatured Ethyl Alcohol, Aqua, Parfum, Citronellol, Linalool, Geraniol, Farnesol, Limonene, Eugenol, Benzyl Benzoate, Benzyl Cinnamate, Isoeugenol, Citral",
+    "barcode": "6297000197807",
+    "story": [
+      "A fragrance for stories that linger after the last page.",
+      "Luminous lemon opens, then rose and clove spice.",
+      "Warm balsamic amber settles in and stays.",
+      "Thoughtful, unhurried, quietly magnetic."
+    ],
+    "never_discount": false,
+    "published": true,
+    "order": 5
+  },
+  "edward-the-black-prince": {
+    "name": "Edward the Black Prince",
+    "category": "edp",
+    "price": 85,
+    "stock": 6,
+    "gender": "Him",
+    "size": "50 ml",
+    "top": "Bright citrus",
+    "heart": "Aromatic floral/lavender, clove",
+    "base": "Warm spice",
+    "ingredients": "Denatured Ethyl Alcohol, Aqua, Parfum, Eugenol, Limonene, Linalool, Isoeugenol",
+    "barcode": "6297000197760",
+    "story": [
+      "Dark, noble and commanding.",
+      "Bright citrus cuts through aromatic lavender and clove.",
+      "Warm spice closes in behind it.",
+      "A trail that announces itself, then holds its tongue."
+    ],
+    "never_discount": false,
+    "published": true,
+    "order": 6
+  },
+  "amore": {
+    "name": "Amore",
+    "category": "edp",
+    "price": 85,
+    "stock": 13,
+    "gender": "Her",
+    "size": "50 ml",
+    "top": "Lemon, citrus",
+    "heart": "Aromatic floral/lavender, clove",
+    "base": "Warm spice",
+    "ingredients": "Denatured Ethyl Alcohol, Aqua, Parfum, Limonene, Linalool, Isoeugenol, Citral, Eugenol",
+    "barcode": "6297000197753",
+    "story": [
+      "A celebration of love in all its warmth.",
+      "Lemon-bright freshness opens the door.",
+      "Aromatic florals and clove fill the room.",
+      "It finishes softly spiced, and lingers longer than expected."
+    ],
+    "never_discount": false,
+    "published": true,
+    "order": 7
+  },
+  "soleil-frais": {
+    "name": "Soleil Frais",
+    "category": "edp",
+    "price": 85,
+    "stock": 3,
+    "gender": "Unisex",
+    "size": "50 ml",
+    "top": "Bright lemon, citrus",
+    "heart": "Clean citrus",
+    "base": null,
+    "ingredients": "Denatured Ethyl Alcohol, Aqua, Parfum, Limonene",
+    "barcode": "6297000197746",
+    "story": [
+      "Like cool sunlight on a clear morning.",
+      "Clean lemon and bright citrus, and very little else.",
+      "Nothing heavy, nothing asking for attention.",
+      "The one you reach for when the day is already warm."
+    ],
+    "never_discount": false,
+    "published": true,
+    "order": 8
+  },
+  "barcelona": {
+    "name": "Barcelona",
+    "category": "edp",
+    "price": 85,
+    "stock": 5,
+    "gender": "Unisex",
+    "size": "50 ml",
+    "top": "Citrus, lemon",
+    "heart": "Aromatic floral/lavender, rose",
+    "base": "Soft sweet tonka-like warmth",
+    "ingredients": "Denatured Ethyl Alcohol, Aqua, Parfum, Linalool, Coumarin, Limonene, Geraniol, Citral",
+    "barcode": "6297000197791",
+    "story": [
+      "A tribute to a city alive with colour, art and late-night energy.",
+      "Citrus opens sharp, the way the light does there.",
+      "Aromatic florals and rose fill the middle.",
+      "A gentle sweetness carries it into the evening."
+    ],
+    "never_discount": false,
+    "published": true,
+    "order": 9
+  },
+  "imperial-crown": {
+    "name": "Imperial Crown",
+    "category": "oud-oils",
+    "price": 75,
+    "sizes": [
+      {
+        "label": "3 ml",
+        "price": 45
+      },
+      {
+        "label": "6 ml",
+        "price": 75
+      }
+    ],
+    "stock": null,
+    "story": [],
+    "never_discount": false,
+    "published": true,
+    "order": 10
+  },
+  "dark-leather": {
+    "name": "Dark Leather",
+    "category": "oud-oils",
+    "price": 75,
+    "sizes": [
+      {
+        "label": "3 ml",
+        "price": 45
+      },
+      {
+        "label": "6 ml",
+        "price": 75
+      }
+    ],
+    "stock": null,
+    "story": [],
+    "never_discount": false,
+    "published": true,
+    "order": 11
+  },
+  "royal-amber": {
+    "name": "Royal Amber",
+    "category": "oud-oils",
+    "price": 75,
+    "sizes": [
+      {
+        "label": "3 ml",
+        "price": 45
+      },
+      {
+        "label": "6 ml",
+        "price": 75
+      }
+    ],
+    "stock": null,
+    "story": [],
+    "never_discount": false,
+    "published": true,
+    "order": 12
+  },
+  "golden-bloom": {
+    "name": "Golden Bloom",
+    "category": "oud-oils",
+    "price": 75,
+    "sizes": [
+      {
+        "label": "3 ml",
+        "price": 45
+      },
+      {
+        "label": "6 ml",
+        "price": 75
+      }
+    ],
+    "stock": null,
+    "story": [],
+    "never_discount": false,
+    "published": true,
+    "order": 13
+  },
+  "majestic-musk": {
+    "name": "Majestic Musk",
+    "category": "oud-oils",
+    "price": 75,
+    "sizes": [
+      {
+        "label": "3 ml",
+        "price": 45
+      },
+      {
+        "label": "6 ml",
+        "price": 75
+      }
+    ],
+    "stock": null,
+    "story": [],
+    "never_discount": false,
+    "published": true,
+    "order": 14
+  },
+  "musk-bloom": {
+    "name": "Musk Bloom",
+    "category": "oud-oils",
+    "price": 75,
+    "sizes": [
+      {
+        "label": "3 ml",
+        "price": 45
+      },
+      {
+        "label": "6 ml",
+        "price": 75
+      }
+    ],
+    "stock": null,
+    "story": [],
+    "never_discount": false,
+    "published": true,
+    "order": 15
+  },
+  "belle-aura": {
+    "name": "Belle Aura",
+    "category": "oud-oils",
+    "price": 75,
+    "sizes": [
+      {
+        "label": "3 ml",
+        "price": 45
+      },
+      {
+        "label": "6 ml",
+        "price": 75
+      }
+    ],
+    "stock": null,
+    "story": [],
+    "never_discount": false,
+    "published": true,
+    "order": 16
+  },
+  "magnolia-veil": {
+    "name": "Magnolia Veil",
+    "category": "oud-oils",
+    "price": 75,
+    "sizes": [
+      {
+        "label": "3 ml",
+        "price": 45
+      },
+      {
+        "label": "6 ml",
+        "price": 75
+      }
+    ],
+    "stock": null,
+    "story": [],
+    "never_discount": false,
+    "published": true,
+    "order": 17
+  },
+  "parisian-muse": {
+    "name": "Parisian Muse",
+    "category": "oud-oils",
+    "price": 75,
+    "sizes": [
+      {
+        "label": "3 ml",
+        "price": 45
+      },
+      {
+        "label": "6 ml",
+        "price": 75
+      }
+    ],
+    "stock": null,
+    "story": [],
+    "never_discount": false,
+    "published": true,
+    "order": 18
+  },
+  "velvet-spell": {
+    "name": "Velvet Spell",
+    "category": "oud-oils",
+    "price": 75,
+    "sizes": [
+      {
+        "label": "3 ml",
+        "price": 45
+      },
+      {
+        "label": "6 ml",
+        "price": 75
+      }
+    ],
+    "stock": null,
+    "story": [],
+    "never_discount": false,
+    "published": true,
+    "order": 19
+  },
+  "desert-breeze": {
+    "name": "Desert Breeze",
+    "category": "oud-oils",
+    "price": 75,
+    "sizes": [
+      {
+        "label": "3 ml",
+        "price": 45
+      },
+      {
+        "label": "6 ml",
+        "price": 75
+      }
+    ],
+    "stock": null,
+    "story": [],
+    "never_discount": false,
+    "published": true,
+    "order": 20
+  },
+  "seasonal-slot": {
+    "name": "Seasonal slot",
+    "category": "oud-oils",
+    "price": 75,
+    "sizes": [
+      {
+        "label": "3 ml",
+        "price": 45
+      },
+      {
+        "label": "6 ml",
+        "price": 75
+      }
+    ],
+    "stock": null,
+    "story": [],
+    "never_discount": false,
+    "published": false,
+    "order": 21
+  },
+  "majlis-oud": {
+    "name": "Majlis OUD",
+    "category": "reserve",
+    "price": 650,
+    "sizes": [
+      {
+        "label": "6 ml",
+        "price": 650
+      },
+      {
+        "label": "12 ml",
+        "price": 1295
+      }
+    ],
+    "stock": null,
+    "story": [],
+    "never_discount": true,
+    "published": true,
+    "order": 22
+  },
+  "platinum-musk-oud": {
+    "name": "Platinum Musk OUD",
+    "category": "reserve",
+    "price": 399,
+    "sizes": [
+      {
+        "label": "6 ml",
+        "price": 399
+      }
+    ],
+    "stock": null,
+    "story": [],
+    "never_discount": true,
+    "published": true,
+    "order": 23
+  },
+  "shay": {
+    "name": "Shay",
+    "category": "bakhoor",
+    "price": 50,
+    "size": "50 g",
+    "stock": null,
+    "story": [],
+    "never_discount": false,
+    "published": true,
+    "order": 24
+  },
+  "compodi": {
+    "name": "Compodi",
+    "category": "bakhoor",
+    "price": 50,
+    "size": "50 g",
+    "stock": null,
+    "story": [],
+    "never_discount": false,
+    "published": true,
+    "order": 25
+  },
+  "mattar": {
+    "name": "Mattar",
+    "category": "bakhoor",
+    "price": 35,
+    "size": "25 g",
+    "stock": null,
+    "story": [],
+    "never_discount": false,
+    "published": true,
+    "order": 26
+  },
+  "falah": {
+    "name": "Falah",
+    "category": "bakhoor",
+    "price": 50,
+    "size": "40 g",
+    "stock": null,
+    "story": [],
+    "never_discount": false,
+    "published": true,
+    "order": 27
+  },
+  "philippine": {
+    "name": "Philippine",
+    "category": "bakhoor",
+    "price": 35,
+    "size": "20 g",
+    "stock": null,
+    "story": [],
+    "never_discount": false,
+    "published": true,
+    "order": 28
+  },
+  "discovery-trio": {
+    "name": "Discovery Trio",
+    "category": "gift-sets",
+    "price": 129,
+    "contents": "3 × 3 ml",
+    "stock": null,
+    "story": [],
+    "never_discount": false,
+    "published": true,
+    "order": 29
+  },
+  "his-and-hers-duo": {
+    "name": "His & Hers Duo",
+    "category": "gift-sets",
+    "price": 149,
+    "contents": "2 × 6 ml",
+    "stock": null,
+    "story": [],
+    "never_discount": false,
+    "published": true,
+    "order": 30
+  },
+  "majlis-ritual-set": {
+    "name": "Majlis Ritual Set",
+    "category": "gift-sets",
+    "price": 129,
+    "contents": "6 ml + bakhoor",
+    "stock": null,
+    "story": [],
+    "never_discount": false,
+    "published": true,
+    "order": 31
+  },
+  "oud-lover-s-flight": {
+    "name": "Oud Lover’s Flight",
+    "category": "gift-sets",
+    "price": 199,
+    "contents": "3 × 6 ml",
+    "stock": null,
+    "story": [],
+    "never_discount": false,
+    "published": true,
+    "order": 32
+  },
+  "eid-royal-hamper": {
+    "name": "Eid Royal Hamper",
+    "category": "gift-sets",
+    "price": 299,
+    "contents": "2 × 6 ml + EDP + bakhoor",
+    "stock": null,
+    "story": [],
+    "never_discount": false,
+    "published": true,
+    "order": 33
+  },
+  "dubai-in-a-bottle": {
+    "name": "Dubai in a Bottle",
+    "category": "gift-sets",
+    "price": 79,
+    "contents": "3 ml + mini bakhoor",
+    "stock": null,
+    "story": [],
+    "never_discount": false,
+    "published": true,
+    "order": 34
+  }
+}

@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BGS Corner admin</title>
+<style>
+  :root{
+    --ink:#16181D; --body:#3A3F49; --mut:#616874; --faint:#8A909C;
+    --bg:#FBFBFC; --alt:#F2F3F5; --hair:#E3E5E9; --line:#D3D7DE;
+    --accent:#B02A37; --green:#1E6B4E; --r:4px;
+    --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--sans);font-size:14px;line-height:1.5;
+    color:var(--body);background:var(--bg)}
+  header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:16px;
+    padding:0 20px;height:60px;background:var(--bg);border-bottom:1px solid var(--hair)}
+  header b{color:var(--ink);font-size:15px;letter-spacing:-.01em}
+  header .sp{flex:1}
+  .layout{display:grid;grid-template-columns:230px 1fr;min-height:calc(100vh - 60px)}
+  nav{border-right:1px solid var(--hair);padding:16px 0;background:var(--alt)}
+  nav button{display:block;width:100%;text-align:left;padding:10px 20px;border:0;
+    background:none;font-family:inherit;font-size:13.5px;color:var(--body);cursor:pointer}
+  nav button:hover{color:var(--ink);background:#fff}
+  nav button.on{color:var(--ink);font-weight:600;background:#fff;
+    box-shadow:inset 3px 0 0 var(--ink)}
+  main{padding:24px 28px 80px;max-width:900px}
+  h1{font-size:20px;color:var(--ink);margin:0 0 4px;letter-spacing:-.02em}
+  .hint{color:var(--mut);font-size:12.5px;margin:0 0 20px}
+
+  .btn{font-family:inherit;font-size:13px;font-weight:600;border-radius:var(--r);
+    border:1px solid var(--line);background:#fff;color:var(--ink);
+    padding:0 14px;min-height:38px;cursor:pointer}
+  .btn:hover{border-color:var(--ink)}
+  .btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .btn.primary:hover{background:#000}
+  .btn.danger{color:var(--accent);border-color:var(--line)}
+  .btn.danger:hover{border-color:var(--accent)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  label.f{display:block;margin-bottom:14px}
+  label.f > span{display:block;font-size:11.5px;font-weight:600;letter-spacing:.03em;
+    text-transform:uppercase;color:var(--mut);margin-bottom:5px}
+  input[type=text],input[type=number],textarea,select{
+    width:100%;font-family:inherit;font-size:14px;color:var(--ink);background:#fff;
+    border:1px solid var(--line);border-radius:var(--r);padding:9px 11px;min-height:40px}
+  textarea{min-height:76px;resize:vertical;line-height:1.5}
+  input:focus,textarea:focus,select:focus{outline:2px solid var(--accent);
+    outline-offset:1px;border-color:var(--ink)}
+  label.bool{display:flex;align-items:center;gap:8px;margin-bottom:14px;
+    font-size:13.5px;color:var(--ink)}
+  label.bool input{width:16px;height:16px;min-height:0}
+
+  fieldset{border:1px solid var(--hair);border-radius:var(--r);padding:14px 16px;
+    margin:0 0 16px;background:#fff}
+  legend{font-size:11.5px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;
+    color:var(--mut);padding:0 6px}
+  .item{border:1px solid var(--hair);border-radius:var(--r);padding:12px 14px;
+    margin-bottom:10px;background:var(--alt)}
+  .item > .row:first-child{margin-bottom:8px}
+  .idx{font-family:var(--mono);font-size:11px;color:var(--faint)}
+
+  .list{display:grid;gap:6px;margin-bottom:20px}
+  .list a{display:flex;justify-content:space-between;gap:10px;align-items:center;
+    padding:10px 12px;border:1px solid var(--hair);border-radius:var(--r);
+    background:#fff;color:var(--ink);text-decoration:none;font-size:13.5px;cursor:pointer}
+  .list a:hover{border-color:var(--ink)}
+  .list .meta{color:var(--mut);font-size:12px;font-family:var(--mono)}
+  .tag{font-size:11px;font-family:var(--mono);color:var(--mut);
+    border:1px solid var(--hair);border-radius:99px;padding:2px 8px}
+  .tag.off{color:var(--accent);border-color:var(--accent)}
+
+  .savebar{position:fixed;left:230px;right:0;bottom:0;display:flex;align-items:center;
+    gap:12px;padding:12px 28px;background:rgba(251,251,252,.97);
+    border-top:1px solid var(--hair);backdrop-filter:blur(8px)}
+  .status{font-size:12.5px;color:var(--mut)}
+  .status.ok{color:var(--green)}
+  .status.err{color:var(--accent)}
+  .search{margin-bottom:14px}
+</style>
+</head><body>
+
+<header>
+  <b>BGS Corner admin</b>
+  <span class="tag">local only</span>
+  <span class="sp"></span>
+  <a class="btn" href="http://localhost:4310" target="_blank" rel="noopener">Open storefront</a>
+  <button class="btn" id="rebuild">Rebuild site</button>
+</header>
+
+<div class="layout">
+  <nav id="nav"></nav>
+  <main>
+    <div id="view"></div>
+  </main>
+</div>
+
+<div class="savebar">
+  <button class="btn primary" id="save">Save and rebuild</button>
+  <button class="btn" id="revert">Discard changes</button>
+  <span class="status" id="status">No changes</span>
+</div>
+
+<script>
+"use strict";
+var state = { id:null, data:null, clean:null, dirty:false, editing:null };
+
+var el = function (t, cls, txt) {
+  var n = document.createElement(t);
+  if (cls) n.className = cls;
+  if (txt != null) n.textContent = txt;
+  return n;
+};
+function setStatus(msg, kind) {
+  var s = document.getElementById("status");
+  s.textContent = msg; s.className = "status" + (kind ? " " + kind : "");
+}
+function markDirty() { state.dirty = true; setStatus("Unsaved changes"); }
+
+/* ---- label prettifier: keys are the schema, so make them readable ---- */
+function pretty(k) {
+  return String(k).replace(/_/g, " ")
+    .replace(/\bpercent\b/, "%").replace(/^\w/, function (c) { return c.toUpperCase(); });
+}
+var LONG = /story|body|ingredients|intro|sub|description|headline/;
+
+/* ---- recursive field renderer: whatever is in the JSON becomes editable ---- */
+function field(key, value, parent, path) {
+  /* boolean */
+  if (typeof value === "boolean") {
+    var lb = el("label", "bool");
+    var cb = el("input"); cb.type = "checkbox"; cb.checked = value;
+    cb.onchange = function () { parent[key] = cb.checked; markDirty(); };
+    lb.appendChild(cb); lb.appendChild(el("span", null, pretty(key)));
+    return lb;
+  }
+  /* number (null means "not recorded" and must stay null, not become 0) */
+  if (typeof value === "number" || (value === null && /stock|price|order/.test(key))) {
+    var l = el("label", "f"); l.appendChild(el("span", null, pretty(key)));
+    var i = el("input"); i.type = "number"; i.value = value === null ? "" : value;
+    i.placeholder = value === null ? "not recorded" : "";
+    i.oninput = function () { parent[key] = i.value === "" ? null : Number(i.value); markDirty(); };
+    l.appendChild(i); return l;
+  }
+  /* string */
+  if (typeof value === "string") {
+    var l2 = el("label", "f"); l2.appendChild(el("span", null, pretty(key)));
+    var inp = LONG.test(key) || value.length > 70 ? el("textarea") : el("input");
+    if (inp.tagName === "INPUT") inp.type = "text";
+    inp.value = value;
+    inp.oninput = function () { parent[key] = inp.value; markDirty(); };
+    l2.appendChild(inp); return l2;
+  }
+  /* array */
+  if (Array.isArray(value)) {
+    var fs = el("fieldset"); fs.appendChild(el("legend", null, pretty(key)));
+    var host = el("div");
+    function draw() {
+      host.innerHTML = "";
+      value.forEach(function (v, i) {
+        var wrap = el("div", "item");
+        var head = el("div", "row");
+        head.appendChild(el("span", "idx", "#" + (i + 1)));
+        head.appendChild(el("span", null, ""));
+        var sp = el("span"); sp.style.flex = "1"; head.appendChild(sp);
+        var up = el("button", "btn", "↑"); up.type = "button";
+        up.onclick = function () { if (i) { value.splice(i-1,0,value.splice(i,1)[0]); markDirty(); draw(); } };
+        var dn = el("button", "btn", "↓"); dn.type = "button";
+        dn.onclick = function () { if (i<value.length-1) { value.splice(i+1,0,value.splice(i,1)[0]); markDirty(); draw(); } };
+        var rm = el("button", "btn danger", "Remove"); rm.type = "button";
+        rm.onclick = function () { value.splice(i,1); markDirty(); draw(); };
+        head.appendChild(up); head.appendChild(dn); head.appendChild(rm);
+        wrap.appendChild(head);
+        if (v !== null && typeof v === "object") {
+          Object.keys(v).forEach(function (k2) { wrap.appendChild(field(k2, v[k2], v, path+"."+i)); });
+        } else {
+          wrap.appendChild(field(String(i), v, value, path+"."+i));
+        }
+        host.appendChild(wrap);
+      });
+      var add = el("button", "btn", "Add");
+      add.type = "button";
+      add.onclick = function () {
+        var last = value[value.length - 1];
+        if (last && typeof last === "object") {
+          var blank = {}; Object.keys(last).forEach(function (k3) {
+            blank[k3] = typeof last[k3] === "number" ? 0
+                      : typeof last[k3] === "boolean" ? false
+                      : Array.isArray(last[k3]) ? [] : "";
+          });
+          value.push(blank);
+        } else { value.push(""); }
+        markDirty(); draw();
+      };
+      host.appendChild(add);
+    }
+    draw(); fs.appendChild(host); return fs;
+  }
+  /* object */
+  if (value !== null && typeof value === "object") {
+    var fs2 = el("fieldset"); fs2.appendChild(el("legend", null, pretty(key)));
+    Object.keys(value).forEach(function (k4) {
+      fs2.appendChild(field(k4, value[k4], value, path+"."+k4));
+    });
+    return fs2;
+  }
+  /* null of unknown type: treat as free text so it is still editable */
+  var l3 = el("label", "f"); l3.appendChild(el("span", null, pretty(key) + " (empty)"));
+  var t3 = el("input"); t3.type = "text"; t3.value = "";
+  t3.oninput = function () { parent[key] = t3.value; markDirty(); };
+  l3.appendChild(t3); return l3;
+}
+
+/* ---- products get a list first, because 34 forms at once is unusable ---- */
+function renderProducts(view) {
+  if (state.editing) {
+    var p = state.data[state.editing];
+    var back = el("button", "btn", "← All products"); back.type = "button";
+    back.onclick = function () { state.editing = null; render(); };
+    view.appendChild(back);
+    view.appendChild(el("h1", null, p.name || state.editing));
+    view.appendChild(el("p", "hint", "Document id: " + state.editing +
+      " · this is the product's URL and does not change when you rename it."));
+    Object.keys(p).forEach(function (k) { view.appendChild(field(k, p[k], p, k)); });
+    var del = el("button", "btn danger", "Delete this product"); del.type = "button";
+    del.onclick = function () {
+      if (!confirm("Delete " + (p.name || state.editing) + "? Save is still required to apply it.")) return;
+      delete state.data[state.editing]; state.editing = null; markDirty(); render();
+    };
+    view.appendChild(del);
+    return;
+  }
+  view.appendChild(el("h1", null, "Products"));
+  view.appendChild(el("p", "hint", Object.keys(state.data).length +
+    " documents. Unpublished ones stay out of the site but keep their data."));
+
+  var q = el("input", "search"); q.type = "text"; q.placeholder = "Filter by name or category…";
+  view.appendChild(q);
+  var list = el("div", "list"); view.appendChild(list);
+
+  function draw() {
+    list.innerHTML = "";
+    var term = q.value.toLowerCase();
+    Object.keys(state.data)
+      .sort(function (a, b) { return (state.data[a].order||0) - (state.data[b].order||0); })
+      .filter(function (k) {
+        var p = state.data[k];
+        return !term || (p.name + " " + p.category + " " + k).toLowerCase().indexOf(term) > -1;
+      })
+      .forEach(function (k) {
+        var p = state.data[k];
+        var a = el("a");
+        var left = el("span", null, p.name || k);
+        var right = el("span", "row");
+        right.appendChild(el("span", "meta", "AED " + p.price));
+        right.appendChild(el("span", "tag", p.category));
+        if (p.published === false) right.appendChild(el("span", "tag off", "unpublished"));
+        a.appendChild(left); a.appendChild(right);
+        a.onclick = function () { state.editing = k; render(); };
+        list.appendChild(a);
+      });
+  }
+  q.oninput = draw; draw();
+
+  var add = el("button", "btn", "Add a product"); add.type = "button";
+  add.onclick = function () {
+    var name = prompt("Product name");
+    if (!name) return;
+    var id = name.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    if (state.data[id]) { alert("A product with that id already exists."); return; }
+    var maxOrder = Math.max.apply(null, [0].concat(Object.keys(state.data).map(function (k) {
+      return state.data[k].order || 0; })));
+    state.data[id] = { name:name, category:"oud-oils", price:0, stock:null,
+                       story:[], never_discount:false, published:false, order:maxOrder + 1 };
+    state.editing = id; markDirty(); render();
+  };
+  view.appendChild(add);
+}
+
+function render() {
+  var view = document.getElementById("view");
+  view.innerHTML = "";
+  if (!state.data) { view.appendChild(el("p", "hint", "Loading…")); return; }
+  if (state.id === "products") return renderProducts(view);
+
+  var labels = { settings:"Store settings", navigation:"Navigation and footer",
+                 copy:"Site copy", home:"Home page" };
+  view.appendChild(el("h1", null, labels[state.id] || state.id));
+  view.appendChild(el("p", "hint", "Every field here is written straight into the site on save."));
+  Object.keys(state.data).forEach(function (k) {
+    view.appendChild(field(k, state.data[k], state.data, k));
+  });
+}
+
+function load(id) {
+  state.id = id; state.editing = null; state.data = null;
+  document.querySelectorAll("#nav button").forEach(function (b) {
+    b.classList.toggle("on", b.dataset.id === id);
+  });
+  render();
+  fetch("/api/content/" + id).then(function (r) { return r.json(); }).then(function (d) {
+    state.data = d; state.clean = JSON.stringify(d); state.dirty = false;
+    setStatus("No changes"); render();
+  });
+}
+
+document.getElementById("save").onclick = function () {
+  if (!state.data) return;
+  setStatus("Saving…");
+  fetch("/api/content/" + state.id, {
+    method: "PUT", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(state.data)
+  }).then(function (r) { return r.json(); }).then(function (res) {
+    if (res.error) return setStatus("Not saved: " + res.error, "err");
+    state.clean = JSON.stringify(state.data); state.dirty = false;
+    setStatus(res.built ? "Saved and rebuilt. Reload the storefront to see it."
+                        : "Saved, but the build failed: " + res.output, res.built ? "ok" : "err");
+  }).catch(function (e) { setStatus("Not saved: " + e.message, "err"); });
+};
+
+document.getElementById("revert").onclick = function () {
+  if (!state.clean) return;
+  state.data = JSON.parse(state.clean); state.dirty = false;
+  state.editing = null; setStatus("Changes discarded"); render();
+};
+
+document.getElementById("rebuild").onclick = function () {
+  setStatus("Rebuilding…");
+  fetch("/api/build", { method: "POST" }).then(function (r) { return r.json(); })
+    .then(function (res) { setStatus(res.built ? "Rebuilt." : "Build failed: " + res.output,
+                                     res.built ? "ok" : "err"); });
+};
+
+window.addEventListener("beforeunload", function (e) {
+  if (state.dirty) { e.preventDefault(); e.returnValue = ""; }
+});
+
+fetch("/api/collections").then(function (r) { return r.json(); }).then(function (d) {
+  var nav = document.getElementById("nav");
+  d.collections.forEach(function (c) {
+    var b = el("button", null, c.label);
+    b.type = "button"; b.dataset.id = c.id;
+    b.onclick = function () {
+      if (state.dirty && !confirm("You have unsaved changes. Leave them?")) return;
+      load(c.id);
+    };
+    nav.appendChild(b);
+  });
+  load("products");
+});
+</script>
+</body></html>

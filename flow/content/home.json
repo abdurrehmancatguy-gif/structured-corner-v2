@@ -1,0 +1,78 @@
+{
+  "hero_slides": [
+    {
+      "eyebrow": "Blended in Dubai · alcohol-free ouds",
+      "headline": "Find your scent.",
+      "body": "Eleven house ouds in 3 ml and 6 ml, Reserve oud, bakhoor and EDP sprays.",
+      "primary": {
+        "label": "Shop ouds",
+        "href": "collection.html"
+      },
+      "secondary": {
+        "label": "Build a gift box",
+        "href": "gift-box.html"
+      }
+    },
+    {
+      "eyebrow": "Order by 2:00 PM",
+      "headline": "Delivered today\nin Dubai.",
+      "body": "Same-day across Dubai for AED 25. Standard delivery is free over AED 150.",
+      "primary": {
+        "label": "Shop ready today",
+        "href": "collection.html?cat=oud-oils"
+      },
+      "secondary": {
+        "label": "Delivery info",
+        "href": "track-order.html"
+      }
+    },
+    {
+      "eyebrow": "Start here",
+      "headline": "Discovery Trio,\nAED 129.",
+      "body": "Three 3 ml ouds. What you spend comes back as credit on your first full bottle.",
+      "primary": {
+        "label": "Choose three",
+        "href": "gift-box.html"
+      },
+      "secondary": {
+        "label": "See all sets",
+        "href": "gift-box.html"
+      }
+    },
+    {
+      "eyebrow": "Gifting",
+      "headline": "Three scents,\none wrapped box.",
+      "body": "Add a handwritten card and a recorded message. Prices never show on a gift receipt.",
+      "primary": {
+        "label": "Build a gift box",
+        "href": "gift-box.html"
+      },
+      "secondary": {
+        "label": "Corporate gifting",
+        "href": "corporate.html"
+      }
+    },
+    {
+      "eyebrow": "Reserve",
+      "headline": "Never\ndiscounted.",
+      "body": "Majlis OUD and Platinum Musk sit outside every discount the shop runs.",
+      "primary": {
+        "label": "See Reserve",
+        "href": "collection.html?cat=reserve"
+      },
+      "secondary": {
+        "label": "Our story",
+        "href": "index.html"
+      }
+    }
+  ],
+  "sections": {
+    "house_ouds": "House ouds",
+    "reserve": "Reserve",
+    "gift_sets": "Gift sets",
+    "scent_family": "Shop by scent family",
+    "bakhoor": "Bakhoor & home",
+    "edp": "EDP sprays",
+    "delivered_today": "Delivered today"
+  }
+}

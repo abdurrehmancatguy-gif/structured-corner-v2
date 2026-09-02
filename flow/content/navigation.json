@@ -1,0 +1,177 @@
+{
+  "main": [
+    {
+      "label": "Oud Oils",
+      "href": "collection.html"
+    },
+    {
+      "label": "Reserve",
+      "href": "collection.html"
+    },
+    {
+      "label": "Bakhoor",
+      "href": "collection.html"
+    },
+    {
+      "label": "EDP Sprays",
+      "href": "collection.html"
+    },
+    {
+      "label": "Gift Sets",
+      "href": "gift-box.html"
+    },
+    {
+      "label": "Discovery",
+      "href": "collection.html"
+    },
+    {
+      "label": "Shop by Occasion",
+      "href": "collection.html"
+    },
+    {
+      "label": "Corporate Gifting",
+      "href": "corporate.html"
+    }
+  ],
+  "tabs": [
+    {
+      "label": "Home",
+      "href": "index.html"
+    },
+    {
+      "label": "Shop",
+      "href": "collection.html"
+    },
+    {
+      "label": "Gifts",
+      "href": "gift-box.html"
+    },
+    {
+      "label": "Bag",
+      "href": "cart.html"
+    },
+    {
+      "label": "Account",
+      "href": "account.html"
+    }
+  ],
+  "categories": [
+    {
+      "label": "Oud Oils",
+      "href": "collection.html?cat=oud-oils",
+      "swatch": "c_oil",
+      "photo": "oud"
+    },
+    {
+      "label": "Reserve",
+      "href": "collection.html?cat=reserve",
+      "swatch": "c_res",
+      "photo": "res"
+    },
+    {
+      "label": "Bakhoor",
+      "href": "collection.html?cat=bakhoor",
+      "swatch": "c_bak",
+      "photo": "bak"
+    },
+    {
+      "label": "EDP Sprays",
+      "href": "collection.html?cat=edp",
+      "swatch": "c_edp",
+      "photo": "musk"
+    },
+    {
+      "label": "Gift Sets",
+      "href": "gift-box.html",
+      "swatch": "c_gift",
+      "photo": "floral"
+    },
+    {
+      "label": "Discovery",
+      "href": "collection.html?cat=discovery",
+      "swatch": "c_disc",
+      "photo": "fresh"
+    },
+    {
+      "label": "Shop by Occasion",
+      "href": "collection.html?cat=occasion",
+      "swatch": "c_occ",
+      "photo": "amber"
+    },
+    {
+      "label": "Corporate Gifting",
+      "href": "corporate.html",
+      "swatch": "c_corp",
+      "photo": "sweet"
+    }
+  ],
+  "footer": [
+    {
+      "heading": "Shop",
+      "links": [
+        {
+          "label": "Oud Oils",
+          "href": "collection.html?cat=oud-oils"
+        },
+        {
+          "label": "Reserve",
+          "href": "collection.html?cat=reserve"
+        },
+        {
+          "label": "Bakhoor",
+          "href": "collection.html?cat=bakhoor"
+        },
+        {
+          "label": "EDP sprays",
+          "href": "collection.html?cat=edp"
+        },
+        {
+          "label": "Gift sets",
+          "href": "gift-box.html"
+        }
+      ]
+    },
+    {
+      "heading": "Help",
+      "links": [
+        {
+          "label": "Delivery & returns",
+          "href": "product.html?p=royal-amber&tab=delivery"
+        },
+        {
+          "label": "How to apply oud",
+          "href": "product.html?p=royal-amber&tab=apply"
+        },
+        {
+          "label": "Track your order",
+          "href": "track-order.html"
+        },
+        {
+          "label": "FAQ",
+          "href": ""
+        }
+      ]
+    },
+    {
+      "heading": "BGS Corner",
+      "links": [
+        {
+          "label": "Your account",
+          "href": "account.html"
+        },
+        {
+          "label": "Our story",
+          "href": ""
+        },
+        {
+          "label": "Corporate gifting",
+          "href": "corporate.html"
+        },
+        {
+          "label": "Wholesale",
+          "href": "corporate.html"
+        }
+      ]
+    }
+  ]
+}

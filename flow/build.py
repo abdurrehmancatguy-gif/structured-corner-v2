@@ -29,6 +29,33 @@ P = {
  "c_corp":'<rect x="3" y="8" width="18" height="12" rx="1.5"/><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/>', "left":'<path d="M15 5l-7 7 7 7"/>', "right":'<path d="M9 5l7 7-7 7"/>', "check":'<path d="M5 12l5 5L19 7"/>',
 }
 def sv(k, w=18, s=1.6): return I(P[k], w, s)
+
+# ---------------------------------------------------------------- content
+# Everything editable lives in content/ as collections of documents, shaped so
+# a Firestore collection can replace the file later without touching anything
+# downstream: load_content() is the only thing that knows where they come from.
+CONTENT_DIR = pathlib.Path("content")
+
+def load_content():
+    out = {}
+    for f in ("settings", "navigation", "copy", "home", "products"):
+        out[f] = json.loads((CONTENT_DIR / (f + ".json")).read_text())
+    return out
+
+C = load_content()
+SETTINGS = C["settings"]["store"]
+NAVC     = C["navigation"]
+COPY     = C["copy"]
+HOME     = C["home"]
+PRODUCTS = C["products"]
+
+def published(cat=None):
+    """Documents in display order, optionally one category."""
+    rows = [dict(p, id=k) for k, p in PRODUCTS.items() if p.get("published", True)]
+    if cat:
+        rows = [r for r in rows if r.get("category") == cat]
+    return sorted(rows, key=lambda r: r.get("order", 0))
+
 ON = ' class="on"'
 def A(l, h, on):
     return '<a href="%s"%s>%s</a>' % (h, ON if l == on else "", l)
@@ -41,12 +68,10 @@ def slot(label):
     """A field with no value in any of the three sources."""
     return '<span class="slot">%s</span>' % label
 
-NAV = [("Oud Oils","collection.html"),("Reserve","collection.html"),("Bakhoor","collection.html"),
-       ("EDP Sprays","collection.html"),("Gift Sets","gift-box.html"),("Discovery","collection.html"),
-       ("Shop by Occasion","collection.html"),("Corporate Gifting","corporate.html")]
-TABS = [("Home","index.html"),("Shop","collection.html"),("Gifts","gift-box.html"),("Bag","cart.html"),("Account","account.html")]
+NAV = [(n["label"], n["href"]) for n in NAVC["main"]]
+TABS = [(n["label"], n["href"]) for n in NAVC["tabs"]]
 
-CATS = [('Oud Oils', 'collection.html?cat=oud-oils', 'c_oil', 'oud'), ('Reserve', 'collection.html?cat=reserve', 'c_res', 'res'), ('Bakhoor', 'collection.html?cat=bakhoor', 'c_bak', 'bak'), ('EDP Sprays', 'collection.html?cat=edp', 'c_edp', 'musk'), ('Gift Sets', 'gift-box.html', 'c_gift', 'floral'), ('Discovery', 'collection.html?cat=discovery', 'c_disc', 'fresh'), ('Shop by Occasion', 'collection.html?cat=occasion', 'c_occ', 'amber'), ('Corporate Gifting', 'corporate.html', 'c_corp', 'sweet')]
+CATS = [(c["label"], c["href"], c["swatch"], c["photo"]) for c in NAVC["categories"]]
 def catstrip():
     return ('<div class="catstrip"><div class="wrap"><div class="cs">' + "".join(
         '<a class="c-{3}" href="{0}"><span class="circle">{1}</span><span>{2}</span></a>'.format(h, sv(ic, 30, 1.5), n, k)
@@ -107,7 +132,7 @@ SETS = [("Discovery Trio","3 &times; 3 ml","129"),("His &amp; Hers Duo","2 &time
         ("Majlis Ritual Set","6 ml + bakhoor","129"),("Oud Lover&rsquo;s Flight","3 &times; 6 ml","199"),
         ("Eid Royal Hamper","2 &times; 6 ml + EDP + bakhoor","299"),("Dubai in a Bottle","3 ml + mini bakhoor","79")]
 
-def card(name, meta, price, sizes=None, halo=False, notes=None, barcode=None, low=None):
+def card(name, meta, price, sizes=None, halo=False, notes=None, barcode=None, low=None, pid=None):
     b = '<span class="badge res">Reserve</span>' if halo else ''
     if low: b = '<span class="badge low">%s left</span>' % low
     sz = ''
@@ -124,99 +149,101 @@ def card(name, meta, price, sizes=None, halo=False, notes=None, barcode=None, lo
   <span class="rev">%s</span>
   %s<div class="pr"><b>AED %s</b></div>%s%s
   <span class="btn sm solid" style="margin-top:4px">Add to bag</span></div></a>""" % (
-    slug(name), b, sv("heart",15), meta, name, nt, slot("family"), slot("tone"),
+    (pid or slug(name)), b, sv("heart",15), meta, name, nt, slot("family"), slot("tone"),
     slot("no reviews yet"), sz, price, hl, bc)
 
-def oudoil_cards(n=None):
-    return "".join(card(nm, "Oud oil &middot; 3 ml / 6 ml", "75", sizes=["3 ml &middot; 45","6 ml &middot; 75"])
-                   for nm in ATTARS[:n])
-def reserve_cards():
-    return "".join(card(n, "Reserve &middot; %s" % z, p, halo=True) for n, z, p in OUD)
-def bakhoor_cards(n=None):
-    return "".join(card(x, "Bakhoor &middot; %s" % g, p) for x, g, p in BAKHOOR[:n])
-def edp_cards(n=None):
+def money(n):
+    """Prices carry a thousands separator: AED 1,295 not AED 1295."""
+    return "{:,}".format(int(n))
+
+def _meta(pr):
+    """The one place a product's meta line is composed, so the admin can change
+       a name, size or gender and every card follows."""
+    c = pr["category"]
+    if c == "edp":       return "EDP spray &middot; %s &middot; %s" % (pr.get("size","50 ml"), pr.get("gender",""))
+    if c == "oud-oils":  return "Oud oil &middot; " + " / ".join(z["label"] for z in pr.get("sizes", []))
+    if c == "reserve":   return "Reserve &middot; " + (pr.get("sizes") or [{"label":""}])[0]["label"]
+    if c == "bakhoor":   return "Bakhoor &middot; %s" % pr.get("size","")
+    if c == "gift-sets": return "Gift set &middot; %s" % pr.get("contents","")
+    return ""
+
+def _cards(cat, n=None):
     out = []
-    for e in EDP[:n]:
-        low = e["stock"] <= 5
-        out.append(card(e["name"], "EDP spray &middot; 50 ml &middot; " + e["gender"],
-                        str(e["price"]),
-                        notes=e["top"] + " &middot; " + e["heart"],
-                        barcode=e["sku"], low=(e["stock"] if low else None)))
+    for pr in published(cat)[:n]:
+        sizes = ["%s &middot; %s" % (z["label"], money(z["price"])) for z in pr.get("sizes", [])] or None
+        stock = pr.get("stock")
+        notes = None
+        if pr.get("top") or pr.get("heart"):
+            notes = " &middot; ".join(x for x in (pr.get("top"), pr.get("heart")) if x)
+        out.append(card(pr["name"], _meta(pr), money(pr["price"]), sizes=sizes, pid=pr["id"],
+                        halo=pr.get("never_discount", False), notes=notes,
+                        barcode=pr.get("barcode") or None,
+                        low=(stock if isinstance(stock, int) and stock <= 5 else None)))
     return "".join(out)
 
-def set_cards():
-    return "".join(card(n, "Gift set &middot; %s" % c, p) for n, c, p in SETS)
+def oudoil_cards(n=None):  return _cards("oud-oils", n)
+def reserve_cards(n=None): return _cards("reserve", n)
+def bakhoor_cards(n=None): return _cards("bakhoor", n)
+def edp_cards(n=None):     return _cards("edp", n)
+def set_cards(n=None):     return _cards("gift-sets", n)
+
+
+def usp_strip():
+    """The four promises under the hero, from content/copy.json."""
+    return "".join(
+        '<div>%s<div><b>%s</b><span>%s</span></div></div>'
+        % (sv(u.get("icon", "leaf"), 20), u["title"], u["sub"])
+        for u in COPY["usp"])
+
+def hero_slides():
+    """Each slide is a document: eyebrow, headline, body and up to two CTAs.
+       A newline in the headline becomes a line break, so the admin can control
+       where it wraps without knowing any HTML."""
+    out = []
+    for i, sl in enumerate(HOME["hero_slides"]):
+        cta = ""
+        if sl.get("primary"):
+            cta += '<a class="btn gold" href="%s">%s</a>' % (sl["primary"]["href"], sl["primary"]["label"])
+        if sl.get("secondary"):
+            cta += '<a class="btn ghost" href="%s">%s</a>' % (sl["secondary"]["href"], sl["secondary"]["label"])
+        out.append(
+            '<div class="over slide%s" data-slide><div class="wrap"><div class="box">'
+            '<span class="eyebrow gold">%s</span>'
+            '<h1>%s</h1>'
+            '<p>%s</p>'
+            '<div style="display:flex;gap:10px;flex-wrap:wrap">%s</div>'
+            '</div></div></div>'
+            % (" on" if i == 0 else "", sl.get("eyebrow", ""),
+               sl.get("headline", "").replace("\n", "<br>"), sl.get("body", ""), cta))
+    return "".join(out)
+
+def hero_dots():
+    return "".join('<i%s data-dot="%d"></i>' % (' class="on"' if i == 0 else "", i)
+                   for i in range(len(HOME["hero_slides"])))
 
 # ---------------------------------------------------------------- HOME
 home = """
 <div class="hero" data-carousel>
-  <div class="heroimg"><span class="none corner"><b data-slideno>1</b>/5</span></div>
-  <div class="over slide on" data-slide><div class="wrap"><div class="box">
-    <span class="eyebrow gold">Blended in Dubai &middot; alcohol-free ouds</span>
-    <h1>Find your scent.</h1>
-    <p>Eleven house ouds in 3 ml and 6 ml, Reserve oud, bakhoor and EDP sprays.</p>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <a class="btn gold" href="collection.html">Shop ouds</a>
-      <a class="btn ghost" href="gift-box.html">Build a gift box</a>
-    </div>
-  </div></div></div>
-  <div class="over slide" data-slide><div class="wrap"><div class="box">
-    <span class="eyebrow gold">Order by 2:00 PM</span>
-    <h1>Delivered today<br>in Dubai.</h1>
-    <p>Same-day across Dubai for AED 25. Standard delivery is free over AED 150.</p>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <a class="btn gold" href="collection.html?cat=oud-oils">Shop ready today</a>
-      <a class="btn ghost" href="track-order.html">Delivery info</a>
-    </div>
-  </div></div></div>
-  <div class="over slide" data-slide><div class="wrap"><div class="box">
-    <span class="eyebrow gold">Start here</span>
-    <h1>Discovery Trio<br>, AED 129.</h1>
-    <p>Three 3 ml ouds. What you spend comes back as credit on your first full bottle.</p>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <a class="btn gold" href="gift-box.html">Choose three</a>
-      <a class="btn ghost" href="gift-box.html">See all sets</a>
-    </div>
-  </div></div></div>
-  <div class="over slide" data-slide><div class="wrap"><div class="box">
-    <span class="eyebrow gold">Gifting</span>
-    <h1>Three scents,<br>one wrapped box.</h1>
-    <p>Add a handwritten card and a recorded message. Prices never show on a gift receipt.</p>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <a class="btn gold" href="gift-box.html">Build a gift box</a>
-      <a class="btn ghost" href="corporate.html">Corporate gifting</a>
-    </div>
-  </div></div></div>
-  <div class="over slide" data-slide><div class="wrap"><div class="box">
-    <span class="eyebrow gold">Reserve</span>
-    <h1>Never<br>discounted.</h1>
-    <p>Majlis OUD and Platinum Musk sit outside every discount the shop runs.</p>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <a class="btn gold" href="collection.html?cat=reserve">See Reserve</a>
-      <a class="btn ghost" href="index.html">Our story</a>
-    </div>
-  </div></div></div>
+  <div class="heroimg"><span class="none corner"><b data-slideno>1</b>/%(hero_n)s</span></div>
+  %(hero)s
   <button class="arrow prev" data-prev aria-label="Previous slide">%(prev)s</button>
   <button class="arrow next" data-next aria-label="Next slide">%(next)s</button>
-  <div class="dots" data-dots><i class="on" data-dot="0"></i><i data-dot="1"></i><i data-dot="2"></i><i data-dot="3"></i><i data-dot="4"></i></div>
+  <div class="dots" data-dots>%(hero_dots)s</div>
 </div>
 
 %(catstrip)s
 <div class="usp">
-  <div>%(truck)s<div><b>Free delivery over AED 150</b><span>AED 12 below &middot; UAE only</span></div></div>
-  <div>%(clock)s<div><b>Same-day in Dubai</b><span>Before 2:00 PM &middot; +AED 25</span></div></div>
-  <div>%(cash)s<div><b>Cash on delivery</b><span>Under AED 300 &middot; AED 8 fee</span></div></div>
-  <div>%(leaf)s<div><b>Alcohol-free ouds</b><span>Oil based &middot; batch numbered</span></div></div>
+  %(usp)s
 </div>
 
 <section style="padding-top:26px;padding-bottom:0"><div class="wrap">
   <div class="quizband">
     <div>
-      <span class="eyebrow gold">Five questions &middot; under a minute</span>
-      <h3>Find the blend that suits you</h3>
-      <p>Tell us when you will wear it and what you are drawn to. We will point you at the closest thing we make.</p>
+      <span class="eyebrow gold">%(qb_eyebrow)s</span>
+      <h3>%(qb_heading)s</h3>
+      <p>%(qb_body)s</p>
     </div>
-    <a class="btn gold" href="quiz.html">Test your scent</a>
+    <a class="btn gold" href="%(qb_href)s">%(qb_cta)s</a>
   </div>
 </div></section>
 
@@ -273,10 +300,13 @@ home = """
   <div class="sec-h"><h2>EDP sprays</h2><a href="collection.html">All 9 &rarr;</a></div>
   <div class="grid g3">%(edp)s</div>
 </div></section>
-""" % dict(catstrip=catstrip(), truck=sv("truck",20), clock=sv("clock",20), cash=sv("cash",20), leaf=sv("leaf",20),
+""" % dict(catstrip=catstrip(), usp=usp_strip(),
+           hero=hero_slides(), hero_dots=hero_dots(), hero_n=len(HOME["hero_slides"]),
+           qb_eyebrow=COPY["quiz_banner"]["eyebrow"], qb_heading=COPY["quiz_banner"]["heading"],
+           qb_body=COPY["quiz_banner"]["body"], qb_cta=COPY["quiz_banner"]["cta_label"],
+           qb_href=COPY["quiz_banner"]["cta_href"],
            prev=sv("left",22,2), next=sv("right",22,2),
-           attars=oudoil_cards(4), oud=reserve_cards(), sets=set_cards()[:0] or "".join(
-               card(n, "Gift set &middot; %s" % c, p) for n, c, p in SETS),
+           attars=oudoil_cards(4), oud=reserve_cards(), sets=set_cards(),
            bakhoor=bakhoor_cards(4), edp=edp_cards(6), ct=slot("count"))
 
 # ---------------------------------------------------------------- COLLECTION
@@ -786,25 +816,32 @@ def unent(t):
     return _h.unescape(_h.unescape(str(t)))
 
 def emit_catalogue():
+    """The client-side catalogue is a projection of the same content documents
+       the pages are built from, so a price edited in the admin moves the card,
+       the PDP and the cart together."""
+    CRUMB = {"oud-oils": "Oud oils", "reserve": "Reserve", "bakhoor": "Bakhoor",
+             "edp": "EDP sprays", "gift-sets": "Gift sets"}
     cat = {}
-    for e in EDP:
-        cat[slug(e["name"])] = {
-            "name": e["name"], "meta": "EDP spray &middot; 50 ml &middot; " + e["gender"],
-            "price": str(e["price"]), "crumb": "EDP sprays", "story": e["story"],
-            "top": e["top"], "heart": e["heart"], "base": e["base"],
-            "ing": e["ing"], "sku": e["sku"], "stock": e["stock"],
+    for pr in published():
+        doc = {
+            "name": pr["name"], "meta": _meta(pr), "price": money(pr["price"]),
+            "pn": int(pr["price"]), "cat": pr["category"],
+            "crumb": CRUMB.get(pr["category"], ""),
         }
-    for nm in ATTARS:
-        cat[slug(nm)] = {"name": nm, "meta": "Oud oil &middot; 3 ml / 6 ml", "price": "75",
-                         "crumb": "Oud oils", "sizes": ["3 ml &middot; AED 45", "6 ml &middot; AED 75"]}
-    cat[slug("Majlis OUD")] = {"name": "Majlis OUD", "meta": "Reserve &middot; 6 ml", "price": "650",
-        "crumb": "Reserve", "halo": True, "sizes": ["6 ml &middot; AED 650", "12 ml &middot; AED 1,295"]}
-    cat[slug("Platinum Musk OUD")] = {"name": "Platinum Musk OUD", "meta": "Reserve &middot; 6 ml",
-        "price": "399", "crumb": "Reserve", "halo": True}
-    for n, g, pr in BAKHOOR:
-        cat[slug(n)] = {"name": n, "meta": "Bakhoor &middot; " + g, "price": str(pr), "crumb": "Bakhoor"}
-    for n, c, pr in SETS:
-        cat[slug(n)] = {"name": n, "meta": "Gift set &middot; " + c, "price": str(pr), "crumb": "Gift sets"}
+        if pr.get("sizes"):
+            doc["sizes"] = ["%s &middot; AED %s" % (z["label"], money(z["price"]))
+                            for z in pr["sizes"]]
+        for k_src, k_out in (("top","top"), ("heart","heart"), ("base","base"),
+                             ("ingredients","ing"), ("barcode","sku"),
+                             ("gender","gender"), ("story","story")):
+            if pr.get(k_src):
+                doc[k_out] = pr[k_src]
+        if isinstance(pr.get("stock"), int):
+            doc["stock"] = pr["stock"]
+        if pr.get("never_discount"):
+            doc["halo"] = True
+        cat[pr["id"]] = doc
+
     def _clean(o):
         if isinstance(o, dict):  return {k: _clean(v) for k, v in o.items()}
         if isinstance(o, list):  return [_clean(v) for v in o]

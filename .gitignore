@@ -39,3 +39,4 @@ coverage/
 # deploy
 .vercel
 .netlify
+flow/content/.backups/
