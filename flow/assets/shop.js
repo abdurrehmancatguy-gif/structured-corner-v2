@@ -201,6 +201,23 @@
         }
       }
 
+      /* the gallery shows this product's photographs; a slide with no image
+         keeps its placeholder rather than repeating one that is not its own */
+      var imgs = pr.images || [];
+      document.querySelectorAll("[data-gs]").forEach(function (slide, i) {
+        if (!imgs[i]) return;
+        slide.innerHTML = '<img src="assets/img/' + imgs[i] + '" alt="' +
+          String(pr.name).replace(/"/g, "&quot;") + '" loading="' + (i ? "lazy" : "eager") +
+          '" decoding="async">';
+      });
+      document.querySelectorAll("[data-gt]").forEach(function (t, i) {
+        if (!imgs[i]) return;
+        t.innerHTML = '<img src="assets/img/' + imgs[i].replace(".jpg", "-card.jpg") +
+          '" alt="" loading="lazy" decoding="async">';
+      });
+      var gcount = document.querySelector(".galcount");
+      if (gcount && imgs.length) gcount.innerHTML = '<b data-gnum>1</b>/' + imgs.length;
+
       /* availability + batch rows */
       var rows = document.querySelectorAll(".buy .kv div");
       rows.forEach(function (r) {

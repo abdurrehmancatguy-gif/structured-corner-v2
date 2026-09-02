@@ -19,7 +19,13 @@
     ],
     "never_discount": false,
     "published": true,
-    "order": 1
+    "order": 1,
+    "images": [
+      "be-mine-1.jpg",
+      "be-mine-2.jpg",
+      "be-mine-3.jpg",
+      "be-mine-4.jpg"
+    ]
   },
   "vibe": {
     "name": "Vibe",
@@ -41,7 +47,13 @@
     ],
     "never_discount": false,
     "published": true,
-    "order": 2
+    "order": 2,
+    "images": [
+      "vibe-1.jpg",
+      "vibe-2.jpg",
+      "vibe-3.jpg",
+      "vibe-4.jpg"
+    ]
   },
   "pride-of-arabia": {
     "name": "Pride of Arabia",
@@ -63,7 +75,13 @@
     ],
     "never_discount": false,
     "published": true,
-    "order": 3
+    "order": 3,
+    "images": [
+      "pride-of-arabia-1.jpg",
+      "pride-of-arabia-2.jpg",
+      "pride-of-arabia-3.jpg",
+      "pride-of-arabia-4.jpg"
+    ]
   },
   "suit-up": {
     "name": "Suit Up",
@@ -85,7 +103,12 @@
     ],
     "never_discount": false,
     "published": true,
-    "order": 4
+    "order": 4,
+    "images": [
+      "suit-up-1.jpg",
+      "suit-up-2.jpg",
+      "suit-up-3.jpg"
+    ]
   },
   "the-writer": {
     "name": "The Writer",
@@ -129,7 +152,13 @@
     ],
     "never_discount": false,
     "published": true,
-    "order": 6
+    "order": 6,
+    "images": [
+      "edward-the-black-prince-1.jpg",
+      "edward-the-black-prince-2.jpg",
+      "edward-the-black-prince-3.jpg",
+      "edward-the-black-prince-4.jpg"
+    ]
   },
   "amore": {
     "name": "Amore",
@@ -151,7 +180,13 @@
     ],
     "never_discount": false,
     "published": true,
-    "order": 7
+    "order": 7,
+    "images": [
+      "amore-1.jpg",
+      "amore-2.jpg",
+      "amore-3.jpg",
+      "amore-4.jpg"
+    ]
   },
   "soleil-frais": {
     "name": "Soleil Frais",
@@ -173,7 +208,13 @@
     ],
     "never_discount": false,
     "published": true,
-    "order": 8
+    "order": 8,
+    "images": [
+      "soleil-frais-1.jpg",
+      "soleil-frais-2.jpg",
+      "soleil-frais-3.jpg",
+      "soleil-frais-4.jpg"
+    ]
   },
   "barcelona": {
     "name": "Barcelona",
@@ -195,7 +236,13 @@
     ],
     "never_discount": false,
     "published": true,
-    "order": 9
+    "order": 9,
+    "images": [
+      "barcelona-1.jpg",
+      "barcelona-2.jpg",
+      "barcelona-3.jpg",
+      "barcelona-4.jpg"
+    ]
   },
   "imperial-crown": {
     "name": "Imperial Crown",
@@ -215,7 +262,13 @@
     "story": [],
     "never_discount": false,
     "published": true,
-    "order": 10
+    "order": 10,
+    "images": [
+      "imperial-crown-1.jpg",
+      "imperial-crown-2.jpg",
+      "imperial-crown-3.jpg",
+      "imperial-crown-4.jpg"
+    ]
   },
   "dark-leather": {
     "name": "Dark Leather",
@@ -235,7 +288,13 @@
     "story": [],
     "never_discount": false,
     "published": true,
-    "order": 11
+    "order": 11,
+    "images": [
+      "dark-leather-1.jpg",
+      "dark-leather-2.jpg",
+      "dark-leather-3.jpg",
+      "dark-leather-4.jpg"
+    ]
   },
   "royal-amber": {
     "name": "Royal Amber",
@@ -255,7 +314,13 @@
     "story": [],
     "never_discount": false,
     "published": true,
-    "order": 12
+    "order": 12,
+    "images": [
+      "royal-amber-1.jpg",
+      "royal-amber-2.jpg",
+      "royal-amber-3.jpg",
+      "royal-amber-4.jpg"
+    ]
   },
   "golden-bloom": {
     "name": "Golden Bloom",
@@ -275,7 +340,13 @@
     "story": [],
     "never_discount": false,
     "published": true,
-    "order": 13
+    "order": 13,
+    "images": [
+      "golden-bloom-1.jpg",
+      "golden-bloom-2.jpg",
+      "golden-bloom-3.jpg",
+      "golden-bloom-4.jpg"
+    ]
   },
   "majestic-musk": {
     "name": "Majestic Musk",
@@ -295,7 +366,13 @@
     "story": [],
     "never_discount": false,
     "published": true,
-    "order": 14
+    "order": 14,
+    "images": [
+      "majestic-musk-1.jpg",
+      "majestic-musk-2.jpg",
+      "majestic-musk-3.jpg",
+      "majestic-musk-4.jpg"
+    ]
   },
   "musk-bloom": {
     "name": "Musk Bloom",
@@ -335,7 +412,13 @@
     "story": [],
     "never_discount": false,
     "published": true,
-    "order": 16
+    "order": 16,
+    "images": [
+      "belle-aura-1.jpg",
+      "belle-aura-2.jpg",
+      "belle-aura-3.jpg",
+      "belle-aura-4.jpg"
+    ]
   },
   "magnolia-veil": {
     "name": "Magnolia Veil",
@@ -355,7 +438,13 @@
     "story": [],
     "never_discount": false,
     "published": true,
-    "order": 17
+    "order": 17,
+    "images": [
+      "magnolia-veil-1.jpg",
+      "magnolia-veil-2.jpg",
+      "magnolia-veil-3.jpg",
+      "magnolia-veil-4.jpg"
+    ]
   },
   "parisian-muse": {
     "name": "Parisian Muse",
@@ -375,7 +464,13 @@
     "story": [],
     "never_discount": false,
     "published": true,
-    "order": 18
+    "order": 18,
+    "images": [
+      "parisian-muse-1.jpg",
+      "parisian-muse-2.jpg",
+      "parisian-muse-3.jpg",
+      "parisian-muse-4.jpg"
+    ]
   },
   "velvet-spell": {
     "name": "Velvet Spell",
@@ -395,7 +490,13 @@
     "story": [],
     "never_discount": false,
     "published": true,
-    "order": 19
+    "order": 19,
+    "images": [
+      "velvet-spell-1.jpg",
+      "velvet-spell-2.jpg",
+      "velvet-spell-3.jpg",
+      "velvet-spell-4.jpg"
+    ]
   },
   "desert-breeze": {
     "name": "Desert Breeze",
@@ -415,7 +516,13 @@
     "story": [],
     "never_discount": false,
     "published": true,
-    "order": 20
+    "order": 20,
+    "images": [
+      "desert-breeze-1.jpg",
+      "desert-breeze-2.jpg",
+      "desert-breeze-3.jpg",
+      "desert-breeze-4.jpg"
+    ]
   },
   "seasonal-slot": {
     "name": "Seasonal slot",
@@ -455,7 +562,13 @@
     "story": [],
     "never_discount": true,
     "published": true,
-    "order": 22
+    "order": 22,
+    "images": [
+      "majlis-oud-1.jpg",
+      "majlis-oud-2.jpg",
+      "majlis-oud-3.jpg",
+      "majlis-oud-4.jpg"
+    ]
   },
   "platinum-musk-oud": {
     "name": "Platinum Musk OUD",
@@ -471,7 +584,10 @@
     "story": [],
     "never_discount": true,
     "published": true,
-    "order": 23
+    "order": 23,
+    "images": [
+      "platinum-musk-oud-1.jpg"
+    ]
   },
   "shay": {
     "name": "Shay",

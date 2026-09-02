@@ -132,7 +132,8 @@ SETS = [("Discovery Trio","3 &times; 3 ml","129"),("His &amp; Hers Duo","2 &time
         ("Majlis Ritual Set","6 ml + bakhoor","129"),("Oud Lover&rsquo;s Flight","3 &times; 6 ml","199"),
         ("Eid Royal Hamper","2 &times; 6 ml + EDP + bakhoor","299"),("Dubai in a Bottle","3 ml + mini bakhoor","79")]
 
-def card(name, meta, price, sizes=None, halo=False, notes=None, barcode=None, low=None, pid=None):
+def card(name, meta, price, sizes=None, halo=False, notes=None, barcode=None, low=None,
+         pid=None, images=None):
     b = '<span class="badge res">Reserve</span>' if halo else ''
     if low: b = '<span class="badge low">%s left</span>' % low
     sz = ''
@@ -143,14 +144,25 @@ def card(name, meta, price, sizes=None, halo=False, notes=None, barcode=None, lo
     bc = '<span class="norm">Barcode %s</span>' % barcode if barcode else ''
     hl = '<span class="norm">Never discounted</span>' if halo else ''
     return """<a class="p" href="product.html?p=%s">
-  <div class="ph"><span class="none">Product image</span>%s<span class="heart">%s</span></div>
+  <div class="ph">%s%s<span class="heart">%s</span></div>
   <div class="b"><span class="meta">%s</span><span class="nm">%s</span>%s
   <span class="tax">%s &middot; %s</span>
   <span class="rev">%s</span>
   %s<div class="pr"><b>AED %s</b></div>%s%s
   <span class="btn sm solid" style="margin-top:4px">Add to bag</span></div></a>""" % (
-    (pid or slug(name)), b, sv("heart",15), meta, name, nt, slot("family"), slot("tone"),
+    (pid or slug(name)), ph_img(images, name), b, sv("heart",15), meta, name, nt, slot("family"), slot("tone"),
     slot("no reviews yet"), sz, price, hl, bc)
+
+def ph_img(images, alt, card_size=True):
+    """A real photograph if the product has one, the placeholder if not.
+       Cards use the smaller derivative; nothing here invents an image."""
+    if not images:
+        return '<span class="none">Product image</span>'
+    src = images[0]
+    if card_size:
+        src = src.replace(".jpg", "-card.jpg")
+    return ('<img src="assets/img/%s" alt="%s" loading="lazy" decoding="async" width="520" height="520">'
+            % (src, alt.replace('"', "&quot;")))
 
 def money(n):
     """Prices carry a thousands separator: AED 1,295 not AED 1295."""
@@ -176,6 +188,7 @@ def _cards(cat, n=None):
         if pr.get("top") or pr.get("heart"):
             notes = " &middot; ".join(x for x in (pr.get("top"), pr.get("heart")) if x)
         out.append(card(pr["name"], _meta(pr), money(pr["price"]), sizes=sizes, pid=pr["id"],
+                        images=pr.get("images"),
                         halo=pr.get("never_discount", False), notes=notes,
                         barcode=pr.get("barcode") or None,
                         low=(stock if isinstance(stock, int) and stock <= 5 else None)))
@@ -224,7 +237,7 @@ def hero_dots():
 # ---------------------------------------------------------------- HOME
 home = """
 <div class="hero" data-carousel>
-  <div class="heroimg"><span class="none corner"><b data-slideno>1</b>/%(hero_n)s</span></div>
+  <div class="heroimg"><img src="assets/img/banner-1.jpg" alt="" fetchpriority="high" decoding="async" width="2400" height="790"><span class="none corner"><b data-slideno>1</b>/%(hero_n)s</span></div>
   %(hero)s
   <button class="arrow prev" data-prev aria-label="Previous slide">%(prev)s</button>
   <button class="arrow next" data-next aria-label="Next slide">%(next)s</button>
@@ -831,6 +844,8 @@ def emit_catalogue():
         if pr.get("sizes"):
             doc["sizes"] = ["%s &middot; AED %s" % (z["label"], money(z["price"]))
                             for z in pr["sizes"]]
+        if pr.get("images"):
+            doc["images"] = pr["images"]
         for k_src, k_out in (("top","top"), ("heart","heart"), ("base","base"),
                              ("ingredients","ing"), ("barcode","sku"),
                              ("gender","gender"), ("story","story")):

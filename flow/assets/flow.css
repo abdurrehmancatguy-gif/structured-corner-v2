@@ -944,3 +944,58 @@ footer .wm{color:#fff}
   .page-product .galmain{max-height:300px}
   .page-product .gal{gap:8px}
 }
+
+/* ---------- real photography ---------- */
+.p .ph{position:relative;overflow:hidden}
+.p .ph img{width:100%;height:100%;object-fit:cover;display:block}
+.heroimg{position:relative;overflow:hidden}
+.heroimg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  object-position:center}
+.galslide img{width:100%;height:100%;object-fit:cover;display:block}
+.galthumb{overflow:hidden;padding:0}
+.galthumb img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* ==========================================================================
+   Hero with real photography
+   --------------------------------------------------------------------------
+   The banner is a composite: the salt-ring shot sits on the right, the left is
+   the photograph's own black, which is where the headline goes. The old scrim
+   darkened the whole width at .86 and buried the product. It now holds full
+   strength only across the text column and clears by two thirds, so the bottle
+   and the ring read at full contrast.
+   ========================================================================== */
+/* --------------------------------------------------------------------------
+   Hero with real photography
+
+   Measured off the banner itself rather than guessed: the left 30% of the
+   composite is pure black (peak luminance 0) and the salt reaches a peak of
+   171 by the 46% mark. So the text column is capped at 46% and the scrim only
+   needs 0.55 there, not the 0.86 that used to cover the whole width and bury
+   the product. Over that brightest pixel: headline 8.46:1, body 5.63:1.
+
+   The eyebrow was --gold (#a8791e). A dark amber cannot carry small text over
+   a photograph, failing at 2.18 and still failing at 3.88 with a 0.70 scrim,
+   so on the hero only it becomes champagne, which measures 5.23:1.
+   -------------------------------------------------------------------------- */
+.hero{min-height:430px;position:relative}
+/* the image band was fixed at 340px inside a 430px hero, leaving a dead strip
+   under the photograph; it fills the hero now */
+.heroimg{position:absolute;inset:0;height:100%;background:#000}
+.heroimg img{object-position:80% center}
+.hero .over .wrap{width:100%}
+.hero .over .box{max-width:min(540px,44%)}
+.hero .over{background:linear-gradient(90deg,
+  rgba(0,0,0,.86) 0%,
+  rgba(0,0,0,.72) 34%,
+  rgba(0,0,0,.55) 48%,
+  rgba(0,0,0,.16) 70%,
+  rgba(0,0,0,0) 86%)}
+.hero .over .eyebrow.gold{color:#E8C87E}
+
+@media (max-width:900px){
+  .hero{min-height:380px}
+  .heroimg img{object-position:80% center}
+  .hero .over .box{max-width:none}
+  .hero .over{background:linear-gradient(180deg,
+    rgba(0,0,0,.30) 0%, rgba(0,0,0,.70) 38%, rgba(0,0,0,.88) 100%)}
+}
