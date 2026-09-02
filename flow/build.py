@@ -213,8 +213,8 @@ home = """
   <div class="quizband">
     <div>
       <span class="eyebrow gold">Five questions &middot; under a minute</span>
-      <h3>Check what scent might be for you</h3>
-      <p>Tell us when you will wear it and what draws you, and we will point you at the closest thing we make.</p>
+      <h3>Find the blend that suits you</h3>
+      <p>Tell us when you will wear it and what you are drawn to. We will point you at the closest thing we make.</p>
     </div>
     <a class="btn gold" href="quiz.html">Test your scent</a>
   </div>
