@@ -32,7 +32,8 @@ OUT     = FLOW / "assets" / "img"
 CONTENT = FLOW / "content" / "products.json"
 
 SQUARE, CARD, QUALITY = 1000, 520, 72       # px, px, jpeg quality
-MAX_PER_PRODUCT = 4                          # the PDP gallery shows four
+MAX_PER_PRODUCT = 8   # you supplied up to 60 per product; 8 is a gallery,
+                      # beyond that it is a slideshow nobody reaches the end of
 
 # image-set name -> product id. Only unambiguous pairings live here.
 EXTRA_MAP = {
@@ -43,19 +44,17 @@ EXTRA_MAP = {
 BAKHOOR_MAP = {}
 
 # The category circles live at assets/cat/<key>.jpg, referenced by flow.css.
-# key -> (image set, which shot). The four gift/occasion tiles all draw on the
-# Collection set, so they take different frames rather than repeating one.
+# Only the four tiles that ARE a product category take real photography. Gift
+# Sets, Discovery, Shop by Occasion and Corporate Gifting are concepts, not
+# products: the Collection set gave four near-identical rows of bottles for
+# them, so they keep their Pexels stock (see assets/cat/SOURCES.txt) and this
+# tool leaves those files alone.
 CATEGORY_IMAGES = {
-    "oud":    ("Royal Amber", 0),
-    "res":    ("Majlis Oud", 0),
-    "bak":    ("Bakhoor 1", 0),
-    "musk":   ("Pride Of Arabia", 0),
-    "floral": ("Collection", 2),
-    "fresh":  ("Collection", 8),
-    "amber":  ("Collection", 14),
-    "sweet":  ("Collection", 20),
+    "oud":  ("Royal Amber", 0),
+    "res":  ("Majlis Oud", 0),
+    "bak":  ("Bakhoor 1", 0),
+    "musk": ("Pride Of Arabia", 0),
 }
-
 
 def sh(*args):
     subprocess.run(args, check=True, capture_output=True)

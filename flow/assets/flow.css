@@ -791,11 +791,21 @@ footer .wm{color:#fff}
  margin:0 auto 10px;background:var(--tint)}
 .cs a .circle::before{content:"";position:absolute;top:0;right:0;bottom:0;left:0;
  background-size:cover;background-position:center;transition:transform .22s ease}
+/* The flat .3 tint over the whole circle washed the photographs out. It drops
+   to .10, which leaves a hint of the category colour, and the icon gets its
+   own radial scrim instead. Measured: the brightest tile centre is 254, and a
+   .52 scrim puts a white icon at 3.24:1 there, so the photograph stays bright
+   at the edges while the glyph still reads. */
 .cs a .circle::after{content:"";position:absolute;top:0;right:0;bottom:0;left:0;
- background:var(--tint);opacity:.3;box-shadow:inset 0 0 0 1px rgba(23,19,16,.08);border-radius:50%}
+ background:radial-gradient(circle at 50% 50%,
+   rgba(0,0,0,.52) 0%, rgba(0,0,0,.44) 26%, rgba(0,0,0,.16) 50%, rgba(0,0,0,0) 68%);
+ opacity:1;
+ box-shadow:inset 0 0 0 1px rgba(23,19,16,.10);border-radius:50%}
+.cs a .circle{background:var(--tint)}
+.cs a .circle::before{opacity:1}
 .cs a::before,.cs a::after{content:none}
 .cs a svg{position:relative;z-index:2;transform:none;color:#fff;width:30px;height:30px;
- filter:drop-shadow(0 1px 4px rgba(0,0,0,.6))}
+ filter:drop-shadow(0 1px 3px rgba(0,0,0,.85)) drop-shadow(0 0 10px rgba(0,0,0,.5))}
 .cs a span:not(.circle){position:static;background:none;border:0;padding:0;width:100%;
  text-align:center;font-size:12px;font-weight:600;line-height:1.25;color:inherit;z-index:auto}
 .cs a:hover .circle::before{transform:scale(1.06)}

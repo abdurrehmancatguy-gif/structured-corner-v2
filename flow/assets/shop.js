@@ -201,22 +201,45 @@
         }
       }
 
-      /* the gallery shows this product's photographs; a slide with no image
-         keeps its placeholder rather than repeating one that is not its own */
+      /* The gallery is built from the image list, not from a fixed four slots.
+         The markup ships four placeholders; a product with one photograph was
+         showing that photograph plus three empty boxes and a counter reading
+         "3/1". Slides, thumbnails and the counter all follow the real count,
+         and with a single image the thumbs, arrows and counter are hidden
+         because there is nothing to move between. */
       var imgs = pr.images || [];
-      document.querySelectorAll("[data-gs]").forEach(function (slide, i) {
-        if (!imgs[i]) return;
-        slide.innerHTML = '<img src="assets/img/' + imgs[i] + '" alt="' +
-          String(pr.name).replace(/"/g, "&quot;") + '" loading="' + (i ? "lazy" : "eager") +
-          '" decoding="async">';
-      });
-      document.querySelectorAll("[data-gt]").forEach(function (t, i) {
-        if (!imgs[i]) return;
-        t.innerHTML = '<img src="assets/img/' + imgs[i].replace(".jpg", "-card.jpg") +
-          '" alt="" loading="lazy" decoding="async">';
-      });
-      var gcount = document.querySelector(".galcount");
-      if (gcount && imgs.length) gcount.innerHTML = '<b data-gnum>1</b>/' + imgs.length;
+      var main = document.querySelector(".galmain");
+      var thumbs = document.querySelector(".galthumbs");
+      if (main && imgs.length) {
+        var esc = function (t) { return String(t).replace(/"/g, "&quot;"); };
+        var nav = main.querySelectorAll(".galnav, .galcount");
+        main.querySelectorAll("[data-gs]").forEach(function (n) { n.remove(); });
+        imgs.forEach(function (src, i) {
+          var d = document.createElement("div");
+          d.className = "galslide" + (i === 0 ? " on" : "");
+          d.setAttribute("data-gs", i);
+          d.innerHTML = '<img src="assets/img/' + src + '" alt="' + esc(pr.name) +
+            '" loading="' + (i ? "lazy" : "eager") + '" decoding="async">';
+          main.insertBefore(d, nav[0] || null);
+        });
+        if (thumbs) {
+          thumbs.innerHTML = imgs.map(function (src, i) {
+            return '<button type="button" class="galthumb' + (i === 0 ? " on" : "") +
+              '" data-gt="' + i + '" aria-label="Image ' + (i + 1) + '">' +
+              '<img src="assets/img/' + src.replace(".jpg", "-card.jpg") +
+              '" alt="" loading="lazy" decoding="async"></button>';
+          }).join("");
+          thumbs.style.gridTemplateColumns = "repeat(" + Math.min(imgs.length, 6) + ",1fr)";
+          thumbs.hidden = imgs.length < 2;
+        }
+        var single = imgs.length < 2;
+        main.querySelectorAll(".galnav").forEach(function (b2) { b2.hidden = single; });
+        var gc = main.querySelector(".galcount");
+        if (gc) {
+          gc.hidden = single;
+          gc.innerHTML = '<b data-gnum>1</b>/' + imgs.length;
+        }
+      }
 
       /* availability + batch rows */
       var rows = document.querySelectorAll(".buy .kv div");
