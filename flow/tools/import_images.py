@@ -43,6 +43,51 @@ EXTRA_MAP = {
 # "Bakhoor 1".."Bakhoor 5" -> product id. Empty until the tins are identified.
 BAKHOOR_MAP = {}
 
+# Which shot is the bare product and which shows the box, per product, read off
+# contact sheets of every imported image. There is no pattern to inherit: the
+# box is frame 3 for Suit Up, 5 for Be Mine, 7 for Amore, and frame 1 for most
+# of the oud oils, which are shot in a leather BGS case rather than a carton.
+# 1-based, matching the numbering on the contact sheets.
+#   product: (close-up frame, box frame or None)
+SHOT_ORDER = {
+    "be-mine":                 (1, 5),
+    "vibe":                    (1, None),   # every frame is the bottle
+    "pride-of-arabia":         (1, 4),
+    "suit-up":                 (1, 3),
+    "edward-the-black-prince": (1, 5),
+    "amore":                   (1, 7),
+    "soleil-frais":            (1, 5),
+    "barcelona":               (1, 5),
+    "imperial-crown":          (2, 1),
+    "dark-leather":            (1, 5),
+    "royal-amber":             (1, 5),
+    "golden-bloom":            (2, 1),
+    "majestic-musk":           (3, 1),
+    "belle-aura":              (3, 1),
+    "magnolia-veil":           (4, 1),
+    "parisian-muse":           (4, 1),
+    "velvet-spell":            (2, 1),
+    "desert-breeze":           (1, 8),
+    "majlis-oud":              (1, 4),
+    "platinum-musk-oud":       (1, None),   # one frame, and it has the box in it
+}
+
+
+def order_shots(pid, names):
+    """Close-up first, box second, everything else after in its original order.
+       A product with no box shot keeps its close-up first and simply has no
+       second view to swap to."""
+    pair = SHOT_ORDER.get(pid)
+    if not pair:
+        return names
+    close, box = pair
+    picked = []
+    for idx in (close, box):
+        if idx and 1 <= idx <= len(names) and names[idx - 1] not in picked:
+            picked.append(names[idx - 1])
+    return picked + [n for n in names if n not in picked]
+
+
 # The category circles live at assets/cat/<key>.jpg, referenced by flow.css.
 # Only the four tiles that ARE a product category take real photography. Gift
 # Sets, Discovery, Shop by Occasion and Corporate Gifting are concepts, not
@@ -178,7 +223,7 @@ def main():
             square(f, card, CARD)
             names.append(full.name)
             written += 2
-        products[pid]["images"] = names
+        products[pid]["images"] = order_shots(pid, names)
         print("  %-26s %d" % (pid, len(names)))
 
     # the banner

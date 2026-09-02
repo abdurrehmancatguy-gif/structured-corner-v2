@@ -155,14 +155,23 @@ def card(name, meta, price, sizes=None, halo=False, notes=None, barcode=None, lo
 
 def ph_img(images, alt, card_size=True):
     """A real photograph if the product has one, the placeholder if not.
-       Cards use the smaller derivative; nothing here invents an image."""
+
+       Two frames are emitted when the product has them: the close-up, and the
+       shot with the box underneath it. CSS cross-fades to the second on hover,
+       so the card turns into the boxed view. Products with only one shot get
+       one image and simply do not swap."""
     if not images:
         return '<span class="none">Product image</span>'
-    src = images[0]
-    if card_size:
-        src = src.replace(".jpg", "-card.jpg")
-    return ('<img src="assets/img/%s" alt="%s" loading="lazy" decoding="async" width="520" height="520">'
-            % (src, alt.replace('"', "&quot;")))
+    a = alt.replace('"', "&quot;")
+    def src(n):
+        return n.replace(".jpg", "-card.jpg") if card_size else n
+    out = ('<img class="ph-a" src="assets/img/%s" alt="%s" loading="lazy" '
+           'decoding="async" width="520" height="520">' % (src(images[0]), a))
+    if len(images) > 1:
+        out += ('<img class="ph-b" src="assets/img/%s" alt="" aria-hidden="true" '
+                'loading="lazy" decoding="async" width="520" height="520">'
+                % src(images[1]))
+    return out
 
 def money(n):
     """Prices carry a thousands separator: AED 1,295 not AED 1295."""

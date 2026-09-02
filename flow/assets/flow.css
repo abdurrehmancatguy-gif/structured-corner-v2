@@ -1009,3 +1009,30 @@ footer .wm{color:#fff}
   .hero .over{background:linear-gradient(180deg,
     rgba(0,0,0,.30) 0%, rgba(0,0,0,.70) 38%, rgba(0,0,0,.88) 100%)}
 }
+
+/* ==========================================================================
+   Card hover: the product turns to its boxed view
+   --------------------------------------------------------------------------
+   Frame one is the close-up, frame two is the shot with the box; the order is
+   set per product in tools/import_images.py, read off contact sheets, because
+   the box lands on a different frame for every product. Hovering cross-fades
+   to the second so the card reads as the product turning to show its box.
+
+   The second frame is aria-hidden and never the only carrier of information:
+   the card still names and prices the product. Products with a single
+   photograph have no second image and simply do not swap.
+   ========================================================================== */
+.p .ph{position:relative;overflow:hidden}
+.p .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.p .ph .ph-a{position:relative;z-index:1}
+.p .ph .ph-b{z-index:2;opacity:0;transition:opacity .32s ease}
+.p:hover .ph .ph-b,.p:focus-within .ph .ph-b{opacity:1}
+
+/* A hover a phone cannot perform must not hide the second view behind it, and
+   a reader who has asked for less motion should not get a cross-fade. */
+@media (hover:none){
+  .p .ph .ph-b{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .p .ph .ph-b{transition:none}
+}
