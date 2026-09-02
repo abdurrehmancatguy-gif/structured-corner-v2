@@ -169,7 +169,7 @@
       }
 
       document.querySelectorAll(".buy span").forEach(function (el) {
-        if (/^AED\s/.test(el.textContent) && el.style.fontSize) el.textContent = "AED " + pr.price;
+        if (el.classList.contains("amt")) el.textContent = "AED " + pr.price;
         if (/VAT included/.test(el.textContent)) {
           el.textContent = pr.meta.split("\u00b7").slice(1).join("\u00b7").trim() + " \u00b7 VAT included";
         }
@@ -193,9 +193,12 @@
         if (pr.sizes) {
           sizeWrap.innerHTML = pr.sizes.map(function (x, i) {
             return '<span' + (i === 1 ? ' class="on"' : '') +
-                   ' style="padding:11px 18px;font-size:13px">' + x + "</span>";
+                   ' data-size="' + x + '">' + x + "</span>";
           }).join("");
-        } else { sizeWrap.closest("div").style.display = "none"; }
+        } else {
+          var sb = sizeWrap.closest(".sizeblock");
+          if (sb) sb.hidden = true;
+        }
       }
 
       /* availability + batch rows */
@@ -497,4 +500,71 @@
   }, { passive: true });
 
   show(0);
+})();
+
+
+/* ---------- PDP: keep the buy decision above the fold ----------------------
+   The spec table is four rows that are all placeholders on most products, and
+   it used to sit between the price and Add to bag. It is below the button now,
+   and when nothing in it has a value it collapses to a single honest line
+   rather than four rows saying "not set".
+--------------------------------------------------------------------------- */
+(function () {
+  "use strict";
+  var specs = document.querySelector("[data-specs]");
+  if (!specs) return;
+  var rows = [].slice.call(specs.querySelectorAll("div"));
+  var withValue = rows.filter(function (r) {
+    var v = r.lastElementChild;
+    return v && !v.querySelector(".slot") && v.textContent.trim() !== "";
+  });
+  if (withValue.length === 0) {
+    specs.innerHTML = '<div><span>Longevity, sillage, batch and stock</span>' +
+      '<span class="slot">not recorded in the source sheet for this product</span></div>';
+  } else {
+    rows.forEach(function (r) {
+      if (withValue.indexOf(r) < 0) r.hidden = true;
+    });
+  }
+
+  /* the story slot says the same thing; one placeholder is enough */
+  var d = document.querySelector("[data-desc]");
+  if (d && d.querySelector(".slot") && !d.textContent.replace(/\[.*?\]/g, "").trim()) {
+    d.hidden = true;
+  }
+})();
+
+
+/* ---------- size chips pick a variant ---------------------------------------
+   The chips carry a price, so choosing one has to move the price and the
+   button with it. On a product card the whole tile is a link, so the click has
+   to be stopped before it navigates.
+--------------------------------------------------------------------------- */
+(function () {
+  "use strict";
+  document.addEventListener("click", function (e) {
+    var chip = e.target.closest("[data-size]");
+    if (!chip || !chip.parentElement) return;
+    e.preventDefault(); e.stopPropagation();
+
+    var row = chip.parentElement;
+    row.querySelectorAll("[data-size]").forEach(function (x) { x.classList.remove("on"); });
+    chip.classList.add("on");
+
+    var m = chip.textContent.match(/([\d,]+)\s*$/);
+    if (!m) return;
+    var scope = chip.closest(".buy") || chip.closest(".p");
+    if (!scope) return;
+
+    var amt = scope.querySelector(".amt") || scope.querySelector(".pr b");
+    if (amt) amt.textContent = "AED " + m[1];
+
+    scope.querySelectorAll(".btn").forEach(function (b) {
+      if (/Add to bag: AED/.test(b.textContent)) b.textContent = "Add to bag: AED " + m[1];
+    });
+    var sbm = document.querySelector("[data-sbmeta]");
+    if (sbm && scope.classList.contains("buy")) {
+      sbm.textContent = sbm.textContent.replace(/AED [\d,]+/, "AED " + m[1]);
+    }
+  });
 })();

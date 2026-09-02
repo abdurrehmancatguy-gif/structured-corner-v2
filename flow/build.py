@@ -52,12 +52,12 @@ def catstrip():
         '<a class="c-{3}" href="{0}"><span class="circle">{1}</span><span>{2}</span></a>'.format(h, sv(ic, 30, 1.5), n, k)
         for n, h, ic, k in CATS) + '</div></div></div>')
 
-def shell(title, body, nav_on="", tab="Home", strip_here=True):
+def shell(title, body, nav_on="", tab="Home", strip_here=True, page=""):
     strip = catstrip()
     return """<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>%(title)s | BGS Corner</title><link rel="stylesheet" href="assets/flow.css?v=%(cssv)s"></head><body>
+<title>%(title)s | BGS Corner</title><link rel="stylesheet" href="assets/flow.css?v=%(cssv)s"></head><body class="%(page)s">
 <div class="strip"><div class="wrap">
   <span>%(clock)s Order by 2:00 PM for delivery today in Dubai &middot; <b>3h 47m</b></span>
   <span class="r"><a href="#">Free UAE delivery over AED 150</a><a href="#">Cash on delivery</a><a href="track-order.html">Track order</a><a href="#" data-langtoggle>العربية</a></span>
@@ -88,7 +88,7 @@ def shell(title, body, nav_on="", tab="Home", strip_here=True):
 <div class="tabbar">%(tabs)s</div>
 <script src="assets/catalogue.js?v=%(cssv)s"></script>
 <script src="assets/shop.js?v=%(cssv)s"></script></body></html>
-""" % dict(title=title, body=body, cssv=CSSV,
+""" % dict(title=title, body=body, cssv=CSSV, page=page,
    strip=(strip if strip_here else ""), tabs="".join(A(l,h,tab) for l,h in TABS),
    clock=sv("clock",13,2), menu=sv("menu",22), chev=sv("chev",14,2), search=sv("search",17),
    user=sv("user"), heart=sv("heart"), bag=sv("bag"),
@@ -352,29 +352,30 @@ product = """
       </div>
     </div>
     <div class="buy">
-      <div class="pills" style="margin-bottom:8px"><span class="pill">%(fam)s</span><span class="pill">%(tone)s</span><span class="pill">%(gen)s</span></div>
       <h1>Royal Amber</h1>
-      <span class="rev">%(rev)s</span>
-      <p style="color:var(--body);font-size:14px;line-height:1.65;margin:12px 0 16px">%(desc)s</p>
-      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:6px">
-        <span style="font-size:30px;font-weight:700">AED 75</span>
-        <span style="color:var(--mut);font-size:13px">6 ml &middot; VAT included</span></div>
-      <div style="margin:16px 0"><span class="eyebrow" style="display:block;margin-bottom:8px">Size</span>
-        <div class="sizes" style="gap:8px"><span style="padding:11px 18px;font-size:13px">3 ml &middot; AED 45</span><span class="on" style="padding:11px 18px;font-size:13px">6 ml &middot; AED 75</span></div></div>
-      <div class="kv" style="margin-bottom:16px">
-        <div><span>Longevity</span><span>%(lon)s</span></div>
-        <div><span>Sillage</span><span>%(sil)s</span></div>
-        <div><span>Batch number</span><span>%(bat)s</span></div>
-        <div><span>Availability</span><span>%(av)s</span></div>
-      </div>
-      <div style="display:flex;gap:10px;margin-bottom:12px">
+      <div class="pricerow">
+        <span class="amt">AED 75</span>
+        <span class="permeta">6 ml &middot; VAT included</span></div>
+      <div class="sizeblock" data-sizeblock><span class="eyebrow">Size</span>
+        <div class="sizes" style="gap:8px"><span data-size="3 ml &middot; AED 45">3 ml &middot; AED 45</span><span class="on" data-size="6 ml &middot; AED 75">6 ml &middot; AED 75</span></div></div>
+      <div class="atcrow">
         <span class="stepper" data-stepper><button type="button" data-step="-1" aria-label="Decrease quantity">&minus;</button><i data-qty>1</i><button type="button" data-step="1" aria-label="Increase quantity">+</button></span>
         <a class="btn solid" style="flex-grow:1" href="cart.html">Add to bag: AED 75</a></div>
       <a class="btn block" href="gift-box.html" style="margin-bottom:12px">Send as a gift</a>
-      <div class="note">Try the 3 ml first, the AED 45 comes back as a voucher on any bottle over AED 75, issued the day it is delivered.</div>
-      <div class="kv" style="margin-top:16px">
-        <div><span>%(truck)s Delivery</span><span>Free over AED 150 &middot; same-day before 2 PM</span></div>
-        <div><span>%(cash)s Payment</span><span>Card &middot; Apple Pay &middot; Tabby &middot; Tamara &middot; COD</span></div>
+
+      <div class="belowbuy">
+        <p class="story-slot" data-desc>%(desc)s</p>
+        <div class="note">Try the 3 ml first, the AED 45 comes back as a voucher on any bottle over AED 75, issued the day it is delivered.</div>
+        <div class="kv" data-specs style="margin-top:16px">
+          <div><span>Longevity</span><span>%(lon)s</span></div>
+          <div><span>Sillage</span><span>%(sil)s</span></div>
+          <div><span>Batch number</span><span>%(bat)s</span></div>
+          <div><span>Availability</span><span>%(av)s</span></div>
+        </div>
+        <div class="kv" style="margin-top:16px">
+          <div><span>%(truck)s Delivery</span><span>Free over AED 150 &middot; same-day before 2 PM</span></div>
+          <div><span>%(cash)s Payment</span><span>Card &middot; Apple Pay &middot; Tabby &middot; Tamara &middot; COD</span></div>
+        </div>
       </div>
     </div>
   </div>
@@ -827,5 +828,6 @@ PAGES = [("index.html","Oud Oils, Bakhoor &amp; EDP Sprays: Blended in Dubai",ho
          ("corporate.html","Corporate Gifting: Co-Branded Oud and Bakhoor",corporate,"Corporate Gifting","Home")]
 print("catalogue:", emit_catalogue(), "products")
 for fn, t, b, on, tab in PAGES:
-    pathlib.Path(fn).write_text(shell(t, b, on, tab, strip_here=(fn != "index.html")))
+    pathlib.Path(fn).write_text(shell(t, b, on, tab, strip_here=(fn != "index.html"),
+                                      page="page-" + fn.replace(".html", "")))
 print("wrote", len(PAGES), "pages")

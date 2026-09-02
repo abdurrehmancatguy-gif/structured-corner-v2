@@ -899,3 +899,48 @@ footer .wm{color:#fff}
   .galnav.prev{left:8px} .galnav.next{right:8px}
   .galthumbs{gap:8px}
 }
+
+/* ==========================================================================
+   PDP: the buy decision fits the first screen
+   --------------------------------------------------------------------------
+   Measured before: Add to bag sat at 885px, so it was below the fold on every
+   realistic laptop (1512x780 needed 105px of scroll, 1280x720 needed 165,
+   mobile needed 551). Two causes. The category strip ate 179px desktop and
+   247px mobile on a page that already has breadcrumbs, and the buy column
+   spent its height on placeholders: empty family/tone/gender chips, an empty
+   reviews chip, and a four-row spec table that read "not set" on every row.
+
+   The chips are gone, the spec table moved below the button, and the strip is
+   hidden here only. Nothing was deleted: the specs still render, and still say
+   what is missing, just after the thing people came to click.
+   ========================================================================== */
+.page-product .catstrip{display:none}
+
+.buy h1{margin:0 0 10px}
+.buy .pricerow{display:flex;align-items:baseline;gap:10px;margin-bottom:14px}
+.buy .pricerow .amt{font-size:30px;font-weight:700;color:var(--ink);line-height:1.1}
+.buy .pricerow .permeta{color:var(--mut);font-size:13px}
+
+.buy .sizeblock{margin:0 0 16px}
+.buy .sizeblock .eyebrow{display:block;margin-bottom:8px}
+.buy .sizeblock .sizes span{padding:11px 18px;font-size:13px;cursor:pointer}
+
+.buy .atcrow{display:flex;gap:10px;margin-bottom:12px}
+.buy .belowbuy{margin-top:20px;padding-top:18px;border-top:1px solid var(--hair)}
+.buy .belowbuy .story-slot{color:var(--body);font-size:14px;line-height:1.65;margin:0 0 14px}
+.buy .belowbuy .story-slot[hidden]{display:none}
+
+@media (max-width:900px){
+  .page-product .catstrip{display:none}
+  .buy .pricerow .amt{font-size:26px}
+  .buy .sizeblock{margin-bottom:14px}
+}
+
+/* Mobile was 36px short of putting Add to bag on the first screen. The main
+   image gives up 40px of its cap and the section loses some top padding on
+   this page only. The sticky buy bar still backs it up on scroll. */
+@media (max-width:900px){
+  .page-product section:first-of-type{padding-top:14px}
+  .page-product .galmain{max-height:300px}
+  .page-product .gal{gap:8px}
+}
