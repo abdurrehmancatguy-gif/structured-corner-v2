@@ -152,7 +152,7 @@
   if (key && document.querySelector(".pdp")) {
     var pr = CAT[key];
     if (pr) {
-      document.title = pr.name + ": " + pr.meta.replace(/&middot;/g, "\u00b7").replace(/<[^>]*>/g, "") + " | BGS Corner";
+      document.title = pr.name + ": " + pr.meta + " | BGS Corner";
       T(".buy h1", pr.name);
       var crumb = document.querySelector("section .eyebrow");
       if (crumb) crumb.textContent = "Home / " + pr.crumb + " / " + pr.name;
@@ -171,12 +171,22 @@
       document.querySelectorAll(".buy span").forEach(function (el) {
         if (/^AED\s/.test(el.textContent) && el.style.fontSize) el.textContent = "AED " + pr.price;
         if (/VAT included/.test(el.textContent)) {
-          el.textContent = pr.meta.split("&middot;").slice(1).join("\u00b7").replace(/<[^>]*>/g, "").trim() + " \u00b7 VAT included";
+          el.textContent = pr.meta.split("\u00b7").slice(1).join("\u00b7").trim() + " \u00b7 VAT included";
         }
       });
       document.querySelectorAll(".buy .btn.solid").forEach(function (b) {
         b.textContent = "Add to bag: AED " + pr.price;
       });
+
+      /* the sticky bar carries the same product, not the page default */
+      var sbn = document.querySelector("[data-sbname]");
+      var sbm = document.querySelector("[data-sbmeta]");
+      if (sbn) sbn.textContent = pr.name;
+      if (sbm) {
+        sbm.textContent =
+          "AED " + pr.price + " \u00b7 " +
+          pr.meta.split("\u00b7").slice(1).join("\u00b7").trim();
+      }
 
       var sizeWrap = document.querySelector(".buy .sizes");
       if (sizeWrap) {
@@ -441,6 +451,50 @@
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   });
+
+  show(0);
+})();
+
+
+/* ---------- PDP gallery: thumbnails select, arrows cycle ---------- */
+(function () {
+  "use strict";
+  var root = document.querySelector("[data-gallery]");
+  if (!root) return;
+  var slides = root.querySelectorAll("[data-gs]");
+  var thumbs = root.querySelectorAll("[data-gt]");
+  var num = root.querySelector("[data-gnum]");
+  var i = 0;
+
+  function show(n) {
+    i = (n + slides.length) % slides.length;
+    slides.forEach(function (s, k) { s.classList.toggle("on", k === i); });
+    thumbs.forEach(function (t, k) {
+      t.classList.toggle("on", k === i);
+      t.setAttribute("aria-selected", k === i ? "true" : "false");
+    });
+    if (num) num.textContent = i + 1;
+  }
+
+  thumbs.forEach(function (t) {
+    t.addEventListener("click", function () { show(+t.dataset.gt); });
+  });
+  root.querySelector("[data-gprev]").addEventListener("click", function () { show(i - 1); });
+  root.querySelector("[data-gnext]").addEventListener("click", function () { show(i + 1); });
+
+  /* arrow keys when the gallery has focus, and swipe on touch */
+  root.addEventListener("keydown", function (e) {
+    if (e.key === "ArrowLeft") { show(i - 1); }
+    if (e.key === "ArrowRight") { show(i + 1); }
+  });
+  var x0 = null;
+  root.addEventListener("touchstart", function (e) { x0 = e.touches[0].clientX; }, { passive: true });
+  root.addEventListener("touchend", function (e) {
+    if (x0 === null) return;
+    var dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 40) show(i + (dx < 0 ? 1 : -1));
+    x0 = null;
+  }, { passive: true });
 
   show(0);
 })();

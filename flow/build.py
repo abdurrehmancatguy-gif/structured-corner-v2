@@ -334,9 +334,22 @@ product = """
 <section><div class="wrap">
   <span class="eyebrow">Home / Oud Oils / Royal Amber</span>
   <div class="pdp" style="margin-top:18px">
-    <div class="gal">
-      <div class="main"><span class="none">Product image</span></div>
-      <div class="th"><div class="on"><span class="none">1</span></div><div><span class="none">2</span></div><div><span class="none">3</span></div><div><span class="none">Video</span></div></div>
+    <div class="gal" data-gallery>
+      <div class="galmain">
+        <div class="galslide on" data-gs="0"><span class="none">Product image 1</span></div>
+        <div class="galslide" data-gs="1"><span class="none">Product image 2</span></div>
+        <div class="galslide" data-gs="2"><span class="none">Product image 3</span></div>
+        <div class="galslide" data-gs="3"><span class="none">Video still</span></div>
+        <button type="button" class="galnav prev" data-gprev aria-label="Previous image">%(gprev)s</button>
+        <button type="button" class="galnav next" data-gnext aria-label="Next image">%(gnext)s</button>
+        <span class="galcount"><b data-gnum>1</b>/4</span>
+      </div>
+      <div class="galthumbs" role="tablist">
+        <button type="button" class="galthumb on" data-gt="0" aria-label="Image 1"><span>1</span></button>
+        <button type="button" class="galthumb" data-gt="1" aria-label="Image 2"><span>2</span></button>
+        <button type="button" class="galthumb" data-gt="2" aria-label="Image 3"><span>3</span></button>
+        <button type="button" class="galthumb" data-gt="3" aria-label="Video"><span>Video</span></button>
+      </div>
     </div>
     <div class="buy">
       <div class="pills" style="margin-bottom:8px"><span class="pill">%(fam)s</span><span class="pill">%(tone)s</span><span class="pill">%(gen)s</span></div>
@@ -367,7 +380,7 @@ product = """
   </div>
 </div></section>
 <div class="stickybuy">
-  <div><b>Royal Amber</b><span>AED 75 &middot; 6 ml</span></div>
+  <div><b data-sbname>Royal Amber</b><span data-sbmeta>AED 75 &middot; 6 ml</span></div>
   <a class="btn solid sm" href="cart.html">Add to bag</a>
 </div>
 <section class="alt"><div class="wrap">
@@ -383,7 +396,7 @@ product = """
   <div class="sec-h"><h2>Complete the ritual</h2><a href="collection.html">More &rarr;</a></div>
   <div class="grid g4">%(rel)s</div>
 </div></section>
-""" % dict(fam=slot("family"), tone=slot("tone"), gen=slot("gender"), rev=slot("no reviews yet"),
+""" % dict(gprev=sv("left",20,2), gnext=sv("right",20,2), fam=slot("family"), tone=slot("tone"), gen=slot("gender"), rev=slot("no reviews yet"),
    desc=slot("product description, not in any source file"), lon=slot("not set"), sil=slot("not set"),
    bat=slot("not set"), av=slot("Available Units column is empty in the sheet"),
    truck=sv("truck",16), cash=sv("cash",16), n1=slot("top notes"), n2=slot("heart notes"), n3=slot("base notes"),
@@ -765,6 +778,12 @@ quiz = """
 """
 
 # --- emit the product catalogue for the client, from one source ---
+def unent(t):
+    """catalogue.js is consumed with textContent, which escapes again. Store the
+       actual characters so "His & Hers Duo" does not render as "HIS &AMP;"."""
+    import html as _h
+    return _h.unescape(_h.unescape(str(t)))
+
 def emit_catalogue():
     cat = {}
     for e in EDP:
@@ -785,8 +804,13 @@ def emit_catalogue():
         cat[slug(n)] = {"name": n, "meta": "Bakhoor &middot; " + g, "price": str(pr), "crumb": "Bakhoor"}
     for n, c, pr in SETS:
         cat[slug(n)] = {"name": n, "meta": "Gift set &middot; " + c, "price": str(pr), "crumb": "Gift sets"}
+    def _clean(o):
+        if isinstance(o, dict):  return {k: _clean(v) for k, v in o.items()}
+        if isinstance(o, list):  return [_clean(v) for v in o]
+        if isinstance(o, str):   return unent(o)
+        return o
     pathlib.Path("assets/catalogue.js").write_text(
-        "window.BGS_CATALOGUE = " + json.dumps(cat, ensure_ascii=False) + ";\n")
+        "window.BGS_CATALOGUE = " + json.dumps(_clean(cat), ensure_ascii=False) + ";\n")
     return len(cat)
 
 
