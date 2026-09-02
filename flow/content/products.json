@@ -25,7 +25,20 @@
       "be-mine-2.jpg",
       "be-mine-3.jpg",
       "be-mine-4.jpg"
-    ]
+    ],
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "vibe": {
     "name": "Vibe",
@@ -53,7 +66,20 @@
       "vibe-2.jpg",
       "vibe-3.jpg",
       "vibe-4.jpg"
-    ]
+    ],
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "pride-of-arabia": {
     "name": "Pride of Arabia",
@@ -81,7 +107,20 @@
       "pride-of-arabia-2.jpg",
       "pride-of-arabia-3.jpg",
       "pride-of-arabia-4.jpg"
-    ]
+    ],
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "suit-up": {
     "name": "Suit Up",
@@ -108,7 +147,20 @@
       "suit-up-1.jpg",
       "suit-up-2.jpg",
       "suit-up-3.jpg"
-    ]
+    ],
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "the-writer": {
     "name": "The Writer",
@@ -130,7 +182,20 @@
     ],
     "never_discount": false,
     "published": true,
-    "order": 5
+    "order": 5,
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "edward-the-black-prince": {
     "name": "Edward the Black Prince",
@@ -158,7 +223,20 @@
       "edward-the-black-prince-2.jpg",
       "edward-the-black-prince-3.jpg",
       "edward-the-black-prince-4.jpg"
-    ]
+    ],
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "amore": {
     "name": "Amore",
@@ -186,7 +264,20 @@
       "amore-2.jpg",
       "amore-3.jpg",
       "amore-4.jpg"
-    ]
+    ],
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "soleil-frais": {
     "name": "Soleil Frais",
@@ -214,7 +305,20 @@
       "soleil-frais-2.jpg",
       "soleil-frais-3.jpg",
       "soleil-frais-4.jpg"
-    ]
+    ],
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "barcelona": {
     "name": "Barcelona",
@@ -242,7 +346,20 @@
       "barcelona-2.jpg",
       "barcelona-3.jpg",
       "barcelona-4.jpg"
-    ]
+    ],
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "imperial-crown": {
     "name": "Imperial Crown",
@@ -268,7 +385,20 @@
       "imperial-crown-2.jpg",
       "imperial-crown-3.jpg",
       "imperial-crown-4.jpg"
-    ]
+    ],
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "dark-leather": {
     "name": "Dark Leather",
@@ -294,7 +424,20 @@
       "dark-leather-2.jpg",
       "dark-leather-3.jpg",
       "dark-leather-4.jpg"
-    ]
+    ],
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "royal-amber": {
     "name": "Royal Amber",
@@ -320,7 +463,20 @@
       "royal-amber-2.jpg",
       "royal-amber-3.jpg",
       "royal-amber-4.jpg"
-    ]
+    ],
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "golden-bloom": {
     "name": "Golden Bloom",
@@ -346,7 +502,20 @@
       "golden-bloom-2.jpg",
       "golden-bloom-3.jpg",
       "golden-bloom-4.jpg"
-    ]
+    ],
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "majestic-musk": {
     "name": "Majestic Musk",
@@ -372,7 +541,20 @@
       "majestic-musk-2.jpg",
       "majestic-musk-3.jpg",
       "majestic-musk-4.jpg"
-    ]
+    ],
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "musk-bloom": {
     "name": "Musk Bloom",
@@ -392,7 +574,20 @@
     "story": [],
     "never_discount": false,
     "published": true,
-    "order": 15
+    "order": 15,
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "belle-aura": {
     "name": "Belle Aura",
@@ -418,7 +613,20 @@
       "belle-aura-2.jpg",
       "belle-aura-3.jpg",
       "belle-aura-4.jpg"
-    ]
+    ],
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "magnolia-veil": {
     "name": "Magnolia Veil",
@@ -444,7 +652,20 @@
       "magnolia-veil-2.jpg",
       "magnolia-veil-3.jpg",
       "magnolia-veil-4.jpg"
-    ]
+    ],
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "parisian-muse": {
     "name": "Parisian Muse",
@@ -470,7 +691,20 @@
       "parisian-muse-2.jpg",
       "parisian-muse-3.jpg",
       "parisian-muse-4.jpg"
-    ]
+    ],
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "velvet-spell": {
     "name": "Velvet Spell",
@@ -496,7 +730,20 @@
       "velvet-spell-2.jpg",
       "velvet-spell-3.jpg",
       "velvet-spell-4.jpg"
-    ]
+    ],
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "desert-breeze": {
     "name": "Desert Breeze",
@@ -522,7 +769,20 @@
       "desert-breeze-2.jpg",
       "desert-breeze-3.jpg",
       "desert-breeze-4.jpg"
-    ]
+    ],
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "seasonal-slot": {
     "name": "Seasonal slot",
@@ -542,7 +802,20 @@
     "story": [],
     "never_discount": false,
     "published": false,
-    "order": 21
+    "order": 21,
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "majlis-oud": {
     "name": "Majlis OUD",
@@ -568,7 +841,20 @@
       "majlis-oud-2.jpg",
       "majlis-oud-3.jpg",
       "majlis-oud-4.jpg"
-    ]
+    ],
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "platinum-musk-oud": {
     "name": "Platinum Musk OUD",
@@ -587,7 +873,20 @@
     "order": 23,
     "images": [
       "platinum-musk-oud-1.jpg"
-    ]
+    ],
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "shay": {
     "name": "Shay",
@@ -598,7 +897,20 @@
     "story": [],
     "never_discount": false,
     "published": true,
-    "order": 24
+    "order": 24,
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "compodi": {
     "name": "Compodi",
@@ -609,7 +921,20 @@
     "story": [],
     "never_discount": false,
     "published": true,
-    "order": 25
+    "order": 25,
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "mattar": {
     "name": "Mattar",
@@ -620,7 +945,20 @@
     "story": [],
     "never_discount": false,
     "published": true,
-    "order": 26
+    "order": 26,
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "falah": {
     "name": "Falah",
@@ -631,7 +969,20 @@
     "story": [],
     "never_discount": false,
     "published": true,
-    "order": 27
+    "order": 27,
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "philippine": {
     "name": "Philippine",
@@ -642,7 +993,20 @@
     "story": [],
     "never_discount": false,
     "published": true,
-    "order": 28
+    "order": 28,
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "discovery-trio": {
     "name": "Discovery Trio",
@@ -653,7 +1017,20 @@
     "story": [],
     "never_discount": false,
     "published": true,
-    "order": 29
+    "order": 29,
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "his-and-hers-duo": {
     "name": "His & Hers Duo",
@@ -664,7 +1041,20 @@
     "story": [],
     "never_discount": false,
     "published": true,
-    "order": 30
+    "order": 30,
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "majlis-ritual-set": {
     "name": "Majlis Ritual Set",
@@ -675,7 +1065,20 @@
     "story": [],
     "never_discount": false,
     "published": true,
-    "order": 31
+    "order": 31,
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "oud-lover-s-flight": {
     "name": "Oud Lover’s Flight",
@@ -686,7 +1089,20 @@
     "story": [],
     "never_discount": false,
     "published": true,
-    "order": 32
+    "order": 32,
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "eid-royal-hamper": {
     "name": "Eid Royal Hamper",
@@ -697,7 +1113,20 @@
     "story": [],
     "never_discount": false,
     "published": true,
-    "order": 33
+    "order": 33,
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   },
   "dubai-in-a-bottle": {
     "name": "Dubai in a Bottle",
@@ -708,6 +1137,19 @@
     "story": [],
     "never_discount": false,
     "published": true,
-    "order": 34
+    "order": 34,
+    "name_ar": "",
+    "story_ar": [],
+    "family": "",
+    "tone": "",
+    "occasion": "",
+    "season": "",
+    "longevity": "",
+    "sillage": "",
+    "badge": "",
+    "seo_title": "",
+    "seo_description": "",
+    "image_alt": "",
+    "related": []
   }
 }

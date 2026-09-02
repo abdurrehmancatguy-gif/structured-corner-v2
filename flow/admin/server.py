@@ -66,6 +66,38 @@ class Store:
         self._backup(path)
         path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
 
+    def backups(self, name):
+        """Every save is kept. This lists what can be rolled back to."""
+        if not BACKUP_DIR.exists():
+            return []
+        out = []
+        for f in sorted(BACKUP_DIR.glob(name + ".*.json"), reverse=True):
+            stamp = f.stem.split(".", 1)[1]
+            out.append({"file": f.name, "stamp": stamp,
+                        "bytes": f.stat().st_size})
+        return out
+
+    def restore(self, name, filename):
+        if name not in COLLECTIONS or "/" in filename or ".." in filename:
+            raise KeyError(name)
+        src = BACKUP_DIR / filename
+        if not src.exists() or not src.name.startswith(name + "."):
+            raise KeyError(filename)
+        data = json.loads(src.read_text())
+        self.put(name, data)
+        return data
+
+    def export_all(self):
+        return {name: self.get(name) for name in COLLECTIONS}
+
+    def import_all(self, bundle):
+        written = []
+        for name, data in bundle.items():
+            if name in COLLECTIONS:
+                self.put(name, data)
+                written.append(name)
+        return written
+
     def _backup(self, path):
         """Keep the last 20 versions of each file. Local undo, no git needed."""
         if not path.exists():
@@ -108,6 +140,18 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return self._send(200, (ADMIN_DIR / "admin.html").read_bytes(), "text/html; charset=utf-8")
         if path == "/api/collections":
             return self._send(200, {"collections": [{"id": k, "label": v} for k, v in COLLECTIONS.items()]})
+        if path.startswith("/api/backups/"):
+            name = path.rsplit("/", 1)[-1]
+            return self._send(200, {"backups": STORE.backups(name)})
+        if path == "/api/export":
+            body = json.dumps(STORE.export_all(), indent=2, ensure_ascii=False).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Disposition",
+                             'attachment; filename="bgs-content-export.json"')
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            return self.wfile.write(body)
         if path.startswith("/api/content/"):
             name = path.rsplit("/", 1)[-1]
             try:
@@ -133,8 +177,30 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         ok, out = rebuild()
         return self._send(200, {"saved": True, "built": ok, "output": out})
 
+    def _body(self):
+        n = int(self.headers.get("Content-Length", 0))
+        return json.loads(self.rfile.read(n).decode("utf-8"))
+
     def do_POST(self):
-        if urllib.parse.urlparse(self.path).path == "/api/build":
+        path = urllib.parse.urlparse(self.path).path
+        if path == "/api/restore":
+            try:
+                b = self._body()
+                data = STORE.restore(b["collection"], b["file"])
+            except KeyError as e:
+                return self._send(404, {"error": "cannot restore: %s" % e})
+            except Exception as e:
+                return self._send(400, {"error": str(e)})
+            ok, out = rebuild()
+            return self._send(200, {"restored": True, "built": ok, "data": data})
+        if path == "/api/import":
+            try:
+                written = STORE.import_all(self._body())
+            except Exception as e:
+                return self._send(400, {"error": str(e)})
+            ok, out = rebuild()
+            return self._send(200, {"imported": written, "built": ok, "output": out})
+        if path == "/api/build":
             ok, out = rebuild()
             return self._send(200, {"built": ok, "output": out})
         return self._send(404, {"error": "not found"})

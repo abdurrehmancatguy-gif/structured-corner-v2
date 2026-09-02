@@ -88,24 +88,57 @@ def banner(src, dst, w=2400, h=790):
     The source is a portrait shot of the bottle inside a ring of salt. A wide
     band cut straight out of it loses the ring and leaves no room for the
     headline, so the frame is extended in the photograph's own black and the
-    shot is placed to the right, feathered so there is no seam. That gives the
-    hero a dark left half to set type on, which is how the reference reads."""
+    shot placed to the right.
+
+    No blend mask. The source's own left edge is already black (mean luminance
+    3.4 of 255), so it butts against the canvas invisibly. The earlier attempt
+    feathered the paste, and the fade was itself the artifact: it put a 39.7
+    brightness step at the 72% mark. A hard paste measures better than the
+    photograph's own internal contrast. check_seam() enforces that."""
     from PIL import Image
     src_img = Image.open(src).convert("RGB")
     canvas = Image.new("RGB", (w, h), (0, 0, 0))
 
-    sw = int(w * 0.70)
+    sw = int(w * 0.68)                      # leaves the left third for the type
     sh_ = int(src_img.height * (sw / src_img.width))
     sub = src_img.resize((sw, sh_), Image.LANCZOS)
     top = (sh_ - h) // 2
     sub = sub.crop((0, top, sw, top + h))
 
-    mask = Image.new("L", (sw, h), 255)
-    grad = Image.linear_gradient("L").rotate(270, expand=True).resize((int(sw * 0.60), h))
-    mask.paste(grad, (0, 0))
-    canvas.paste(sub, (w - sw, 0), mask)
-    canvas.save(dst, "JPEG", quality=82, optimize=True, progressive=True)
+    canvas.paste(sub, (w - sw, 0))
+    canvas.save(dst, "JPEG", quality=84, optimize=True, progressive=True)
 
+    # Verify against a control: the same band with no compositing at all. Any
+    # excess over the control is something this function introduced.
+    import tempfile, os
+    fd, ctrl = tempfile.mkstemp(suffix=".jpg"); os.close(fd)
+    sub.save(ctrl, "JPEG", quality=84)
+    a, b = check_seam(dst), check_seam(ctrl)
+    os.unlink(ctrl)
+    added = round(a["worst_column_jump"] - b["worst_column_jump"], 2)
+    return {"photo_contrast": b["worst_column_jump"],
+            "banner_worst": a["worst_column_jump"],
+            "added_by_compositing": added,
+            "seamless": added < 2.0}
+
+
+def check_seam(path):
+    """Scan for a vertical seam: a column whose mean brightness jumps away from
+       its neighbours. Returns the worst jump found, in 0-255 units."""
+    from PIL import Image
+    im = Image.open(path).convert("L")
+    w, h = im.size
+    px = im.load()
+    cols = []
+    for x in range(w):
+        cols.append(sum(px[x, y] for y in range(0, h, 7)) / len(range(0, h, 7)))
+    worst, at = 0.0, 0
+    for x in range(2, w - 2):
+        d = abs((cols[x + 1] + cols[x + 2]) / 2 - (cols[x - 1] + cols[x - 2]) / 2)
+        if d > worst:
+            worst, at = d, x
+    return {"worst_column_jump": round(worst, 2), "at_x": at,
+            "at_pct": round(100 * at / w, 1)}
 
 def main():
     dry = "--dry-run" in sys.argv
@@ -151,7 +184,8 @@ def main():
 
     # the banner
     if BANNER.exists():
-        banner(BANNER, OUT / "banner-1.jpg")
+        seam = banner(BANNER, OUT / "banner-1.jpg")
+        print("  banner seam check: %s" % seam)
         written += 1
         print("  banner-1.jpg written from %s" % BANNER.name)
 

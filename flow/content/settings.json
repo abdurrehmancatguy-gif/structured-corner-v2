@@ -15,5 +15,31 @@
     "giftbox_fee": 25,
     "giftbox_volume_discount_at": 3,
     "giftbox_volume_discount_percent": 10
+  },
+  "seo": {
+    "default_title_suffix": "BGS Corner",
+    "default_description": "Alcohol-free oud oils, bakhoor and EDP sprays, blended in Dubai.",
+    "og_image": "assets/img/banner-1.jpg"
+  },
+  "social": {
+    "instagram": "",
+    "whatsapp": "",
+    "tiktok": ""
+  },
+  "analytics": {
+    "ga4_id": "",
+    "meta_pixel_id": "",
+    "tiktok_pixel_id": ""
+  },
+  "payments": {
+    "card": true,
+    "apple_pay": true,
+    "tabby": true,
+    "tamara": true,
+    "cod": true
+  },
+  "languages": {
+    "english": true,
+    "arabic": false
   }
 }

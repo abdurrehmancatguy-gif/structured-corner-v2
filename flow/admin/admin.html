@@ -79,6 +79,33 @@
   .status.ok{color:var(--green)}
   .status.err{color:var(--accent)}
   .search{margin-bottom:14px}
+  .imgstrip{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 14px}
+  .imgcard{width:104px;border:1px solid var(--hair);border-radius:var(--r);
+    background:#fff;padding:6px;text-align:center}
+  .imgcard img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:2px;display:block}
+  .imgcard .nm{font-size:10px;font-family:var(--mono);color:var(--mut);
+    margin:5px 0 6px;word-break:break-all;line-height:1.3}
+  .imgcard .row{gap:4px;justify-content:center}
+  .imgcard button{font-size:11px;min-height:26px;padding:0 7px}
+  .imgcard.primary{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+  .imgcard.primary .nm{color:var(--ink);font-weight:600}
+  .bulk{display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+    padding:10px 12px;border:1px solid var(--hair);border-radius:var(--r);
+    background:#fff;margin-bottom:12px}
+  .bulk .n{font-size:12.5px;color:var(--mut)}
+  .list a input{width:16px;height:16px;margin-right:4px}
+  .panel{position:fixed;right:0;top:60px;bottom:0;width:380px;background:#fff;
+    border-left:1px solid var(--hair);padding:18px 20px;overflow:auto;z-index:20;
+    box-shadow:-8px 0 28px rgba(22,24,29,.08)}
+  .panel h2{font-size:15px;color:var(--ink);margin:0 0 4px}
+  .panel .v{display:flex;justify-content:space-between;gap:8px;align-items:center;
+    padding:9px 0;border-bottom:1px solid var(--hair);font-size:12.5px}
+  .panel .v code{font-family:var(--mono);font-size:11px;color:var(--mut)}
+  .group{margin:0 0 18px;border:1px solid var(--hair);border-radius:var(--r);background:#fff}
+  .group > summary{cursor:pointer;padding:11px 14px;font-size:12px;font-weight:600;
+    letter-spacing:.03em;text-transform:uppercase;color:var(--mut)}
+  .group[open] > summary{border-bottom:1px solid var(--hair);color:var(--ink)}
+  .group .inner{padding:14px 16px 4px}
 </style>
 </head><body>
 
@@ -87,6 +114,10 @@
   <span class="tag">local only</span>
   <span class="sp"></span>
   <a class="btn" href="http://localhost:4310" target="_blank" rel="noopener">Open storefront</a>
+  <button class="btn" id="history">History</button>
+  <a class="btn" href="/api/export" download>Export</a>
+  <button class="btn" id="importBtn">Import</button>
+  <input type="file" id="importFile" accept="application/json" hidden>
   <button class="btn" id="rebuild">Rebuild site</button>
 </header>
 
@@ -221,9 +252,62 @@ function renderProducts(view) {
     back.onclick = function () { state.editing = null; render(); };
     view.appendChild(back);
     view.appendChild(el("h1", null, p.name || state.editing));
-    view.appendChild(el("p", "hint", "Document id: " + state.editing +
-      " · this is the product's URL and does not change when you rename it."));
-    Object.keys(p).forEach(function (k) { view.appendChild(field(k, p[k], p, k)); });
+    var hint = el("p", "hint");
+    hint.appendChild(document.createTextNode("Document id: " + state.editing +
+      " · this is the product's URL and does not change when you rename it. "));
+    var prev = el("a", null, "Preview on the storefront →");
+    prev.href = "http://localhost:4310/product.html?p=" + state.editing;
+    prev.target = "_blank"; prev.rel = "noopener";
+    hint.appendChild(prev);
+    view.appendChild(hint);
+
+    if (p.images && p.images.length) view.appendChild(imageManager(p));
+
+    /* fields are grouped; "in use" is what the site reads today, the rest are
+       here ready for when they are needed */
+    var GROUPS = [
+      ["In use now", ["name","category","price","sizes","stock","gender","size",
+                      "contents","published","never_discount","order"]],
+      ["Scent and story", ["top","heart","base","story","ingredients","barcode"]],
+      ["Taxonomy, not yet filled", ["family","tone","occasion","season",
+                                    "longevity","sillage","badge"]],
+      ["Arabic", ["name_ar","story_ar"]],
+      ["Search engines", ["seo_title","seo_description","image_alt"]],
+      ["Related products", ["related"]],
+      ["Images", ["images"]]
+    ];
+    var placed = {};
+    GROUPS.forEach(function (g, gi) {
+      var keys = g[1].filter(function (k) { return k in p; });
+      if (!keys.length) return;
+      var d = el("details", "group"); if (gi === 0) d.open = true;
+      d.appendChild(el("summary", null, g[0]));
+      var inner = el("div", "inner");
+      keys.forEach(function (k) { placed[k] = 1; inner.appendChild(field(k, p[k], p, k)); });
+      d.appendChild(inner); view.appendChild(d);
+    });
+    var rest = Object.keys(p).filter(function (k) { return !placed[k]; });
+    if (rest.length) {
+      var d2 = el("details", "group");
+      d2.appendChild(el("summary", null, "Other"));
+      var in2 = el("div", "inner");
+      rest.forEach(function (k) { in2.appendChild(field(k, p[k], p, k)); });
+      d2.appendChild(in2); view.appendChild(d2);
+    }
+
+    var dup = el("button", "btn", "Duplicate"); dup.type = "button";
+    dup.onclick = function () {
+      var name = prompt("Name for the copy", p.name + " copy");
+      if (!name) return;
+      var id = name.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+      if (state.data[id]) { alert("A product with that id already exists."); return; }
+      var copy = JSON.parse(JSON.stringify(p));
+      copy.name = name; copy.published = false; copy.images = [];
+      copy.order = Math.max.apply(null, [0].concat(Object.keys(state.data).map(function (k) {
+        return state.data[k].order || 0; }))) + 1;
+      state.data[id] = copy; state.editing = id; markDirty(); render();
+    };
+    view.appendChild(dup);
     var del = el("button", "btn danger", "Delete this product"); del.type = "button";
     del.onclick = function () {
       if (!confirm("Delete " + (p.name || state.editing) + "? Save is still required to apply it.")) return;
@@ -238,6 +322,38 @@ function renderProducts(view) {
 
   var q = el("input", "search"); q.type = "text"; q.placeholder = "Filter by name or category…";
   view.appendChild(q);
+
+  /* bulk actions: publishing a season of products one at a time is no fun */
+  var sel = {};
+  var bulk = el("div", "bulk");
+  function refreshBulk() {
+    var n = Object.keys(sel).filter(function (k) { return sel[k]; }).length;
+    bulk.querySelector(".n").textContent = n ? n + " selected" : "Nothing selected";
+    [].forEach.call(bulk.querySelectorAll("button"), function (b) { b.disabled = !n; });
+  }
+  function chosen() { return Object.keys(sel).filter(function (k) { return sel[k]; }); }
+  bulk.appendChild(el("span", "n", "Nothing selected"));
+  [["Publish", function (k) { state.data[k].published = true; }],
+   ["Unpublish", function (k) { state.data[k].published = false; }]].forEach(function (a) {
+    var b = el("button", "btn", a[0]); b.type = "button";
+    b.onclick = function () { chosen().forEach(a[1]); markDirty(); render(); };
+    bulk.appendChild(b);
+  });
+  var pc = el("button", "btn", "Adjust price %"); pc.type = "button";
+  pc.onclick = function () {
+    var v = prompt("Change price by what percent? (e.g. 10 or -5)");
+    if (v === null || v === "") return;
+    var f = 1 + Number(v) / 100;
+    if (!isFinite(f)) return alert("Not a number.");
+    chosen().forEach(function (k) {
+      state.data[k].price = Math.round((state.data[k].price || 0) * f);
+      (state.data[k].sizes || []).forEach(function (z) { z.price = Math.round(z.price * f); });
+    });
+    markDirty(); render();
+  };
+  bulk.appendChild(pc);
+  view.appendChild(bulk);
+
   var list = el("div", "list"); view.appendChild(list);
 
   function draw() {
@@ -252,7 +368,11 @@ function renderProducts(view) {
       .forEach(function (k) {
         var p = state.data[k];
         var a = el("a");
-        var left = el("span", null, p.name || k);
+        var left = el("span", "row");
+        var cb = el("input"); cb.type = "checkbox"; cb.checked = !!sel[k];
+        cb.onclick = function (ev) { ev.stopPropagation(); sel[k] = cb.checked; refreshBulk(); };
+        left.appendChild(cb);
+        left.appendChild(el("span", null, p.name || k));
         var right = el("span", "row");
         right.appendChild(el("span", "meta", "AED " + p.price));
         right.appendChild(el("span", "tag", p.category));
@@ -262,7 +382,7 @@ function renderProducts(view) {
         list.appendChild(a);
       });
   }
-  q.oninput = draw; draw();
+  q.oninput = draw; draw(); refreshBulk();
 
   var add = el("button", "btn", "Add a product"); add.type = "button";
   add.onclick = function () {
@@ -336,6 +456,98 @@ document.getElementById("rebuild").onclick = function () {
 window.addEventListener("beforeunload", function (e) {
   if (state.dirty) { e.preventDefault(); e.returnValue = ""; }
 });
+
+/* ---- image manager: reorder, set primary, remove ---- */
+function imageManager(p) {
+  var fs = el("fieldset");
+  fs.appendChild(el("legend", null, "Photographs"));
+  var note = el("p", "hint", "The first image is the one used on cards and as the gallery's opening frame. Files live in assets/img/ and are produced by tools/import_images.py.");
+  note.style.margin = "0 0 8px";
+  fs.appendChild(note);
+  var strip = el("div", "imgstrip");
+  function draw() {
+    strip.innerHTML = "";
+    p.images.forEach(function (name, i) {
+      var c = el("div", "imgcard" + (i === 0 ? " primary" : ""));
+      var im = el("img"); im.src = "http://localhost:4310/assets/img/" + name; im.alt = "";
+      c.appendChild(im);
+      c.appendChild(el("div", "nm", i === 0 ? "primary" : "#" + (i + 1)));
+      var row = el("div", "row");
+      var L = el("button", "btn", "←"); L.type = "button";
+      L.onclick = function () { if (i) { p.images.splice(i-1,0,p.images.splice(i,1)[0]); markDirty(); draw(); } };
+      var R = el("button", "btn", "→"); R.type = "button";
+      R.onclick = function () { if (i<p.images.length-1) { p.images.splice(i+1,0,p.images.splice(i,1)[0]); markDirty(); draw(); } };
+      var X = el("button", "btn danger", "×"); X.type = "button";
+      X.onclick = function () { p.images.splice(i,1); markDirty(); draw(); };
+      row.appendChild(L); row.appendChild(R); row.appendChild(X);
+      c.appendChild(row); strip.appendChild(c);
+    });
+  }
+  draw(); fs.appendChild(strip); return fs;
+}
+
+/* ---- slide-over panel ---- */
+function panel(title, build) {
+  var old = document.querySelector(".panel"); if (old) old.remove();
+  var p = el("div", "panel");
+  var head = el("div", "row"); head.style.marginBottom = "10px";
+  head.appendChild(el("h2", null, title));
+  var sp = el("span"); sp.style.flex = "1"; head.appendChild(sp);
+  var x = el("button", "btn", "Close"); x.type = "button";
+  x.onclick = function () { p.remove(); };
+  head.appendChild(x); p.appendChild(head);
+  build(p);
+  document.body.appendChild(p);
+}
+
+document.getElementById("history").onclick = function () {
+  panel("History — " + state.id, function (p) {
+    p.appendChild(el("p", "hint", "Every save is kept. Restoring writes that version back and rebuilds."));
+    fetch("/api/backups/" + state.id).then(function (r) { return r.json(); }).then(function (d) {
+      if (!d.backups.length) { p.appendChild(el("p", "hint", "No earlier versions yet.")); return; }
+      d.backups.forEach(function (b) {
+        var row = el("div", "v");
+        var t = b.stamp.replace(/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})$/,
+                                "$1-$2-$3 $4:$5:$6");
+        row.appendChild(el("code", null, t + "  ·  " + Math.round(b.bytes/1024) + " KB"));
+        var r2 = el("button", "btn", "Restore"); r2.type = "button";
+        r2.onclick = function () {
+          if (!confirm("Restore the version from " + t + "?")) return;
+          fetch("/api/restore", { method:"POST", headers:{"Content-Type":"application/json"},
+            body: JSON.stringify({ collection: state.id, file: b.file }) })
+            .then(function (r3) { return r3.json(); }).then(function (res) {
+              if (res.error) return setStatus(res.error, "err");
+              state.data = res.data; state.clean = JSON.stringify(res.data);
+              state.dirty = false; state.editing = null;
+              setStatus("Restored " + t, "ok"); render();
+              document.querySelector(".panel").remove();
+            });
+        };
+        row.appendChild(r2); p.appendChild(row);
+      });
+    });
+  });
+};
+
+document.getElementById("importBtn").onclick = function () {
+  document.getElementById("importFile").click();
+};
+document.getElementById("importFile").onchange = function (e) {
+  var f = e.target.files[0]; if (!f) return;
+  if (!confirm("Import " + f.name + "? This replaces every collection it contains.")) return;
+  f.text().then(function (t) {
+    var bundle; try { bundle = JSON.parse(t); }
+    catch (err) { return setStatus("Not valid JSON: " + err.message, "err"); }
+    return fetch("/api/import", { method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify(bundle) }).then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (res.error) return setStatus(res.error, "err");
+        setStatus("Imported: " + res.imported.join(", "), "ok");
+        load(state.id);
+      });
+  });
+  e.target.value = "";
+};
 
 fetch("/api/collections").then(function (r) { return r.json(); }).then(function (d) {
   var nav = document.getElementById("nav");
