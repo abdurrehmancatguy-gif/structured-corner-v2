@@ -163,8 +163,11 @@ section.alt{background:var(--alt)}
 .meter{height:5px;background:var(--hair);border-radius:3px;overflow:hidden;width:112px}
 .meter i{display:block;height:5px;background:var(--gold)}
 .tabs2{display:flex;gap:26px;border-bottom:1px solid var(--line);margin-bottom:20px;overflow-x:auto}
-.tabs2 span{padding:12px 0;font-size:13.5px;color:var(--mut);white-space:nowrap;border-bottom:2px solid transparent}
-.tabs2 span.on{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+.tabs2 span,.tabs2 button{padding:12px 0;font-size:13.5px;color:var(--mut);white-space:nowrap;border-bottom:2px solid transparent}
+.tabs2 button{appearance:none;-webkit-appearance:none;background:none;border-top:0;border-left:0;border-right:0;font-family:inherit;cursor:pointer}
+.tabs2 button:hover{color:var(--ink)}
+.tabs2 button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.tabs2 span.on,.tabs2 button.on{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
 .note{background:var(--gold-l);border-left:3px solid var(--gold);padding:12px 15px;font-size:12.5px;
  color:var(--body);border-radius:0 var(--r) var(--r) 0}
 
@@ -532,7 +535,7 @@ footer .wm{color:#fff}
   .buy p{font-size:13px;line-height:1.6;margin:10px 0 12px}
   .kv div{padding:9px 0;font-size:12.5px}
   .tabs2{gap:16px}
-  .tabs2 span{font-size:12.5px}
+  .tabs2 span,.tabs2 button{font-size:12.5px}
 
   /* sticky add-to-bag, the one control that must always be reachable */
   .stickybuy{display:flex;position:fixed;left:0;right:0;bottom:56px;z-index:30;

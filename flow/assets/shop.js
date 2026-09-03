@@ -160,11 +160,11 @@
       /* the four-line story */
       var d = document.querySelector(".buy p");
       if (d) {
-        if (pr.story) {
+        if (pr.story && pr.story.length) {
           d.className = "story";
           d.innerHTML = pr.story.map(function (l) { return "<span>" + l + "</span>"; }).join("");
         } else {
-          d.innerHTML = '<span class="slot">product story \u2014 not in the source sheet</span>';
+          d.hidden = true;
         }
       }
 
@@ -256,22 +256,23 @@
         if (/Batch number/.test(k) && pr.sku) { r.firstElementChild.textContent = "Barcode"; v.textContent = pr.sku; }
       });
 
-      /* pyramid + ingredients below the fold */
-      var pyr = document.querySelectorAll("section.alt .grid.g3 > div");
-      if (pyr.length === 3 && pr.top) {
-        [[0, "Top", pr.top], [1, "Heart", pr.heart], [2, "Base", pr.base]].forEach(function (t) {
-          var el = pyr[t[0]].querySelector("p");
-          if (!el) return;
-          if (t[2]) el.textContent = t[2];
-          else el.innerHTML = '<span class="slot">not given for this product</span>';
+      /* scent pyramid: fill the three note slots, or show the note line */
+      if (pr.top || pr.heart || pr.base) {
+        [["top", pr.top], ["heart", pr.heart], ["base", pr.base]].forEach(function (t) {
+          var el = document.querySelector('[data-note="' + t[0] + '"]');
+          if (el) el.textContent = t[1] || "\u2014";
         });
+      } else {
+        var grid = document.querySelector('[data-panel="pyramid"] .grid');
+        if (grid) grid.hidden = true;
+        var pn = document.querySelector("[data-pyrnote]");
+        if (pn) pn.hidden = false;
       }
+      /* declared ingredients go inside the Ingredients tab */
       if (pr.ing) {
-        var host = document.querySelector("section.alt .wrap");
-        var box = document.createElement("div");
-        box.className = "ingbox";
-        box.innerHTML = '<span class="eyebrow">Declared ingredients</span><p>' + pr.ing + "</p>";
-        host.appendChild(box);
+        var ing = document.querySelector("[data-ingpanel]");
+        if (ing) ing.innerHTML = '<span class="eyebrow">Declared ingredients</span>' +
+          '<p style="margin:8px 0 0">' + pr.ing + "</p>";
       }
     }
   }
@@ -559,18 +560,11 @@
     return v && !v.querySelector(".slot") && v.textContent.trim() !== "";
   });
   if (withValue.length === 0) {
-    specs.innerHTML = '<div><span>Longevity, sillage, batch and stock</span>' +
-      '<span class="slot">not recorded in the source sheet for this product</span></div>';
+    specs.hidden = true;
   } else {
     rows.forEach(function (r) {
       if (withValue.indexOf(r) < 0) r.hidden = true;
     });
-  }
-
-  /* the story slot says the same thing; one placeholder is enough */
-  var d = document.querySelector("[data-desc]");
-  if (d && d.querySelector(".slot") && !d.textContent.replace(/\[.*?\]/g, "").trim()) {
-    d.hidden = true;
   }
 })();
 
@@ -794,4 +788,30 @@
     set(w); sync();
   });
   sync();
+})();
+
+
+/* ---------- PDP tabs: five spans that could not be switched ---------- */
+(function () {
+  "use strict";
+  var tabs = document.querySelectorAll("[data-tab]");
+  if (!tabs.length) return;
+  function show(name) {
+    tabs.forEach(function (t) {
+      var on = t.getAttribute("data-tab") === name;
+      t.classList.toggle("on", on);
+      t.setAttribute("aria-selected", on ? "true" : "false");
+    });
+    document.querySelectorAll("[data-panel]").forEach(function (pnl) {
+      pnl.hidden = pnl.getAttribute("data-panel") !== name;
+    });
+  }
+  tabs.forEach(function (t) {
+    t.addEventListener("click", function () { show(t.getAttribute("data-tab")); });
+    t.addEventListener("keydown", function (e) {
+      var list = [].slice.call(tabs), i = list.indexOf(t);
+      if (e.key === "ArrowRight") { e.preventDefault(); var nx = list[(i + 1) % list.length]; nx.focus(); nx.click(); }
+      if (e.key === "ArrowLeft")  { e.preventDefault(); var pv = list[(i - 1 + list.length) % list.length]; pv.focus(); pv.click(); }
+    });
+  });
 })();

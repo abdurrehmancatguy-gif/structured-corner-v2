@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Royal Amber | BGS Corner</title><link rel="stylesheet" href="assets/flow.css?v=d5d8e83e"></head><body class="page-product">
+<title>Royal Amber | BGS Corner</title><link rel="stylesheet" href="assets/flow.css?v=8faff6fc"></head><body class="page-product">
 <div class="strip"><div class="wrap">
   <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Order by 2:00 PM for delivery today in Dubai &middot; <b>3h 47m</b></span>
   <span class="r"><a href="#">Free UAE delivery over AED 150</a><a href="#">Cash on delivery</a><a href="track-order.html">Track order</a><a href="#" data-langtoggle>العربية</a></span>
@@ -53,13 +53,13 @@
       <a class="btn block" href="gift-box.html" style="margin-bottom:12px">Send as a gift</a>
 
       <div class="belowbuy">
-        <p class="story-slot" data-desc><span class="slot">product description, not in any source file</span></p>
+        <p class="story-slot" data-desc></p>
         <div class="note">Try the 3 ml first, the AED 45 comes back as a voucher on any bottle over AED 75, issued the day it is delivered.</div>
         <div class="kv" data-specs style="margin-top:16px">
-          <div><span>Longevity</span><span><span class="slot">not set</span></span></div>
-          <div><span>Sillage</span><span><span class="slot">not set</span></span></div>
-          <div><span>Batch number</span><span><span class="slot">not set</span></span></div>
-          <div><span>Availability</span><span><span class="slot">Available Units column is empty in the sheet</span></span></div>
+          <div><span>Longevity</span><span></span></div>
+          <div><span>Sillage</span><span></span></div>
+          <div><span>Batch number</span><span></span></div>
+          <div><span>Availability</span><span></span></div>
         </div>
         <div class="kv" style="margin-top:16px">
           <div><span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 7h11v9H3z"/><path d="M14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg> Delivery</span><span>Free over AED 150 &middot; same-day before 2 PM</span></div>
@@ -74,13 +74,45 @@
   <a class="btn solid sm" href="cart.html">Add to bag</a>
 </div>
 <section class="alt"><div class="wrap">
-  <div class="tabs2"><span class="on">Scent pyramid</span><span>How to apply oud</span><span>Ingredients &amp; allergens</span><span>Delivery &amp; returns</span><span>Reviews</span></div>
-  <div class="grid g3">
-    <div><span class="eyebrow">Top</span><p style="margin:8px 0 0"><span class="slot">top notes</span></p></div>
-    <div><span class="eyebrow">Heart</span><p style="margin:8px 0 0"><span class="slot">heart notes</span></p></div>
-    <div><span class="eyebrow">Base</span><p style="margin:8px 0 0"><span class="slot">base notes</span></p></div>
+  <div class="tabs2" role="tablist">
+    <button type="button" class="on" data-tab="pyramid" role="tab" aria-selected="true">Scent pyramid</button>
+    <button type="button" data-tab="apply" role="tab" aria-selected="false">How to apply oud</button>
+    <button type="button" data-tab="ing" role="tab" aria-selected="false">Ingredients &amp; allergens</button>
+    <button type="button" data-tab="delivery" role="tab" aria-selected="false">Delivery &amp; returns</button>
+    <button type="button" data-tab="reviews" role="tab" aria-selected="false">Reviews</button>
   </div>
-  <div class="note" style="margin-top:20px">Note values are not yet recorded for the oud oils. The EDP sprays carry theirs.</div>
+  <div data-panel="pyramid">
+    <div class="grid g3">
+      <div><span class="eyebrow">Top</span><p style="margin:8px 0 0" data-note="top"></p></div>
+      <div><span class="eyebrow">Heart</span><p style="margin:8px 0 0" data-note="heart"></p></div>
+      <div><span class="eyebrow">Base</span><p style="margin:8px 0 0" data-note="base"></p></div>
+    </div>
+    <div class="note" data-pyrnote style="margin-top:20px" hidden>The scent pyramid is published for our EDP sprays. For the oud oils it is coming soon.</div>
+  </div>
+  <div data-panel="apply" hidden>
+    <div class="grid g3">
+      <div><span class="eyebrow">Where</span><p style="margin:8px 0 0">Wrists, the base of the throat, behind the ears. Warm points carry the oil.</p></div>
+      <div><span class="eyebrow">How much</span><p style="margin:8px 0 0">These are oils, not sprays. One dab on each point is the dose; a 3 ml bottle lasts accordingly.</p></div>
+      <div><span class="eyebrow">Do not rub</span><p style="margin:8px 0 0">Press the points together rather than rubbing, which breaks the top notes.</p></div>
+    </div>
+    <div class="note" style="margin-top:20px">Every blend in the shop is alcohol-free and oil based.</div>
+  </div>
+  <div data-panel="ing" hidden>
+    <div data-ingpanel><p style="margin:0;color:var(--mut)">Full ingredient and allergen lists are published for our EDP sprays. This one is coming soon.</p></div>
+  </div>
+  <div data-panel="delivery" hidden>
+    <div class="grid g3">
+      <div><span class="eyebrow">UAE delivery</span><p style="margin:8px 0 0">Free over AED 150. AED 12 below that. UAE only.</p></div>
+      <div><span class="eyebrow">Same-day Dubai</span><p style="margin:8px 0 0">AED 25, for orders placed before the 2:00 PM cutoff.</p></div>
+      <div><span class="eyebrow">Returns</span><p style="margin:8px 0 0">Exchange on sealed items. Opened fragrance cannot be returned.</p></div>
+    </div>
+  </div>
+  <div data-panel="reviews" hidden>
+    <div class="emptystate" style="text-align:left;padding:20px 0">
+      <b>No reviews yet.</b>
+      <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">Reviews open after the first orders are delivered. Nothing appears here that a buyer has not left.</p>
+    </div>
+  </div>
 </div></section>
 <section><div class="wrap">
   <div class="sec-h"><h2>Complete the ritual</h2><a href="collection.html">More &rarr;</a></div>
@@ -113,5 +145,5 @@
 </div><div class="bot"><span>&copy; 2026 BGS Corner General Trading LLC</span>
 <span>Cards &middot; Apple Pay &middot; Tabby &middot; Tamara &middot; Cash on delivery</span></div></div></footer>
 <div class="tabbar"><a href="index.html">Home</a><a href="collection.html" class="on">Shop</a><a href="gift-box.html">Gifts</a><a href="cart.html">Bag</a><a href="account.html">Account</a></div>
-<script src="assets/catalogue.js?v=d5d8e83e"></script>
-<script src="assets/shop.js?v=d5d8e83e"></script></body></html>
+<script src="assets/catalogue.js?v=8faff6fc"></script>
+<script src="assets/shop.js?v=8faff6fc"></script></body></html>

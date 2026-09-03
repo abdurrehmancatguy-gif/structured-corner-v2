@@ -447,22 +447,54 @@ product = """
   <a class="btn solid sm" href="cart.html">Add to bag</a>
 </div>
 <section class="alt"><div class="wrap">
-  <div class="tabs2"><span class="on">Scent pyramid</span><span>How to apply oud</span><span>Ingredients &amp; allergens</span><span>Delivery &amp; returns</span><span>Reviews</span></div>
-  <div class="grid g3">
-    <div><span class="eyebrow">Top</span><p style="margin:8px 0 0">%(n1)s</p></div>
-    <div><span class="eyebrow">Heart</span><p style="margin:8px 0 0">%(n2)s</p></div>
-    <div><span class="eyebrow">Base</span><p style="margin:8px 0 0">%(n3)s</p></div>
+  <div class="tabs2" role="tablist">
+    <button type="button" class="on" data-tab="pyramid" role="tab" aria-selected="true">Scent pyramid</button>
+    <button type="button" data-tab="apply" role="tab" aria-selected="false">How to apply oud</button>
+    <button type="button" data-tab="ing" role="tab" aria-selected="false">Ingredients &amp; allergens</button>
+    <button type="button" data-tab="delivery" role="tab" aria-selected="false">Delivery &amp; returns</button>
+    <button type="button" data-tab="reviews" role="tab" aria-selected="false">Reviews</button>
   </div>
-  <div class="note" style="margin-top:20px">Note values are not yet recorded for the oud oils. The EDP sprays carry theirs.</div>
+  <div data-panel="pyramid">
+    <div class="grid g3">
+      <div><span class="eyebrow">Top</span><p style="margin:8px 0 0" data-note="top"></p></div>
+      <div><span class="eyebrow">Heart</span><p style="margin:8px 0 0" data-note="heart"></p></div>
+      <div><span class="eyebrow">Base</span><p style="margin:8px 0 0" data-note="base"></p></div>
+    </div>
+    <div class="note" data-pyrnote style="margin-top:20px" hidden>The scent pyramid is published for our EDP sprays. For the oud oils it is coming soon.</div>
+  </div>
+  <div data-panel="apply" hidden>
+    <div class="grid g3">
+      <div><span class="eyebrow">Where</span><p style="margin:8px 0 0">Wrists, the base of the throat, behind the ears. Warm points carry the oil.</p></div>
+      <div><span class="eyebrow">How much</span><p style="margin:8px 0 0">These are oils, not sprays. One dab on each point is the dose; a 3 ml bottle lasts accordingly.</p></div>
+      <div><span class="eyebrow">Do not rub</span><p style="margin:8px 0 0">Press the points together rather than rubbing, which breaks the top notes.</p></div>
+    </div>
+    <div class="note" style="margin-top:20px">Every blend in the shop is alcohol-free and oil based.</div>
+  </div>
+  <div data-panel="ing" hidden>
+    <div data-ingpanel><p style="margin:0;color:var(--mut)">Full ingredient and allergen lists are published for our EDP sprays. This one is coming soon.</p></div>
+  </div>
+  <div data-panel="delivery" hidden>
+    <div class="grid g3">
+      <div><span class="eyebrow">UAE delivery</span><p style="margin:8px 0 0">Free over AED 150. AED 12 below that. UAE only.</p></div>
+      <div><span class="eyebrow">Same-day Dubai</span><p style="margin:8px 0 0">AED 25, for orders placed before the 2:00 PM cutoff.</p></div>
+      <div><span class="eyebrow">Returns</span><p style="margin:8px 0 0">Exchange on sealed items. Opened fragrance cannot be returned.</p></div>
+    </div>
+  </div>
+  <div data-panel="reviews" hidden>
+    <div class="emptystate" style="text-align:left;padding:20px 0">
+      <b>No reviews yet.</b>
+      <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">Reviews open after the first orders are delivered. Nothing appears here that a buyer has not left.</p>
+    </div>
+  </div>
 </div></section>
 <section><div class="wrap">
   <div class="sec-h"><h2>Complete the ritual</h2><a href="collection.html">More &rarr;</a></div>
   <div class="grid g4">%(rel)s</div>
 </div></section>
 """ % dict(gprev=sv("left",20,2), gnext=sv("right",20,2), fam=slot("family"), tone=slot("tone"), gen=slot("gender"), rev=slot("no reviews yet"),
-   desc=slot("product description, not in any source file"), lon=slot("not set"), sil=slot("not set"),
-   bat=slot("not set"), av=slot("Available Units column is empty in the sheet"),
-   truck=sv("truck",16), cash=sv("cash",16), n1=slot("top notes"), n2=slot("heart notes"), n3=slot("base notes"),
+   desc="", lon="", sil="",
+   bat="", av="",
+   truck=sv("truck",16), cash=sv("cash",16), 
    rel=oudoil_cards(4))
 
 # ---------------------------------------------------------------- GIFT BOX
