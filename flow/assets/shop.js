@@ -608,3 +608,190 @@
     }
   });
 })();
+
+
+/* ---------- collection: a real filter engine -------------------------------
+   The collection page shipped a hardcoded oud-oils grid, so every category
+   link relabelled the heading and still showed the same 11 products. This
+   filters the real catalogue. Only facets the content layer carries are
+   offered: category and price for all products, gender for the sprays. State
+   lives in the URL so a filtered view is shareable.
+--------------------------------------------------------------------------- */
+(function () {
+  "use strict";
+  var grid = document.querySelector("[data-grid]");
+  if (!grid) return;
+  var CAT = window.BGS_CATALOGUE || {};
+
+  var CAT_LABEL = { "oud-oils": "Oud oils", "reserve": "Reserve", "bakhoor": "Bakhoor",
+                    "edp": "EDP sprays", "gift-sets": "Gift sets" };
+  var CAT_INTRO = {
+    "oud-oils": "Alcohol-free perfume oil in 3 ml and 6 ml.",
+    "reserve":  "The blends that sit outside every discount the shop runs.",
+    "bakhoor":  "Bakhoor for the home, in 20 g to 50 g tins.",
+    "edp":      "Eau de parfum sprays, 50 ml, with declared note profiles.",
+    "gift-sets": "Wrapped sets, built from the house blends." };
+
+  function params() {
+    var q = new URLSearchParams(location.search),
+        st = { cat: [], price: [], gender: [], ready: false, sort: "featured", q: "" };
+    ["cat", "price", "gender"].forEach(function (k) {
+      var v = q.get(k); if (v) st[k] = v.split(",").filter(Boolean);
+    });
+    if (q.get("ready") === "1") st.ready = true;
+    if (q.get("sort")) st.sort = q.get("sort");
+    if (q.get("q")) st.q = q.get("q");
+    return st;
+  }
+  function write(st) {
+    var q = new URLSearchParams();
+    ["cat", "price", "gender"].forEach(function (k) { if (st[k].length) q.set(k, st[k].join(",")); });
+    if (st.ready) q.set("ready", "1");
+    if (st.sort !== "featured") q.set("sort", st.sort);
+    if (st.q) q.set("q", st.q);
+    history.replaceState(null, "", location.pathname + (q.toString() ? "?" + q : ""));
+  }
+  function inBand(pn, band) { var p = band.split("-"); return pn >= +p[0] && pn <= +p[1]; }
+  function match(pr, st) {
+    if (st.cat.length && st.cat.indexOf(pr.cat) < 0) return false;
+    if (st.gender.length && (!pr.gender || st.gender.indexOf(pr.gender) < 0)) return false;
+    if (st.price.length && !st.price.some(function (b) { return inBand(pr.pn, b); })) return false;
+    if (st.ready && !(pr.stock > 0)) return false;
+    if (st.q && pr.name.toLowerCase().indexOf(st.q.toLowerCase()) < 0) return false;
+    return true;
+  }
+  function esc(t) {
+    return String(t).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; });
+  }
+  var HEART = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 20s-7-4.5-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 4.5-7 9-7 9z"/></svg>';
+  function photo(pr) {
+    var imgs = pr.images || [];
+    if (!imgs.length) return '<span class="none">Product image</span>';
+    var c = function (n) { return n.replace(".jpg", "-card.jpg"); };
+    var o = '<img class="ph-a" src="assets/img/' + c(imgs[0]) + '" alt="' + esc(pr.name) +
+            '" loading="lazy" decoding="async" width="520" height="520">';
+    if (imgs.length > 1)
+      o += '<img class="ph-b" src="assets/img/' + c(imgs[1]) +
+           '" alt="" aria-hidden="true" loading="lazy" decoding="async" width="520" height="520">';
+    return o;
+  }
+  function cardHTML(key, pr) {
+    var badge = pr.halo ? '<span class="badge res">Reserve</span>'
+              : (pr.stock > 0 && pr.stock <= 5) ? '<span class="badge low">' + pr.stock + ' left</span>' : '';
+    var sizes = (pr.sizes && pr.sizes.length)
+      ? '<div class="sizes">' + pr.sizes.map(function (sz, i) {
+          return '<span' + (i === 1 ? ' class="on"' : "") + ' data-size="' + esc(sz) + '">' + esc(sz) + "</span>"; }).join("") + '</div>'
+      : '';
+    var notes = pr.top ? '<span class="notes">' + esc(pr.top) + "</span>" : "";
+    return '<a class="p" href="product.html?p=' + key + '">' +
+      '<div class="ph">' + photo(pr) + badge +
+      '<button type="button" class="heart" data-wish="' + key + '" aria-pressed="false" aria-label="Save ' + esc(pr.name) + ' to wishlist">' + HEART + "</button></div>" +
+      '<div class="b"><span class="meta">' + esc(pr.meta) + "</span><span class=\"nm\">" + esc(pr.name) + "</span>" + notes + sizes +
+      '<div class="pr"><b>AED ' + esc(pr.price) + "</b></div>" +
+      (pr.halo ? '<span class="norm">Never discounted</span>' : "") +
+      '<span class="btn sm solid" style="margin-top:4px">Add to bag</span></div></a>';
+  }
+  function pillsFor(st) {
+    var out = [];
+    st.cat.forEach(function (c) { out.push(["cat", c, CAT_LABEL[c] || c]); });
+    st.gender.forEach(function (g) { out.push(["gender", g, g]); });
+    st.price.forEach(function (b) { var p = b.split("-");
+      out.push(["price", b, +p[1] > 99998 ? "AED " + p[0] + "+" : "AED " + p[0] + "-" + p[1]]); });
+    if (st.q) out.push(["q", st.q, '"' + st.q + '"']);
+    return out;
+  }
+  function render() {
+    var st = params();
+    var keys = Object.keys(CAT).filter(function (k) { return match(CAT[k], st); });
+    if (st.sort === "price-asc")  keys.sort(function (a, b) { return CAT[a].pn - CAT[b].pn; });
+    if (st.sort === "price-desc") keys.sort(function (a, b) { return CAT[b].pn - CAT[a].pn; });
+    if (st.sort === "name")       keys.sort(function (a, b) { return CAT[a].name.localeCompare(CAT[b].name); });
+    grid.innerHTML = keys.map(function (k) { return cardHTML(k, CAT[k]); }).join("");
+    var empty = document.querySelector("[data-empty]");
+    if (empty) empty.hidden = keys.length > 0;
+    grid.hidden = keys.length === 0;
+    document.querySelectorAll("[data-count]").forEach(function (n) { n.textContent = keys.length; });
+
+    var one = st.cat.length === 1 ? st.cat[0] : null;
+    var title = one ? CAT_LABEL[one] : "All products";
+    var t = document.querySelector("[data-title]"), intro = document.querySelector("[data-intro]"),
+        cr = document.querySelector("[data-crumb]");
+    if (t) t.textContent = title;
+    if (intro) intro.textContent = one ? CAT_INTRO[one]
+      : "Every blend in the shop: oud oils, Reserve, bakhoor, EDP sprays and gift sets.";
+    if (cr) cr.textContent = one ? "Home / Categories / " + title : "Home / All products";
+    document.title = title + " | BGS Corner";
+
+    document.querySelectorAll("[data-facet]").forEach(function (cb) {
+      cb.checked = st[cb.getAttribute("data-facet")].indexOf(cb.value) > -1; });
+    var sortSel = document.querySelector("[data-sort]"); if (sortSel) sortSel.value = st.sort;
+
+    var pills = document.querySelector("[data-pills]"), list = pillsFor(st);
+    if (pills) {
+      pills.innerHTML = list.map(function (p) {
+        return '<button type="button" class="pill on" data-rm="' + p[0] + '" data-val="' + esc(p[1]) +
+               '">' + esc(p[2]) + ' <span aria-hidden="true">&times;</span><span class="none-visual"> remove filter</span></button>';
+      }).join("") +
+      '<button type="button" class="pill' + (st.ready ? " on" : "") + '" data-toggle="ready">Ready today</button>';
+    }
+    var fc = document.querySelector("[data-fcount]");
+    if (fc) { fc.textContent = list.length + (st.ready ? 1 : 0); fc.hidden = (list.length + (st.ready ? 1 : 0)) === 0; }
+    if (window.BGSWish) window.BGSWish.sync();
+  }
+
+  document.addEventListener("click", function (e) {
+    var st = params(), touched = false;
+    var rm = e.target.closest("[data-rm]");
+    if (rm) {
+      var k = rm.getAttribute("data-rm"), v = rm.getAttribute("data-val");
+      if (k === "q") st.q = ""; else st[k] = st[k].filter(function (x) { return x !== v; });
+      touched = true;
+    }
+    if (e.target.closest("[data-toggle]")) { st.ready = !st.ready; touched = true; }
+    if (e.target.closest("[data-clearall]")) { st = { cat: [], price: [], gender: [], ready: false, sort: st.sort, q: "" }; touched = true; }
+    if (touched) { e.preventDefault(); write(st); render(); }
+  });
+  document.addEventListener("change", function (e) {
+    var cb = e.target.closest("[data-facet]");
+    if (cb) {
+      var st = params(), k = cb.getAttribute("data-facet");
+      if (cb.checked) { if (st[k].indexOf(cb.value) < 0) st[k].push(cb.value); }
+      else st[k] = st[k].filter(function (x) { return x !== cb.value; });
+      write(st); render(); return;
+    }
+    var sel = e.target.closest("[data-sort]");
+    if (sel) { var s2 = params(); s2.sort = sel.value; write(s2); render(); }
+  });
+  render();
+})();
+
+
+/* ---------- wishlist hearts, on every page ---------------------------------
+   The heart sits inside the card's own link, so its handler must stop the
+   click reaching the anchor. State is per browser; there is no account yet.
+--------------------------------------------------------------------------- */
+(function () {
+  "use strict";
+  function get() { try { return JSON.parse(localStorage.getItem("bgs_wish") || "[]"); } catch (e) { return []; } }
+  function set(a) { try { localStorage.setItem("bgs_wish", JSON.stringify(a)); } catch (e) {} }
+  function sync() {
+    var w = get();
+    document.querySelectorAll("[data-wish]").forEach(function (b) {
+      var on = w.indexOf(b.getAttribute("data-wish")) > -1;
+      b.classList.toggle("on", on);
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    document.querySelectorAll("[data-wishcount]").forEach(function (c) { c.textContent = w.length; c.hidden = w.length === 0; });
+  }
+  window.BGSWish = { get: get, sync: sync };
+  document.addEventListener("click", function (e) {
+    var wish = e.target.closest("[data-wish]");
+    if (!wish) return;
+    e.preventDefault(); e.stopPropagation();
+    var k = wish.getAttribute("data-wish"), w = get(), i = w.indexOf(k);
+    if (i > -1) w.splice(i, 1); else w.push(k);
+    set(w); sync();
+  });
+  sync();
+})();

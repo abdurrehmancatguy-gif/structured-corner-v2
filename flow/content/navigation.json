@@ -88,13 +88,13 @@
     },
     {
       "label": "Discovery",
-      "href": "collection.html?cat=discovery",
+      "href": "collection.html?cat=gift-sets",
       "swatch": "c_disc",
       "photo": "fresh"
     },
     {
       "label": "Shop by Occasion",
-      "href": "collection.html?cat=occasion",
+      "href": "gift-box.html",
       "swatch": "c_occ",
       "photo": "amber"
     },

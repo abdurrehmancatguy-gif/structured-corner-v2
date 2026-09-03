@@ -134,24 +134,25 @@ SETS = [("Discovery Trio","3 &times; 3 ml","129"),("His &amp; Hers Duo","2 &time
 
 def card(name, meta, price, sizes=None, halo=False, notes=None, barcode=None, low=None,
          pid=None, images=None):
+    key = pid or slug(name)
     b = '<span class="badge res">Reserve</span>' if halo else ''
     if low: b = '<span class="badge low">%s left</span>' % low
     sz = ''
     if sizes:
-        sz = '<div class="sizes">' + "".join('<span%s>%s</span>' % (ON if i==1 else "", s)
-                                             for i, s in enumerate(sizes)) + '</div>'
-    nt = '<span class="notes">%s</span>' % notes if notes else '<span class="notes">%s</span>' % slot("scent notes")
-    bc = '<span class="norm">Barcode %s</span>' % barcode if barcode else ''
+        sz = '<div class="sizes">' + "".join(
+            '<span%s data-size="%s">%s</span>' % (ON if i == 1 else "", s, s)
+            for i, s in enumerate(sizes)) + '</div>'
+    nt = '<span class="notes">%s</span>' % notes if notes else ''
     hl = '<span class="norm">Never discounted</span>' if halo else ''
+    heart = ('<button type="button" class="heart" data-wish="%s" aria-pressed="false" '
+             'aria-label="Save %s to wishlist">%s</button>'
+             % (key, name.replace('"', '&quot;'), sv("heart", 15)))
     return """<a class="p" href="product.html?p=%s">
-  <div class="ph">%s%s<span class="heart">%s</span></div>
+  <div class="ph">%s%s%s</div>
   <div class="b"><span class="meta">%s</span><span class="nm">%s</span>%s
-  <span class="tax">%s &middot; %s</span>
-  <span class="rev">%s</span>
-  %s<div class="pr"><b>AED %s</b></div>%s%s
+  %s<div class="pr"><b>AED %s</b></div>%s
   <span class="btn sm solid" style="margin-top:4px">Add to bag</span></div></a>""" % (
-    (pid or slug(name)), ph_img(images, name), b, sv("heart",15), meta, name, nt, slot("family"), slot("tone"),
-    slot("no reviews yet"), sz, price, hl, bc)
+    key, ph_img(images, name), b, heart, meta, name, nt, sz, price, hl)
 
 def ph_img(images, alt, card_size=True):
     """A real photograph if the product has one, the placeholder if not.
@@ -191,7 +192,7 @@ def _meta(pr):
 def _cards(cat, n=None):
     out = []
     for pr in published(cat)[:n]:
-        sizes = ["%s &middot; %s" % (z["label"], money(z["price"])) for z in pr.get("sizes", [])] or None
+        sizes = ["%s &middot; AED %s" % (z["label"], money(z["price"])) for z in pr.get("sizes", [])] or None
         stock = pr.get("stock")
         notes = None
         if pr.get("top") or pr.get("heart"):
@@ -332,54 +333,63 @@ home = """
            bakhoor=bakhoor_cards(4), edp=edp_cards(6), ct=slot("count"))
 
 # ---------------------------------------------------------------- COLLECTION
-FACETS = [("Scent family",["Oud &amp; Woods","Amber &amp; Spice","Musk &amp; Clean","Floral Veil",
-           "Fresh &amp; Citrus","Sweet &amp; Gourmand","Reserve"]),
-          ("Tone",["Bold","Soft","Warm","Fresh","Mysterious","Modern"]),
-          ("Gender",["Him","Her","Unisex"]),
-          ("Format &amp; size",["Oud oil","EDP spray","Bakhoor","Gift set","3 ml","6 ml","12 ml","50 g"]),
-          ("Occasion",["Daily","Office","Evening","Wedding","Gift","Majlis"]),
-          ("Longevity",["Moderate","Long","Very long"]),
-          ("Sillage",["Intimate","Noticeable","Room-filling"]),
-          ("Season",["Summer-safe","Winter","Day","Night"]),
-          ("Availability",["Ready today"])]
-def facet(t, rows):
-    return '<div class="fbox"><h4>%s</h4>%s</div>' % (t, "".join(
-        '<label><input type="checkbox">%s<span class="ct">%s</span></label>' % (n, slot(",")) for n in rows))
+# Only facets the content layer actually carries: category and price for all
+# products, gender for the EDP sprays. Family/tone/occasion/season are in the
+# brief taxonomy but have no per-product value in any source, so they are not
+# offered as controls that would do nothing.
+FACETS_LIVE = [
+    ("Category", "cat", [("Oud oils", "oud-oils"), ("Reserve", "reserve"),
+                         ("Bakhoor", "bakhoor"), ("EDP sprays", "edp"),
+                         ("Gift sets", "gift-sets")]),
+    ("Price", "price", [("Under AED 50", "0-49"), ("AED 50-100", "50-100"),
+                        ("AED 100-200", "100-200"), ("AED 200+", "200-999999")]),
+    ("Gender", "gender", [("Him", "Him"), ("Her", "Her"), ("Unisex", "Unisex")]),
+]
+
+def facet_live(title, key, rows):
+    return '<div class="fbox"><h4>%s</h4>%s</div>' % (title, "".join(
+        '<label><input type="checkbox" data-facet="%s" value="%s">%s</label>' % (key, val, lbl)
+        for lbl, val in rows))
 
 collection = """
 <section><div class="wrap">
-  <span class="eyebrow">Home / Oud Oils</span>
-  <div class="sec-h" style="margin-top:10px"><div><h2 style="font-size:26px">Oud oils</h2>
-  <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0;max-width:70ch">Alcohol-free perfume oil in 3 ml and 6 ml. Eleven house blends.</p></div></div>
+  <span class="eyebrow" data-crumb>Home / All products</span>
+  <div class="sec-h" style="margin-top:10px"><div>
+    <h2 style="font-size:26px" data-title>All products</h2>
+    <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0;max-width:70ch" data-intro>Every blend in the shop: oud oils, Reserve, bakhoor, EDP sprays and gift sets.</p></div></div>
   <div class="plp">
     <div class="side" data-filters>
       <div class="drawerhead"><b>Filters</b><button type="button" class="closex" data-closefilters aria-label="Close filters">&times;</button></div>
-      <div class="toolbar" style="border:0;padding:0;margin-bottom:6px"><b style="font-size:13px">Filters</b><a href="#" style="font-size:12.5px;color:var(--gold-d)">Clear all</a></div>
+      <div class="toolbar" style="border:0;padding:0;margin-bottom:6px"><b style="font-size:13px">Filters</b><button type="button" class="linkbtn" data-clearall>Clear all</button></div>
       %(facets)s
-      <div class="fbox"><h4>Price</h4>
-        <label><input type="checkbox">Under AED 50<span class="ct">%(s)s</span></label>
-        <label><input type="checkbox">AED 50&ndash;100<span class="ct">%(s)s</span></label>
-        <label><input type="checkbox">AED 100&ndash;200<span class="ct">%(s)s</span></label>
-        <label><input type="checkbox">AED 200+<span class="ct">%(s)s</span></label>
-      </div>
-      <div class="draweractions"><button type="button" class="btn solid block" data-closefilters>Show 11 products</button></div>
+      <div class="draweractions"><button type="button" class="btn solid block" data-closefilters>Show <span data-count>34</span> products</button></div>
     </div>
     <div class="scrim" data-closefilters></div>
     <div>
       <div class="toolbar">
-        <button type="button" class="filterbtn" data-openfilters>%(filt)s Filters <i class="fcount">1</i></button>
-        <div class="pills"><span class="pill on">Oud oil &times;</span><span class="pill">Ready today</span><span class="pill">Summer-safe</span></div>
+        <button type="button" class="filterbtn" data-openfilters>%(filt)s Filters <i class="fcount" data-fcount hidden>0</i></button>
+        <div class="pills" data-pills></div>
         <div style="display:flex;gap:12px;align-items:center">
-          <span style="font-size:13px;color:var(--mut)">11 products</span>
-          <span class="sel">Sort: Featured %(chev)s</span></div>
+          <span style="font-size:13px;color:var(--mut)"><span data-count>34</span> products</span>
+          <label class="sel"><span class="none-visual">Sort</span>
+            <select data-sort aria-label="Sort products">
+              <option value="featured">Sort: Featured</option>
+              <option value="price-asc">Price: low to high</option>
+              <option value="price-desc">Price: high to low</option>
+              <option value="name">Name: A to Z</option>
+            </select>%(chev)s</label></div>
       </div>
-      <div class="grid g4">%(cards)s</div>
-      <div class="pager"><span class="on">1</span><span>2</span><span>&rarr;</span></div>
+      <div class="grid g4" data-grid></div>
+      <div class="emptystate" data-empty hidden>
+        <b>Nothing matches those filters.</b>
+        <p style="color:var(--mut);font-size:13.5px;margin:6px 0 14px">Try removing one, or clear them all.</p>
+        <button type="button" class="btn ghost" data-clearall>Clear all filters</button>
+      </div>
     </div>
   </div>
 </div></section>
-""" % dict(facets="".join(facet(t,r) for t,r in FACETS), chev=sv("chev",13,2),
-           cards=oudoil_cards(), s=slot(","), filt=sv("filter",15,1.9))
+""" % dict(facets="".join(facet_live(t, k, r) for t, k, r in FACETS_LIVE),
+           chev=sv("chev", 13, 2), filt=sv("filter", 15, 1.9))
 
 # ---------------------------------------------------------------- PDP
 product = """
