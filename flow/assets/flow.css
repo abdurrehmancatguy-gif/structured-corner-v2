@@ -1137,3 +1137,12 @@ input.field:focus{outline:2px solid var(--gold);outline-offset:1px;border-color:
   cursor:pointer;padding:0;width:100%}
 .slot-filled:hover{border-color:var(--gold)}
 .slot-filled:hover .notes{color:var(--gold)}
+
+/* footer is dark: its muted placeholders/soon items keep the footer's light
+   grey, not --faint (which is tuned for the light page grounds) */
+footer .slot,footer .soon{color:#b9b0a4}
+
+/* the gift-box CTA sits on a light summary card; its not-full (ghost) state
+   must be dark-on-light, not the hero's white-on-transparent ghost */
+[data-boxcta].ghost{border-color:var(--line);color:var(--ink);background:#fff}
+[data-boxcta].ghost:hover{border-color:var(--ink)}
