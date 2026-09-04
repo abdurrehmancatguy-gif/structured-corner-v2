@@ -88,17 +88,16 @@ def shell(title, body, nav_on="", tab="Home", strip_here=True, page=""):
   <span class="r"><a href="#">Free UAE delivery over AED 150</a><a href="#">Cash on delivery</a><a href="track-order.html">Track order</a><a href="#" data-langtoggle>العربية</a></span>
 </div></div>
 <div class="mast"><div class="wrap">
-  <span class="burger">%(menu)s</span>
   <a class="logo" href="index.html"><span class="logomark">%(slotlogo)s</span><span class="wm">BGS CORNER</span></a>
-  <div class="search"><span class="cat">All categories %(chev)s</span>
-    <input placeholder="Search ouds, oud, bakhoor&hellip;"><span class="go">%(search)s</span></div>
+  <form class="search" action="collection.html" method="get" role="search">
+    <input name="q" aria-label="Search products" placeholder="Search ouds, oud, bakhoor&hellip;"><button type="submit" class="go" aria-label="Search">%(search)s</button></form>
   <div class="acts">
     <a class="act" href="account.html">%(user)s<span>Account</span></a>
     <a class="act" href="account.html">%(heart)s<span>Wishlist</span></a>
     <a class="act" href="cart.html">%(bag)s<span>Bag</span><i class="n">4</i></a>
   </div>
 </div>
-<div class="msearch"><div class="search"><input placeholder="Search ouds, oud, bakhoor&hellip;"><span class="go">%(search)s</span></div></div></div>
+<div class="msearch"><form class="search" action="collection.html" method="get" role="search"><input name="q" aria-label="Search products" placeholder="Search ouds, oud, bakhoor&hellip;"><button type="submit" class="go" aria-label="Search">%(search)s</button></form></div></div>
 %(strip)s
 %(body)s
 <footer><div class="wrap"><div class="cols">
@@ -574,7 +573,7 @@ cart = """
       <div class="r" data-vatrow style="color:var(--mut);font-size:12.5px"><span>Includes VAT at 5%%</span><span data-vat>AED 39.31</span></div>
       <div class="r t"><span>Total</span><span data-total>AED 825.50</span></div>
       <a class="btn solid block" href="checkout.html" style="margin-top:12px">Checkout</a>
-      <div class="pay" style="margin-top:14px;justify-content:center"><span>Card</span><span>Apple Pay</span><span>Tabby</span><span>Tamara</span><span class="off">COD</span></div>
+      <div class="pay" data-pay style="margin-top:14px;justify-content:center"><span>Card</span><span>Apple Pay</span><span>Tabby</span><span>Tamara</span><span class="off">COD</span></div>
       <p data-codnote style="font-size:11.5px;color:var(--mut);margin:12px 0 0;text-align:center">Cash on delivery is withheld over AED 300.</p>
     </div></div>
   </div>
@@ -601,7 +600,7 @@ checkout = """
         <div><span><b>Scheduled</b></span><span>Tomorrow to +30 days</span></div>
       </div>
       <span class="eyebrow">3 &middot; Payment</span>
-      <div class="pay" style="margin:10px 0 14px"><span class="on">Card</span><span>Apple Pay</span><span>Tabby</span><span>Tamara</span><span class="off">Cash on delivery</span></div>
+      <div class="pay" data-paypick style="margin:10px 0 14px"><button type="button" class="on">Card</button><button type="button">Apple Pay</button><button type="button">Tabby</button><button type="button">Tamara</button><button type="button" data-codbtn>Cash on delivery</button></div>
       <div class="note">COD is withheld here because the bag is over AED 300. Under that it carries an AED 8 fee, waived when paid online. It is also withheld on QR-video orders and from customers with a prior refusal.</div>
     </div>
     <div><div class="sum">

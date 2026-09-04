@@ -815,3 +815,17 @@
     });
   });
 })();
+
+
+/* ---------- checkout: selectable payment method ---------- */
+(function () {
+  "use strict";
+  var pick = document.querySelector("[data-paypick]");
+  if (!pick) return;
+  pick.addEventListener("click", function (e) {
+    var b = e.target.closest("button");
+    if (!b) return;
+    pick.querySelectorAll("button").forEach(function (x) { x.classList.remove("on"); });
+    b.classList.add("on");
+  });
+})();
