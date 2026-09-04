@@ -114,7 +114,7 @@ def shell(title, body, nav_on="", tab="Home", strip_here=True, page="", desc="",
 <link rel="stylesheet" href="assets/flow.css?v=%(cssv)s"></head><body class="%(page)s">
 <div class="strip"><div class="wrap">
   <span>%(clock)s Order by 2:00 PM for delivery today in Dubai &middot; <b>3h 47m</b></span>
-  <span class="r"><a href="#">Free UAE delivery over AED 150</a><a href="#">Cash on delivery</a><a href="track-order.html">Track order</a><a href="#" data-langtoggle>العربية</a></span>
+  <span class="r"><span>Free UAE delivery over AED 150</span><span>Cash on delivery</span><a href="track-order.html">Track order</a><a href="#" data-langtoggle>العربية</a></span>
 </div></div>
 <div class="mast"><div class="wrap">
   <a class="logo" href="index.html"><span class="logomark">%(slotlogo)s</span><span class="wm">BGS CORNER</span></a>
@@ -134,8 +134,8 @@ def shell(title, body, nav_on="", tab="Home", strip_here=True, page="", desc="",
     <p>BGS Corner General Trading LLC &middot; Dubai, UAE</p>
     <p>%(addr)s</p><div class="nl"><span class="field">Your email</span><span class="btn">Join</span></div></div>
   <div><h5>Shop</h5><a href="collection.html">Oud Oils</a><a href="collection.html">Oud</a><a href="collection.html">Bakhoor</a><a href="collection.html">EDP sprays</a><a href="gift-box.html">Gift sets</a></div>
-  <div><h5>Help</h5><a href="#">Delivery &amp; returns</a><a href="#">How to apply oud</a><a href="track-order.html">Track your order</a><a href="#">FAQ</a></div>
-  <div><h5>BGS Corner</h5><a href="account.html">Your account</a><a href="#">Our story</a><a href="corporate.html">Corporate gifting</a><a href="#">Wholesale</a></div>
+  <div><h5>Help</h5><a href="product.html?p=royal-amber&amp;tab=delivery">Delivery &amp; returns</a><a href="product.html?p=royal-amber&amp;tab=apply">How to apply oud</a><a href="track-order.html">Track your order</a><span class="soon">FAQ</span></div>
+  <div><h5>BGS Corner</h5><a href="account.html">Your account</a><span class="soon">Our story</span><a href="corporate.html">Corporate gifting</a><a href="corporate.html">Wholesale</a></div>
 </div><div class="bot"><span>&copy; 2026 BGS Corner General Trading LLC</span>
 <span>Cards &middot; Apple Pay &middot; Tabby &middot; Tamara &middot; Cash on delivery</span></div></div></footer>
 <div class="tabbar">%(tabs)s</div>
@@ -681,8 +681,13 @@ corporate = """
     <div class="sum" style="background:#fff"><span class="eyebrow">50 units</span><div class="tier">%(s)s</div><p style="font-size:12.5px;color:var(--mut);margin:0">Co-branding options</p></div>
     <div class="sum" style="background:#fff"><span class="eyebrow">100 units</span><div class="tier">Quote</div><p style="font-size:12.5px;color:var(--mut);margin:0">Full co-branding</p></div>
   </div>
-  <div class="note" style="margin-bottom:20px">The brief specifies a 10 / 25 / 50 / 100 tier table but sets no per-unit prices, and neither spreadsheet carries them.</div>
-  <div class="band"><div><h3>Tell us the occasion and the headcount</h3><p>The enquiry opens a pipeline opportunity; 20+ units go to quote rather than checkout.</p></div><a class="btn gold" href="#">Request a quote</a></div>
+  <div class="band"><div><h3>Tell us the occasion and the headcount</h3><p>Above 20 units this becomes a quote rather than a checkout. Send the details and we will come back with pricing.</p></div><a class="btn gold" href="#corporate-form">Request a quote</a></div>
+  <div id="corporate-form" style="margin-top:22px;max-width:560px">
+    <div class="grid g2" style="margin-bottom:12px"><input class="field" data-cq="name" aria-label="Your name" placeholder="Your name"><input class="field" data-cq="email" type="email" aria-label="Work email" placeholder="Work email"></div>
+    <div class="grid g2" style="margin-bottom:12px"><input class="field" data-cq="occasion" aria-label="Occasion" placeholder="Occasion (Eid, wedding, staff gift)"><input class="field" data-cq="units" type="number" aria-label="Units" placeholder="Headcount / units"></div>
+    <button type="button" class="btn solid" data-cqsend>Send enquiry</button>
+    <p class="note" data-cqresult hidden style="margin:10px 0 0"></p>
+  </div>
 </div></section>
 """ % dict(s="On quote")
 
@@ -691,8 +696,9 @@ track = """
   <span class="eyebrow">Home / Track order</span>
   <div class="sec-h" style="margin-top:10px"><div><h2 style="font-size:26px">Track your order</h2>
   <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">Enter the order number from your confirmation, or the phone number you ordered with.</p></div></div>
-  <div class="grid g2" style="margin-bottom:14px"><span class="field">Order number</span><span class="field">Phone &middot; UAE</span></div>
-  <a class="btn solid block" href="#" style="margin-bottom:26px">Find my order</a>
+  <div class="grid g2" style="margin-bottom:14px"><input class="field" data-ordernum aria-label="Order number" placeholder="Order number"><input class="field" data-orderphone type="tel" aria-label="Phone number" placeholder="Phone &middot; UAE"></div>
+  <button type="button" class="btn solid block" data-findorder style="margin-bottom:10px">Find my order</button>
+  <p class="note" data-findresult hidden style="margin:0 0 26px"></p>
   <span class="eyebrow">Where it will be</span>
   <div class="kv" style="margin-top:10px">
     <div><span>Placed</span><span>Order confirmed, payment taken</span></div>

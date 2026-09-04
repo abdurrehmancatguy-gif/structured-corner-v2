@@ -1122,3 +1122,12 @@ footer .wm{color:#fff}
    Join button use the darker gold so their labels clear AA */
 .act .n{background:var(--gold-d)}
 .nl .btn{background:var(--gold-d);border-color:var(--gold-d)}
+
+/* footer items with no page yet: shown, not linked */
+.soon{color:var(--faint);cursor:default}
+
+/* real form inputs on track-order and corporate (were mock spans) */
+input.field{appearance:none;-webkit-appearance:none;font-family:inherit;font-size:14px;
+  color:var(--ink);background:#fff;width:100%}
+input.field::placeholder{color:var(--faint)}
+input.field:focus{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--ink)}

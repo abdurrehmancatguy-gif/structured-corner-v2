@@ -813,6 +813,8 @@
       pnl.hidden = pnl.getAttribute("data-panel") !== name;
     });
   }
+  var want = new URLSearchParams(location.search).get("tab");
+  if (want && document.querySelector('[data-tab="' + want + '"]')) show(want);
   tabs.forEach(function (t) {
     t.addEventListener("click", function () { show(t.getAttribute("data-tab")); });
     t.addEventListener("keydown", function (e) {
@@ -850,4 +852,36 @@
   var m = document.createElement("meta");
   m.name = "robots"; m.content = "noindex,follow";
   document.head.appendChild(m);
+})();
+
+
+/* ---------- track order + corporate enquiry (front-end only) ----------------
+   There is no backend, and these say so rather than pretending. Find-my-order
+   validates the number and reveals the standard status sequence; the corporate
+   form validates an email and acknowledges the enquiry.
+--------------------------------------------------------------------------- */
+(function () {
+  "use strict";
+  var find = document.querySelector("[data-findorder]");
+  if (find) {
+    find.addEventListener("click", function () {
+      var num = (document.querySelector("[data-ordernum]") || {}).value || "";
+      var phone = (document.querySelector("[data-orderphone]") || {}).value || "";
+      var out = document.querySelector("[data-findresult]");
+      out.hidden = false;
+      if (!num.trim() && !phone.trim()) { out.textContent = "Enter your order number, or the phone you ordered with."; return; }
+      out.textContent = "Looking for " + (num.trim() || phone.trim()) + ". Live courier tracking connects with the backend; the stages below are the standard sequence your order moves through.";
+    });
+  }
+  var send = document.querySelector("[data-cqsend]");
+  if (send) {
+    send.addEventListener("click", function () {
+      var g = function (k) { var e = document.querySelector('[data-cq="' + k + '"]'); return e ? e.value.trim() : ""; };
+      var out = document.querySelector("[data-cqresult]");
+      out.hidden = false;
+      var email = g("email");
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { out.textContent = "Enter a valid work email so we can reply."; return; }
+      out.textContent = "Thank you" + (g("name") ? ", " + g("name") : "") + ". We will come back with a quote" + (g("units") ? " for " + g("units") + " units" : "") + ". This form is front-end only for now; the enquiry is not yet sent anywhere.";
+    });
+  }
 })();
