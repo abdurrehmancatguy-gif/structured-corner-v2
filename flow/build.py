@@ -309,8 +309,8 @@ home = """
 </div></section>
 
 <section class="alt"><div class="wrap">
-  <div class="sec-h"><h2>House ouds</h2><a href="collection.html">All 12 &rarr;</a></div>
-  <div class="grid g4">%(attars)s</div>
+  <div class="sec-h"><h2>House ouds</h2><a href="collection.html?cat=oud-oils">All 12 &rarr;</a></div>
+  <div class="grid g5">%(attars)s</div>
 </div></section>
 
 <section><div class="wrap"><div class="band">
@@ -327,7 +327,7 @@ home = """
 
 <section class="alt"><div class="wrap">
   <div class="sec-h"><h2>Gift sets</h2><a href="gift-box.html">All sets &rarr;</a></div>
-  <div class="grid g3">%(sets)s</div>
+  <div class="grid g5">%(sets)s</div>
 </div></section>
 
 <section><div class="wrap">
@@ -353,13 +353,13 @@ home = """
 </div></section>
 
 <section class="alt"><div class="wrap">
-  <div class="sec-h"><h2>Bakhoor &amp; home</h2><a href="collection.html">All 5 &rarr;</a></div>
-  <div class="grid g4">%(bakhoor)s</div>
+  <div class="sec-h"><h2>Bakhoor &amp; home</h2><a href="collection.html?cat=bakhoor">Shop bakhoor &rarr;</a></div>
+  <div class="grid g5">%(bakhoor)s</div>
 </div></section>
 
 <section><div class="wrap">
-  <div class="sec-h"><h2>EDP sprays</h2><a href="collection.html">All 9 &rarr;</a></div>
-  <div class="grid g3">%(edp)s</div>
+  <div class="sec-h"><h2>EDP sprays</h2><a href="collection.html?cat=edp">All 9 &rarr;</a></div>
+  <div class="grid g5">%(edp)s</div>
 </div></section>
 """ % dict(catstrip=catstrip(), usp=usp_strip(),
            hero=hero_slides(), hero_dots=hero_dots(), hero_n=len(HOME["hero_slides"]),
@@ -367,8 +367,8 @@ home = """
            qb_body=COPY["quiz_banner"]["body"], qb_cta=COPY["quiz_banner"]["cta_label"],
            qb_href=COPY["quiz_banner"]["cta_href"],
            prev=sv("left",22,2), next=sv("right",22,2),
-           attars=oudoil_cards(4), oud=reserve_cards(), sets=set_cards(),
-           bakhoor=bakhoor_cards(4), edp=edp_cards(6), ct=slot("count"))
+           attars=oudoil_cards(5), oud=reserve_cards(), sets=set_cards(5),
+           bakhoor=bakhoor_cards(), edp=edp_cards(5), ct=slot("count"))
 
 # ---------------------------------------------------------------- COLLECTION
 # Only facets the content layer actually carries: category and price for all

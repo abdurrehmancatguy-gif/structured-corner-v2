@@ -207,7 +207,8 @@ footer a,footer p{display:block;font-size:13px;margin:0 0 9px;color:#b9b0a4;line
 .tabbar{display:none}
 
 /* ---------- responsive ---------- */
-@media (max-width:1080px){ .g5{grid-template-columns:repeat(4,minmax(0,1fr))} .cats{grid-template-columns:repeat(4,1fr)} }
+@media (max-width:1080px){ .cats{grid-template-columns:repeat(4,1fr)} }
+@media (max-width:1000px){ .g5{grid-template-columns:repeat(4,minmax(0,1fr))} }
 @media (max-width:900px){
   .wrap{padding:0 16px}
   .mast .wrap{padding:12px 16px;gap:14px}
