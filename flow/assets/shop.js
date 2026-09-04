@@ -522,27 +522,47 @@
     if (num) num.textContent = i + 1;
   }
 
+  /* manual navigation: move, then reset the autoplay countdown so it doesn't
+     yank the slide out from under the visitor a moment later */
+  function go(n) { show(n); start(); }
+
   thumbs.forEach(function (t) {
-    t.addEventListener("click", function () { show(+t.dataset.gt); });
+    t.addEventListener("click", function () { go(+t.dataset.gt); });
   });
-  root.querySelector("[data-gprev]").addEventListener("click", function () { show(i - 1); });
-  root.querySelector("[data-gnext]").addEventListener("click", function () { show(i + 1); });
+  root.querySelector("[data-gprev]").addEventListener("click", function () { go(i - 1); });
+  root.querySelector("[data-gnext]").addEventListener("click", function () { go(i + 1); });
 
   /* arrow keys when the gallery has focus, and swipe on touch */
   root.addEventListener("keydown", function (e) {
-    if (e.key === "ArrowLeft") { show(i - 1); }
-    if (e.key === "ArrowRight") { show(i + 1); }
+    if (e.key === "ArrowLeft") { go(i - 1); }
+    if (e.key === "ArrowRight") { go(i + 1); }
   });
   var x0 = null;
   root.addEventListener("touchstart", function (e) { x0 = e.touches[0].clientX; }, { passive: true });
   root.addEventListener("touchend", function (e) {
     if (x0 === null) return;
     var dx = e.changedTouches[0].clientX - x0;
-    if (Math.abs(dx) > 40) show(i + (dx < 0 ? 1 : -1));
+    if (Math.abs(dx) > 40) go(i + (dx < 0 ? 1 : -1));
     x0 = null;
   }, { passive: true });
 
+  /* autoplay: advance every AUTO ms. Pauses on hover and while the tab is
+     hidden, resets on any manual navigation, and stays off for single-image
+     products or visitors who prefer reduced motion. */
+  var AUTO = 5000, timer = null;
+  var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function stop() { if (timer) { clearInterval(timer); timer = null; } }
+  function start() {
+    stop();
+    if (slides.length < 2 || still) return;
+    timer = setInterval(function () { if (!document.hidden) show(i + 1); }, AUTO);
+  }
+  root.addEventListener("mouseenter", stop);
+  root.addEventListener("mouseleave", start);
+  document.addEventListener("visibilitychange", function () { if (document.hidden) { stop(); } else { start(); } });
+
   show(0);
+  start();
 })();
 
 
