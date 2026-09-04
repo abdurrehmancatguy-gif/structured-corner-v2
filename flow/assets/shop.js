@@ -191,9 +191,11 @@
       var sizeWrap = document.querySelector(".buy .sizes");
       if (sizeWrap) {
         if (pr.sizes) {
+          var psel = pr.sizes.findIndex(function (x) { return x.replace(/&middot;/g, "\u00b7").trim().endsWith("AED " + pr.price); });
+          if (psel < 0) psel = 0;
           sizeWrap.innerHTML = pr.sizes.map(function (x, i) {
-            return '<span' + (i === 1 ? ' class="on"' : '') +
-                   ' data-size="' + x + '">' + x + "</span>";
+            return '<button type="button"' + (i === psel ? ' class="on"' : '') +
+                   ' data-size="' + x + '">' + x + "</button>";
           }).join("");
         } else {
           var sb = sizeWrap.closest(".sizeblock");
@@ -673,9 +675,14 @@
   function cardHTML(key, pr) {
     var badge = pr.halo ? '<span class="badge res">Reserve</span>'
               : (pr.stock > 0 && pr.stock <= 5) ? '<span class="badge low">' + pr.stock + ' left</span>' : '';
+    var ssel = 0;
+    if (pr.sizes && pr.sizes.length) {
+      ssel = pr.sizes.findIndex(function (x) { return x.replace(/&middot;/g, "\u00b7").trim().endsWith("AED " + pr.price); });
+      if (ssel < 0) ssel = 0;
+    }
     var sizes = (pr.sizes && pr.sizes.length)
       ? '<div class="sizes">' + pr.sizes.map(function (sz, i) {
-          return '<span' + (i === 1 ? ' class="on"' : "") + ' data-size="' + esc(sz) + '">' + esc(sz) + "</span>"; }).join("") + '</div>'
+          return '<button type="button"' + (i === ssel ? ' class="on"' : "") + ' data-size="' + esc(sz) + '">' + esc(sz) + "</button>"; }).join("") + '</div>'
       : '';
     var notes = pr.top ? '<span class="notes">' + esc(pr.top) + "</span>" : "";
     return '<a class="p" href="product.html?p=' + key + '">' +

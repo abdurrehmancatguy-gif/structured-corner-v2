@@ -1,5 +1,5 @@
 :root{
-  --ink:#171310; --body:#4a423a; --mut:#7d7266; --faint:#a79c8f;
+  --ink:#171310; --body:#4a423a; --mut:#6b6154; --faint:#726858;
   --line:#e6e0d6; --hair:#f0ece4; --bg:#fff; --alt:#faf7f2;
   --gold:#a8791e; --gold-d:#8a5a14; --gold-l:#f6efdd;
   --red:#b3261e; --green:#2e6b3e; --blue:#2b5b7a;
@@ -1094,3 +1094,31 @@ footer .wm{color:#fff}
 .pay button:hover{border-color:var(--ink)}
 .pay button.on{border-color:var(--ink);border-width:1.5px;font-weight:600}
 .pay button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+/* ==========================================================================
+   Accessibility: keyboard-operable chips, legible placeholders, tap targets
+   -------------------------------------------------------------------------- */
+/* size chips are buttons now (keyboard + focus), styled like the old spans */
+.sizes button{appearance:none;-webkit-appearance:none;font-family:inherit;cursor:pointer;
+  border:1px solid var(--line);border-radius:2px;padding:4px 8px;font-size:11px;
+  color:var(--body);background:#fff}
+.sizes button.on{border-color:var(--ink);border-width:1.5px;color:var(--ink);font-weight:600}
+.sizes button:hover{border-color:var(--ink)}
+.sizes button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+/* placeholder text now clears AA (was 2.5-3.2:1) */
+.slot{color:var(--faint)}
+.p .ph .none,.heroimg .none,.cats .c .none,.gal .main .none,.gal .th div .none,
+.line .im .none,.p[style*="dashed"] .ph .none{color:var(--faint)}
+
+@media (max-width:900px){
+  .btn.sm{min-height:44px}
+  .heart{width:40px;height:40px}
+  .sizes button{min-height:40px}
+  .buy .pills .pill{min-height:40px}
+}
+
+/* white text on the accent fails at small sizes; the badge and the newsletter
+   Join button use the darker gold so their labels clear AA */
+.act .n{background:var(--gold-d)}
+.nl .btn{background:var(--gold-d);border-color:var(--gold-d)}

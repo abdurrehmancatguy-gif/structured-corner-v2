@@ -138,8 +138,12 @@ def card(name, meta, price, sizes=None, halo=False, notes=None, barcode=None, lo
     if low: b = '<span class="badge low">%s left</span>' % low
     sz = ''
     if sizes:
+        sel = 0
+        for i, ss in enumerate(sizes):
+            if ss.replace("&middot;", "·").rstrip().endswith("AED %s" % price):
+                sel = i; break
         sz = '<div class="sizes">' + "".join(
-            '<span%s data-size="%s">%s</span>' % (ON if i == 1 else "", s, s)
+            '<button type="button"%s data-size="%s">%s</button>' % (' class="on"' if i == sel else "", s, s)
             for i, s in enumerate(sizes)) + '</div>'
     nt = '<span class="notes">%s</span>' % notes if notes else ''
     hl = '<span class="norm">Never discounted</span>' if halo else ''
@@ -405,7 +409,7 @@ product = """
         <button type="button" class="galnav next" data-gnext aria-label="Next image">%(gnext)s</button>
         <span class="galcount"><b data-gnum>1</b>/4</span>
       </div>
-      <div class="galthumbs" role="tablist">
+      <div class="galthumbs">
         <button type="button" class="galthumb on" data-gt="0" aria-label="Image 1"><span>1</span></button>
         <button type="button" class="galthumb" data-gt="1" aria-label="Image 2"><span>2</span></button>
         <button type="button" class="galthumb" data-gt="2" aria-label="Image 3"><span>3</span></button>
@@ -418,7 +422,7 @@ product = """
         <span class="amt">AED 75</span>
         <span class="permeta">6 ml &middot; VAT included</span></div>
       <div class="sizeblock" data-sizeblock><span class="eyebrow">Size</span>
-        <div class="sizes" style="gap:8px"><span data-size="3 ml &middot; AED 45">3 ml &middot; AED 45</span><span class="on" data-size="6 ml &middot; AED 75">6 ml &middot; AED 75</span></div></div>
+        <div class="sizes" style="gap:8px"><button type="button" data-size="3 ml &middot; AED 45">3 ml &middot; AED 45</button><button type="button" class="on" data-size="6 ml &middot; AED 75">6 ml &middot; AED 75</button></div></div>
       <div class="atcrow">
         <span class="stepper" data-stepper><button type="button" data-step="-1" aria-label="Decrease quantity">&minus;</button><i data-qty>1</i><button type="button" data-step="1" aria-label="Increase quantity">+</button></span>
         <a class="btn solid" style="flex-grow:1" href="cart.html">Add to bag: AED 75</a></div>
