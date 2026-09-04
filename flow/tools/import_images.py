@@ -184,6 +184,11 @@ def check_seam(path):
     return {"worst_column_jump": round(worst, 2), "at_x": at,
             "at_pct": round(100 * at / w, 1)}
 
+# These nine now come from tools/import_new_edits.py (the re-edited folder);
+# this importer must not overwrite them from the old CORNER_RAW_IMAGES set.
+SUPERSEDED = {"amore","barcelona","be-mine","edward-the-black-prince","majlis-oud",
+              "pride-of-arabia","soleil-frais","suit-up","vibe"}
+
 def main():
     dry = "--dry-run" in sys.argv
     if not SRC.exists():
@@ -199,6 +204,8 @@ def main():
               or EXTRA_MAP.get(name) or BAKHOOR_MAP.get(name)
         if not pid or pid not in products:
             skipped.append(name)
+            continue
+        if pid in SUPERSEDED:
             continue
         plan[pid] = sorted(files)[:MAX_PER_PRODUCT]
 
