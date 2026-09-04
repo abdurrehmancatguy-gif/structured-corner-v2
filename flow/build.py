@@ -540,25 +540,23 @@ giftbox = """
 <section><div class="wrap">
   <span class="eyebrow">Home / Gift sets / Build a box</span>
   <div class="sec-h" style="margin-top:10px"><div><h2 style="font-size:26px">Build a gift box</h2>
-  <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">Three or six slots, filled from eligible products, leaving as one cart line with its contents itemised.</p></div></div>
+  <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">Three or six slots, filled from the house scents, leaving as one cart line with its contents itemised.</p></div></div>
   <div class="two">
     <div>
-      <div class="pills" style="margin-bottom:18px"><span class="pill on">3 slots</span><span class="pill">6 slots</span></div>
-      <div class="grid g3" style="margin-bottom:22px">
-        <div class="p"><div class="ph"><span class="none">Slot 1</span></div><div class="b"><span class="nm">Royal Amber</span><span class="notes">6 ml &middot; tap to remove</span></div></div>
-        <div class="p"><div class="ph"><span class="none">Slot 2</span></div><div class="b"><span class="nm">Majestic Musk</span><span class="notes">6 ml &middot; tap to remove</span></div></div>
-        <div class="p" style="border-style:dashed"><div class="ph" style="background:var(--alt)"><span class="none">Slot 3 empty</span></div><div class="b"><span class="nm" style="color:var(--faint)">Choose a scent</span><span class="notes">Pairing hint reads from the taxonomy</span></div></div>
-      </div>
+      <div class="pills" style="margin-bottom:18px">
+        <button type="button" class="pill on" data-boxsize="3">3 slots</button>
+        <button type="button" class="pill" data-boxsize="6">6 slots</button></div>
+      <div class="grid g3" data-slots style="margin-bottom:22px"></div>
       <div class="sec-h"><h2 style="font-size:17px">Add to the box</h2></div>
       <div class="grid g4">%(pick)s</div>
     </div>
     <div>
       <div class="sum">
-        <div class="r"><span>2 scents</span><span>AED 150</span></div>
+        <div class="r"><span data-boxn>0 scents</span><span data-boxscents>AED 0</span></div>
         <div class="r"><span>Premium box</span><span>AED 25</span></div>
-        <div class="r" style="color:var(--faint)"><span>Volume discount at 3 items</span><span>&minus;10%%</span></div>
-        <div class="r t"><span>Total</span><span>AED 175</span></div>
-        <a class="btn solid block" href="cart.html" style="margin-top:12px">Fill 1 more slot</a>
+        <div class="r" data-boxdisc style="color:var(--faint)"><span>Volume discount at 3 items</span><span>&minus;10%%</span></div>
+        <div class="r t"><span>Total</span><span data-boxtotal>AED 25</span></div>
+        <button type="button" class="btn ghost block" data-boxcta style="margin-top:12px">Fill 3 more slots</button>
       </div>
       <div class="sum" style="margin-top:16px;background:#fff">
         <span class="eyebrow">Gift options</span>
@@ -572,7 +570,7 @@ giftbox = """
     </div>
   </div>
 </div></section>
-""" % dict(pick=oudoil_cards(4))
+""" % dict(pick=oudoil_cards(6))
 
 def stepper(qty, fixed=False):
     if fixed:

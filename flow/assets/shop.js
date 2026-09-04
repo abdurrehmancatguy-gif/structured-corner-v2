@@ -885,3 +885,106 @@
     });
   }
 })();
+/* ---------- gift box builder ----------------------------------------------
+   Was a static mock: two inert "3 slots / 6 slots" pills, three hardcoded
+   slots and a total that never moved. The picker cards below it are ordinary
+   product links, so adding has to intercept the click the same way the
+   wishlist heart does.
+--------------------------------------------------------------------------- */
+(function () {
+  "use strict";
+  var slotsHost = document.querySelector("[data-slots]");
+  if (!slotsHost) return;
+  var CAT = window.BGS_CATALOGUE || {};
+  var BOX_FEE = 25;
+  var size = 3, picked = [];
+
+  function priceOf(k) { return (CAT[k] && CAT[k].pn) || 0; }
+
+  function renderSlots() {
+    var html = "";
+    for (var i = 0; i < size; i++) {
+      var k = picked[i];
+      if (k) {
+        html += '<button type="button" class="p slot-filled" data-unpick="' + i + '">' +
+          '<div class="ph"><span class="none">Slot ' + (i + 1) + "</span></div>" +
+          '<div class="b"><span class="nm">' + CAT[k].name + "</span>" +
+          '<span class="notes">AED ' + CAT[k].price + ' &middot; tap to remove</span></div></button>';
+      } else {
+        html += '<div class="p" style="border-style:dashed"><div class="ph" style="background:var(--alt)">' +
+          '<span class="none">Slot ' + (i + 1) + ' empty</span></div>' +
+          '<div class="b"><span class="nm" style="color:var(--faint)">Choose a scent</span>' +
+          '<span class="notes">Pick from below</span></div></div>';
+      }
+    }
+    slotsHost.innerHTML = html;
+    slotsHost.className = "grid " + (size === 6 ? "g3" : "g3");
+  }
+
+  function renderSummary() {
+    var n = picked.length;
+    var scents = picked.reduce(function (t, k) { return t + priceOf(k); }, 0);
+    var disc = n >= 3 ? Math.round(scents * 0.10) : 0;
+    var total = scents + BOX_FEE - disc;
+
+    var q = function (s) { return document.querySelector(s); };
+    q("[data-boxn]").textContent = n + (n === 1 ? " scent" : " scents");
+    q("[data-boxscents]").textContent = "AED " + scents;
+    var dr = q("[data-boxdisc]");
+    dr.style.color = n >= 3 ? "var(--green)" : "var(--faint)";
+    dr.querySelector("span:last-child").innerHTML = n >= 3 ? "&minus;AED " + disc : "&minus;10%";
+    q("[data-boxtotal]").textContent = "AED " + total;
+
+    var cta = q("[data-boxcta]"), left = size - n;
+    if (left > 0) {
+      cta.textContent = "Fill " + left + (left === 1 ? " more slot" : " more slots");
+      cta.classList.add("ghost"); cta.classList.remove("solid");
+    } else {
+      cta.textContent = "Add box to bag: AED " + total;
+      cta.classList.add("solid"); cta.classList.remove("ghost");
+    }
+  }
+
+  function render() { renderSlots(); renderSummary(); }
+
+  document.addEventListener("click", function (e) {
+    var sz = e.target.closest("[data-boxsize]");
+    if (sz) {
+      size = +sz.getAttribute("data-boxsize");
+      document.querySelectorAll("[data-boxsize]").forEach(function (b) {
+        b.classList.toggle("on", b === sz);
+      });
+      if (picked.length > size) picked = picked.slice(0, size);
+      render(); return;
+    }
+
+    var un = e.target.closest("[data-unpick]");
+    if (un) {
+      e.preventDefault();
+      picked.splice(+un.getAttribute("data-unpick"), 1);
+      render(); return;
+    }
+
+    /* the picker cards are product links; adding must not navigate */
+    var card = e.target.closest("[data-slots] ~ * .p, .two .grid.g4 .p");
+    if (card && card.getAttribute("href")) {
+      var key = new URLSearchParams(card.getAttribute("href").split("?")[1] || "").get("p");
+      if (!key || !CAT[key]) return;
+      e.preventDefault(); e.stopPropagation();
+      if (picked.length >= size) {
+        var cta = document.querySelector("[data-boxcta]");
+        cta.textContent = "Box is full, remove one first";
+        setTimeout(renderSummary, 1800);
+        return;
+      }
+      picked.push(key);
+      render();
+      return;
+    }
+
+    var go = e.target.closest("[data-boxcta]");
+    if (go && picked.length === size) location.href = "cart.html";
+  });
+
+  render();
+})();

@@ -1131,3 +1131,9 @@ input.field{appearance:none;-webkit-appearance:none;font-family:inherit;font-siz
   color:var(--ink);background:#fff;width:100%}
 input.field::placeholder{color:var(--faint)}
 input.field:focus{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--ink)}
+
+/* a filled gift-box slot is a button that removes itself on tap */
+.slot-filled{appearance:none;-webkit-appearance:none;text-align:left;font-family:inherit;
+  cursor:pointer;padding:0;width:100%}
+.slot-filled:hover{border-color:var(--gold)}
+.slot-filled:hover .notes{color:var(--gold)}
