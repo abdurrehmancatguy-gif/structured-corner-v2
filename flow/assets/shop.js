@@ -836,3 +836,18 @@
     b.classList.add("on");
   });
 })();
+
+
+/* ---------- SEO: keep faceted collection URLs out of the index -------------
+   The filter engine applies ?cat=&price=&gender=… client-side; the brief
+   (§14.4) wants those multi-facet combinations noindex,follow with a canonical
+   to the clean collection page, to prevent crawl explosion.
+--------------------------------------------------------------------------- */
+(function () {
+  "use strict";
+  if (!/collection\.html$/.test(location.pathname)) return;
+  if (!location.search) return;
+  var m = document.createElement("meta");
+  m.name = "robots"; m.content = "noindex,follow";
+  document.head.appendChild(m);
+})();

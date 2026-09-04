@@ -48,6 +48,23 @@ def load_content():
 
 C = load_content()
 SETTINGS = C["settings"]["store"]
+SEO = C["settings"].get("seo", {})
+SITE_URL = (C["settings"].get("site_url") or "").rstrip("/")
+
+# One-line description per page for <meta name=description> and OG.
+PAGE_DESC = {
+    "index.html": "Alcohol-free oud oils, bakhoor and EDP sprays, blended in Dubai. Same-day delivery in Dubai, free over AED 150.",
+    "collection.html": "Shop BGS Corner: oud oils, Reserve, bakhoor, EDP sprays and gift sets. Filter by category, price and gender.",
+    "product.html": "House-blended, alcohol-free fragrance from BGS Corner, Dubai. Oud oils, Reserve, bakhoor and EDP sprays.",
+    "gift-box.html": "Build a gift box of three or six house scents, wrapped, with a handwritten card. BGS Corner, Dubai.",
+    "cart.html": "Your BGS Corner bag.",
+    "checkout.html": "Guest checkout with card, Apple Pay, Tabby, Tamara or cash on delivery. BGS Corner, Dubai.",
+    "confirmed.html": "Order confirmed. BGS Corner, Dubai.",
+    "track-order.html": "Track your BGS Corner order by number or phone.",
+    "account.html": "Your BGS Corner account: BGS One rewards, wallet and referrals.",
+    "quiz.html": "Answer five questions and we will point you at the closest blend we make.",
+    "corporate.html": "Co-branded oud and bakhoor for corporate gifting. Above 20 units becomes a quote. BGS Corner, Dubai.",
+}
 NAVC     = C["navigation"]
 COPY     = C["copy"]
 HOME     = C["home"]
@@ -81,12 +98,20 @@ def catstrip():
         '<a class="c-{3}" href="{0}"><span class="circle">{1}</span><span>{2}</span></a>'.format(h, sv(ic, 30, 1.5), n, k)
         for n, h, ic, k in CATS) + '</div></div></div>')
 
-def shell(title, body, nav_on="", tab="Home", strip_here=True, page=""):
+def shell(title, body, nav_on="", tab="Home", strip_here=True, page="", desc="", canon=""):
     strip = catstrip()
     return """<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>%(title)s | BGS Corner</title><link rel="stylesheet" href="assets/flow.css?v=%(cssv)s"></head><body class="%(page)s">
+<title>%(title)s | BGS Corner</title>
+<meta name="description" content="%(desc)s">
+<link rel="canonical" href="%(canon)s">
+<meta property="og:type" content="website">
+<meta property="og:title" content="%(title)s | BGS Corner">
+<meta property="og:description" content="%(desc)s">
+<meta property="og:image" content="%(ogimg)s">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="assets/flow.css?v=%(cssv)s"></head><body class="%(page)s">
 <div class="strip"><div class="wrap">
   <span>%(clock)s Order by 2:00 PM for delivery today in Dubai &middot; <b>3h 47m</b></span>
   <span class="r"><a href="#">Free UAE delivery over AED 150</a><a href="#">Cash on delivery</a><a href="track-order.html">Track order</a><a href="#" data-langtoggle>العربية</a></span>
@@ -117,6 +142,8 @@ def shell(title, body, nav_on="", tab="Home", strip_here=True, page=""):
 <script src="assets/catalogue.js?v=%(cssv)s"></script>
 <script src="assets/shop.js?v=%(cssv)s"></script></body></html>
 """ % dict(title=title, body=body, cssv=CSSV, page=page,
+   desc=esc(desc), canon=esc(canon),
+   ogimg=esc((SITE_URL + "/" + SEO.get("og_image", "") ) if SITE_URL else SEO.get("og_image", "")),
    strip=(strip if strip_here else ""), tabs="".join(A(l,h,tab) for l,h in TABS),
    clock=sv("clock",13,2), menu=sv("menu",22), chev=sv("chev",14,2), search=sv("search",17),
    user=sv("user"), heart=sv("heart"), bag=sv("bag"),
@@ -657,7 +684,7 @@ corporate = """
   <div class="note" style="margin-bottom:20px">The brief specifies a 10 / 25 / 50 / 100 tier table but sets no per-unit prices, and neither spreadsheet carries them.</div>
   <div class="band"><div><h3>Tell us the occasion and the headcount</h3><p>The enquiry opens a pipeline opportunity; 20+ units go to quote rather than checkout.</p></div><a class="btn gold" href="#">Request a quote</a></div>
 </div></section>
-""" % dict(s=slot("price not set"))
+""" % dict(s="On quote")
 
 track = """
 <section><div class="wrap" style="max-width:720px">
@@ -949,6 +976,9 @@ CSSV = hashlib.md5(b"".join(
     pathlib.Path("assets/" + f).read_bytes() for f in ("flow.css", "shop.js", "catalogue.js")
 )).hexdigest()[:8]
 for fn, t, b, on, tab in PAGES:
+    canon = (SITE_URL + "/" + fn) if SITE_URL else fn
     pathlib.Path(fn).write_text(shell(t, b, on, tab, strip_here=(fn != "index.html"),
-                                      page="page-" + fn.replace(".html", "")))
+                                      page="page-" + fn.replace(".html", ""),
+                                      desc=PAGE_DESC.get(fn, SEO.get("default_description", "")),
+                                      canon=canon))
 print("wrote", len(PAGES), "pages")
