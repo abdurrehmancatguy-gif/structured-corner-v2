@@ -1,4 +1,9 @@
 {
+  "brand": {
+    "logo": "assets/img/logo.png",
+    "logo_light": "assets/img/logo-light.png",
+    "logo_alt": "BGS Corner"
+  },
   "store": {
     "name": "BGS Corner",
     "legal_name": "BGS Corner General Trading LLC",

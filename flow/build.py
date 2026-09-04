@@ -89,6 +89,29 @@ def slot(label):
     """A field with no value in any of the three sources."""
     return '<span class="slot">%s</span>' % label
 
+BRAND = C["settings"].get("brand", {})
+
+def _brand_alt():
+    return esc(BRAND.get("logo_alt") or SETTINGS.get("name") or "BGS Corner")
+
+def header_logo():
+    """Masthead brand: the logo image when set in settings.brand, else the
+    wordmark fallback. Content-driven — the admin swaps the file, not the code."""
+    logo = BRAND.get("logo")
+    if logo:
+        return ('<a class="logo" href="index.html">'
+                '<img class="brandmark" src="%s" alt="%s"></a>' % (esc(logo), _brand_alt()))
+    return ('<a class="logo" href="index.html"><span class="logomark">%s</span>'
+            '<span class="wm">BGS CORNER</span></a>' % slot("logo"))
+
+def footer_logo():
+    """Footer brand: the light logo on the dark ground, else the wordmark."""
+    logo = BRAND.get("logo_light") or BRAND.get("logo")
+    if logo:
+        return '<img class="foot-logo" src="%s" alt="%s">' % (esc(logo), _brand_alt())
+    return ('<div class="wm" style="color:#fff;font-size:20px;margin-bottom:14px">'
+            'BGS CORNER</div>')
+
 NAV = [(n["label"], n["href"]) for n in NAVC["main"]]
 TABS = [(n["label"], n["href"]) for n in NAVC["tabs"]]
 
@@ -117,7 +140,7 @@ def shell(title, body, nav_on="", tab="Home", strip_here=True, page="", desc="",
   <span class="r"><span>Free UAE delivery over AED 150</span><span>Cash on delivery</span><a href="track-order.html">Track order</a><a href="#" data-langtoggle>العربية</a></span>
 </div></div>
 <div class="mast"><div class="wrap">
-  <a class="logo" href="index.html"><span class="logomark">%(slotlogo)s</span><span class="wm">BGS CORNER</span></a>
+  %(brandlogo)s
   <form class="search" action="collection.html" method="get" role="search">
     <input name="q" aria-label="Search products" placeholder="Search ouds, oud, bakhoor&hellip;"><button type="submit" class="go" aria-label="Search">%(search)s</button></form>
   <div class="acts">
@@ -130,7 +153,7 @@ def shell(title, body, nav_on="", tab="Home", strip_here=True, page="", desc="",
 %(strip)s
 %(body)s
 <footer><div class="wrap"><div class="cols">
-  <div><div class="wm" style="color:#fff;font-size:20px;margin-bottom:14px">BGS CORNER</div>
+  <div>%(footlogo)s
     <p>BGS Corner General Trading LLC &middot; Dubai, UAE</p>
     <p>%(addr)s</p><div class="nl"><span class="field">Your email</span><span class="btn">Join</span></div></div>
   <div><h5>Shop</h5><a href="collection.html">Oud Oils</a><a href="collection.html">Oud</a><a href="collection.html">Bakhoor</a><a href="collection.html">EDP sprays</a><a href="gift-box.html">Gift sets</a></div>
@@ -147,7 +170,7 @@ def shell(title, body, nav_on="", tab="Home", strip_here=True, page="", desc="",
    strip=(strip if strip_here else ""), tabs="".join(A(l,h,tab) for l,h in TABS),
    clock=sv("clock",13,2), menu=sv("menu",22), chev=sv("chev",14,2), search=sv("search",17),
    user=sv("user"), heart=sv("heart"), bag=sv("bag"),
-   slotlogo=slot("logo"), addr=slot("address, hours, phone"))
+   brandlogo=header_logo(), footlogo=footer_logo(), addr=slot("address, hours, phone"))
 
 # ---------------------------------------------------------------- DATA
 # names + sizes: BGS Corner Sheet.xlsx "OUD & Bakhoor Stock"; prices: brief §3

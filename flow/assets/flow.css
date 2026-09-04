@@ -1147,3 +1147,9 @@ footer .slot,footer .soon{color:#b9b0a4}
    must be dark-on-light, not the hero's white-on-transparent ghost */
 [data-boxcta].ghost{border-color:var(--line);color:var(--ink);background:#fff}
 [data-boxcta].ghost:hover{border-color:var(--ink)}
+
+/* ---- brand logo (masthead + footer), content-driven from settings.brand ---- */
+.logo .brandmark{height:34px;width:auto;display:block}
+.foot-logo{height:30px;width:auto;display:block;margin-bottom:14px}
+@media (max-width:900px){ .logo .brandmark{height:30px} }
+@media (max-width:700px){ .logo .brandmark{height:26px} .foot-logo{height:26px} }
