@@ -3,7 +3,11 @@
 #   B) BGS Corner Sheet.xlsx          (product lineup, weights, August selling prices)
 #   C) BGS_Perfume_Ingredients.xlsx   (EDP note profiles + barcodes)
 # No images. No data from any other source. Unsourced fields render as placeholders.
-import pathlib, hashlib, json
+import pathlib, hashlib, json, html
+
+def esc(t):
+    """Escape admin-authored free text so a typed & or < cannot break markup."""
+    return html.escape(str(t), quote=True)
 CSSV = hashlib.md5(pathlib.Path("assets/flow.css").read_bytes()).hexdigest()[:8]
 
 def I(d, w=18, s=1.6):
@@ -54,7 +58,7 @@ def published(cat=None):
     rows = [dict(p, id=k) for k, p in PRODUCTS.items() if p.get("published", True)]
     if cat:
         rows = [r for r in rows if r.get("category") == cat]
-    return sorted(rows, key=lambda r: r.get("order", 0))
+    return sorted(rows, key=lambda r: r.get("order") or 0)
 
 ON = ' class="on"'
 def A(l, h, on):
@@ -149,13 +153,13 @@ def card(name, meta, price, sizes=None, halo=False, notes=None, barcode=None, lo
     hl = '<span class="norm">Never discounted</span>' if halo else ''
     heart = ('<button type="button" class="heart" data-wish="%s" aria-pressed="false" '
              'aria-label="Save %s to wishlist">%s</button>'
-             % (key, name.replace('"', '&quot;'), sv("heart", 15)))
+             % (key, esc(name), sv("heart", 15)))
     return """<a class="p" href="product.html?p=%s">
   <div class="ph">%s%s%s</div>
   <div class="b"><span class="meta">%s</span><span class="nm">%s</span>%s
   %s<div class="pr"><b>AED %s</b></div>%s
   <span class="btn sm solid" style="margin-top:4px">Add to bag</span></div></a>""" % (
-    key, ph_img(images, name), b, heart, meta, name, nt, sz, price, hl)
+    key, ph_img(images, name), b, heart, meta, esc(name), nt, sz, price, hl)
 
 def ph_img(images, alt, card_size=True):
     """A real photograph if the product has one, the placeholder if not.
@@ -178,8 +182,12 @@ def ph_img(images, alt, card_size=True):
     return out
 
 def money(n):
-    """Prices carry a thousands separator: AED 1,295 not AED 1295."""
-    return "{:,}".format(int(n))
+    """Prices carry a thousands separator: AED 1,295 not AED 1295.
+       A cleared field (None / "") coerces to 0 rather than crashing the build."""
+    try:
+        return "{:,}".format(int(str(n).replace(",", "")))
+    except (TypeError, ValueError):
+        return "0"
 
 def _meta(pr):
     """The one place a product's meta line is composed, so the admin can change
@@ -229,9 +237,9 @@ def hero_slides():
     for i, sl in enumerate(HOME["hero_slides"]):
         cta = ""
         if sl.get("primary"):
-            cta += '<a class="btn gold" href="%s">%s</a>' % (sl["primary"]["href"], sl["primary"]["label"])
+            cta += '<a class="btn gold" href="%s">%s</a>' % (esc(sl["primary"]["href"]), esc(sl["primary"]["label"]))
         if sl.get("secondary"):
-            cta += '<a class="btn ghost" href="%s">%s</a>' % (sl["secondary"]["href"], sl["secondary"]["label"])
+            cta += '<a class="btn ghost" href="%s">%s</a>' % (esc(sl["secondary"]["href"]), esc(sl["secondary"]["label"]))
         out.append(
             '<div class="over slide%s" data-slide><div class="wrap"><div class="box">'
             '<span class="eyebrow gold">%s</span>'
@@ -239,8 +247,8 @@ def hero_slides():
             '<p>%s</p>'
             '<div style="display:flex;gap:10px;flex-wrap:wrap">%s</div>'
             '</div></div></div>'
-            % (" on" if i == 0 else "", sl.get("eyebrow", ""),
-               sl.get("headline", "").replace("\n", "<br>"), sl.get("body", ""), cta))
+            % (" on" if i == 0 else "", esc(sl.get("eyebrow", "")),
+               esc(sl.get("headline", "")).replace("\n", "<br>"), esc(sl.get("body", "")), cta))
     return "".join(out)
 
 def hero_dots():
@@ -892,7 +900,8 @@ def emit_catalogue():
     for pr in published():
         doc = {
             "name": pr["name"], "meta": _meta(pr), "price": money(pr["price"]),
-            "pn": int(pr["price"]), "cat": pr["category"],
+            "pn": (int(str(pr["price"]).replace(",", "")) if str(pr.get("price", "")).strip().replace(",", "").isdigit() else 0),
+            "cat": pr["category"],
             "crumb": CRUMB.get(pr["category"], ""),
         }
         if pr.get("sizes"):
@@ -933,6 +942,12 @@ PAGES = [("index.html","Oud Oils, Bakhoor &amp; EDP Sprays: Blended in Dubai",ho
          ("quiz.html","Test Your Scent: Five Questions, One Minute",quiz,"","Home"),
          ("corporate.html","Corporate Gifting: Co-Branded Oud and Bakhoor",corporate,"Corporate Gifting","Home")]
 print("catalogue:", emit_catalogue(), "products")
+# The ?v= token stamps flow.css, shop.js AND catalogue.js, so it must hash all
+# three (catalogue.js is written by emit_catalogue above). Hashing only flow.css
+# served stale JS after any content or script edit.
+CSSV = hashlib.md5(b"".join(
+    pathlib.Path("assets/" + f).read_bytes() for f in ("flow.css", "shop.js", "catalogue.js")
+)).hexdigest()[:8]
 for fn, t, b, on, tab in PAGES:
     pathlib.Path(fn).write_text(shell(t, b, on, tab, strip_here=(fn != "index.html"),
                                       page="page-" + fn.replace(".html", "")))
