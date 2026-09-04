@@ -33,6 +33,10 @@ ORDER = {
     "soleil-frais": ["Solei 2 301 (1).png", "Solei 1 301 (1).png", "Solei 3 301 (1).png", "solei 4 301.. (1).png"],
     "suit-up": ["Suit up 1 301 (1).png", "suit up 2 301 (1).png", "Suit up 3 301 (1).png", "Suit up 4  301(1).png"],
     "vibe": ["Vibe 1 301 (1).png", "Vibe 3 301 (1).png", "Vibe 2 301 (1).png", "Vibe4 301 (1).png"],
+    # recovered from a chat paste (see tools/recover_pasted_velvet.py); lone bottle,
+    # then the shot with the BGS box, then the two lifestyle frames.
+    "velvet-spell": ["Velvet Spell 1 lone 301.webp", "Velvet Spell 2 box 301.webp",
+                     "Velvet Spell 3 301.webp", "Velvet Spell 4 301.webp"],
 }
 
 
@@ -56,14 +60,23 @@ def main():
     products = json.loads(CONTENT.read_text())
     dry = "--dry-run" in sys.argv
 
+    # optional whitelist: any non-flag args restrict the run to those product ids
+    # (so re-importing one product doesn't churn the others' derivatives)
+    want = [a for a in sys.argv[1:] if not a.startswith("-")]
+    plan = {pid: files for pid, files in ORDER.items() if not want or pid in want}
+    if want:
+        unknown = [a for a in want if a not in ORDER]
+        if unknown:
+            sys.exit("not in ORDER: %s" % ", ".join(unknown))
+
     # verify every source file exists before touching anything
-    missing = [(pid, f) for pid, files in ORDER.items() for f in files if not (SRC / f).exists()]
+    missing = [(pid, f) for pid, files in plan.items() for f in files if not (SRC / f).exists()]
     if missing:
         for pid, f in missing:
             print("MISSING:", pid, "->", f)
         sys.exit("aborting: %d source files not found" % len(missing))
 
-    for pid, files in ORDER.items():
+    for pid, files in plan.items():
         if pid not in products:
             print("skip (no such product):", pid); continue
         if dry:
@@ -83,7 +96,7 @@ def main():
 
     if not dry:
         CONTENT.write_text(json.dumps(products, indent=2, ensure_ascii=False) + "\n")
-        print("updated products.json for %d products" % len(ORDER))
+        print("updated products.json for %d products" % len(plan))
 
 
 if __name__ == "__main__":

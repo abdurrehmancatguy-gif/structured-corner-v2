@@ -756,12 +756,10 @@
     "published": true,
     "order": 19,
     "images": [
-      "velvet-spell-2.jpg",
       "velvet-spell-1.jpg",
+      "velvet-spell-2.jpg",
       "velvet-spell-3.jpg",
-      "velvet-spell-4.jpg",
-      "velvet-spell-5.jpg",
-      "velvet-spell-6.jpg"
+      "velvet-spell-4.jpg"
     ],
     "name_ar": "",
     "story_ar": [],

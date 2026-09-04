@@ -187,7 +187,7 @@ def check_seam(path):
 # These nine now come from tools/import_new_edits.py (the re-edited folder);
 # this importer must not overwrite them from the old CORNER_RAW_IMAGES set.
 SUPERSEDED = {"amore","barcelona","be-mine","edward-the-black-prince","majlis-oud",
-              "pride-of-arabia","soleil-frais","suit-up","vibe"}
+              "pride-of-arabia","soleil-frais","suit-up","vibe","velvet-spell"}
 
 def main():
     dry = "--dry-run" in sys.argv
