@@ -96,19 +96,28 @@ def _brand_alt():
 
 def header_logo():
     """Masthead brand: the logo image when set in settings.brand, else the
-    wordmark fallback. Content-driven — the admin swaps the file, not the code."""
+    wordmark fallback. Content-driven — the admin swaps the file, not the code.
+    The logo art reads "BGS"; settings.brand.suffix ("CORNER") is set beside it
+    in a matching serif so the lockup reads as the full name."""
     logo = BRAND.get("logo")
+    suffix = BRAND.get("suffix", "")
     if logo:
+        alt = "BGS" if suffix else _brand_alt()
+        word = ('<span class="brandword">%s</span>' % esc(suffix)) if suffix else ""
         return ('<a class="logo" href="index.html">'
-                '<img class="brandmark" src="%s" alt="%s"></a>' % (esc(logo), _brand_alt()))
+                '<img class="brandmark" src="%s" alt="%s">%s</a>' % (esc(logo), alt, word))
     return ('<a class="logo" href="index.html"><span class="logomark">%s</span>'
             '<span class="wm">BGS CORNER</span></a>' % slot("logo"))
 
 def footer_logo():
-    """Footer brand: the light logo on the dark ground, else the wordmark."""
+    """Footer brand: the light logo (+ suffix) on the dark ground, else wordmark."""
     logo = BRAND.get("logo_light") or BRAND.get("logo")
+    suffix = BRAND.get("suffix", "")
     if logo:
-        return '<img class="foot-logo" src="%s" alt="%s">' % (esc(logo), _brand_alt())
+        alt = "BGS" if suffix else _brand_alt()
+        word = ('<span class="brandword foot-brandword">%s</span>' % esc(suffix)) if suffix else ""
+        return ('<span class="foot-brand">'
+                '<img class="foot-logo" src="%s" alt="%s">%s</span>' % (esc(logo), alt, word))
     return ('<div class="wm" style="color:#fff;font-size:20px;margin-bottom:14px">'
             'BGS CORNER</div>')
 
