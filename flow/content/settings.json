@@ -3,7 +3,13 @@
     "logo": "assets/img/logo.png",
     "logo_light": "assets/img/logo-light.png",
     "logo_alt": "BGS Corner",
-    "suffix": "CORNER"
+    "suffix": "CORNER",
+    "icons": {
+      "ico": "favicon.ico",
+      "png32": "assets/img/favicon-32.png",
+      "png16": "assets/img/favicon-16.png",
+      "apple": "assets/img/apple-touch-icon.png"
+    }
   },
   "store": {
     "name": "BGS Corner",
