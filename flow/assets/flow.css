@@ -1161,3 +1161,45 @@ footer .slot,footer .soon{color:#b9b0a4}
 @media (max-width:900px){ .logo .brandmark{height:30px} .brandword{font-size:28px} }
 @media (max-width:700px){ .logo .brandmark{height:26px} .brandword{font-size:24px}
   .foot-logo{height:26px} .foot-brandword{font-size:24px} }
+
+/* ---- product grids: four across further down, on a tighter card ------------
+   The grids dropped straight from four (or five) columns to two at 900px, so
+   on a narrow laptop window or a zoomed page every product card blew up to
+   ~430px wide — a product card the size of a hero. Four now hold down to
+   900px, three to 700, two only on phones, and the card's padding, type and
+   controls step down with the columns so four across reads compact rather
+   than cramped. The 44px touch targets are kept for touch devices; only fine
+   pointers get the smaller controls. */
+@media (max-width:900px){
+  .grid.g5,.grid.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .grid.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .grid{gap:12px}
+  .p .b{padding:10px;gap:5px}
+  .p .meta{font-size:9px;letter-spacing:.09em}
+  .p .nm{font-size:12.5px;line-height:1.25}
+  .p .notes{font-size:10.5px;line-height:1.4}
+  .p .pr b{font-size:14px}
+  .p .pr s{font-size:11px}
+  .p .tax,.p .rev,.p .norm,.norm{font-size:10px}
+  .sizes{gap:4px}
+  .p .sizes button{padding:3px 6px;font-size:10px}
+  .badge{font-size:8.5px;padding:3px 6px;top:7px;left:7px}
+  .p .btn.sm{font-size:11.5px;padding:7px 8px}
+}
+@media (max-width:900px) and (pointer:fine){
+  .p .btn.sm{min-height:34px}
+  .p .sizes button{min-height:0}
+  .p .heart{width:26px;height:26px;top:6px;right:6px}
+}
+@media (max-width:700px){
+  .grid.g5,.grid.g4{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (max-width:560px){
+  .grid.g5,.grid.g4,.grid.g3{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid{gap:10px}
+  .p .b{padding:11px;gap:6px}
+  .p .nm{font-size:13px}
+  .p .notes{font-size:11px}
+  .p .pr b{font-size:15px}
+  .p .sizes button{padding:4px 7px;font-size:10.5px}
+}
