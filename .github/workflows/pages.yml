@@ -1,0 +1,48 @@
+# Publish the storefront to GitHub Pages.
+#
+# Pages' "deploy from a branch" option can only serve the repository root or
+# /docs, and the site lives in flow/. This workflow uploads flow/ as the Pages
+# artifact instead, so nothing has to be moved or duplicated, and Netlify keeps
+# deploying from the same commit unchanged.
+#
+# No build step runs here: build.py generates the HTML locally and the output is
+# committed, so the artifact is just the flow/ directory as it stands.
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:        # lets you run it by hand from the Actions tab
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never let two Pages deploys race; queue them instead.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload flow/ as the Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: flow
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
