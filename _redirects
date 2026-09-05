@@ -1,0 +1,11 @@
+# Fallback for when Netlify publishes the REPOSITORY ROOT instead of flow/.
+#
+# The correct setup is netlify.toml's `publish = "flow"`, and when that is in
+# effect this file sits outside the publish directory and is ignored entirely.
+# But if the site's publish directory is overridden in the Netlify UI, or a
+# base directory makes the root netlify.toml get skipped, the root is served
+# instead — and the root has no index.html, so every path 404s.
+#
+# This rewrite makes that case work too: serve everything out of flow/.
+# 200 = rewrite (URL stays clean), not a 301 redirect.
+/*  /flow/:splat  200
