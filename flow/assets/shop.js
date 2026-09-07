@@ -159,7 +159,7 @@
       if (crumb) crumb.textContent = "Home / " + pr.crumb + " / " + pr.name;
 
       /* the four-line story */
-      var d = document.querySelector(".buy p");
+      var d = document.querySelector("[data-desc]");
       if (d) {
         if (pr.story && pr.story.length) {
           d.className = "story";
@@ -263,7 +263,9 @@
       if (pr.top || pr.heart || pr.base) {
         [["top", pr.top], ["heart", pr.heart], ["base", pr.base]].forEach(function (t) {
           document.querySelectorAll('[data-note="' + t[0] + '"]').forEach(function (el) {
-            el.textContent = t[1] || "\u2014";
+            el.textContent = t[1] || "";
+            var col = el.closest("[data-notestop] > div");
+            if (col) col.hidden = !t[1];
           });
         });
       } else {
@@ -722,7 +724,7 @@
     st.cat.forEach(function (c) { out.push(["cat", c, CAT_LABEL[c] || c]); });
     st.gender.forEach(function (g) { out.push(["gender", g, g]); });
     st.price.forEach(function (b) { var p = b.split("-");
-      out.push(["price", b, +p[1] > 99998 ? "AED " + p[0] + "+" : "AED " + p[0] + "-" + p[1]]); });
+      out.push(["price", b, +p[1] > 99998 ? "AED " + p[0] + "+" : "AED " + p[0] + " to " + p[1]]); });
     if (st.q) out.push(["q", st.q, '"' + st.q + '"']);
     return out;
   }

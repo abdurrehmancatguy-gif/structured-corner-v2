@@ -1243,3 +1243,20 @@ footer .slot,footer .soon{color:#b9b0a4}
 .galmain{max-height:min(62vh,560px)}
 .galmain img{width:100%;height:100%;object-fit:cover}
 @media (max-width:900px){ .galmain{max-height:min(52vh,360px)} }
+
+/* Fit the product page to one screen: the gallery leaves room for its own
+   thumbnails, and the reference rows underneath stop eating 43px each. */
+.galmain{max-height:min(52vh,470px)}
+.gal .th img,.galthumbs img{object-fit:cover}
+.buy .belowbuy .kv div{padding:7px 0}
+.buy .belowbuy .note{padding:10px 13px;font-size:12px}
+.buy .belowbuy{margin-top:10px}
+.buy .btn.block{margin-bottom:8px}
+.notestop{margin:2px 0 12px}
+@media (max-width:900px){ .galmain{max-height:min(46vh,330px)} }
+.buy .belowbuy .kv div{padding:5px 0}
+.buy .belowbuy .kv + .kv{margin-top:10px !important}
+.buy .story{margin:10px 0 12px}
+.buy .story span{line-height:1.45}
+.buy .belowbuy{margin-top:4px}
+.buy .belowbuy .kv + .kv{margin-top:5px !important}
