@@ -91,6 +91,7 @@
     if (cod) cod.classList.toggle("off", over);
     if (note) note.style.display = over ? "" : "none";
   }
+  window.BGS_RECALC = recalc;
   recalc();
 
   /* ---------- language toggle: direction is the thing worth seeing ---------- */
@@ -711,7 +712,7 @@
       '<div class="b"><span class="meta">' + esc(pr.meta) + "</span><span class=\"nm\">" + esc(pr.name) + "</span>" + notes + sizes +
       '<div class="pr"><b>AED ' + esc(pr.price) + "</b></div>" +
       (pr.halo ? '<span class="norm">Never discounted</span>' : "") +
-      '<span class="btn sm solid" style="margin-top:4px">Add to bag</span></div></a>';
+      '<button type="button" class="btn sm solid" data-add="' + key + '" style="margin-top:4px">Add to bag</button></div></a>';
   }
   function pillsFor(st) {
     var out = [];
@@ -1006,5 +1007,169 @@
     if (go && picked.length === size) location.href = "cart.html";
   });
 
+  render();
+})();
+
+
+/* ---------- cart: real state, in localStorage ------------------------------
+   Replaces the four demo lines that used to be baked into cart.html at build
+   time. Stored as [{id, qty}]; the gift line is derived from the subtotal at
+   render time rather than stored, so it cannot be edited or orphaned.
+--------------------------------------------------------------------------- */
+(function () {
+  "use strict";
+
+  var KEY = "bgs_cart";
+  var GIFT_AT = 300;
+
+  function read() {
+    try {
+      var v = JSON.parse(localStorage.getItem(KEY) || "[]");
+      return Array.isArray(v) ? v.filter(function (l) { return l && l.id; }) : [];
+    } catch (e) { return []; }
+  }
+  function write(lines) {
+    try { localStorage.setItem(KEY, JSON.stringify(lines)); } catch (e) {}
+    paintCount();
+    render();
+  }
+  function cat(id) {
+    return (window.BGS_CATALOGUE && window.BGS_CATALOGUE[id]) || null;
+  }
+  function units() {
+    return read().reduce(function (n, l) { return n + (l.qty || 0); }, 0);
+  }
+
+  function add(id, qty) {
+    if (!id || !cat(id)) return false;
+    var lines = read(), hit = null;
+    lines.forEach(function (l) { if (l.id === id) hit = l; });
+    if (hit) hit.qty = Math.min(20, (hit.qty || 1) + (qty || 1));
+    else lines.push({ id: id, qty: Math.min(20, qty || 1) });
+    write(lines);
+    return true;
+  }
+  function setQty(id, qty) {
+    var lines = read().map(function (l) {
+      return l.id === id ? { id: id, qty: Math.max(1, Math.min(20, qty)) } : l;
+    });
+    write(lines);
+  }
+  function remove(id) {
+    write(read().filter(function (l) { return l.id !== id; }));
+  }
+
+  /* the bag badge, on every page */
+  function paintCount() {
+    var n = units();
+    document.querySelectorAll("[data-bagcount]").forEach(function (el) {
+      el.textContent = n;
+      el.hidden = n === 0;
+    });
+    var label = document.querySelector("[data-bagitems]");
+    if (label) label.textContent = n ? " · " + n + (n === 1 ? " item" : " items") : "";
+  }
+
+  function money(n) {
+    return "AED " + n.toLocaleString("en-AE", { maximumFractionDigits: 2 });
+  }
+
+  function lineHtml(l, p) {
+    var halo = !!p.halo;
+    var img = (p.images && p.images[0])
+      ? '<img src="assets/img/' + p.images[0].replace(/\.jpg$/, "-card.jpg") +
+        '" alt="' + (p.name || "").replace(/"/g, "&quot;") + '">'
+      : '<span class="none">Image</span>';
+    return '<div class="line" data-line data-id="' + l.id + '" data-unit="' + p.pn +
+      '" data-halo="' + (halo ? "1" : "0") + '" data-gift="0">' +
+      '<a class="im" href="product.html?p=' + l.id + '">' + img + '</a>' +
+      '<div class="linfo"><div class="lname">' + p.name + '</div>' +
+      '<div class="lmeta">' + (p.meta || "") + '</div>' +
+      '<span class="stepper" data-stepper>' +
+        '<button type="button" data-step="-1" aria-label="Decrease quantity">&minus;</button>' +
+        '<i data-qty>' + l.qty + '</i>' +
+        '<button type="button" data-step="1" aria-label="Increase quantity">+</button></span>' +
+      (halo ? '<div class="norm" style="margin-top:6px">Never discounted</div>' : "") +
+      '<button type="button" class="lrem" data-remove="' + l.id + '">Remove</button>' +
+      '</div>' +
+      '<div class="lprice"><span data-lineprice>' + money(p.pn * l.qty) + '</span></div></div>';
+  }
+
+  function giftHtml() {
+    return '<div class="line" data-line data-unit="0" data-halo="0" data-gift="1">' +
+      '<div class="im"><span class="none">Gift</span></div>' +
+      '<div class="linfo"><div class="lname">Mystery oud, 3 ml</div>' +
+      '<div class="lmeta">Gift with purchase over AED ' + GIFT_AT + '</div></div>' +
+      '<div class="lprice"><span data-lineprice>Free</span></div></div>';
+  }
+
+  function render() {
+    var host = document.querySelector("[data-cartlines]");
+    if (!host) return;                       // not the cart page
+
+    var lines = read().filter(function (l) { return cat(l.id); });
+    var sub = lines.reduce(function (n, l) { return n + cat(l.id).pn * l.qty; }, 0);
+
+    host.innerHTML = lines.map(function (l) { return lineHtml(l, cat(l.id)); }).join("") +
+      (sub >= GIFT_AT ? giftHtml() : "");
+
+    var empty = lines.length === 0;
+    var toggle = function (sel, hide) {
+      var el = document.querySelector(sel);
+      if (el) el.hidden = hide;
+    };
+    toggle("[data-cartempty]", !empty);
+    toggle("[data-cartsummary]", empty);
+    toggle("[data-cartprogress]", empty);
+    toggle("[data-cartnote]", empty || !lines.some(function (l) {
+      var p = cat(l.id);
+      return p && !!p.halo;
+    }));
+
+    if (typeof window.BGS_RECALC === "function") window.BGS_RECALC();
+  }
+
+  /* add to bag, from anywhere */
+  document.addEventListener("click", function (e) {
+    var btn = e.target.closest("[data-add]");
+    if (btn) {
+      e.preventDefault();
+      e.stopPropagation();                   // cards are wrapped in a link
+      var id = btn.getAttribute("data-add");
+      if (!id) {                             // PDP: the product in the URL
+        id = new URLSearchParams(location.search).get("p");
+      }
+      var qty = 1;
+      if (btn.hasAttribute("data-addqty")) {
+        var q = document.querySelector("[data-stepper] [data-qty]");
+        qty = q ? parseInt(q.textContent, 10) || 1 : 1;
+      }
+      if (add(id, qty)) {
+        var was = btn.textContent;
+        btn.textContent = "Added";
+        setTimeout(function () { btn.textContent = was; }, 1200);
+      }
+      return;
+    }
+
+    var rem = e.target.closest("[data-remove]");
+    if (rem) {
+      e.preventDefault();
+      remove(rem.getAttribute("data-remove"));
+    }
+  });
+
+  /* quantity steppers on the cart page write through to storage */
+  document.addEventListener("click", function (e) {
+    var step = e.target.closest("[data-line] [data-step]");
+    if (!step) return;
+    var line = step.closest("[data-line]");
+    var id = line && line.getAttribute("data-id");
+    if (!id) return;
+    var cur = parseInt(line.querySelector("[data-qty]").textContent, 10) || 1;
+    setQty(id, cur + (parseInt(step.dataset.step, 10) || 0));
+  }, true);
+
+  paintCount();
   render();
 })();

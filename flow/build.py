@@ -171,7 +171,7 @@ def shell(title, body, nav_on="", tab="Home", strip_here=True, page="", desc="",
   <div class="acts">
     <a class="act" href="account.html">%(user)s<span>Account</span></a>
     <a class="act" href="account.html">%(heart)s<span>Wishlist</span></a>
-    <a class="act" href="cart.html">%(bag)s<span>Bag</span><i class="n">4</i></a>
+    <a class="act" href="cart.html">%(bag)s<span>Bag</span><i class="n" data-bagcount hidden>0</i></a>
   </div>
 </div>
 <div class="msearch"><form class="search" action="collection.html" method="get" role="search"><input name="q" aria-label="Search products" placeholder="Search ouds, oud, bakhoor&hellip;"><button type="submit" class="go" aria-label="Search">%(search)s</button></form></div></div>
@@ -234,8 +234,8 @@ def card(name, meta, price, sizes=None, halo=False, notes=None, barcode=None, lo
   <div class="ph">%s%s%s</div>
   <div class="b"><span class="meta">%s</span><span class="nm">%s</span>%s
   %s<div class="pr"><b>AED %s</b></div>%s
-  <span class="btn sm solid" style="margin-top:4px">Add to bag</span></div></a>""" % (
-    key, ph_img(images, name), b, heart, meta, esc(name), nt, sz, price, hl)
+  <button type="button" class="btn sm solid" data-add="%s" style="margin-top:4px">Add to bag</button></div></a>""" % (
+    key, ph_img(images, name), b, heart, meta, esc(name), nt, sz, price, hl, key)
 
 def ph_img(images, alt, card_size=True):
     """A real photograph if the product has one, the placeholder if not.
@@ -509,7 +509,7 @@ product = """
         <div class="sizes" style="gap:8px"><button type="button" data-size="3 ml &middot; AED 45">3 ml &middot; AED 45</button><button type="button" class="on" data-size="6 ml &middot; AED 75">6 ml &middot; AED 75</button></div></div>
       <div class="atcrow">
         <span class="stepper" data-stepper><button type="button" data-step="-1" aria-label="Decrease quantity">&minus;</button><i data-qty>1</i><button type="button" data-step="1" aria-label="Increase quantity">+</button></span>
-        <a class="btn solid" style="flex-grow:1" href="cart.html">Add to bag: AED 75</a></div>
+        <button type="button" class="btn solid" style="flex-grow:1" data-add data-addqty>Add to bag: AED 75</button></div>
       <a class="btn block" href="gift-box.html" style="margin-bottom:12px">Send as a gift</a>
 
       <div class="belowbuy">
@@ -531,7 +531,7 @@ product = """
 </div></section>
 <div class="stickybuy">
   <div><b data-sbname>Royal Amber</b><span data-sbmeta>AED 75 &middot; 6 ml</span></div>
-  <a class="btn solid sm" href="cart.html">Add to bag</a>
+  <button type="button" class="btn solid sm" data-add data-addqty>Add to bag</button>
 </div>
 <section class="alt"><div class="wrap">
   <div class="tabs2" role="tablist">
@@ -641,19 +641,23 @@ def cline(name, meta, unit, qty, extra="", halo=False, gift=False):
 
 cart = """
 <section><div class="wrap">
-  <div class="sec-h"><h2 style="font-size:26px">Your bag &middot; 4 items</h2><a href="collection.html">Continue shopping &rarr;</a></div>
+  <div class="sec-h"><h2 style="font-size:26px">Your bag<span data-bagitems></span></h2><a href="collection.html">Continue shopping &rarr;</a></div>
   <div class="two">
     <div>
-      <div class="sum" style="background:#fff;margin-bottom:18px">
+      <div class="sum" data-cartprogress style="background:#fff;margin-bottom:18px">
         <div class="prog"><div class="lb"><span>Free UAE delivery over AED 150</span><b data-p1lb style="color:var(--green)">Unlocked</b></div><div class="tr"><i data-p1 style="width:100%%"></i></div></div>
         <div class="prog" style="margin-top:14px"><div class="lb"><span>Free mystery oud over AED 300</span><b data-p2lb style="color:var(--green)">Unlocked</b></div><div class="tr"><i data-p2 style="width:100%%"></i></div></div>
         <div class="prog" style="margin-top:14px"><div class="lb"><span data-p3txt>Add 3 more items to save 15%%</span><b data-p3lb style="color:var(--gold-d)">3 of 6</b></div><div class="tr"><i class="part" data-p3 style="width:50%%"></i></div></div>
       </div>
-      %(l1)s%(l2)s%(l3)s%(l4)s
-      <div class="note" style="margin-top:16px">The 10%% volume discount applies to the three eligible items only. Majlis OUD is a Reserve piece. It is never discounted, on any offer, at any basket size.</div>
+      <div data-cartlines></div>
+      <div data-cartempty class="empty" hidden>
+        <p style="margin-bottom:16px">Your bag is empty.</p>
+        <a class="btn solid" href="collection.html">Browse the collection</a>
+      </div>
+      <div data-cartnote class="note" style="margin-top:16px" hidden>Reserve pieces are never discounted, on any offer, at any basket size, so they sit outside the volume ladder.</div>
     </div>
-    <div><div class="sum">
-      <div class="r"><span>Subtotal</span><span data-subtotal>AED 845</span></div>
+    <div data-cartsummary><div class="sum">
+      <div class="r"><span>Subtotal</span><span data-subtotal>AED 0</span></div>
       <div class="r" style="color:var(--green)" data-tierrow><span>Volume discount &middot; <b data-tierpct>10</b>%%</span><span data-tieramt>&minus; AED 19.50</span></div>
       <div class="r"><span>Delivery</span><span data-delivery style="color:var(--green)">Free</span></div>
       <div class="r" data-vatrow style="color:var(--mut);font-size:12.5px"><span>Includes VAT at 5%%</span><span data-vat>AED 39.31</span></div>
@@ -664,12 +668,7 @@ cart = """
     </div></div>
   </div>
 </div></section>
-""" % dict(vat=slot("VAT registration expected ~month 9"),
-  l1=cline("Royal Amber","Oud oil &middot; 6 ml", 75, 2),
-  l2=cline("Imperial Crown","Oud oil &middot; 3 ml &middot; AED 45 credit back", 45, 1),
-  l3=cline("Majlis OUD","Oud &middot; 6 ml &middot; Reserve", 650, 1,
-           '<div class="norm" style="margin-top:6px">Never discounted</div>', halo=True),
-  l4=cline("Mystery oud, 3 ml","Gift with purchase over AED 300", 0, 1, gift=True))
+""" % dict(vat=slot("VAT registration expected ~month 9"))
 
 checkout = """
 <section><div class="wrap">
@@ -1030,7 +1029,7 @@ CSSV = hashlib.md5(b"".join(
 )).hexdigest()[:8]
 for fn, t, b, on, tab in PAGES:
     canon = (SITE_URL + "/" + fn) if SITE_URL else fn
-    pathlib.Path(fn).write_text(shell(t, b, on, tab, strip_here=(fn != "index.html"),
+    pathlib.Path(fn).write_text(shell(t, b, on, tab, strip_here=(fn not in ("index.html", "cart.html", "checkout.html", "confirmed.html")),
                                       page="page-" + fn.replace(".html", ""),
                                       desc=PAGE_DESC.get(fn, SEO.get("default_description", "")),
                                       canon=canon))

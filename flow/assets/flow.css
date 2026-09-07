@@ -1203,3 +1203,11 @@ footer .slot,footer .soon{color:#b9b0a4}
   .p .pr b{font-size:15px}
   .p .sizes button{padding:4px 7px;font-size:10.5px}
 }
+
+/* remove control on a cart line */
+.line .lrem{display:inline-block;margin-top:8px;background:none;border:0;padding:0;
+  font:inherit;font-size:12px;color:var(--mut);text-decoration:underline;
+  text-underline-offset:3px;cursor:pointer}
+.line .lrem:hover{color:var(--red)}
+.line .im img{width:100%;height:100%;object-fit:cover;display:block}
+.empty{text-align:center;padding:48px 20px;border:1px dashed var(--line);border-radius:var(--r)}
