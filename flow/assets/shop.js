@@ -171,8 +171,8 @@
 
       document.querySelectorAll(".buy span").forEach(function (el) {
         if (el.classList.contains("amt")) el.textContent = "AED " + pr.price;
-        if (/VAT included/.test(el.textContent)) {
-          el.textContent = pr.meta.split("\u00b7").slice(1).join("\u00b7").trim() + " \u00b7 VAT included";
+        if (el.classList.contains("permeta")) {
+          el.textContent = pr.meta.split("\u00b7").slice(1).join("\u00b7").trim();
         }
       });
       document.querySelectorAll(".buy .btn.solid").forEach(function (b) {
@@ -262,12 +262,15 @@
       /* scent pyramid: fill the three note slots, or show the note line */
       if (pr.top || pr.heart || pr.base) {
         [["top", pr.top], ["heart", pr.heart], ["base", pr.base]].forEach(function (t) {
-          var el = document.querySelector('[data-note="' + t[0] + '"]');
-          if (el) el.textContent = t[1] || "\u2014";
+          document.querySelectorAll('[data-note="' + t[0] + '"]').forEach(function (el) {
+            el.textContent = t[1] || "\u2014";
+          });
         });
       } else {
         var grid = document.querySelector('[data-panel="pyramid"] .grid');
         if (grid) grid.hidden = true;
+        var topstrip = document.querySelector("[data-notestop]");
+        if (topstrip) topstrip.hidden = true;
         var pn = document.querySelector("[data-pyrnote]");
         if (pn) pn.hidden = false;
       }

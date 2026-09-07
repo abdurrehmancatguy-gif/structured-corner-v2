@@ -22,6 +22,7 @@ P = {
  "clock":'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
  "cash":'<rect x="3" y="7" width="18" height="11" rx="1"/><circle cx="12" cy="12.5" r="2.5"/>',
  "leaf":'<path d="M20 4C10 4 4 9 4 16c0 2 1 4 1 4s6-1 10-5 5-11 5-11z"/><path d="M5 20L14 11"/>',
+ "drop":'<path d="M12 3s6 6.5 6 10.5a6 6 0 0 1-12 0C6 9.5 12 3 12 3z"/>',
  "chev":'<path d="M6 9l6 6 6-6"/>', "filter":'<path d="M3 6h18M7 12h10M11 18h2"/>',
  "c_oil":'<rect x="9" y="2.5" width="6" height="3.5" rx="1"/><path d="M8 9.5C8 7.5 9.5 6 9.5 6h5S16 7.5 16 9.5V19a2.5 2.5 0 0 1-2.5 2.5h-3A2.5 2.5 0 0 1 8 19z"/><path d="M8 14h8"/>',
  "c_res":'<path d="M4 8l4 3 4-6 4 6 4-3-2 11H6z"/><path d="M6 19h12"/>',
@@ -504,7 +505,12 @@ product = """
       <h1>Royal Amber</h1>
       <div class="pricerow">
         <span class="amt">AED 75</span>
-        <span class="permeta">6 ml &middot; VAT included</span></div>
+        <span class="permeta">6 ml</span></div>
+      <div class="notestop" data-notestop>
+        <div><span class="ni">%(leaf)s</span><b>Top</b><p data-note="top"></p></div>
+        <div><span class="ni">%(hrt)s</span><b>Heart</b><p data-note="heart"></p></div>
+        <div><span class="ni">%(drop)s</span><b>Base</b><p data-note="base"></p></div>
+      </div>
       <div class="sizeblock" data-sizeblock><span class="eyebrow">Size</span>
         <div class="sizes" style="gap:8px"><button type="button" data-size="3 ml &middot; AED 45">3 ml &middot; AED 45</button><button type="button" class="on" data-size="6 ml &middot; AED 75">6 ml &middot; AED 75</button></div></div>
       <div class="atcrow">
@@ -581,7 +587,8 @@ product = """
 """ % dict(gprev=sv("left",20,2), gnext=sv("right",20,2), fam=slot("family"), tone=slot("tone"), gen=slot("gender"), rev=slot("no reviews yet"),
    desc="", lon="", sil="",
    bat="", av="",
-   truck=sv("truck",16), cash=sv("cash",16), 
+   truck=sv("truck",16), cash=sv("cash",16),
+   leaf=sv("leaf",15), hrt=sv("heart",15), drop=sv("drop",15), 
    rel=oudoil_cards(4))
 
 # ---------------------------------------------------------------- GIFT BOX
@@ -660,7 +667,6 @@ cart = """
       <div class="r"><span>Subtotal</span><span data-subtotal>AED 0</span></div>
       <div class="r" style="color:var(--green)" data-tierrow><span>Volume discount &middot; <b data-tierpct>10</b>%%</span><span data-tieramt>&minus; AED 19.50</span></div>
       <div class="r"><span>Delivery</span><span data-delivery style="color:var(--green)">Free</span></div>
-      <div class="r" data-vatrow style="color:var(--mut);font-size:12.5px"><span>Includes VAT at 5%%</span><span data-vat>AED 39.31</span></div>
       <div class="r t"><span>Total</span><span data-total>AED 825.50</span></div>
       <a class="btn solid block" href="checkout.html" style="margin-top:12px">Checkout</a>
       <div class="pay" data-pay style="margin-top:14px;justify-content:center"><span>Card</span><span>Apple Pay</span><span>Tabby</span><span>Tamara</span><span class="off">COD</span></div>
@@ -690,9 +696,9 @@ checkout = """
     </div>
     <div><div class="sum">
       <div class="r"><span>4 items</span><span data-subtotal>AED 845</span></div>
-      <div class="r" style="color:var(--green)" data-tierrow><span>Volume discount &middot; <b data-tierpct>10</b>%%</span><span data-tieramt>&minus; AED 19.50</span></div>
+      <div class="r" style="color:var(--green)" data-tierrow><span>Volume discount &middot; <b data-tierpct>10</b>%</span><span data-tieramt>&minus; AED 19.50</span></div>
       <div class="r"><span>Delivery</span><span data-delivery style="color:var(--green)">Free</span></div>
-      <div class="r" data-vatrow style="color:var(--mut);font-size:12.5px"><span>Includes VAT at 5%%</span><span data-vat>AED 39.31</span></div>
+      <div class="r" data-vatrow style="color:var(--mut);font-size:12.5px"><span>Includes VAT at 5%</span><span data-vat>AED 39.31</span></div>
       <div class="r t"><span>Total</span><span data-total>AED 825.50</span></div>
       <a class="btn solid block" href="confirmed.html" style="margin-top:12px">Place order</a>
     </div></div>
@@ -708,7 +714,6 @@ confirmed = """
   </div>
   <div class="kv">
     <div><span>Delivery</span><span>Free &middot; same-day if placed before 2 PM</span></div>
-    <div><span>Includes VAT at 5%%</span><span>AED 39.31</span></div>
     <div><span>Tax registration number</span><span>%(trn)s</span></div>
     <div><span>Credit back</span><span>AED 45 voucher, issued the day it is delivered</span></div>
     <div><span>Review request</span><span>Delivery + 3 days</span></div>
@@ -847,7 +852,7 @@ account = """
 </div></section>
 """ % dict(name=slot("customer name"), contact=slot("phone"), email=slot("email"),
            tier="Musk", drops=slot("0"), credit=slot("AED 0"), orders=slot("0"),
-           tierpct="0%%", tiernext="500 lifetime drops to Amber",
+           tierpct="0%", tiernext="500 lifetime drops to Amber",
            voucher=slot("none active"), refcode=slot("unique code per customer"),
            referred=slot("0"))
 
@@ -856,7 +861,7 @@ quiz = """
   <span class="eyebrow">Home / Test your scent</span>
 
   <div class="quiz" data-quiz>
-    <div class="qprog"><i data-qbar style="width:20%%"></i></div>
+    <div class="qprog"><i data-qbar style="width:20%"></i></div>
     <span class="qstep">Question <b data-qnum>1</b> of 5 &middot; under a minute</span>
 
     <div class="qcard" data-q="0">
@@ -927,7 +932,7 @@ quiz = """
         <div style="font-weight:700;font-size:16px">AED 89</div>
       </div>
       <div class="kv" style="margin-top:14px">
-        <div><span>Declared aroma facets</span><span data-rnotes style="text-align:right;max-width:60%%"></span></div>
+        <div><span>Declared aroma facets</span><span data-rnotes style="text-align:right;max-width:60%"></span></div>
         <div><span>Barcode</span><span data-rcode></span></div>
         <div><span>Match strength</span><span data-rscore></span></div>
       </div>
