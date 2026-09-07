@@ -1212,19 +1212,24 @@ footer .slot,footer .soon{color:#b9b0a4}
 .line .im img{width:100%;height:100%;object-fit:cover;display:block}
 .empty{text-align:center;padding:48px 20px;border:1px dashed var(--line);border-radius:var(--r)}
 
-/* scent notes, sat with the price rather than three tabs down */
-.notestop{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;
-  margin:16px 0 18px;padding:14px 0;border-top:1px solid var(--hair);
-  border-bottom:1px solid var(--hair)}
-.notestop .ni{display:block;color:var(--gold);margin-bottom:5px}
-.notestop b{display:block;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;
-  color:var(--gold-d);font-weight:700;margin-bottom:4px}
-.notestop p{margin:0;font-size:12.5px;line-height:1.4;color:var(--ink)}
+/* Scent notes: a gold panel under the buy controls. The notes are what the
+   bottle is chosen on, so they get a colour of their own. Icon sits on the
+   label's line so each column is two lines, not three. */
+.notestop{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 18px;
+  margin:2px 0 16px;padding:11px 15px;border-radius:var(--r);
+  background:var(--gold-l);border:1px solid #ecdfc0}
+.notestop>div{display:grid;grid-template-columns:auto 1fr;column-gap:6px;align-items:center}
+.notestop .ni{grid-area:1/1;display:flex;color:var(--gold-d);margin:0}
+.notestop .ni svg{width:13px;height:13px}
+.notestop b{grid-area:1/2;font-size:9px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--gold-d);font-weight:700;margin:0}
+.notestop p{grid-area:2/1/3/3;margin:2px 0 0;font-size:12px;line-height:1.35;color:var(--ink)}
 @media (max-width:560px){
-  .notestop{grid-template-columns:1fr;gap:10px;margin:14px 0 16px}
-  .notestop>div{display:grid;grid-template-columns:20px 62px 1fr;align-items:center;gap:8px}
-  .notestop .ni{margin:0}
-  .notestop b{margin:0}
+  .notestop{grid-template-columns:1fr;gap:8px;padding:10px 14px}
+  .notestop>div{grid-template-columns:auto 54px 1fr;column-gap:7px}
+  .notestop b{grid-area:1/2}
+  .notestop p{grid-area:1/3/2/4;margin:0}
+}
 }
 
 /* the delivery and payment rows read as facts, not as greyed-out fine print */

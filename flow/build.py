@@ -506,17 +506,17 @@ product = """
       <div class="pricerow">
         <span class="amt">AED 75</span>
         <span class="permeta">6 ml</span></div>
-      <div class="notestop" data-notestop>
-        <div><span class="ni">%(leaf)s</span><b>Top</b><p data-note="top"></p></div>
-        <div><span class="ni">%(hrt)s</span><b>Heart</b><p data-note="heart"></p></div>
-        <div><span class="ni">%(drop)s</span><b>Base</b><p data-note="base"></p></div>
-      </div>
       <div class="sizeblock" data-sizeblock><span class="eyebrow">Size</span>
         <div class="sizes" style="gap:8px"><button type="button" data-size="3 ml &middot; AED 45">3 ml &middot; AED 45</button><button type="button" class="on" data-size="6 ml &middot; AED 75">6 ml &middot; AED 75</button></div></div>
       <div class="atcrow">
         <span class="stepper" data-stepper><button type="button" data-step="-1" aria-label="Decrease quantity">&minus;</button><i data-qty>1</i><button type="button" data-step="1" aria-label="Increase quantity">+</button></span>
         <button type="button" class="btn solid" style="flex-grow:1" data-add data-addqty>Add to bag: AED 75</button></div>
       <a class="btn block" href="gift-box.html" style="margin-bottom:12px">Send as a gift</a>
+      <div class="notestop" data-notestop>
+        <div><span class="ni">%(leaf)s</span><b>Top</b><p data-note="top"></p></div>
+        <div><span class="ni">%(hrt)s</span><b>Heart</b><p data-note="heart"></p></div>
+        <div><span class="ni">%(drop)s</span><b>Base</b><p data-note="base"></p></div>
+      </div>
 
       <div class="belowbuy">
         <p class="story-slot" data-desc>%(desc)s</p>
