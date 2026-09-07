@@ -1260,3 +1260,12 @@ footer .slot,footer .soon{color:#b9b0a4}
 .buy .story span{line-height:1.45}
 .buy .belowbuy{margin-top:4px}
 .buy .belowbuy .kv + .kv{margin-top:5px !important}
+
+/* Mobile masthead: the search box is what pushes the actions right on desktop,
+   so with it hidden the bag ended up sitting against the wordmark. The badge
+   is positioned off .act, which is icon-width once the label is hidden, so it
+   anchors to the icon's corner rather than a label that isn't there. */
+@media (max-width:900px){
+  .mast .wrap .acts{margin-left:auto}
+  .acts .act .n{left:auto;right:-7px;top:-7px}
+}
