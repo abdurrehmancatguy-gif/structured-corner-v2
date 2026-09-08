@@ -1422,3 +1422,39 @@ footer .slot,footer .soon{color:#b9b0a4}
      rather than leaving "OUDS" alone on the second. */
   .hero .over .eyebrow{text-wrap:balance}
 }
+
+/* ---- phone hero: the overlapping card ------------------------------------
+   Chosen from five directions. The photograph runs full bleed and the copy
+   sits in a card that climbs 40px into the bottom of it.
+
+   The overlap is the whole point: it buys depth and a clear hierarchy while
+   the copy stays on a solid ground at 18.5:1, so nothing has to be measured
+   again when a light photograph is added - which is what the scrim approach
+   demanded, and what put the Platinum Musk frame at 3.42:1.
+
+   Full bleed on the phone, so the hero drops its side margin and radius here.
+
+   The window is 49% of the frame, and the product is aimed into the middle of
+   it per slide - see hero_images() in build.py. */
+@media (max-width:900px){
+  .hero{min-height:0;margin:0;border:0;border-radius:0;background:var(--alt)}
+  /* width:100% is load-bearing: with aspect-ratio and a max-height, an auto
+     width shrinks to keep the ratio once the height is capped, which left a
+     485px band inside a 768px tablet. Fixed width, capped height, and
+     object-fit crops the difference. */
+  .heroimg{position:relative;inset:auto;width:100%;height:auto;min-height:0;
+    aspect-ratio:1.85/1;max-height:min(42vh,262px)}
+  .heroimg img{object-position:var(--focus,80%) center}
+
+  .hero .over{position:relative;inset:auto;z-index:2;display:none;
+    margin:-40px 16px 0;padding:0;background:var(--secondary);
+    border-radius:var(--r)}
+  .hero .over.on{display:block}
+  .hero .over .wrap{padding:0;width:auto}
+  .hero .box{max-width:none;padding:14px 17px 14px}
+  .hero h1{font-size:26px;margin:5px 0 8px}
+  .hero p{font-size:13px;margin-bottom:13px}
+
+  /* the dots land on the paper the card sits on, not on the card */
+  .dots{background:var(--alt);padding:9px 0 11px}
+}

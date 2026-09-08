@@ -13,7 +13,8 @@
         "href": "gift-box.html"
       },
       "image": "assets/img/banner-2.jpg",
-      "image_alt": "The BGS oud oil range with its leather case"
+      "image_alt": "The BGS oud oil range with its leather case",
+      "image_focus": 93
     },
     {
       "eyebrow": "Order by 2:00 PM",
@@ -28,7 +29,8 @@
         "href": "track-order.html"
       },
       "image": "assets/img/banner-5.jpg",
-      "image_alt": "Platinum Musk Oud boxed and ribboned"
+      "image_alt": "Platinum Musk Oud boxed and ribboned",
+      "image_focus": 100
     },
     {
       "eyebrow": "Start here",
@@ -43,7 +45,8 @@
         "href": "gift-box.html"
       },
       "image": "assets/img/banner-1.jpg",
-      "image_alt": "A BGS oud oil"
+      "image_alt": "A BGS oud oil",
+      "image_focus": 90
     },
     {
       "eyebrow": "Gifting",
@@ -58,7 +61,8 @@
         "href": "corporate.html"
       },
       "image": "assets/img/banner-4.jpg",
-      "image_alt": "The Amore, Vibe and Be Mine trio in a wrapped box"
+      "image_alt": "The Amore, Vibe and Be Mine trio in a wrapped box",
+      "image_focus": 100
     },
     {
       "eyebrow": "Reserve",
@@ -73,7 +77,8 @@
         "href": "index.html"
       },
       "image": "assets/img/banner-3.jpg",
-      "image_alt": "Majlis Oud in 6 ml and 12 ml crystal"
+      "image_alt": "Majlis Oud in 6 ml and 12 ml crystal",
+      "image_focus": 100
     }
   ],
   "sections": {

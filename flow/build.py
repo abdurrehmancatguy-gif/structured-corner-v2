@@ -338,9 +338,15 @@ def hero_images():
         src = sl.get("image") or first
         if not src:
             continue
+        # The phone band shows half the frame's width, so the window has to be
+        # aimed per slide to keep the product centred in it: measured off the
+        # frames by edge mass, the product's centre sits between 65% and 71%,
+        # which works out as 81% to 91% here. One value cannot centre all five.
+        focus = sl.get("image_focus")
+        aim = ' style="--focus:%d%%"' % int(focus) if focus is not None else ""
         out.append(
-            '<img class="hs%s" src="%s" alt="%s" width="2400" height="790"%s>'
-            % (" on" if i == 0 else "", esc(src), esc(sl.get("image_alt", "")),
+            '<img class="hs%s" src="%s" alt="%s" width="2400" height="790"%s%s>'
+            % (" on" if i == 0 else "", esc(src), esc(sl.get("image_alt", "")), aim,
                ' fetchpriority="high" decoding="async"' if i == 0
                else ' loading="lazy" decoding="async"'))
     return "".join(out)
