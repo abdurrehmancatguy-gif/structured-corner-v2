@@ -1148,37 +1148,16 @@ footer .slot,footer .soon{color:#b9b0a4}
 [data-boxcta].ghost{border-color:var(--line);color:var(--ink);background:#fff}
 [data-boxcta].ghost:hover{border-color:var(--ink)}
 
-/* ---- brand logo (masthead + footer), content-driven from settings.brand ---- */
+/* ---- brand logo (masthead + footer), content-driven from settings.brand ----
+   The art carries the whole lockup — emblem, BGS and CORNER, in metallic gold
+   (tools/make_gold_logo.py). CORNER used to be live text beside it, which meant
+   matching a condensed serif out of the CSS fallback stack and nudging the
+   baseline by hand; it never matched, and could not on a device without Times.
+   One image, so height is the only thing left to set. */
 .logo .brandmark{height:34px;width:auto;display:block}
-/* "CORNER" set beside the BGS logo art, in the same bold serif so the two read
-   as one lockup; sized to the logo's cap-height, baseline-nudged to sit on the
-   BGS baseline.
-
-   The art is metallic gold (tools/make_gold_logo.py), so the word is filled
-   with the SAME ramp rather than a flat gold, or the two halves of the lockup
-   would not match. The stops below mirror ON_LIGHT / ON_DARK in that script —
-   change them in both places or the word will drift away from the art.
-
-   The flat --gold-d comes first and stays as the fallback: with
-   background-clip:text the text colour has to go transparent, so a browser
-   that cannot clip to text would render nothing at all. */
-.brandword{font:700 32px/1 "Times New Roman",Times,serif;letter-spacing:0;
-  color:var(--gold-d);display:inline-block;transform:translateY(-0.069em)}
-@supports ((-webkit-background-clip:text) or (background-clip:text)){
-  .brandword{
-    background-image:linear-gradient(180deg,#5E3A0C 0%,#8A5A14 16%,#B98A2E 34%,
-      #EFDCA4 46%,#C2932F 55%,#7E5011 76%,#5A380B 100%);
-    -webkit-background-clip:text;background-clip:text;color:transparent}
-  .foot-brandword{
-    background-image:linear-gradient(180deg,#8A5A14 0%,#B98A2E 18%,#E3C87E 36%,
-      #F7EBC8 48%,#D8B054 58%,#A0741F 78%,#8A5A14 100%)}
-}
-.foot-brand{display:flex;align-items:center;gap:9px;margin-bottom:14px}
-.foot-logo{height:30px;width:auto;display:block}
-.foot-brandword{color:#B98A2E;font-size:28px}
-@media (max-width:900px){ .logo .brandmark{height:30px} .brandword{font-size:28px} }
-@media (max-width:700px){ .logo .brandmark{height:26px} .brandword{font-size:24px}
-  .foot-logo{height:26px} .foot-brandword{font-size:24px} }
+.foot-logo{height:30px;width:auto;display:block;margin-bottom:14px}
+@media (max-width:900px){ .logo .brandmark{height:30px} }
+@media (max-width:700px){ .logo .brandmark{height:26px} .foot-logo{height:26px} }
 
 /* ---- product grids: four across further down, on a tighter card ------------
    The grids dropped straight from four (or five) columns to two at 900px, so

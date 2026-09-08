@@ -25,7 +25,6 @@ P = {
  "drop":'<path d="M12 3s6 6.5 6 10.5a6 6 0 0 1-12 0C6 9.5 12 3 12 3z"/>',
  "chev":'<path d="M6 9l6 6 6-6"/>', "filter":'<path d="M3 6h18M7 12h10M11 18h2"/>',
  "share":'<path d="M4 13v6a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-6"/><path d="M12 15V3.5"/><path d="M8 7.5l4-4 4 4"/>',
- "link":'<path d="M10 13.5a3.5 3.5 0 0 0 5 0l3-3a3.5 3.5 0 0 0-5-5l-1 1"/><path d="M14 10.5a3.5 3.5 0 0 0-5 0l-3 3a3.5 3.5 0 0 0 5 5l1-1"/>',
  "c_oil":'<rect x="9" y="2.5" width="6" height="3.5" rx="1"/><path d="M8 9.5C8 7.5 9.5 6 9.5 6h5S16 7.5 16 9.5V19a2.5 2.5 0 0 1-2.5 2.5h-3A2.5 2.5 0 0 1 8 19z"/><path d="M8 14h8"/>',
  "c_res":'<path d="M4 8l4 3 4-6 4 6 4-3-2 11H6z"/><path d="M6 19h12"/>',
  "c_bak":'<path d="M6 14h12l-1.5 6h-9z"/><path d="M4 14h16"/><path d="M11 10c0-2 2-3 2-5 2 2 2 3.5 1.5 5"/>',
@@ -100,15 +99,12 @@ def _brand_alt():
 def header_logo():
     """Masthead brand: the logo image when set in settings.brand, else the
     wordmark fallback. Content-driven — the admin swaps the file, not the code.
-    The logo art reads "BGS"; settings.brand.suffix ("CORNER") is set beside it
-    in a matching serif so the lockup reads as the full name."""
+    The art carries the whole lockup, CORNER included (tools/make_gold_logo.py),
+    so there is nothing to set beside it."""
     logo = BRAND.get("logo")
-    suffix = BRAND.get("suffix", "")
     if logo:
-        alt = "BGS" if suffix else _brand_alt()
-        word = ('<span class="brandword">%s</span>' % esc(suffix)) if suffix else ""
         return ('<a class="logo" href="index.html">'
-                '<img class="brandmark" src="%s" alt="%s">%s</a>' % (esc(logo), alt, word))
+                '<img class="brandmark" src="%s" alt="%s"></a>' % (esc(logo), _brand_alt()))
     return ('<a class="logo" href="index.html"><span class="logomark">%s</span>'
             '<span class="wm">BGS CORNER</span></a>' % slot("logo"))
 
@@ -128,14 +124,11 @@ def favicon_links():
     return "\n".join(tags)
 
 def footer_logo():
-    """Footer brand: the light logo (+ suffix) on the dark ground, else wordmark."""
+    """Footer brand: the lifted logo on the dark ground, else wordmark."""
     logo = BRAND.get("logo_light") or BRAND.get("logo")
-    suffix = BRAND.get("suffix", "")
     if logo:
-        alt = "BGS" if suffix else _brand_alt()
-        word = ('<span class="brandword foot-brandword">%s</span>' % esc(suffix)) if suffix else ""
-        return ('<span class="foot-brand">'
-                '<img class="foot-logo" src="%s" alt="%s">%s</span>' % (esc(logo), alt, word))
+        return ('<img class="foot-logo" src="%s" alt="%s">'
+                % (esc(logo), _brand_alt()))
     return ('<div class="wm" style="color:#fff;font-size:20px;margin-bottom:14px">'
             'BGS CORNER</div>')
 
