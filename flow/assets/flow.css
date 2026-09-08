@@ -1437,14 +1437,22 @@ footer .slot,footer .soon{color:#b9b0a4}
    The window is 49% of the frame, and the product is aimed into the middle of
    it per slide - see hero_images() in build.py. */
 @media (max-width:900px){
-  .hero{min-height:0;margin:0;border:0;border-radius:0;background:var(--alt)}
-  /* width:100% is load-bearing: with aspect-ratio and a max-height, an auto
-     width shrinks to keep the ratio once the height is capped, which left a
-     485px band inside a 768px tablet. Fixed width, capped height, and
-     object-fit crops the difference. */
+  /* max-width so a tablet does not stretch the band into a slab; the ratio
+     has to stay 1.85:1 at every width here, because that is the phone
+     asset's own ratio and matching them is what removes the crop. */
+  .hero{min-height:0;margin:0 auto;border:0;border-radius:0;
+    max-width:560px;background:var(--alt)}
+  /* max-height:none is not decoration. An earlier block in this append-only
+     file still sets .heroimg{max-height:min(38vh,220px)}, same specificity and
+     higher up, and dropping the property here left that one in force - which
+     capped the band at 220px from 430px wide upward and pushed the ratio to
+     1.96 and then 2.55, reintroducing exactly the crop this change removes. */
   .heroimg{position:relative;inset:auto;width:100%;height:auto;min-height:0;
-    aspect-ratio:1.85/1;max-height:min(42vh,262px)}
-  .heroimg img{object-position:var(--focus,80%) center}
+    max-height:none;aspect-ratio:1.85/1}
+  /* display:contents keeps <picture> out of the layout, so the img stays a
+     direct child of the band as the positioning rules assume. */
+  .heroimg picture{display:contents}
+  .heroimg img{object-position:center}
 
   .hero .over{position:relative;inset:auto;z-index:2;display:none;
     margin:-40px 16px 0;padding:0;background:var(--secondary);

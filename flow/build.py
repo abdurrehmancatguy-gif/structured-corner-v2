@@ -338,15 +338,20 @@ def hero_images():
         src = sl.get("image") or first
         if not src:
             continue
-        # The phone band shows half the frame's width, so the window has to be
-        # aimed per slide to keep the product centred in it: measured off the
-        # frames by edge mass, the product's centre sits between 65% and 71%,
-        # which works out as 81% to 91% here. One value cannot centre all five.
-        focus = sl.get("image_focus")
-        aim = ' style="--focus:%d%%"' % int(focus) if focus is not None else ""
+        # A <picture>, because the phone gets a different CROP, not a smaller
+        # copy. object-position could only ever be right at one band width: the
+        # window's share of the frame changes with the viewport, so the value
+        # that centred the product at 375px pushed it off at 614px. The phone
+        # asset is cropped 1.85:1 around the product, which is the band's exact
+        # ratio, so there is nothing left to aim - centre is centre everywhere.
+        phone = src.replace(".jpg", "-phone.jpg")
         out.append(
-            '<img class="hs%s" src="%s" alt="%s" width="2400" height="790"%s%s>'
-            % (" on" if i == 0 else "", esc(src), esc(sl.get("image_alt", "")), aim,
+            '<picture>'
+            '<source media="(max-width:900px)" srcset="%s">'
+            '<img class="hs%s" src="%s" alt="%s" width="2400" height="790"%s>'
+            '</picture>'
+            % (esc(phone), " on" if i == 0 else "", esc(src),
+               esc(sl.get("image_alt", "")),
                ' fetchpriority="high" decoding="async"' if i == 0
                else ' loading="lazy" decoding="async"'))
     return "".join(out)
