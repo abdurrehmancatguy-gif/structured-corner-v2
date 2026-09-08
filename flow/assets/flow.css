@@ -1150,14 +1150,32 @@ footer .slot,footer .soon{color:#b9b0a4}
 
 /* ---- brand logo (masthead + footer), content-driven from settings.brand ---- */
 .logo .brandmark{height:34px;width:auto;display:block}
-/* "CORNER" set beside the BGS logo art, in the same bold serif and ink so the
-   two read as one lockup; sized to the logo's cap-height, baseline-nudged to sit
-   on the BGS baseline. */
+/* "CORNER" set beside the BGS logo art, in the same bold serif so the two read
+   as one lockup; sized to the logo's cap-height, baseline-nudged to sit on the
+   BGS baseline.
+
+   The art is metallic gold (tools/make_gold_logo.py), so the word is filled
+   with the SAME ramp rather than a flat gold, or the two halves of the lockup
+   would not match. The stops below mirror ON_LIGHT / ON_DARK in that script —
+   change them in both places or the word will drift away from the art.
+
+   The flat --gold-d comes first and stays as the fallback: with
+   background-clip:text the text colour has to go transparent, so a browser
+   that cannot clip to text would render nothing at all. */
 .brandword{font:700 32px/1 "Times New Roman",Times,serif;letter-spacing:0;
-  color:#080010;display:inline-block;transform:translateY(-0.069em)}
+  color:var(--gold-d);display:inline-block;transform:translateY(-0.069em)}
+@supports ((-webkit-background-clip:text) or (background-clip:text)){
+  .brandword{
+    background-image:linear-gradient(180deg,#5E3A0C 0%,#8A5A14 16%,#B98A2E 34%,
+      #EFDCA4 46%,#C2932F 55%,#7E5011 76%,#5A380B 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .foot-brandword{
+    background-image:linear-gradient(180deg,#8A5A14 0%,#B98A2E 18%,#E3C87E 36%,
+      #F7EBC8 48%,#D8B054 58%,#A0741F 78%,#8A5A14 100%)}
+}
 .foot-brand{display:flex;align-items:center;gap:9px;margin-bottom:14px}
 .foot-logo{height:30px;width:auto;display:block}
-.foot-brandword{color:#fff;font-size:28px}
+.foot-brandword{color:#B98A2E;font-size:28px}
 @media (max-width:900px){ .logo .brandmark{height:30px} .brandword{font-size:28px} }
 @media (max-width:700px){ .logo .brandmark{height:26px} .brandword{font-size:24px}
   .foot-logo{height:26px} .foot-brandword{font-size:24px} }
@@ -1268,4 +1286,38 @@ footer .slot,footer .soon{color:#b9b0a4}
 @media (max-width:900px){
   .mast .wrap .acts{margin-left:auto}
   .acts .act .n{left:auto;right:-7px;top:-7px}
+}
+
+/* ---- share the product ----------------------------------------------------
+   Pushed to the far end of the price row with margin-left:auto, so it reads as
+   a secondary action against the price rather than competing with Add to bag.
+   The row is baseline-aligned for the price and its unit, which would drop the
+   button's text onto that same baseline and leave the icon hanging; align-self
+   centres it against the price block instead.
+
+   It needs a 44px touch target and it must not make the row any taller: at
+   min-height:44px it drove the row itself, 15px past the price, and spent
+   above-the-fold budget the page does not have. So the box stays at the
+   price's own height and the ::after carries the tap area past the border —
+   absolutely positioned, so it costs no layout at all. */
+.sharebtn{position:relative;display:inline-flex;align-items:center;gap:6px;
+  margin-left:auto;align-self:center;background:none;
+  border:1px solid var(--line);border-radius:var(--r);padding:0 12px;
+  min-height:30px;font:inherit;font-size:12px;color:var(--body);
+  cursor:pointer;white-space:nowrap;transition:border-color .12s,color .12s}
+.sharebtn::after{content:"";position:absolute;inset:-8px;border-radius:8px}
+.sharebtn svg{color:var(--gold-d);flex-shrink:0}
+.sharebtn:hover{border-color:var(--gold);color:var(--ink)}
+.sharebtn:active{transform:translateY(1px)}
+.sharebtn:focus-visible{outline:2px solid var(--gold-d);outline-offset:2px}
+/* Confirmation after a copy: the button itself reports back, so nothing has to
+   be positioned or dismissed. */
+.sharebtn.done{border-color:var(--green);color:var(--green)}
+.sharebtn.done svg{color:var(--green)}
+/* On a phone the label goes and the icon stands alone — the price is the thing
+   worth the width there, and the aria-label still names the action. */
+@media (max-width:700px){
+  .sharebtn{padding:0 9px}
+  .sharebtn [data-sharelabel]{display:none}
+  .sharebtn.done [data-sharelabel]{display:inline}
 }

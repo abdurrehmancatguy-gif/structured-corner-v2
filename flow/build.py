@@ -24,6 +24,8 @@ P = {
  "leaf":'<path d="M20 4C10 4 4 9 4 16c0 2 1 4 1 4s6-1 10-5 5-11 5-11z"/><path d="M5 20L14 11"/>',
  "drop":'<path d="M12 3s6 6.5 6 10.5a6 6 0 0 1-12 0C6 9.5 12 3 12 3z"/>',
  "chev":'<path d="M6 9l6 6 6-6"/>', "filter":'<path d="M3 6h18M7 12h10M11 18h2"/>',
+ "share":'<path d="M4 13v6a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-6"/><path d="M12 15V3.5"/><path d="M8 7.5l4-4 4 4"/>',
+ "link":'<path d="M10 13.5a3.5 3.5 0 0 0 5 0l3-3a3.5 3.5 0 0 0-5-5l-1 1"/><path d="M14 10.5a3.5 3.5 0 0 0-5 0l-3 3a3.5 3.5 0 0 0 5 5l1-1"/>',
  "c_oil":'<rect x="9" y="2.5" width="6" height="3.5" rx="1"/><path d="M8 9.5C8 7.5 9.5 6 9.5 6h5S16 7.5 16 9.5V19a2.5 2.5 0 0 1-2.5 2.5h-3A2.5 2.5 0 0 1 8 19z"/><path d="M8 14h8"/>',
  "c_res":'<path d="M4 8l4 3 4-6 4 6 4-3-2 11H6z"/><path d="M6 19h12"/>',
  "c_bak":'<path d="M6 14h12l-1.5 6h-9z"/><path d="M4 14h16"/><path d="M11 10c0-2 2-3 2-5 2 2 2 3.5 1.5 5"/>',
@@ -505,7 +507,12 @@ product = """
       <h1>Royal Amber</h1>
       <div class="pricerow">
         <span class="amt">AED 75</span>
-        <span class="permeta">6 ml</span></div>
+        <span class="permeta">6 ml</span>
+        <!-- Share sits on the price row, not on a row of its own: the buy
+             decision was measured to fit a 900px screen with 2px to spare, so
+             anything that adds height here pushes it off. -->
+        <button type="button" class="sharebtn" data-share
+                aria-label="Share this product">%(share)s<span data-sharelabel>Share</span></button></div>
       <div class="sizeblock" data-sizeblock><span class="eyebrow">Size</span>
         <div class="sizes" style="gap:8px"><button type="button" data-size="3 ml &middot; AED 45">3 ml &middot; AED 45</button><button type="button" class="on" data-size="6 ml &middot; AED 75">6 ml &middot; AED 75</button></div></div>
       <div class="atcrow">
@@ -588,8 +595,8 @@ product = """
    desc="", lon="", sil="",
    bat="", av="",
    truck=sv("truck",16), cash=sv("cash",16),
-   leaf=sv("leaf",15), hrt=sv("heart",15), drop=sv("drop",15), 
-   rel=oudoil_cards(4))
+   leaf=sv("leaf",15), hrt=sv("heart",15), drop=sv("drop",15),
+   share=sv("share",15), rel=oudoil_cards(4))
 
 # ---------------------------------------------------------------- GIFT BOX
 giftbox = """

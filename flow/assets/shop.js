@@ -1178,3 +1178,92 @@
   paintCount();
   render();
 })();
+
+/* ---------- share the product ----------------------------------------------
+   navigator.share opens the phone's own share sheet, which on this traffic
+   means WhatsApp and iMessage without us having to build either. It only
+   exists in a secure context and mostly on mobile, so the desktop path copies
+   the link instead and the button says so.
+
+   The URL is rebuilt from ?p= rather than taken from location.href, so a
+   shared link carries the product and nothing else - not an open tab, not a
+   filter the sharer happened to have set. */
+(function () {
+  "use strict";
+  var btn = document.querySelector("[data-share]");
+  if (!btn) return;
+
+  var CAT = window.BGS_CATALOGUE || {};
+  var label = btn.querySelector("[data-sharelabel]");
+  var reset = null;
+
+  function say(text, done) {
+    if (!label) return;
+    label.textContent = text;
+    btn.classList.toggle("done", !!done);
+    clearTimeout(reset);
+    reset = setTimeout(function () {
+      label.textContent = "Share";
+      btn.classList.remove("done");
+    }, 2200);
+  }
+
+  /* What is actually being shared: the product this page rendered, which is
+     whatever ?p= named, falling back to the page's own default heading. */
+  function payload() {
+    var key = new URLSearchParams(location.search).get("p");
+    var pr = key ? CAT[key] : null;
+    var h1 = document.querySelector(".buy h1");
+    var name = (pr && pr.name) || (h1 && h1.textContent.trim()) || "BGS Corner";
+    var url = location.origin + location.pathname +
+              (key ? "?p=" + encodeURIComponent(key) : "");
+    var text = pr ? name + ", AED " + pr.price : name;
+    return { title: name + " | BGS Corner", text: text, url: url };
+  }
+
+  /* Clipboard needs a secure context too, so keep the old execCommand path for
+     anything it refuses. Returns whether the link actually got copied — the
+     button must not claim success it cannot verify. */
+  function copy(url) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(url).then(function () { return true; },
+                                                     function () { return legacy(url); });
+    }
+    return Promise.resolve(legacy(url));
+  }
+
+  function legacy(url) {
+    try {
+      var t = document.createElement("textarea");
+      t.value = url;
+      t.setAttribute("readonly", "");
+      t.style.position = "fixed";
+      t.style.opacity = "0";
+      document.body.appendChild(t);
+      t.select();
+      var ok = document.execCommand("copy");
+      document.body.removeChild(t);
+      return ok;
+    } catch (e) { return false; }
+  }
+
+  btn.addEventListener("click", function () {
+    var p = payload();
+
+    if (navigator.share) {
+      navigator.share(p).catch(function (err) {
+        /* Dismissing the sheet is a choice, not a failure: say nothing. Any
+           other error falls through to the copy path. */
+        if (err && err.name === "AbortError") return;
+        copy(p.url).then(function (ok) {
+          say(ok ? "Link copied" : "Could not copy", ok);
+        });
+      });
+      return;
+    }
+
+    copy(p.url).then(function (ok) {
+      say(ok ? "Link copied" : "Could not copy", ok);
+    });
+  });
+})();
