@@ -1376,13 +1376,21 @@ footer .slot,footer .soon{color:#b9b0a4}
 @media (max-width:900px){
   .hero{min-height:0;background:var(--secondary)}
   .heroimg{position:relative;inset:auto;height:auto;min-height:0;
-    aspect-ratio:1.6/1;max-height:min(52vh,300px)}
-  /* 1.6:1 shows 53% of the frame's width, and where that window sits decides
-     whether the product is whole or sliced - measured, the content spans
-     34-98% of one frame and 51-84% of another, so it is per slide, set from
-     home.json as --focus. 80% is the desktop value, for a slide without one. */
-  .heroimg img{object-position:var(--focus,80%) center}
-  .hero .over{position:relative;inset:auto;padding:18px 0 4px;
+    aspect-ratio:2.2/1;max-height:min(38vh,220px)}
+  /* 2.2:1, down from 1.6:1, to give the category tiles the second row they
+     were missing: the band drops 213px to 155px at 375 wide, which with the
+     padding trims below frees the 65px that row of tiles needed to clear the
+     tab bar.
+
+     The wider band is also a wider window - 72% of the frame rather than 53%.
+     At 53% the crop had to be aimed per slide, 73% to 87%, because the product
+     is not in the same place twice; at 72% every frame's product fits and the
+     arithmetic puts all five at the same place, hard right. So it is one value
+     again, and the per-slide --focus that 1.6:1 needed is gone. Right, not
+     centre, because the copy no longer sits over the photograph - there is no
+     reason to keep the empty left side of the frame in shot. */
+  .heroimg img{object-position:100% center}
+  .hero .over{position:relative;inset:auto;padding:14px 0 4px;
     background:var(--secondary)}
   .hero .box{max-width:none;padding:0 16px}
   .hero h1{font-size:27px;margin:6px 0 9px}
@@ -1400,7 +1408,7 @@ footer .slot,footer .soon{color:#b9b0a4}
      the band already swipes, and two 42px circles were sitting on the product. */
   .hero .arrow{display:none}
   .dots{position:static;transform:none;justify-content:center;
-    padding:14px 0 18px;background:var(--secondary)}
+    padding:10px 0 12px;background:var(--secondary)}
   .dots i{height:4px;width:26px;position:relative}
   .dots i::after{content:"";position:absolute;inset:-16px -5px}
 
