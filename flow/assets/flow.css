@@ -1308,3 +1308,53 @@ footer .slot,footer .soon{color:#b9b0a4}
   .sharebtn [data-sharelabel]{display:none}
   .sharebtn.done [data-sharelabel]{display:inline}
 }
+
+/* ---- the main shot must not be cropped ------------------------------------
+   .galmain is aspect-ratio 1/1 capped by max-height, so on any wide column the
+   box came out wider than tall - 625x468 at 1440x900 - and object-fit:cover
+   filled that by cutting 157px, a quarter of the bottle, off the top and
+   bottom.
+
+   Capping the gallery's WIDTH to the same budget as its height keeps the box
+   square, so a square source fills it exactly: no crop, and no letterbox
+   either, which a wider-than-tall box with object-fit:contain would have left
+   down both sides of every dark lifestyle frame. The thumbnails inherit the
+   same width, so main and strip stay aligned.
+
+   contain stays underneath as the guard for a source that is not square. */
+.gal{max-width:min(52vh,470px);margin-inline:auto}
+.galmain img,.galslide img{object-fit:contain}
+@media (max-width:900px){ .gal{max-width:min(46vh,330px)} }
+
+/* ---- the hero changes picture, not only words -----------------------------
+   The band used to hold one hardcoded photograph while five text overlays
+   rotated over it. Each slide now brings its own, stacked in the same box and
+   cross-faded on the same beat as the copy. */
+.heroimg img{position:absolute;inset:0;width:100%;height:100%;opacity:0;
+  transition:opacity .6s ease}
+.heroimg img.hs.on{opacity:1}
+
+/* ---- the scrim has to survive a light photograph --------------------------
+   The gradient was tuned on dark banners and thinned to .55 by 48%, which is
+   fine over near-black but not over the Platinum Musk marble: measured against
+   that frame, 15px body copy fell to 3.42:1, under the 4.5 AA needs.
+
+   Solving for the alpha that holds #cdc5b8 at 4.5:1 across the text box gives
+   a flat 0.671 - the marble is uniformly bright, so there is no gradient in the
+   requirement. These stops hold >=0.71 to the end of the box (44.2% of a 1320
+   hero) and then fall away on the old curve, so alpha past 60% is unchanged to
+   within 0.003 and the product on the right is no darker than before.
+
+   Mobile lays the copy over the whole frame with a vertical scrim that started
+   at .30, which over the same marble left the eyebrow around 2:1. It starts at
+   .68 now. */
+.hero .over{background:linear-gradient(90deg,
+  rgba(0,0,0,.86) 0%,
+  rgba(0,0,0,.78) 34%,
+  rgba(0,0,0,.70) 46%,
+  rgba(0,0,0,.34) 60%,
+  rgba(0,0,0,0) 78%)}
+@media (max-width:900px){
+  .hero .over{background:linear-gradient(180deg,
+    rgba(0,0,0,.68) 0%, rgba(0,0,0,.78) 38%, rgba(0,0,0,.90) 100%)}
+}

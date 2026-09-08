@@ -11,7 +11,9 @@
       "secondary": {
         "label": "Build a gift box",
         "href": "gift-box.html"
-      }
+      },
+      "image": "assets/img/banner-2.jpg",
+      "image_alt": "The BGS oud oil range with its leather case"
     },
     {
       "eyebrow": "Order by 2:00 PM",
@@ -24,7 +26,9 @@
       "secondary": {
         "label": "Delivery info",
         "href": "track-order.html"
-      }
+      },
+      "image": "assets/img/banner-5.jpg",
+      "image_alt": "Platinum Musk Oud boxed and ribboned"
     },
     {
       "eyebrow": "Start here",
@@ -37,7 +41,9 @@
       "secondary": {
         "label": "See all sets",
         "href": "gift-box.html"
-      }
+      },
+      "image": "assets/img/banner-1.jpg",
+      "image_alt": "A BGS oud oil"
     },
     {
       "eyebrow": "Gifting",
@@ -50,7 +56,9 @@
       "secondary": {
         "label": "Corporate gifting",
         "href": "corporate.html"
-      }
+      },
+      "image": "assets/img/banner-4.jpg",
+      "image_alt": "The Amore, Vibe and Be Mine trio in a wrapped box"
     },
     {
       "eyebrow": "Reserve",
@@ -63,7 +71,9 @@
       "secondary": {
         "label": "Our story",
         "href": "index.html"
-      }
+      },
+      "image": "assets/img/banner-3.jpg",
+      "image_alt": "Majlis Oud in 6 ml and 12 ml crystal"
     }
   ],
   "sections": {

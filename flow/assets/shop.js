@@ -350,10 +350,19 @@
   var no = root.querySelector("[data-slideno]");
   var i = 0, timer;
 
+  /* the photographs, one per slide, cross-fading with the copy */
+  var shots = root.querySelectorAll(".heroimg .hs");
+
   function show(n) {
     i = (n + slides.length) % slides.length;
     slides.forEach(function (s, k) { s.classList.toggle("on", k === i); });
     dots.forEach(function (d, k) { d.classList.toggle("on", k === i); });
+    shots.forEach(function (im, k) {
+      im.classList.toggle("on", k === i);
+      /* a lazy image two slides ahead has not been asked for yet; start it
+         now so the fade lands on a decoded picture rather than a black box */
+      if (k === (i + 1) % shots.length) im.loading = "eager";
+    });
     if (no) no.textContent = i + 1;
   }
   function go(step) { show(i + step); rest(); }

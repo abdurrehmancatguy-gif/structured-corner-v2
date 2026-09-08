@@ -323,6 +323,28 @@ def hero_slides():
                esc(sl.get("headline", "")).replace("\n", "<br>"), esc(sl.get("body", "")), cta))
     return "".join(out)
 
+def hero_images():
+    """One photograph per slide, so the carousel changes picture and not only
+       words. Driven from home.json's hero_slides, like the copy is - a slide
+       with no image set falls back to the first one that has, which keeps the
+       band from going black if the admin adds a slide and forgets the photo.
+
+       Only the first is eager and fetchpriority=high; the rest are lazy, or
+       five full-width banners would compete with the one actually on screen."""
+    slides = HOME["hero_slides"]
+    first = next((s["image"] for s in slides if s.get("image")), "")
+    out = []
+    for i, sl in enumerate(slides):
+        src = sl.get("image") or first
+        if not src:
+            continue
+        out.append(
+            '<img class="hs%s" src="%s" alt="%s" width="2400" height="790"%s>'
+            % (" on" if i == 0 else "", esc(src), esc(sl.get("image_alt", "")),
+               ' fetchpriority="high" decoding="async"' if i == 0
+               else ' loading="lazy" decoding="async"'))
+    return "".join(out)
+
 def hero_dots():
     return "".join('<i%s data-dot="%d"></i>' % (' class="on"' if i == 0 else "", i)
                    for i in range(len(HOME["hero_slides"])))
@@ -330,7 +352,7 @@ def hero_dots():
 # ---------------------------------------------------------------- HOME
 home = """
 <div class="hero" data-carousel>
-  <div class="heroimg"><img src="assets/img/banner-1.jpg" alt="" fetchpriority="high" decoding="async" width="2400" height="790"><span class="none corner"><b data-slideno>1</b>/%(hero_n)s</span></div>
+  <div class="heroimg">%(hero_img)s<span class="none corner"><b data-slideno>1</b>/%(hero_n)s</span></div>
   %(hero)s
   <button class="arrow prev" data-prev aria-label="Previous slide">%(prev)s</button>
   <button class="arrow next" data-next aria-label="Next slide">%(next)s</button>
@@ -407,7 +429,8 @@ home = """
   <div class="grid g5">%(edp)s</div>
 </div></section>
 """ % dict(catstrip=catstrip(), usp=usp_strip(),
-           hero=hero_slides(), hero_dots=hero_dots(), hero_n=len(HOME["hero_slides"]),
+           hero=hero_slides(), hero_img=hero_images(), hero_dots=hero_dots(),
+           hero_n=len(HOME["hero_slides"]),
            qb_eyebrow=COPY["quiz_banner"]["eyebrow"], qb_heading=COPY["quiz_banner"]["heading"],
            qb_body=COPY["quiz_banner"]["body"], qb_cta=COPY["quiz_banner"]["cta_label"],
            qb_href=COPY["quiz_banner"]["cta_href"],
