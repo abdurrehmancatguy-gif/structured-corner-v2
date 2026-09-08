@@ -338,9 +338,16 @@ def hero_images():
         src = sl.get("image") or first
         if not src:
             continue
+        # The phone band shows about half the frame's width, so where that
+        # window sits decides whether the product is whole or sliced. It is per
+        # slide because the product is not in the same place twice: measured,
+        # the content spans 34-98% of one frame and 51-84% of another.
+        focus = sl.get("image_focus")
+        style = ' style="--focus:%d%%"' % int(focus) if focus is not None else ""
         out.append(
-            '<img class="hs%s" src="%s" alt="%s" width="2400" height="790"%s>'
+            '<img class="hs%s" src="%s" alt="%s" width="2400" height="790"%s%s>'
             % (" on" if i == 0 else "", esc(src), esc(sl.get("image_alt", "")),
+               style,
                ' fetchpriority="high" decoding="async"' if i == 0
                else ' loading="lazy" decoding="async"'))
     return "".join(out)

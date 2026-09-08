@@ -1358,3 +1358,59 @@ footer .slot,footer .soon{color:#b9b0a4}
   .hero .over{background:linear-gradient(180deg,
     rgba(0,0,0,.68) 0%, rgba(0,0,0,.78) 38%, rgba(0,0,0,.90) 100%)}
 }
+
+/* ---- phone hero: stack, do not overlay -----------------------------------
+   The banners are 3.04:1. On a phone the overlay put one inside a box the text
+   made portrait - roughly 0.74:1 - and object-fit:cover answered that by
+   showing a tall slice of the middle: the bottle lineup came out sliced off at
+   the bottom and the composition was unreadable. No scrim setting fixes a crop.
+
+   So the photograph gets its own band and the words go underneath on the
+   secondary colour. The picture is no longer cropped to portrait, the copy sits
+   on a known ground at 18.5:1 rather than on whatever the photograph happens to
+   be, and the light-banner contrast problem stops existing on phones instead of
+   being managed.
+
+   3/2 with a max-height: the ratio governs a phone (229px band at 375px wide),
+   the cap stops a wide tablet turning it into a 490px slab. */
+@media (max-width:900px){
+  .hero{min-height:0;background:var(--secondary)}
+  .heroimg{position:relative;inset:auto;height:auto;min-height:0;
+    aspect-ratio:1.6/1;max-height:min(52vh,300px)}
+  /* 1.6:1 shows 53% of the frame's width, and where that window sits decides
+     whether the product is whole or sliced - measured, the content spans
+     34-98% of one frame and 51-84% of another, so it is per slide, set from
+     home.json as --focus. 80% is the desktop value, for a slide without one. */
+  .heroimg img{object-position:var(--focus,80%) center}
+  .hero .over{position:relative;inset:auto;padding:18px 0 4px;
+    background:var(--secondary)}
+  .hero .box{max-width:none;padding:0 16px}
+  .hero h1{font-size:27px;margin:6px 0 9px}
+  .hero p{font-size:13.5px;margin-bottom:16px}
+
+  /* "Build a gift box" was wrapping to three lines. Both labels hold one line
+     each now, and nowrap makes a future long label overflow visibly rather
+     than silently stacking. */
+  .hero .box > div{gap:8px}
+  .hero .btn{flex:1 1 0;min-width:0;padding:12px 8px;font-size:12.5px;
+    text-align:center;white-space:nowrap}
+
+  /* Dots move into the flow under the copy, so they stop floating over the
+     photograph and no longer need a magic offset to clear it. The arrows go:
+     the band already swipes, and two 42px circles were sitting on the product. */
+  .hero .arrow{display:none}
+  .dots{position:static;transform:none;justify-content:center;
+    padding:14px 0 18px;background:var(--secondary)}
+  .dots i{height:4px;width:26px;position:relative}
+  .dots i::after{content:"";position:absolute;inset:-16px -5px}
+
+  /* the slide count read as a dashed placeholder box over the photograph */
+  .heroimg .none.corner{border-color:transparent;background:rgba(0,0,0,.5);
+    color:#fff;top:12px;right:12px;bottom:auto;left:auto}
+
+  /* The longest eyebrow measures 304px against a 273px box, and fitting it on
+     one line would need letter-spacing down to 0.048em from 0.140em, which is
+     not an eyebrow any more. So let it take two lines, but break them evenly
+     rather than leaving "OUDS" alone on the second. */
+  .hero .over .eyebrow{text-wrap:balance}
+}
