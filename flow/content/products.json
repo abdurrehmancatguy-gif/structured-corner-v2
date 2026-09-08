@@ -196,7 +196,13 @@
     "seo_title": "",
     "seo_description": "",
     "image_alt": "",
-    "related": []
+    "related": [],
+    "images": [
+      "the-writer-1.jpg",
+      "the-writer-2.jpg",
+      "the-writer-3.jpg",
+      "the-writer-4.jpg"
+    ]
   },
   "edward-the-black-prince": {
     "name": "Edward the Black Prince",
@@ -264,7 +270,8 @@
       "amore-1.jpg",
       "amore-2.jpg",
       "amore-3.jpg",
-      "amore-4.jpg"
+      "amore-4.jpg",
+      "amore-5.jpg"
     ],
     "name_ar": "",
     "story_ar": [],
@@ -382,12 +389,10 @@
     "published": true,
     "order": 10,
     "images": [
-      "imperial-crown-2.jpg",
       "imperial-crown-1.jpg",
+      "imperial-crown-2.jpg",
       "imperial-crown-3.jpg",
-      "imperial-crown-4.jpg",
-      "imperial-crown-5.jpg",
-      "imperial-crown-6.jpg"
+      "imperial-crown-4.jpg"
     ],
     "name_ar": "",
     "story_ar": [],
@@ -424,13 +429,9 @@
     "order": 11,
     "images": [
       "dark-leather-1.jpg",
-      "dark-leather-5.jpg",
       "dark-leather-2.jpg",
       "dark-leather-3.jpg",
-      "dark-leather-4.jpg",
-      "dark-leather-6.jpg",
-      "dark-leather-7.jpg",
-      "dark-leather-8.jpg"
+      "dark-leather-4.jpg"
     ],
     "name_ar": "",
     "story_ar": [],
@@ -467,12 +468,9 @@
     "order": 12,
     "images": [
       "royal-amber-1.jpg",
-      "royal-amber-5.jpg",
       "royal-amber-2.jpg",
       "royal-amber-3.jpg",
-      "royal-amber-4.jpg",
-      "royal-amber-6.jpg",
-      "royal-amber-7.jpg"
+      "royal-amber-4.jpg"
     ],
     "name_ar": "",
     "story_ar": [],
@@ -508,14 +506,10 @@
     "published": true,
     "order": 13,
     "images": [
-      "golden-bloom-2.jpg",
       "golden-bloom-1.jpg",
+      "golden-bloom-2.jpg",
       "golden-bloom-3.jpg",
-      "golden-bloom-4.jpg",
-      "golden-bloom-5.jpg",
-      "golden-bloom-6.jpg",
-      "golden-bloom-7.jpg",
-      "golden-bloom-8.jpg"
+      "golden-bloom-4.jpg"
     ],
     "name_ar": "",
     "story_ar": [],
@@ -551,14 +545,10 @@
     "published": true,
     "order": 14,
     "images": [
-      "majestic-musk-3.jpg",
       "majestic-musk-1.jpg",
       "majestic-musk-2.jpg",
-      "majestic-musk-4.jpg",
-      "majestic-musk-5.jpg",
-      "majestic-musk-6.jpg",
-      "majestic-musk-7.jpg",
-      "majestic-musk-8.jpg"
+      "majestic-musk-3.jpg",
+      "majestic-musk-4.jpg"
     ],
     "name_ar": "",
     "story_ar": [],
@@ -605,7 +595,13 @@
     "seo_title": "",
     "seo_description": "",
     "image_alt": "",
-    "related": []
+    "related": [],
+    "images": [
+      "musk-bloom-1.jpg",
+      "musk-bloom-2.jpg",
+      "musk-bloom-3.jpg",
+      "musk-bloom-4.jpg"
+    ]
   },
   "belle-aura": {
     "name": "Belle Aura",
@@ -627,14 +623,10 @@
     "published": true,
     "order": 16,
     "images": [
-      "belle-aura-3.jpg",
       "belle-aura-1.jpg",
       "belle-aura-2.jpg",
-      "belle-aura-4.jpg",
-      "belle-aura-5.jpg",
-      "belle-aura-6.jpg",
-      "belle-aura-7.jpg",
-      "belle-aura-8.jpg"
+      "belle-aura-3.jpg",
+      "belle-aura-4.jpg"
     ],
     "name_ar": "",
     "story_ar": [],
@@ -670,14 +662,10 @@
     "published": true,
     "order": 17,
     "images": [
-      "magnolia-veil-4.jpg",
       "magnolia-veil-1.jpg",
       "magnolia-veil-2.jpg",
       "magnolia-veil-3.jpg",
-      "magnolia-veil-5.jpg",
-      "magnolia-veil-6.jpg",
-      "magnolia-veil-7.jpg",
-      "magnolia-veil-8.jpg"
+      "magnolia-veil-4.jpg"
     ],
     "name_ar": "",
     "story_ar": [],
@@ -713,14 +701,10 @@
     "published": true,
     "order": 18,
     "images": [
-      "parisian-muse-4.jpg",
       "parisian-muse-1.jpg",
       "parisian-muse-2.jpg",
       "parisian-muse-3.jpg",
-      "parisian-muse-5.jpg",
-      "parisian-muse-6.jpg",
-      "parisian-muse-7.jpg",
-      "parisian-muse-8.jpg"
+      "parisian-muse-4.jpg"
     ],
     "name_ar": "",
     "story_ar": [],
@@ -796,13 +780,10 @@
     "order": 20,
     "images": [
       "desert-breeze-1.jpg",
-      "desert-breeze-8.jpg",
       "desert-breeze-2.jpg",
       "desert-breeze-3.jpg",
       "desert-breeze-4.jpg",
-      "desert-breeze-5.jpg",
-      "desert-breeze-6.jpg",
-      "desert-breeze-7.jpg"
+      "desert-breeze-5.jpg"
     ],
     "name_ar": "",
     "story_ar": [],
@@ -874,7 +855,9 @@
       "majlis-oud-1.jpg",
       "majlis-oud-2.jpg",
       "majlis-oud-3.jpg",
-      "majlis-oud-4.jpg"
+      "majlis-oud-4.jpg",
+      "majlis-oud-5.jpg",
+      "majlis-oud-6.jpg"
     ],
     "name_ar": "",
     "story_ar": [],
@@ -906,7 +889,10 @@
     "published": true,
     "order": 23,
     "images": [
-      "platinum-musk-oud-1.jpg"
+      "platinum-musk-oud-1.jpg",
+      "platinum-musk-oud-2.jpg",
+      "platinum-musk-oud-3.jpg",
+      "platinum-musk-oud-4.jpg"
     ],
     "name_ar": "",
     "story_ar": [],
@@ -1064,7 +1050,10 @@
     "seo_title": "",
     "seo_description": "",
     "image_alt": "",
-    "related": []
+    "related": [],
+    "images": [
+      "discovery-trio-1.jpg"
+    ]
   },
   "his-and-hers-duo": {
     "name": "His & Hers Duo",
@@ -1088,7 +1077,10 @@
     "seo_title": "",
     "seo_description": "",
     "image_alt": "",
-    "related": []
+    "related": [],
+    "images": [
+      "his-and-hers-duo-1.jpg"
+    ]
   },
   "majlis-ritual-set": {
     "name": "Majlis Ritual Set",
