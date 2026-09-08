@@ -1,7 +1,15 @@
 :root{
-  --ink:#171310; --body:#4a423a; --mut:#6b6154; --faint:#726858;
+  /* Brand roles. These two are the record — every other name below is a use,
+     not an identity, so the roles are what a change should be made against.
+     --primary  gold, the only hue in the mark, and the site's whole vocabulary
+                of emphasis. 3.88:1 on white, so it is never small text; that is
+                what --gold-d is for, at 5.91:1.
+     --secondary the dark brown. Carries the structural dark: body text, the
+                delivery strip, the footer, and every solid button. */
+  --primary:#a8791e; --secondary:#171310;
+  --ink:var(--secondary); --body:#4a423a; --mut:#6b6154; --faint:#726858;
   --line:#e6e0d6; --hair:#f0ece4; --bg:#fff; --alt:#faf7f2;
-  --gold:#a8791e; --gold-d:#8a5a14; --gold-l:#f6efdd;
+  --gold:var(--primary); --gold-d:#8a5a14; --gold-l:#f6efdd;
   --red:#b3261e; --green:#2e6b3e; --blue:#2b5b7a;
   --f-oud:#3E4A33; --f-amber:#94480F; --f-musk:#44555F; --f-floral:#9B3A5B;
   --f-fresh:#4B6B1C; --f-sweet:#6D2F5C; --f-res:#171310;

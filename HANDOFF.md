@@ -186,17 +186,68 @@ not kill the others. Order in file:
 Light theme. Tokens at the top:
 
 ```css
---ink:#171310;  --body:#4a423a;  --mut:#6b6154;  --faint:#726858;
+--primary:#a8791e; --secondary:#171310;
+--ink:var(--secondary); --body:#4a423a; --mut:#6b6154; --faint:#726858;
 --line:#e6e0d6; --hair:#f0ece4;  --bg:#fff;      --alt:#faf7f2;
---gold:#a8791e; --gold-d:#8a5a14; --gold-l:#f6efdd;
+--gold:var(--primary); --gold-d:#8a5a14; --gold-l:#f6efdd;
 --red:#b3261e;  --green:#2e6b3e;  --blue:#2b5b7a;
 --r:3px;
 ```
 
-Plus seven fragrance-family colours (`--f-oud`, `--f-amber`, …).
+Plus eight fragrance-family colours (`--f-oud`, `--f-amber`, … and `--f-bak`, declared
+lower down in a second `:root`), each with a paired `--w-*` wash.
 
 The file is **append-only in practice** and carries duplicate-selector debt. See §9 for the
 specificity trap this creates.
+
+#### Brand colours
+
+Two roles, and they are the record. Every other name in `:root` is a *use*, so a change to
+the brand should be made against `--primary` / `--secondary`, not against `--gold` / `--ink`.
+
+| Role | Token | Hex | What it carries |
+|---|---|---|---|
+| **Primary** | `--primary` | `#a8791e` | The only hue in the mark. The whole vocabulary of emphasis: strip countdown, "see all" links, stars, meters, progress fills, nav underline, bag bubble, wishlist on-state, focus rings, promotional CTAs. |
+| Primary, text form | `--gold-d` | `#8a5a14` | Wherever the primary has to be small text. |
+| **Secondary** | `--secondary` | `#171310` | The structural dark: body text, the delivery strip, the footer, every solid button (Add to bag, Checkout, Place order), the outline-button border, and the "this one is selected" state. |
+
+Measured contrast (sRGB relative luminance):
+
+| Pairing | Ratio | |
+|---|---|---|
+| `--gold-d` on white | 5.91:1 | passes AA body |
+| `--primary` on white | **3.88:1** | large text and non-text only — this is why `--gold-d` exists |
+| `--secondary` on white | 18.47:1 | |
+| `--secondary` on `--alt` | 17.28:1 | |
+| `--secondary` on `--primary` | 4.77:1 | the gold button's own label |
+| white on `--secondary` | 18.47:1 | |
+| strip text `#e8e2d8` on `--secondary` | 14.34:1 | |
+| footer text `#b9b0a4` on `--secondary` | 8.63:1 | |
+
+The footer is the clearest statement of the pair: `footer{background:var(--ink)}` is the
+ground that `logo-gold-light.png` sits on, and that file is generated from the *ON_DARK*
+ramp in `tools/make_gold_logo.py` specifically for it. Gold mark on the secondary ground.
+The ramp itself runs from 3.12:1 at its two end stops up to 15.54:1 at its crest — fine,
+because WCAG 1.4.3 exempts logotypes, not because every stop clears AA.
+
+**Two accepted duplicates of the secondary, both deliberate:**
+
+- `--f-res:#171310` stays a literal. Reserve equals the secondary *by value, not by role* —
+  it is one of the eight scent-family tokens and has a paired wash `--w-res:#e6e3dd`.
+  Aliasing it to `var(--secondary)` would couple brand hierarchy to scent taxonomy, so
+  changing the secondary would silently repaint the Reserve tile (`flow.css:654` and `734`)
+  and the inline background `build.py` writes into `index.html`, while `--w-res` would not
+  follow.
+- `INK = (23, 19, 16, 255)` in `tools/make_favicon.py` — a build tool, no CSS to read.
+
+**The older briefs are stale on colour.** `UNDERSTANDING.md:70` gives Reserve as `#26221D`,
+`UNDERSTANDING.md:57` gives the ground as `#FAF8F4`, and `FRONTEND-PROMPT.md:95` /
+`REBUILD-PROMPT.md:51` disagree on `--mut` and `--faint`. `flow/assets/flow.css:1-16` is
+authoritative. Do not build a brand record by copying those tables.
+
+Colours are **not** in `settings.json`. `build.py` reads `settings.brand` only to emit file
+paths and alt text and never touches CSS, so colour keys there would be inert data
+duplicating the stylesheet.
 
 ### The data — `flow/content/products.json`
 
