@@ -12,6 +12,13 @@ Every file in this set is already 1254x1254. The older importer resizes the
 long side to 2x the target and centre-crops, which on an already-square source
 zooms into the middle and clips the bottle. Straight resize, no crop.
 
+FRAME ORDER
+-----------
+Frame one is the bare product and frame two is the shot with the box. The
+delivered numbering does not always agree, so FRAME_ORDER corrects the four
+sets where it does not. Without it a re-import would silently put a lifestyle
+shot or a second box in the gallery's second slot.
+
 WHAT IT REFUSES TO GUESS
 ------------------------
 The bakhoor tins are labelled by tin number ("BGS BAKHOOR 1", "BGS BAKHOOR 3")
@@ -49,6 +56,18 @@ ALIAS = {
 }
 # Tin number -> product id. Empty on purpose; see the module docstring.
 BAKHOOR_MAP = {}
+
+# Frame order, 1-based, for the sets where the delivered numbering does not put
+# the bare product first and the shot with the box second. Read off contact
+# sheets of the imported frames - there is no pattern to infer, the box lands on
+# frame 4 for Be Mine, 3 for Edward, 1 for Soleil Frais, and both 1 and 2 for
+# Desert Breeze. Everything not listed here already arrives in that order.
+FRAME_ORDER = {
+    "be-mine":                 [1, 4, 2, 3],
+    "edward-the-black-prince": [2, 3, 1, 4],
+    "soleil-frais":            [2, 1, 3, 4],
+    "desert-breeze":           [5, 1, 3, 4, 2],
+}
 
 
 def label_and_index(filename):
@@ -141,8 +160,11 @@ def main():
             if m and int(m.group(1)) > len(files):
                 stale.unlink()
                 removed += 1
+        order = FRAME_ORDER.get(pid)
+        if order and sorted(order) == list(range(1, len(names) + 1)):
+            names = [names[i - 1] for i in order]
         products[pid]["images"] = names
-        print("  %-24s %d" % (pid, len(names)))
+        print("  %-24s %d%s" % (pid, len(names), "  reordered" if order else ""))
 
     CONTENT.write_text(json.dumps(products, indent=2, ensure_ascii=False) + "\n")
     print("\nwrote %d files, removed %d orphaned, updated products.json" % (written, removed))

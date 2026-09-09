@@ -1024,8 +1024,9 @@ footer .wm{color:#fff}
    Card hover: the product turns to its boxed view
    --------------------------------------------------------------------------
    Frame one is the close-up, frame two is the shot with the box; the order is
-   set per product in tools/import_images.py, read off contact sheets, because
-   the box lands on a different frame for every product. Hovering cross-fades
+   set per product by FRAME_ORDER in tools/import_website_set.py, read off
+   contact sheets, because the box lands on a different frame for every product
+   - 4 for Be Mine, 3 for Edward, 1 for Soleil Frais. Hovering cross-fades
    to the second so the card reads as the product turning to show its box.
 
    The second frame is aria-hidden and never the only carrier of information:

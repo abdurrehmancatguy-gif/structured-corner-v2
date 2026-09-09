@@ -22,9 +22,9 @@
     "order": 1,
     "images": [
       "be-mine-1.jpg",
+      "be-mine-4.jpg",
       "be-mine-2.jpg",
-      "be-mine-3.jpg",
-      "be-mine-4.jpg"
+      "be-mine-3.jpg"
     ],
     "name_ar": "",
     "story_ar": [],
@@ -226,9 +226,9 @@
     "published": true,
     "order": 6,
     "images": [
-      "edward-the-black-prince-1.jpg",
       "edward-the-black-prince-2.jpg",
       "edward-the-black-prince-3.jpg",
+      "edward-the-black-prince-1.jpg",
       "edward-the-black-prince-4.jpg"
     ],
     "name_ar": "",
@@ -309,8 +309,8 @@
     "published": true,
     "order": 8,
     "images": [
-      "soleil-frais-1.jpg",
       "soleil-frais-2.jpg",
+      "soleil-frais-1.jpg",
       "soleil-frais-3.jpg",
       "soleil-frais-4.jpg"
     ],
@@ -779,11 +779,11 @@
     "published": true,
     "order": 20,
     "images": [
+      "desert-breeze-5.jpg",
       "desert-breeze-1.jpg",
-      "desert-breeze-2.jpg",
       "desert-breeze-3.jpg",
       "desert-breeze-4.jpg",
-      "desert-breeze-5.jpg"
+      "desert-breeze-2.jpg"
     ],
     "name_ar": "",
     "story_ar": [],
