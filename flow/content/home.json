@@ -5,8 +5,8 @@
       "headline": "Find your scent.",
       "body": "Thirteen attars and perfume oils in 3 ml and 6 ml, bakhoor and EDP sprays.",
       "primary": {
-        "label": "Shop ouds",
-        "href": "collection.html"
+        "label": "Shop attars",
+        "href": "collection.html?cat=attars"
       },
       "secondary": {
         "label": "Build a gift box",

@@ -1630,3 +1630,27 @@ footer .slot,footer .soon{color:#b9b0a4}
   .dots i{background:rgba(23,19,16,.22)}
   .dots i.on{background:var(--gold)}
 }
+
+/* ---- category strip: centre it, whatever the count -----------------------
+   .cs was grid-template-columns:repeat(8,1fr) - a hardcoded eight while there
+   are seven categories since Reserve folded into attars, so the eighth column
+   sat empty and the row read as left-aligned with a gap on the right. Changing
+   8 to 7 would just move the bug to the next taxonomy edit.
+
+   Flex instead, so the count comes from the content. Wide: each tile takes an
+   equal share of the row, which is what the grid was doing when the numbers
+   happened to agree. Narrow: four to a row, and justify-content centres the
+   remainder - three now - under them instead of hanging it off the left. */
+.cs{display:flex;flex-wrap:wrap;justify-content:center}
+.cs a{flex:1 1 0;min-width:0}
+@media (max-width:1080px){
+  .cs a{flex:0 0 calc(25% - 9px)}
+}
+/* The basis has to pay for the gaps or the fourth tile wraps: four at 25%
+   plus three gaps is wider than the row. Setting both here means the sum is
+   exactly 100% - 4 x (25% - 6px) + 3 x 8px - rather than depending on whatever
+   gap an earlier block left behind. It had gone to three rows of 3, 3, 1. */
+@media (max-width:700px){
+  .cs{gap:8px}
+  .cs a{flex:0 0 calc(25% - 6px)}
+}
