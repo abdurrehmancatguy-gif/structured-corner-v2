@@ -512,7 +512,7 @@ collection = """
 product = """
 <section><div class="wrap">
   <span class="eyebrow">Home / Oud Oils / Royal Amber</span>
-  <div class="pdp" style="margin-top:18px">
+  <div class="pdp">
     <div class="gal" data-gallery>
       <div class="galmain">
         <div class="galslide on" data-gs="0"><span class="none">Product image 1</span></div>

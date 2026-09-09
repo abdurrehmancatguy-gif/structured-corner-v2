@@ -1505,3 +1505,33 @@ footer .slot,footer .soon{color:#b9b0a4}
   .hero .arrow.next{right:10px;left:auto}
   .hero .arrow svg{width:17px;height:17px}
 }
+
+/* ---- PDP: put Add to bag on the first screen ------------------------------
+   The inline button bottomed out at 790px on a 375x812 phone against a 711px
+   fold, so it rendered clipped behind the sticky bar - which was itself the
+   problem. .stickybuy.hidden and its transition already existed, but a block
+   further up cancelled it at 900px and nothing ever toggled the class, so the
+   bar sat there permanently: 63px of the fold spent covering a duplicate of
+   the button underneath it.
+
+   It earns its place only once the real button has scrolled away. Re-enabled
+   here, toggled by an observer in shop.js.
+
+   That returns 63px and the trims below find another 43, which clears the
+   worst case: a product WITH size chips. Products without them (the EDPs) were
+   already fitting at 713, since the size block and its gap are 76px.
+
+   margin-top on .pdp replaces the inline style build.py used to write, which
+   no stylesheet could reach. */
+.pdp{margin-top:18px}
+@media (max-width:900px){
+  .stickybuy.hidden{transform:translateY(110%);pointer-events:none}
+}
+@media (max-width:700px){
+  .page-product .pdp{margin-top:10px}
+  .page-product section{padding-top:8px}
+  .page-product .galmain{max-height:285px}
+  .page-product .buy h1{margin:0 0 8px}
+  .page-product .buy .pricerow{margin-bottom:10px}
+  .page-product .sizeblock{margin:0 0 10px}
+}

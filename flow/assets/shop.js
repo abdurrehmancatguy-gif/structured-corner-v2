@@ -1247,3 +1247,61 @@
     });
   });
 })();
+
+/* ---------- the sticky bar waits its turn -----------------------------------
+   It used to sit on every product page from the first paint, covering 63px of
+   the screen to show a second copy of the Add to bag that was directly
+   underneath it - and pushing the real one out of view, which is how it came
+   to render clipped.
+
+   Now it appears only once the real button is not usable. "Usable" is the whole
+   button inside the fold, and the fold stops at the tab bar, which is measured
+   rather than assumed because it is only there on a phone.
+
+   Two things this deliberately is not:
+
+   An IntersectionObserver. One was tried and got the hand-off wrong twice, 600px
+   late leaving the button and never re-hiding on the way back up, because a
+   threshold only reports when it is crossed and a jumped scroll can skip it.
+
+   rAF-throttled. Also tried. requestAnimationFrame does not run while the page
+   is not being painted, so the bar could sit a whole scroll behind. The read is
+   one getBoundingClientRect on a passive listener, which is cheap enough to do
+   outright; the expensive part, measuring the tab bar, is cached and only
+   redone when something could have moved it. The class is written only when the
+   answer changes.
+
+   If any of it fails the bar simply stays visible, which is the safe way to be
+   wrong. */
+(function () {
+  "use strict";
+  var bar = document.querySelector(".stickybuy");
+  var inline = document.querySelector(".atcrow [data-add]");
+  if (!bar || !inline) return;
+
+  var tabH = 0, last = null;
+
+  function measureTab() {
+    var tb = document.querySelector(".tabbar");
+    tabH = tb && getComputedStyle(tb).display !== "none"
+      ? tb.getBoundingClientRect().height : 0;
+  }
+
+  function sync() {
+    var r = inline.getBoundingClientRect();
+    var usable = r.top >= 0 && r.bottom <= window.innerHeight - tabH;
+    if (usable === last) return;
+    last = usable;
+    bar.classList.toggle("hidden", usable);
+  }
+
+  function remeasure() { measureTab(); sync(); }
+
+  measureTab();
+  addEventListener("scroll", sync, { passive: true });
+  addEventListener("resize", remeasure);
+  /* a size chip rewrites the button label, which can change its height */
+  document.addEventListener("click", remeasure);
+  document.addEventListener("visibilitychange", remeasure);
+  sync();
+})();
