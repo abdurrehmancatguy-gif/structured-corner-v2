@@ -371,7 +371,7 @@
   },
   "imperial-crown": {
     "name": "Imperial Crown",
-    "category": "oud-oils",
+    "category": "attars",
     "price": 75,
     "sizes": [
       {
@@ -410,7 +410,7 @@
   },
   "dark-leather": {
     "name": "Dark Leather",
-    "category": "oud-oils",
+    "category": "attars",
     "price": 75,
     "sizes": [
       {
@@ -449,7 +449,7 @@
   },
   "royal-amber": {
     "name": "Royal Amber",
-    "category": "oud-oils",
+    "category": "attars",
     "price": 75,
     "sizes": [
       {
@@ -488,7 +488,7 @@
   },
   "golden-bloom": {
     "name": "Golden Bloom",
-    "category": "oud-oils",
+    "category": "attars",
     "price": 75,
     "sizes": [
       {
@@ -527,7 +527,7 @@
   },
   "majestic-musk": {
     "name": "Majestic Musk",
-    "category": "oud-oils",
+    "category": "attars",
     "price": 75,
     "sizes": [
       {
@@ -566,7 +566,7 @@
   },
   "musk-bloom": {
     "name": "Musk Bloom",
-    "category": "oud-oils",
+    "category": "attars",
     "price": 75,
     "sizes": [
       {
@@ -605,7 +605,7 @@
   },
   "belle-aura": {
     "name": "Belle Aura",
-    "category": "oud-oils",
+    "category": "attars",
     "price": 75,
     "sizes": [
       {
@@ -644,7 +644,7 @@
   },
   "magnolia-veil": {
     "name": "Magnolia Veil",
-    "category": "oud-oils",
+    "category": "attars",
     "price": 75,
     "sizes": [
       {
@@ -683,7 +683,7 @@
   },
   "parisian-muse": {
     "name": "Parisian Muse",
-    "category": "oud-oils",
+    "category": "attars",
     "price": 75,
     "sizes": [
       {
@@ -722,7 +722,7 @@
   },
   "velvet-spell": {
     "name": "Velvet Spell",
-    "category": "oud-oils",
+    "category": "attars",
     "price": 75,
     "sizes": [
       {
@@ -761,7 +761,7 @@
   },
   "desert-breeze": {
     "name": "Desert Breeze",
-    "category": "oud-oils",
+    "category": "attars",
     "price": 75,
     "sizes": [
       {
@@ -801,7 +801,7 @@
   },
   "seasonal-slot": {
     "name": "Seasonal slot",
-    "category": "oud-oils",
+    "category": "attars",
     "price": 75,
     "sizes": [
       {
@@ -834,7 +834,7 @@
   },
   "majlis-oud": {
     "name": "Majlis OUD",
-    "category": "reserve",
+    "category": "attars",
     "price": 650,
     "sizes": [
       {
@@ -875,7 +875,7 @@
   },
   "platinum-musk-oud": {
     "name": "Platinum Musk OUD",
-    "category": "reserve",
+    "category": "attars",
     "price": 399,
     "sizes": [
       {

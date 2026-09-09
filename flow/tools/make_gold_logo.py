@@ -42,10 +42,14 @@ GAP = 77          # emblem's right edge (502) to the B (579): the lockup's own s
 # Stops down the artwork. Anchored on the site's gold tokens: --gold #a8791e
 # and --gold-d #8a5a14 both sit inside each ramp. Mirrored nowhere else now
 # that the word is part of the image.
-ON_LIGHT = [(0.00, (0x5E, 0x3A, 0x0C)), (0.16, (0x8A, 0x5A, 0x14)),
-            (0.34, (0xB9, 0x8A, 0x2E)), (0.46, (0xEF, 0xDC, 0xA4)),
-            (0.55, (0xC2, 0x93, 0x2F)), (0.76, (0x7E, 0x50, 0x11)),
-            (1.00, (0x5A, 0x38, 0x0B))]
+# The masthead ramp used to peak at #EFDCA4, which is 1.36:1 on the white it
+# sits on - so the middle of every letterform washed out and the mark read as
+# white rather than gold. The peak is #C29A45 now, 2.62:1, and the band around
+# it is narrower: still a catch of light, never close to the page.
+ON_LIGHT = [(0.00, (0x4E, 0x2F, 0x09)), (0.20, (0x7E, 0x50, 0x11)),
+            (0.40, (0xA8, 0x79, 0x1E)), (0.50, (0xC2, 0x9A, 0x45)),
+            (0.60, (0xA8, 0x79, 0x1E)), (0.80, (0x75, 0x49, 0x0F)),
+            (1.00, (0x4E, 0x2F, 0x09))]
 ON_DARK = [(0.00, (0x8A, 0x5A, 0x14)), (0.18, (0xB9, 0x8A, 0x2E)),
            (0.36, (0xE3, 0xC8, 0x7E)), (0.48, (0xF7, 0xEB, 0xC8)),
            (0.58, (0xD8, 0xB0, 0x54)), (0.78, (0xA0, 0x74, 0x1F)),

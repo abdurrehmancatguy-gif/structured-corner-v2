@@ -1591,3 +1591,43 @@ footer .slot,footer .soon{color:#b9b0a4}
   .catstrip .cs{row-gap:8px}
   .page-product .galmain{max-height:255px}
 }
+
+/* ---- the hero card: lift it, and stop it resizing -------------------------
+   Two shadows. The upper one falls on the photograph the card overlaps, which
+   is what separates them; the lower one lifts it off the paper underneath.
+   Both tinted with the secondary rather than pure black, so they sit in the
+   palette instead of greying it.
+
+   The height is equalised in shop.js. Copy length varies by slide - the cards
+   measured 183, 211, 183, 191 and 211 - so the hero was growing and shrinking
+   28px as the carousel turned. A number here would go stale the first time the
+   copy changes, so it is measured instead. */
+@media (max-width:900px){
+  .hero .over{box-shadow:0 -10px 22px -12px rgba(0,0,0,.6),
+    0 14px 30px -18px rgba(23,19,16,.45)}
+}
+
+/* ---- let the phone break the headlines itself -----------------------------
+   The headlines carry an explicit newline from home.json, which build.py turns
+   into a <br>. That break is chosen for the desktop hero's line length; on a
+   phone it forced two lines onto headlines that fit one - "Platinum Musk OUD."
+   and "Majlis OUD, two sizes." both do - and those were exactly the slides
+   setting the equalised card height.
+
+   Dropping the break lets each headline wrap where the card actually ends,
+   which shortens the tallest card and hands the category tiles back the row
+   they had lost to it. */
+@media (max-width:700px){
+  .hero h1 br{display:none}
+  .hero .box{padding:13px 17px 13px}
+  .dots{padding:8px 0 10px}
+}
+
+/* The dots were white at 35%, which was right while they sat on the dark hero.
+   Moving them onto the paper under the card left the four inactive ones at
+   1.03:1 against it - invisible, so the carousel looked like it had one slide.
+   The secondary at 22% reads on cream without competing with the gold. */
+@media (max-width:900px){
+  .dots i{background:rgba(23,19,16,.22)}
+  .dots i.on{background:var(--gold)}
+}

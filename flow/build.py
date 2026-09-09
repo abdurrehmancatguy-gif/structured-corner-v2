@@ -56,8 +56,8 @@ SITE_URL = (C["settings"].get("site_url") or "").rstrip("/")
 # One-line description per page for <meta name=description> and OG.
 PAGE_DESC = {
     "index.html": "Alcohol-free oud oils, bakhoor and EDP sprays, blended in Dubai. Same-day delivery in Dubai, free over AED 150.",
-    "collection.html": "Shop BGS Corner: oud oils, Reserve, bakhoor, EDP sprays and gift sets. Filter by category, price and gender.",
-    "product.html": "House-blended, alcohol-free fragrance from BGS Corner, Dubai. Oud oils, Reserve, bakhoor and EDP sprays.",
+    "collection.html": "Shop BGS Corner: attars and perfume oils, bakhoor, EDP sprays and gift sets. Filter by category, price and gender.",
+    "product.html": "House-blended, alcohol-free fragrance from BGS Corner, Dubai. Attars and perfume oils, bakhoor and EDP sprays.",
     "gift-box.html": "Build a gift box of three or six house scents, wrapped, with a handwritten card. BGS Corner, Dubai.",
     "cart.html": "Your BGS Corner bag.",
     "checkout.html": "Guest checkout with card, Apple Pay, Tabby, Tamara or cash on delivery. BGS Corner, Dubai.",
@@ -192,7 +192,7 @@ def shell(title, body, nav_on="", tab="Home", strip_here=True, page="", desc="",
   <div>%(footlogo)s
     <p>BGS Corner General Trading LLC &middot; Dubai, UAE</p>
     <p>%(addr)s</p><div class="nl"><span class="field">Your email</span><span class="btn">Join</span></div></div>
-  <div><h5>Shop</h5><a href="collection.html">Oud Oils</a><a href="collection.html">Oud</a><a href="collection.html">Bakhoor</a><a href="collection.html">EDP sprays</a><a href="gift-box.html">Gift sets</a></div>
+  <div><h5>Shop</h5><a href="collection.html?cat=attars">Attars/Perfume Oils</a><a href="collection.html">Bakhoor</a><a href="collection.html">EDP sprays</a><a href="gift-box.html">Gift sets</a></div>
   <div><h5>Help</h5><a href="product.html?p=royal-amber&amp;tab=delivery">Delivery &amp; returns</a><a href="product.html?p=royal-amber&amp;tab=apply">How to apply oud</a><a href="track-order.html">Track your order</a><span class="soon">FAQ</span></div>
   <div><h5>BGS Corner</h5><a href="account.html">Your account</a><span class="soon">Our story</span><a href="corporate.html">Corporate gifting</a><a href="corporate.html">Wholesale</a></div>
 </div><div class="bot"><span>&copy; 2026 BGS Corner General Trading LLC</span>
@@ -281,15 +281,17 @@ def _meta(pr):
        a name, size or gender and every card follows."""
     c = pr["category"]
     if c == "edp":       return "EDP spray &middot; %s &middot; %s" % (pr.get("size","50 ml"), pr.get("gender",""))
-    if c == "oud-oils":  return "Oud oil &middot; " + " / ".join(z["label"] for z in pr.get("sizes", []))
-    if c == "reserve":   return "Reserve &middot; " + (pr.get("sizes") or [{"label":""}])[0]["label"]
+    if c == "attars":    return "Perfume oil &middot; " + " / ".join(z["label"] for z in pr.get("sizes", []))
     if c == "bakhoor":   return "Bakhoor &middot; %s" % pr.get("size","")
     if c == "gift-sets": return "Gift set &middot; %s" % pr.get("contents","")
     return ""
 
 def _cards(cat, n=None):
+    return _cards_from(published(cat)[:n])
+
+def _cards_from(rows):
     out = []
-    for pr in published(cat)[:n]:
+    for pr in rows:
         sizes = ["%s &middot; AED %s" % (z["label"], money(z["price"])) for z in pr.get("sizes", [])] or None
         stock = pr.get("stock")
         notes = None
@@ -302,8 +304,13 @@ def _cards(cat, n=None):
                         low=(stock if isinstance(stock, int) and stock <= 5 else None)))
     return "".join(out)
 
-def oudoil_cards(n=None):  return _cards("oud-oils", n)
-def reserve_cards(n=None): return _cards("reserve", n)
+def attar_cards(n=None):   return _cards("attars", n)
+
+def halo_cards(n=None):
+    """The pieces that sit outside every discount. This used to be the Reserve
+       category; now that Reserve is folded into attars it selects on
+       never_discount, which is what made them Reserve in the first place."""
+    return _cards_from([r for r in published() if r.get("never_discount")][:n])
 def bakhoor_cards(n=None): return _cards("bakhoor", n)
 def edp_cards(n=None):     return _cards("edp", n)
 def set_cards(n=None):     return _cards("gift-sets", n)
@@ -402,7 +409,7 @@ home = """
 </div></section>
 
 <section class="alt"><div class="wrap">
-  <div class="sec-h"><h2>House ouds</h2><a href="collection.html?cat=oud-oils">All 12 &rarr;</a></div>
+  <div class="sec-h"><h2>Attars and perfume oils</h2><a href="collection.html?cat=attars">All 13 &rarr;</a></div>
   <div class="grid g5">%(attars)s</div>
 </div></section>
 
@@ -414,7 +421,7 @@ home = """
 </div></div></section>
 
 <section><div class="wrap">
-  <div class="sec-h"><h2>Reserve</h2><a href="collection.html">All oud &rarr;</a></div>
+  <div class="sec-h"><h2>Never discounted</h2><a href="collection.html?cat=attars">All attars &rarr;</a></div>
   <div class="grid feat">%(oud)s</div>
 </div></section>
 
@@ -461,7 +468,7 @@ home = """
            qb_body=COPY["quiz_banner"]["body"], qb_cta=COPY["quiz_banner"]["cta_label"],
            qb_href=COPY["quiz_banner"]["cta_href"],
            prev=sv("left",22,2), next=sv("right",22,2),
-           attars=oudoil_cards(5), oud=reserve_cards(), sets=set_cards(5),
+           attars=attar_cards(5), oud=halo_cards(), sets=set_cards(5),
            bakhoor=bakhoor_cards(), edp=edp_cards(5), ct=slot("count"))
 
 # ---------------------------------------------------------------- COLLECTION
@@ -470,7 +477,7 @@ home = """
 # brief taxonomy but have no per-product value in any source, so they are not
 # offered as controls that would do nothing.
 FACETS_LIVE = [
-    ("Category", "cat", [("Oud oils", "oud-oils"), ("Reserve", "reserve"),
+    ("Category", "cat", [("Attars", "attars"),
                          ("Bakhoor", "bakhoor"), ("EDP sprays", "edp"),
                          ("Gift sets", "gift-sets")]),
     ("Price", "price", [("Under AED 50", "0-49"), ("AED 50-100", "50-100"),
@@ -488,7 +495,7 @@ collection = """
   <span class="eyebrow" data-crumb>Home / All products</span>
   <div class="sec-h" style="margin-top:10px"><div>
     <h2 style="font-size:26px" data-title>All products</h2>
-    <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0;max-width:70ch" data-intro>Every blend in the shop: oud oils, Reserve, bakhoor, EDP sprays and gift sets.</p></div></div>
+    <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0;max-width:70ch" data-intro>Every blend in the shop: attars and perfume oils, bakhoor, EDP sprays and gift sets.</p></div></div>
   <div class="plp">
     <div class="side" data-filters>
       <div class="drawerhead"><b>Filters</b><button type="button" class="closex" data-closefilters aria-label="Close filters">&times;</button></div>
@@ -526,7 +533,7 @@ collection = """
 # ---------------------------------------------------------------- PDP
 product = """
 <section><div class="wrap">
-  <span class="eyebrow">Home / Oud Oils / Royal Amber</span>
+  <span class="eyebrow">Home / Attars / Royal Amber</span>
   <div class="pdp">
     <div class="gal" data-gallery>
       <div class="galmain">
@@ -638,7 +645,7 @@ product = """
    bat="", av="",
    truck=sv("truck",16), cash=sv("cash",16),
    leaf=sv("leaf",15), hrt=sv("heart",15), drop=sv("drop",15),
-   share=sv("share",15), rel=oudoil_cards(4))
+   share=sv("share",15), rel=attar_cards(4))
 
 # ---------------------------------------------------------------- GIFT BOX
 giftbox = """
@@ -675,7 +682,7 @@ giftbox = """
     </div>
   </div>
 </div></section>
-""" % dict(pick=oudoil_cards(6))
+""" % dict(pick=attar_cards(6))
 
 def stepper(qty, fixed=False):
     if fixed:
@@ -1027,7 +1034,7 @@ def emit_catalogue():
     """The client-side catalogue is a projection of the same content documents
        the pages are built from, so a price edited in the admin moves the card,
        the PDP and the cart together."""
-    CRUMB = {"oud-oils": "Oud oils", "reserve": "Reserve", "bakhoor": "Bakhoor",
+    CRUMB = {"attars": "Attars", "bakhoor": "Bakhoor",
              "edp": "EDP sprays", "gift-sets": "Gift sets"}
     cat = {}
     for pr in published():
@@ -1063,9 +1070,9 @@ def emit_catalogue():
     return len(cat)
 
 
-PAGES = [("index.html","Oud Oils, Bakhoor &amp; EDP Sprays: Blended in Dubai",home,"","Home"),
-         ("collection.html","Oud Oils: Alcohol-Free Perfume Oil in 3 ml and 6 ml",collection,"Oud Oils","Shop"),
-         ("product.html","Royal Amber",product,"Oud Oils","Shop"),
+PAGES = [("index.html","Attars, Bakhoor &amp; EDP Sprays: Blended in Dubai",home,"","Home"),
+         ("collection.html","Attars and Perfume Oils: Alcohol-Free, 3 ml and 6 ml",collection,"Attars/Perfume Oils","Shop"),
+         ("product.html","Royal Amber",product,"Attars/Perfume Oils","Shop"),
          ("gift-box.html","Build a Gift Box: Three or Six Scents, Wrapped",giftbox,"Gift Sets","Gifts"),
          ("cart.html","Your Bag",cart,"","Bag"),
          ("checkout.html","Checkout: Guest Checkout, COD and Tabby",checkout,"","Bag"),

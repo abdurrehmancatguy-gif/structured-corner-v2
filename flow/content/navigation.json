@@ -1,12 +1,8 @@
 {
   "main": [
     {
-      "label": "Oud Oils",
-      "href": "collection.html"
-    },
-    {
-      "label": "Reserve",
-      "href": "collection.html"
+      "label": "Attars/Perfume Oils",
+      "href": "collection.html?cat=attars"
     },
     {
       "label": "Bakhoor",
@@ -57,16 +53,10 @@
   ],
   "categories": [
     {
-      "label": "Oud Oils",
-      "href": "collection.html?cat=oud-oils",
+      "label": "Attars/Perfume Oils",
+      "href": "collection.html?cat=attars",
       "swatch": "c_oil",
       "photo": "oud"
-    },
-    {
-      "label": "Reserve",
-      "href": "collection.html?cat=reserve",
-      "swatch": "c_res",
-      "photo": "res"
     },
     {
       "label": "Bakhoor",
@@ -110,12 +100,8 @@
       "heading": "Shop",
       "links": [
         {
-          "label": "Oud Oils",
-          "href": "collection.html?cat=oud-oils"
-        },
-        {
-          "label": "Reserve",
-          "href": "collection.html?cat=reserve"
+          "label": "Attars/Perfume Oils",
+          "href": "collection.html?cat=attars"
         },
         {
           "label": "Bakhoor",

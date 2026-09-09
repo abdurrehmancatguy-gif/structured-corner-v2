@@ -654,11 +654,10 @@
   if (!grid) return;
   var CAT = window.BGS_CATALOGUE || {};
 
-  var CAT_LABEL = { "oud-oils": "Oud oils", "reserve": "Reserve", "bakhoor": "Bakhoor",
+  var CAT_LABEL = { "attars": "Attars", "bakhoor": "Bakhoor",
                     "edp": "EDP sprays", "gift-sets": "Gift sets" };
   var CAT_INTRO = {
-    "oud-oils": "Alcohol-free perfume oil in 3 ml and 6 ml.",
-    "reserve":  "The blends that sit outside every discount the shop runs.",
+    "attars": "Alcohol-free attars and perfume oils in 3 ml and 6 ml.",
     "bakhoor":  "Bakhoor for the home, in 20 g to 50 g tins.",
     "edp":      "Eau de parfum sprays, 50 ml, with declared note profiles.",
     "gift-sets": "Wrapped sets, built from the house blends." };
@@ -1335,4 +1334,45 @@
     if (on) a.setAttribute("aria-current", "page");
     else a.removeAttribute("aria-current");
   });
+})();
+
+/* ---------- one card height for every slide ---------------------------------
+   On a phone the copy card sits in the flow under the band, so its height is
+   whatever that slide's copy needs: measured 183, 211, 183, 191 and 211, which
+   made the hero grow and shrink 28px every time the carousel turned.
+
+   The tallest is measured rather than written down, because a number would be
+   wrong the first time someone edits a headline. Each card is shown for one
+   synchronous read and put back, so nothing paints mid-measurement.
+
+   Desktop is left alone: there the cards are absolutely positioned and already
+   fill the hero. */
+(function () {
+  "use strict";
+  var hero = document.querySelector(".hero");
+  var overs = hero && hero.querySelectorAll(".over");
+  if (!overs || overs.length < 2) return;
+
+  var phone = window.matchMedia("(max-width:900px)");
+
+  function equalise() {
+    overs.forEach(function (o) { o.style.minHeight = ""; });
+    if (!phone.matches) return;
+
+    var was = [], tallest = 0;
+    overs.forEach(function (o) { was.push(o.classList.contains("on")); });
+    overs.forEach(function (o) {
+      o.classList.add("on");
+      tallest = Math.max(tallest, o.getBoundingClientRect().height);
+      o.classList.remove("on");
+    });
+    overs.forEach(function (o, i) {
+      if (was[i]) o.classList.add("on");
+      o.style.minHeight = tallest + "px";
+    });
+  }
+
+  equalise();
+  addEventListener("resize", equalise);
+  if (phone.addEventListener) phone.addEventListener("change", equalise);
 })();

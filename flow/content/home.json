@@ -3,7 +3,7 @@
     {
       "eyebrow": "Blended in Dubai · alcohol-free ouds",
       "headline": "Find your scent.",
-      "body": "Eleven house ouds in 3 ml and 6 ml, Reserve oud, bakhoor and EDP sprays.",
+      "body": "Thirteen attars and perfume oils in 3 ml and 6 ml, bakhoor and EDP sprays.",
       "primary": {
         "label": "Shop ouds",
         "href": "collection.html"
@@ -16,9 +16,9 @@
       "image_alt": "The BGS oud oil range with its leather case"
     },
     {
-      "eyebrow": "Gift ready",
+      "eyebrow": "Never discounted",
       "headline": "Platinum Musk\nOUD.",
-      "body": "Reserve oud in 6 ml, AED 399, boxed and ribbon tied.",
+      "body": "Platinum Musk OUD, 6 ml, AED 399, boxed and ribbon tied.",
       "primary": {
         "label": "See Platinum Musk",
         "href": "product.html?p=platinum-musk-oud"
@@ -61,7 +61,7 @@
       "image_alt": "The Amore, Vibe and Be Mine trio in a wrapped box"
     },
     {
-      "eyebrow": "Reserve",
+      "eyebrow": "Never discounted",
       "headline": "Majlis OUD,\ntwo sizes.",
       "body": "6 ml at AED 650, 12 ml at AED 1295. Never discounted.",
       "primary": {
@@ -69,16 +69,16 @@
         "href": "product.html?p=majlis-oud"
       },
       "secondary": {
-        "label": "All Reserve",
-        "href": "collection.html?cat=reserve"
+        "label": "All attars",
+        "href": "collection.html?cat=attars"
       },
       "image": "assets/img/banner-3.jpg",
       "image_alt": "Majlis OUD in 6 ml and 12 ml crystal"
     }
   ],
   "sections": {
-    "house_ouds": "House ouds",
-    "reserve": "Reserve",
+    "house_ouds": "Attars and perfume oils",
+    "reserve": "Never discounted",
     "gift_sets": "Gift sets",
     "scent_family": "Shop by scent family",
     "bakhoor": "Bakhoor & home",
