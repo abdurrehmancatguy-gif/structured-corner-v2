@@ -155,8 +155,11 @@ def catstrip():
         '<a class="c-{3}" href="{0}"><span class="circle">{1}</span><span>{2}</span></a>'.format(h, sv(ic, 30, 1.5), n, k)
         for n, h, ic, k in CATS) + '</div></div></div>')
 
-def shell(title, body, nav_on="", tab="Home", strip_here=True, page="", desc="", canon=""):
-    strip = catstrip()
+def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
+    """No category strip here. The circles are a homepage shelf now - the sticky
+       catnav carries the same eight destinations on every page, so a second copy
+       of them under the masthead was the same row twice. index.html emits its
+       own from the home template; strip_here went with it."""
     return """<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -186,7 +189,6 @@ def shell(title, body, nav_on="", tab="Home", strip_here=True, page="", desc="",
 </div>
 <div class="msearch"><form class="search" action="collection.html" method="get" role="search"><input name="q" aria-label="Search products" placeholder="Search ouds, oud, bakhoor&hellip;"><button type="submit" class="go" aria-label="Search">%(search)s</button></form></div></div>
 %(catnav)s
-%(strip)s
 %(body)s
 <footer><div class="wrap"><div class="cols">
   <div>%(footlogo)s
@@ -203,7 +205,7 @@ def shell(title, body, nav_on="", tab="Home", strip_here=True, page="", desc="",
 """ % dict(title=title, body=body, cssv=CSSV, page=page,
    desc=esc(desc), canon=esc(canon),
    ogimg=esc((SITE_URL + "/" + SEO.get("og_image", "") ) if SITE_URL else SEO.get("og_image", "")),
-   strip=(strip if strip_here else ""), catnav=catnav(), tabs="".join(A(l,h,tab) for l,h in TABS),
+   catnav=catnav(), tabs="".join(A(l,h,tab) for l,h in TABS),
    clock=sv("clock",13,2), menu=sv("menu",22), chev=sv("chev",14,2), search=sv("search",17),
    user=sv("user"), heart=sv("heart"), bag=sv("bag"),
    brandlogo=header_logo(), footlogo=footer_logo(), icons=favicon_links(),
@@ -1090,8 +1092,7 @@ CSSV = hashlib.md5(b"".join(
 )).hexdigest()[:8]
 for fn, t, b, on, tab in PAGES:
     canon = (SITE_URL + "/" + fn) if SITE_URL else fn
-    pathlib.Path(fn).write_text(shell(t, b, on, tab, strip_here=(fn not in ("index.html", "cart.html", "checkout.html", "confirmed.html")),
-                                      page="page-" + fn.replace(".html", ""),
+    pathlib.Path(fn).write_text(shell(t, b, on, tab,                                       page="page-" + fn.replace(".html", ""),
                                       desc=PAGE_DESC.get(fn, SEO.get("default_description", "")),
                                       canon=canon))
 print("wrote", len(PAGES), "pages")
