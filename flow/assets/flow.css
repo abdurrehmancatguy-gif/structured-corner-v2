@@ -1717,3 +1717,40 @@ footer .slot,footer .soon{color:#b9b0a4}
 /* the gold rule stays: it reads as an accent on the satin rather than the
    warning stripe it was on cream */
 .note{color:#E4DCCE;border-left:3px solid var(--gold)}
+
+/* ---- category bar: centred, and no scrolling on a phone ------------------
+   Two problems, one rule each.
+
+   It was left-aligned because the flex row had no justification, so seven items
+   in a container sized for more sat against the left edge with the slack on the
+   right. Centred now. Safe to centre without clipping the start, because below
+   900px it wraps rather than overflows, and above that the row fits: the labels
+   measure about 700px against 845px of available width at the narrowest desktop.
+
+   Sideways scrolling is gone because the labels cannot fit one row on a phone
+   at any size worth reading - measured, all seven need 418px even at 8px text
+   with 5px padding, against a 375px screen. So they wrap to two centred rows
+   and every category is reachable without scrolling. The alternative was
+   abbreviating them, which would have undone the rename to Attars/Perfume Oils. */
+.catnav .wrap{justify-content:center}
+@media (max-width:900px){
+  .catnav .wrap{flex-wrap:wrap;overflow:visible;padding:3px 8px;row-gap:0}
+  .catnav a{min-height:29px;padding:0 9px;font-size:11.5px}
+}
+
+/* Wrapping the bar to two rows on a phone cost 24px, which put the second row
+   of category tiles 14px past the fold at 375x812. Taken back off the bar
+   itself and the circles rather than anything in the hero: the band's 1.85:1
+   has to stay exactly that, it is the phone banner asset's own ratio. */
+@media (max-width:700px){
+  .catnav .wrap{padding:2px 8px}
+  .catnav a{min-height:27px}
+  .cs a .circle{max-width:58px;margin-bottom:5px}
+}
+
+/* The product page has no circle strip, so the trim that paid for the bar
+   there does nothing here and Add to bag sat 1px past the fold at 375x812.
+   Ten pixels off the gallery square, which the thumbnails follow. */
+@media (max-width:700px){
+  .page-product .galmain{max-height:245px}
+}

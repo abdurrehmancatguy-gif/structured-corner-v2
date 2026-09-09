@@ -328,7 +328,11 @@ def usp_strip():
 def hero_slides():
     """Each slide is a document: eyebrow, headline, body and up to two CTAs.
        A newline in the headline becomes a line break, so the admin can control
-       where it wraps without knowing any HTML."""
+       where it wraps without knowing any HTML. The space before the <br> is
+       load-bearing: the phone hides the break, since home.json's newlines are
+       chosen for the desktop hero's line length, and without a space the two
+       halves joined into "Platinum MuskOUD." A trailing space before a line
+       break collapses, so desktop is unaffected."""
     out = []
     for i, sl in enumerate(HOME["hero_slides"]):
         cta = ""
@@ -344,7 +348,7 @@ def hero_slides():
             '<div style="display:flex;gap:10px;flex-wrap:wrap">%s</div>'
             '</div></div></div>'
             % (" on" if i == 0 else "", esc(sl.get("eyebrow", "")),
-               esc(sl.get("headline", "")).replace("\n", "<br>"), esc(sl.get("body", "")), cta))
+               esc(sl.get("headline", "")).replace("\n", " <br>"), esc(sl.get("body", "")), cta))
     return "".join(out)
 
 def hero_images():
