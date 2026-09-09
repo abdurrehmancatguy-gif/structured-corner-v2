@@ -611,7 +611,7 @@ product = """
       <div><span class="eyebrow">Heart</span><p style="margin:8px 0 0" data-note="heart"></p></div>
       <div><span class="eyebrow">Base</span><p style="margin:8px 0 0" data-note="base"></p></div>
     </div>
-    <div class="note" data-pyrnote style="margin-top:20px" hidden>The scent pyramid is published for our EDP sprays. For the oud oils it is coming soon.</div>
+    <div class="note" data-pyrnote style="margin-top:20px" hidden>The scent pyramid is published for our EDP sprays. For the attars it is coming soon.</div>
   </div>
   <div data-panel="apply" hidden>
     <div class="grid g3">

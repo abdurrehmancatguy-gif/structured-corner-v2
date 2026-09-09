@@ -176,8 +176,7 @@ section.alt{background:var(--alt)}
 .tabs2 button:hover{color:var(--ink)}
 .tabs2 button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .tabs2 span.on,.tabs2 button.on{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
-.note{background:var(--gold-l);border-left:3px solid var(--gold);padding:12px 15px;font-size:12.5px;
- color:var(--body);border-radius:0 var(--r) var(--r) 0}
+.note{padding:12px 15px;font-size:12.5px;border-radius:0 var(--r) var(--r) 0}
 
 /* ---------- cart / checkout ---------- */
 .two{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:34px}
@@ -1220,8 +1219,7 @@ footer .slot,footer .soon{color:#b9b0a4}
    bottle is chosen on, so they get a colour of their own. Icon sits on the
    label's line so each column is two lines, not three. */
 .notestop{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 18px;
-  margin:2px 0 16px;padding:11px 15px;border-radius:var(--r);
-  background:var(--gold-l);border:1px solid #ecdfc0}
+  margin:2px 0 16px;padding:11px 15px;border-radius:var(--r)}
 .notestop>div{display:grid;grid-template-columns:auto 1fr;column-gap:6px;align-items:center}
 .notestop .ni{grid-area:1/1;display:flex;color:var(--gold-d);margin:0}
 .notestop .ni svg{width:13px;height:13px}
@@ -1655,37 +1653,67 @@ footer .slot,footer .soon{color:#b9b0a4}
   .cs a{flex:0 0 calc(25% - 6px)}
 }
 
-/* ---- scent notes: black satin, not a warning banner -----------------------
-   The panel was --gold-l with a cream border, which is the shape and colour a
-   browser or a framework uses for a caution message - so a factual note about
-   top, heart and base read as something being wrong.
+/* ---- satin, for the panels that were dressed as warnings ------------------
+   Both .notestop and .note were --gold-l with a gold edge, which is the shape
+   and the colour a browser or a framework uses for a caution message. A note
+   about top, heart and base, or about how the voucher works, was dressed as
+   something being wrong. .note carries ten of them across six pages.
 
-   Black satin instead, built in four layers: a vertical tonal ground so it is
-   not flat, two fine opposed diagonals for the weave, and one broad off-axis
-   band for the sheen a satin gives when light crosses it. A gold hairline and
-   an inside highlight along the top edge finish it, like light catching a fold.
+   The satin is defined once here and referenced by both, so the two cannot
+   drift apart. Four layers: a vertical tonal ground so it is not flat, two
+   fine opposed diagonals for the weave, and one broad off-axis band for the
+   sheen satin gives when light crosses it.
 
-   Kept in the palette rather than introducing navy: this is --secondary, the
-   brand's own dark, so the panel belongs to the same family as the strip, the
-   footer and the buttons.
+   Black rather than the navy also offered, because navy is a hue nothing else
+   in the palette uses. This is --secondary, so these panels belong to the same
+   family as the delivery strip, the footer and the solid buttons.
 
-   Measured against the worst case, which is the lightest tonal stop with the
-   full sheen on top of it, rgb(48,41,36): label #E8C87E 8.85:1, value #E4DCCE
-   10.51:1, icon #C9A567 6.17:1. The 9px label needs 4.5 and the icon 3.
+   Measured against the worst case, the lightest tonal stop with the full sheen
+   on it at rgb(48,41,36): label #E8C87E 8.85:1, body #E4DCCE 10.51:1, icon
+   #C9A567 6.17:1, against 4.5 for the 9px label and 3 for the icon.
 
-   The label is #E8C87E, the gold the hero eyebrow already uses, and not
-   --gold-l: --gold-l is #f6efdd, a near-white cream that was picked to sit
-   behind dark text, so on this ground it read as white and the gold accent
-   went missing. */
-.notestop{
-  background:
-    linear-gradient(103deg, rgba(255,255,255,.055) 0 14%, rgba(255,255,255,0) 34%,
-      rgba(255,255,255,.038) 52%, rgba(255,255,255,0) 74%, rgba(255,255,255,.022) 100%),
-    repeating-linear-gradient(45deg,  rgba(255,255,255,.016) 0 1px, rgba(255,255,255,0) 1px 3px),
-    repeating-linear-gradient(-45deg, rgba(0,0,0,.055) 0 1px, rgba(0,0,0,0) 1px 3px),
-    linear-gradient(180deg, #241d17 0%, var(--secondary) 55%, #110d0a 100%);
-  border:1px solid rgba(232,200,126,.16);
+   The label is #E8C87E, the gold the hero eyebrow uses, and not --gold-l:
+   --gold-l is #f6efdd, a near-white cream chosen to sit behind dark text, so on
+   this ground it read as white and the gold went missing.
+
+   Not applied to .band, which shares the old cream but is not a message - it is
+   a promo block with a heading and a gold CTA. Nor to .tierbadge or .tiers .t.on,
+   where the cream is a selected state doing its job. */
+:root{
+  /* Lit from the upper left and falling away across the panel, which is what
+     makes it read as cloth rather than a dark rectangle. Five layers, topmost
+     first:
+
+       sweep   two highlight bands, because satin catches light twice - once
+               where it enters and once off the far rise of the weave
+       glow    the corner the light comes from
+       weave   two opposed diagonals, one white one black, for the grain
+       ground  itself directional, so the fall-off is in the base tone and not
+               only in the highlight
+
+     The brightest point is where all of it stacks - ground's first stop, plus
+     the weave's white line, plus the glow, plus the sweep peak - which
+     composites to rgb(80,73,68). Measured there: label #E8C87E 5.47:1, body
+     #E4DCCE 6.49:1, icon #C9A567 3.81:1, against 4.5 and 3.
+
+     A stronger version was tried, sweep .13 and glow .10, and dropped: it put
+     the label at 4.55:1 and the icon at 3.17:1, which passes on paper but
+     leaves nothing for rendering variance. */
+  --satin:
+    linear-gradient(100deg,
+      rgba(255,255,255,.10) 0%, rgba(255,255,255,.055) 22%, rgba(255,255,255,.012) 44%,
+      rgba(255,255,255,.045) 62%, rgba(255,255,255,.008) 84%, rgba(255,255,255,.028) 100%),
+    radial-gradient(140% 200% at 2% -30%, rgba(255,255,255,.07), rgba(255,255,255,0) 62%),
+    repeating-linear-gradient(45deg,  rgba(255,255,255,.018) 0 1px, rgba(255,255,255,0) 1px 3px),
+    repeating-linear-gradient(-45deg, rgba(0,0,0,.06) 0 1px, rgba(0,0,0,0) 1px 3px),
+    linear-gradient(100deg, #2a221b 0%, #1c1712 46%, #120e0b 100%);
+}
+.notestop,.note{background:var(--satin);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.05), 0 1px 3px -1px rgba(23,19,16,.25)}
+.notestop{border:1px solid rgba(232,200,126,.16)}
 .notestop .ni{color:#C9A567}
 .notestop b{color:#E8C87E}
 .notestop p{color:#E4DCCE}
+/* the gold rule stays: it reads as an accent on the satin rather than the
+   warning stripe it was on cream */
+.note{color:#E4DCCE;border-left:3px solid var(--gold)}
