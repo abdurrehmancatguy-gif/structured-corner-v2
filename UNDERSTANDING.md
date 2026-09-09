@@ -1,11 +1,11 @@
-# BGS Corner — project instructions and current understanding
+# BGS Corner - project instructions and current understanding
 
 BGS Corner General Trading LLC, Dubai. A fragrance-only UAE ecommerce store:
 house-blended attars, ouds, EDP sprays and bakhoor. UAE-only delivery,
 Dubai-first with a same-day option.
 
 **This is a standalone project.** It does not continue, fork or inherit from
-any earlier BGS website. Nothing is carried across — no code, no catalogue, no
+any earlier BGS website. Nothing is carried across - no code, no catalogue, no
 design. The build brief is the only source.
 
 **Status: design phase.** No application code exists yet, by instruction. This
@@ -43,7 +43,7 @@ These constrain everything else in this file.
 Owner decisions, layered on top of the brief.
 
 ### Light theme
-The site is light-themed. Light is the ground, not a mode bolted on after —
+The site is light-themed. Light is the ground, not a mode bolted on after -
 contrast, shadow and metallics are designed against a pale surface from the
 first screen rather than inverted from a dark one.
 
@@ -57,7 +57,7 @@ PDP into the cart line and onto the gift-box preview.
 Ground: `#FAF8F4`, a warm off-white.
 
 Each family ships two stops: an **ink** that carries text, and a **wash** for
-fills that never carries text. Measured contrast below — AA needs 4.5:1:
+fills that never carries text. Measured contrast below - AA needs 4.5:1:
 
 | Scent family | Ink | on ground | Wash | ink on wash |
 |---|---|---|---|---|
@@ -74,13 +74,13 @@ either without a per-family exception. The narrowest is Fresh & Citrus at 5.44,
 which still leaves room to darken a tint later without breaking a check.
 
 **Gold is not a text colour.** `#A07C3C` reaches 3.64 against the ground and
-4.10 against Reserve ink — both short of AA. Gold is for rules, borders and
+4.10 against Reserve ink - both short of AA. Gold is for rules, borders and
 foil; the halo tier's gold is drawn, never written. A darker `#8A6A2E` passes
 on the ground (4.73) but then fails on Reserve (3.15), so there is no single
 gold that works as text everywhere, and pretending otherwise would put an
 unreadable price on the most expensive product in the shop.
 
-Values are measured, but **not yet approved** — the hues themselves are still
+Values are measured, but **not yet approved** - the hues themselves are still
 the owner's call.
 
 ### Scarcity cues must be true
@@ -89,18 +89,18 @@ Low-stock messaging ("3 left") is wanted, driven by **real inventory**:
 - The number shown is the number in stock. Read, not chosen.
 - A threshold decides when the cue appears, set in admin, not in code.
 - Above the threshold, nothing is shown. Silence is the default.
-- Quote-flow products show no cue — there is no count to be honest about.
+- Quote-flow products show no cue - there is no count to be honest about.
 
 A fabricated "3 left" is a false statement to a customer about a material fact
 in a purchase decision, and the easiest claim in the build to disprove.
 
 ### Premium products are never discounted
-Products marked `margin_role: halo` (§4) — Majlis OUD, Platinum Musk OUD — are
+Products marked `margin_role: halo` (§4) - Majlis OUD, Platinum Musk OUD - are
 excluded from every path that reduces a price: the §6.1 volume ladder, coupon
 codes, campaign percentages, loyalty redemption and the gift-with-purchase
 threshold alike.
 
-Enforced **structurally, not by policy** — one predicate every discount surface
+Enforced **structurally, not by policy** - one predicate every discount surface
 must ask before touching a line, so a mechanism added later cannot forget it. A
 halo product does not decline a discount; it has no arithmetic path to one.
 
@@ -112,7 +112,7 @@ halo product does not decline a discount; it has no arithmetic path to one.
 The basket must average **AED 160+** against ~AED 50 kiosk items. Three levers
 do that work: tiered bundle pricing, gifting as the primary use case, and
 WhatsApp retention through GoHighLevel. Contribution is ~AED 56/order at that
-AOV against ~AED 20 delivery — which is where free delivery ≥ AED 150, AED 12
+AOV against ~AED 20 delivery - which is where free delivery ≥ AED 150, AED 12
 below, and same-day Dubai +AED 25 come from. Margin arithmetic, not preference.
 
 Languages: English + Arabic at launch, full RTL, hreflang'd. Currency AED, with
@@ -131,16 +131,16 @@ A single structured vocabulary on every product, EN + AR, powering filters, the
 quiz, review tags, recommendations, rule-driven collections, GHL segments and
 SEO landing pages. Get it wrong and six modules are wrong.
 
-- `scent_family`, `tone`, `gender_lean` — **one value each**, deliberately. A
+- `scent_family`, `tone`, `gender_lean`: **one value each**, deliberately. A
   scent that is woody and floral and fresh is a scent nobody can be
   recommended, and a quiz cannot score against a product claiming every answer.
-- `occasion[]`, `season[]` — genuinely plural.
+- `occasion[]`, `season[]`: genuinely plural.
 - `longevity`, `sillage`, `format`, `size`, `notes_pyramid`, `wears_like`,
   `batch_number`, `alcohol_free`, `same_day_eligible`, `margin_role`.
 - Per-product SEO fields: meta title/description, slug (EN+AR), alt texts.
 
 ### Hard blockers (the brief's MUSTs)
-- Halo products structurally undiscountable — not merely un-discounted.
+- Halo products structurally undiscountable - not merely un-discounted.
 - Fixed sets can never oversell their components.
 - COD defended: AED 8 fee, disabled above AED 300, on QR-video orders, and for
   customers with a prior refusal; orders enter `cod_pending` and ship only
@@ -150,7 +150,7 @@ SEO landing pages. Get it wrong and six modules are wrong.
   (`order.created`, `order.cod_pending`, `order.confirmed`, `order.fulfilled`,
   `order.delivered`, `order.refunded`, `cart.abandoned`, `review.requested`,
   `voucher.issued`, `optin.captured`). GHL and analytics both consume it. No
-  outbox means no automation — everything downstream depends on this layer.
+  outbox means no automation - everything downstream depends on this layer.
 - Tiered cart pricing: 3+ items −10%, 6+ −15%, automatic, excluding halo,
   Wedding Favours, quotes and fixed sets.
 - Build-a-Gift-Box: 3 or 6 slots, live visual, one cart line, itemised.
@@ -192,7 +192,7 @@ declines non-essential by default.
 Ten modules, role-gated, mobile-usable, because ops happens at the kiosk. The
 real acceptance test: a non-technical person can add a taxonomy'd product,
 receive stock with a batch, clear a COD queue, publish an occasion landing
-page, generate an influencer code and read the dashboard — with no developer.
+page, generate an influencer code and read the dashboard - with no developer.
 
 ### Out of scope for launch
 Subscriptions, GCC shipping, multi-currency, a native app, full Tagalog and
@@ -200,13 +200,13 @@ Spanish locales, engraving. The architecture must not preclude them.
 
 ---
 
-## 4. Competitor reference — vperfumes.com
+## 4. Competitor reference - vperfumes.com
 
 Studied 2026-08-29, UAE English storefront, with the owner's consent (rule 2).
 The brief itself names no competitors; this one was supplied separately. Every
 observation below was read off the live site.
 
-**What they are:** a GCC fragrance *reseller* — designer and niche brands,
+**What they are:** a GCC fragrance *reseller* - designer and niche brands,
 50+ physical stores, a marketplace with third-party sellers, running permanent
 deep discounting (74–90% off with struck-through reference prices, a countdown
 timer on a three-day "Dubai Super Sale"). That is the opposite of a house brand
@@ -221,19 +221,19 @@ with a halo tier. Take their mechanics; leave their strategy.
 - **Category page shape:** short intro line under the heading, the grid, then
   long-form copy and an FAQ block beneath it. That is §14.5's programmatic
   landing page and §14.3's FAQ schema, already proven on a UAE fragrance term.
-- **A result count** — "209 items in Bakhoor" — next to the filter control.
+- **A result count**: "209 items in Bakhoor" - next to the filter control.
 - **A delivery promise on the PDP, not just at checkout.** They show
   "Deliver to UAE, Abu Dhabi, AL Khatam" and "Delivered between Aug 31 – Sep 3"
   against a chosen delivery type. §9 asks for a same-day line with a countdown;
   a resolved date range is the same idea and reads as more concrete.
-- **A delivery-speed badge on the product card** — theirs reads "Free 2-Hour
+- **A delivery-speed badge on the product card**: theirs reads "Free 2-Hour
   Delivery" on eligible items. This is what §4's `same_day_eligible` should
   look like in the grid, and what §8.1's "Ready today" filter should match.
 - **"Notify me" replacing Add to Cart when out of stock.** A dead button is a
   lost customer; this is also an `optin.captured` event (§13) and a reason to
   message someone later.
-- **Two distinct recommendation rails** — "Frequently Purchased" and
-  "Customers who bought this item also bought" — kept separate rather than
+- **Two distinct recommendation rails**: "Frequently Purchased" and
+  "Customers who bought this item also bought" - kept separate rather than
   merged. §9's "Complete the ritual" is our version, but the lesson is that one
   rail can be behavioural and another editorial.
 - **PDP section set:** Key Specifications, About, How to use, Reviews, FAQ.
@@ -244,9 +244,9 @@ with a halo tier. Take their mechanics; leave their strategy.
 
 ### Confirms the brief
 
-- Their PDP carries **GENDER, SILLAGE and SEASON** as structured attributes —
+- Their PDP carries **GENDER, SILLAGE and SEASON** as structured attributes -
   three of §4's axes, on a competitor at scale. The taxonomy is not exotic.
-- Their COD is qualified **"for selected products only"** — the same defence
+- Their COD is qualified **"for selected products only"**: the same defence
   §10.3 requires, stated plainly to the customer rather than hidden.
 - Free-delivery threshold at AED 200 against the brief's AED 150.
 
@@ -255,13 +255,13 @@ with a halo tier. Take their mechanics; leave their strategy.
 - **The discount model.** Struck-through prices at 74–90% off, permanently, on
   most of the catalogue. It trains a customer never to pay the reference price,
   and it is structurally incompatible with a halo tier that is never discounted.
-- **The marketplace layer** — "Sold by", seller ratings, seller registration.
+- **The marketplace layer**: "Sold by", seller ratings, seller registration.
 - **"Load More" pagination**, which needs care to stay crawlable.
 - **The app-download push.** A native app is out of scope for launch.
 
 ### Where we can beat them
 
-Their PDP ships **only `Organization` JSON-LD** — no Product schema, no
+Their PDP ships **only `Organization` JSON-LD** - no Product schema, no
 `offers`, no `aggregateRating`, no Review markup, despite showing a rating on
 the page. §14.3 requires all of it. Rich results on product queries are
 available to whoever asks for them, and they are not asking.
@@ -269,7 +269,7 @@ available to whoever asks for them, and they are not asking.
 ### Not verified
 
 Their filter drawer would not open under automation, so the facet list is
-unknown. Cart, checkout and COD rules were not exercised — that would mean
+unknown. Cart, checkout and COD rules were not exercised - that would mean
 placing an order on a live commercial site.
 
 ---
@@ -279,7 +279,7 @@ placing an order on a live commercial site.
 The brief's own sequence (§2.1), which nothing so far gives reason to change:
 
 1. Data model, catalogue and taxonomy (§3–4)
-2. Storefront core — collections, PDP, search and filters
+2. Storefront core - collections, PDP, search and filters
 3. Cart, checkout, payments, couriers
 4. Bundles, gifting, quiz, vouchers
 5. Admin portal (§16)
@@ -292,9 +292,9 @@ The brief's own sequence (§2.1), which nothing so far gives reason to change:
 ## 6. Open questions
 
 1. The seven family hues need real values, contrast-checked on the light ground.
-2. The §3 catalogue needs real product data from the owner — names, variants,
+2. The §3 catalogue needs real product data from the owner - names, variants,
    prices and taxonomy values. Nothing is invented to stand in (rule 4).
-3. Payment provider: Stripe, or Telr/PayTabs. Plus which BNPL — Tabby, Tamara,
+3. Payment provider: Stripe, or Telr/PayTabs. Plus which BNPL - Tabby, Tamara,
    or both.
 4. Courier: the brief names Jeebly plus one backup, which is unnamed.
 5. Whether the brief document itself should be amended with the design-phase

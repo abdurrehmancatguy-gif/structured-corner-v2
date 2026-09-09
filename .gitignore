@@ -11,7 +11,7 @@ dist/
 *.tsbuildinfo
 next-env.d.ts
 
-# environment — never commit secrets
+# environment - never commit secrets
 .env
 .env.*
 !.env.example

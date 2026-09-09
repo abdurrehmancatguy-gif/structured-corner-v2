@@ -1,4 +1,4 @@
-# BGS Corner — front-end build prompt
+# BGS Corner - front-end build prompt
 
 Everything below is the accumulated instruction set for the BGS Corner storefront
 front end. It is written to be handed to a developer or a fresh session and
@@ -6,18 +6,18 @@ executed without further context.
 
 ---
 
-## 0. Hard rules — these override everything else
+## 0. Hard rules - these override everything else
 
 1. **Never push to a remote without explicit consent.** Commit locally and stop.
    Creating a remote repository counts as publishing.
 2. **Never pull anything from another repository.** Not code, data, design, copy
    or context. `bgscorner-final`, `bgscorner-v2` and the older static prototypes
-   are off limits entirely — not reference material, not to be read or surveyed.
+   are off limits entirely - not reference material, not to be read or surveyed.
 3. **Never pull information from any website** without consent in that message.
 4. **Use only these three sources for data:**
-   - `BGSecommercebuildbrief.md` — catalogue §3, taxonomy §4, all commerce rules
-   - `BGS Corner Sheet.xlsx` — product lineup, weights, August selling prices
-   - `BGS_Perfume_Ingredients.xlsx` — EDP note profiles and barcodes
+   - `BGSecommercebuildbrief.md`: catalogue §3, taxonomy §4, all commerce rules
+   - `BGS Corner Sheet.xlsx`: product lineup, weights, August selling prices
+   - `BGS_Perfume_Ingredients.xlsx`: EDP note profiles and barcodes
    Read the cost and profit columns **only to skip them**. Margin data must never
    reach the front end.
 5. **Never invent anything to fill a gap.** No placeholder statistics, fictional
@@ -36,7 +36,7 @@ House oud oils in 3 ml and 6 ml, Reserve oud, bakhoor and EDP sprays.
 UAE-only delivery, Dubai-first with a same-day option.
 
 **It must read as a professional ecommerce store, not a portfolio or brand site.**
-Merchandising rails, search, filters, product cards with prices and add-to-bag —
+Merchandising rails, search, filters, product cards with prices and add-to-bag -
 not editorial layouts, full-bleed hero photography or long-form storytelling.
 
 Front end only. No backend, no database, no persistence beyond the tab.
@@ -81,13 +81,13 @@ flow/
 
 **Cache busting is mandatory.** Both `flow.css` and `shop.js` are linked with a
 content-hash token (`?v=<md5[:8]>`) regenerated on every build. Without it CSS
-edits silently fail to appear — this cost real debugging time.
+edits silently fail to appear - this cost real debugging time.
 
 ---
 
 ## 4. Design system
 
-### Palette — light theme, wide colour range
+### Palette - light theme, wide colour range
 
 Light is the ground, not a mode. Colour breadth comes from the scent families.
 
@@ -128,7 +128,7 @@ eyebrow 10px uppercase, `.14em` tracking · micro 11.5px.
 ### Placeholder convention
 
 Any value with no source renders as a `.slot`: bracketed, hatched, dashed
-border, muted. `[ family ]`, `[ no reviews yet ]`, `[ TRN — registration
+border, muted. `[ family ]`, `[ no reviews yet ]`, `[ TRN - registration
 expected ~month 9 ]`. Image regions use the same treatment at box scale with a
 label saying what belongs there. **A reader must be able to tell real from
 pending at a glance.**
@@ -141,7 +141,7 @@ pending at a glance.**
 
 ## 5. Global chrome
 
-**Utility strip** (dark, 36px): same-day countdown left — "Order by 2:00 PM for
+**Utility strip** (dark, 36px): same-day countdown left - "Order by 2:00 PM for
 delivery today in Dubai · 3h 47m" with the time in gold. Right: free delivery
 over AED 150, cash on delivery, Track order, العربية. Right group hides on mobile.
 
@@ -154,7 +154,7 @@ Account and Wishlist icons hide, leaving burger + wordmark + bag.
 Bakhoor · EDP Sprays · Gift Sets · Discovery · Shop by Occasion ·
 Corporate Gifting · and a gold "Discovery Trio · credit back" link.
 
-**Footer:** four columns — company block with address placeholder and a
+**Footer:** four columns - company block with address placeholder and a
 newsletter field; Shop; Help; BGS Corner. Bottom bar with the legal entity name
 and the payment method list.
 
@@ -162,7 +162,7 @@ and the payment method list.
 
 ---
 
-## 6. Pages — ten, all reachable
+## 6. Pages - ten, all reachable
 
 | Page | Purpose |
 |---|---|
@@ -179,24 +179,24 @@ and the payment method list.
 
 ### Home, in order
 
-1. Hero **slideshow** — dashed image region, gold eyebrow, "Find your scent.",
+1. Hero **slideshow** - dashed image region, gold eyebrow, "Find your scent.",
    supporting line, two CTAs (Shop ouds / Build a gift box), **prev and next
    arrows**, five dots, and a "Slide 1 image" tag in the top-right. Slide count
    is not capped; past ~8, replace dots with a "3 / 12" counter beside the arrows.
-2. Trust band — four items: free delivery over AED 150 · same-day in Dubai ·
+2. Trust band - four items: free delivery over AED 150 · same-day in Dubai ·
    cash on delivery · alcohol-free ouds. Two rows of two on mobile, 44px tall,
    sub-lines hidden there.
-3. Shop by category — **six** circles: Oud oils, Reserve, Bakhoor, EDP sprays,
+3. Shop by category - **six** circles: Oud oils, Reserve, Bakhoor, EDP sprays,
    Gift sets, Discovery 3 ml. Six because it divides by 2 and 3.
    Each links to `collection.html?cat=<slug>`.
-4. House ouds — 4 product cards, "All 12 →".
-5. Discovery Trio band — AED 129, credit-back offer, gold CTA.
-6. Reserve — 3 cards in a feature layout that stacks to one column on mobile.
-7. Gift sets — 6 cards.
-8. Shop by scent family — **8 coloured tiles on one line**, each linking to
+4. House ouds - 4 product cards, "All 12 →".
+5. Discovery Trio band - AED 129, credit-back offer, gold CTA.
+6. Reserve - 3 cards in a feature layout that stacks to one column on mobile.
+7. Gift sets - 6 cards.
+8. Shop by scent family - **8 coloured tiles on one line**, each linking to
    `collection.html?family=<slug>`.
-9. Bakhoor & home — 4 cards, "All 5 →".
-10. EDP sprays — 6 cards.
+9. Bakhoor & home - 4 cards, "All 5 →".
+10. EDP sprays - 6 cards.
 
 **No explanatory notes on the home page.** Any callout about data provenance
 belongs in this document, not on screen.
@@ -226,7 +226,7 @@ rebuilds name, breadcrumb, price, sizes and title from it.
 
 ### Cart
 
-Three progress bars — free delivery at 150, gift-with-purchase at 300, and the
+Three progress bars - free delivery at 150, gift-with-purchase at 300, and the
 volume ladder toward the next rung. Four lines: two oud oils, one Reserve, one
 zero-priced gift. Summary with subtotal, volume discount, delivery, VAT, total,
 checkout button, payment methods, COD notice.
@@ -244,7 +244,7 @@ Signed-in view. Header with name placeholder and a BGS One tier badge. Left rail
 Addresses, Details & consent, Sign out. Body: three stat cards; BGS One tier
 ladder Musk / Amber / Oud at 0 / 500 / 1,500 lifetime drops with perks; wallet
 holding the credit-back voucher; referral code with copy link; orders empty
-state; details with **two separate WhatsApp consents** — order updates and
+state; details with **two separate WhatsApp consents** - order updates and
 marketing are different permissions.
 
 ---
@@ -253,12 +253,12 @@ marketing are different permissions.
 
 - **Volume ladder:** 3+ items −10%, 6+ items −15%, automatic.
 - **Halo exclusion:** Reserve products (`margin_role: halo`) are outside the
-  ladder, coupons, campaigns and loyalty redemption. Not withheld — structurally
+  ladder, coupons, campaigns and loyalty redemption. Not withheld - structurally
   unreachable. Cards carry "Never discounted"; the cart states the discount
   applied to eligible items only.
 - **Free delivery** at AED 150, AED 12 below. **Same-day Dubai** +AED 25 before
   a 2:00 PM cutoff.
-- **Gift with purchase** at AED 300 — a zero-priced mystery oud line.
+- **Gift with purchase** at AED 300 - a zero-priced mystery oud line.
 - **Credit-back:** any 3 ml purchase issues a voucher of its own value,
   redeemable on any bottle over AED 75, 60-day expiry, single use, issued on
   delivery.
@@ -268,7 +268,7 @@ marketing are different permissions.
   extracted (`total − total ÷ 1.05`) and shown as "Includes VAT at 5%" in cart,
   checkout and on the invoice, with a TRN placeholder. Rate and on/off live in
   one pair of constants so they flip without touching the catalogue.
-  Note: charging VAT before holding a TRN is not permitted in the UAE — the
+  Note: charging VAT before holding a TRN is not permitted in the UAE - the
   display is ready, the collection is a switch to throw later.
 - **Scarcity must be true.** "3 left" shows the real count, appears only under an
   admin threshold, and shows nothing above it. Never fabricate it.
@@ -286,7 +286,7 @@ marketing are different permissions.
 - **`?family=` / `?cat=` on collection** rewrite heading, breadcrumb, pill, facet.
 - **Language toggle** flips `dir="rtl"`, swaps `lang`, and translates UI chrome
   from a dictionary. Product copy is not translated. **Arabic needs a native
-  speaker's review** — the brief lists it as an acceptance criterion.
+  speaker's review** - the brief lists it as an acceptance criterion.
 
 ---
 
@@ -319,7 +319,7 @@ clipping.
 
 ---
 
-## 10. Catalogue — what is real and where it came from
+## 10. Catalogue - what is real and where it came from
 
 **Oud oils, 3 ml / 6 ml, AED 45 / 75** (names from the sheet, prices from §3):
 Imperial Crown, Dark Leather, Royal Amber, Golden Bloom, Majestic Musk,
@@ -341,12 +341,12 @@ other nine rows are named "Image 2"–"Image 9" and cannot be matched to a produ
 Oud Lover's Flight 199 · Eid Royal Hamper 299 · Dubai in a Bottle 79 ·
 Wedding Favours 1,099 (quote flow above 20 units).
 
-**EDP sprays are not alcohol-free** — denatured ethyl alcohol is first on every
+**EDP sprays are not alcohol-free** - denatured ethyl alcohol is first on every
 one. Only the oud oils carry that badge.
 
 ---
 
-## 11. Placeholders — no source exists for these
+## 11. Placeholders - no source exists for these
 
 Scent family and tone per product · ratings and review counts · product
 descriptions · notes pyramid · longevity · sillage · batch numbers · stock

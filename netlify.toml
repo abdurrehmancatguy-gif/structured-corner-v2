@@ -1,6 +1,6 @@
 # The storefront lives in flow/, not at the repository root, so Netlify has to
-# be told where to publish from. Without this it serves the root — which has no
-# index.html — and every path returns 404.
+# be told where to publish from. Without this it serves the root - which has no
+# index.html - and every path returns 404.
 [build]
   publish = "flow"
   command = ""

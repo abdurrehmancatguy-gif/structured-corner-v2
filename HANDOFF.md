@@ -95,6 +95,12 @@ These came from the user directly and override defaults. Carry them into every s
    in `products.json` is empty, the copy must not assert what it would have said.
 6. **Do not hardcode images in the site.** Every product image comes from `products.json`.
 7. **Keep the copy logical.** Copy must survive a literal reading by a real customer.
+8. **No em dashes anywhere in the repo.** Not in copy, not in code comments, not in
+   the briefs. Use a hyphen between clauses, or a colon after a label. `&minus;` is
+   fine and is not a dash: it is the quantity stepper's decrease control and the sign
+   on a negative discount amount. Verify with a repo-wide sweep, not just on the
+   generated pages - the one that reached a visitor was built in `shop.js` at runtime
+   and never appeared in the HTML.
 
 ---
 
