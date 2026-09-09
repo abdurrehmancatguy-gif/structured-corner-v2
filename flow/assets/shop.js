@@ -1305,3 +1305,34 @@
   document.addEventListener("visibilitychange", remeasure);
   sync();
 })();
+
+/* ---------- category bar: mark where you are --------------------------------
+   The pages are static, so the build cannot know which category is open - it
+   is in the query string. Matched on ?cat= where there is one, and on the file
+   name for the three entries that are their own page (gift box, occasion,
+   corporate), which is why data-catnav is empty on those. */
+(function () {
+  "use strict";
+  var links = document.querySelectorAll("[data-catnav]");
+  if (!links.length) return;
+
+  var cat = new URLSearchParams(location.search).get("cat") || "";
+  var page = location.pathname.split("/").pop() || "index.html";
+
+  /* First match only. Gift Sets and Shop by Occasion both point at
+     gift-box.html in navigation.json, so a plain match lit two entries at once
+     on that page. Two labels sharing one destination is a content question that
+     is still open; until it is answered the bar should at least claim one
+     place. */
+  var claimed = false;
+  links.forEach(function (a) {
+    var href = a.getAttribute("href");
+    var target = href.split("?")[0];
+    var on = !claimed && (cat ? a.dataset.catnav === cat
+                              : (target === page && !href.includes("?cat=")));
+    if (on) claimed = true;
+    a.classList.toggle("on", on);
+    if (on) a.setAttribute("aria-current", "page");
+    else a.removeAttribute("aria-current");
+  });
+})();

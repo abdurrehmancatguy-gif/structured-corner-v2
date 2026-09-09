@@ -136,6 +136,20 @@ NAV = [(n["label"], n["href"]) for n in NAVC["main"]]
 TABS = [(n["label"], n["href"]) for n in NAVC["tabs"]]
 
 CATS = [(c["label"], c["href"], c["swatch"], c["photo"]) for c in NAVC["categories"]]
+def catnav():
+    """The sticky category bar under the masthead.
+
+    Built from nav.categories, not nav.main. nav.main carries the same eight
+    labels but every href is a bare collection.html, so all eight would land on
+    the same unfiltered page; nav.categories carries the ?cat= that actually
+    filters. nav.main was read into NAV at import and then emitted by nothing,
+    which is why there was nothing under the masthead to begin with."""
+    return ('<nav class="catnav" aria-label="Categories"><div class="wrap">'
+            + "".join('<a href="%s" data-catnav="%s">%s</a>'
+                      % (esc(h), esc(h.split("cat=")[1] if "cat=" in h else ""), esc(n))
+                      for n, h, ic, k in CATS)
+            + '</div></nav>')
+
 def catstrip():
     return ('<div class="catstrip"><div class="wrap"><div class="cs">' + "".join(
         '<a class="c-{3}" href="{0}"><span class="circle">{1}</span><span>{2}</span></a>'.format(h, sv(ic, 30, 1.5), n, k)
@@ -171,6 +185,7 @@ def shell(title, body, nav_on="", tab="Home", strip_here=True, page="", desc="",
   </div>
 </div>
 <div class="msearch"><form class="search" action="collection.html" method="get" role="search"><input name="q" aria-label="Search products" placeholder="Search ouds, oud, bakhoor&hellip;"><button type="submit" class="go" aria-label="Search">%(search)s</button></form></div></div>
+%(catnav)s
 %(strip)s
 %(body)s
 <footer><div class="wrap"><div class="cols">
@@ -188,7 +203,7 @@ def shell(title, body, nav_on="", tab="Home", strip_here=True, page="", desc="",
 """ % dict(title=title, body=body, cssv=CSSV, page=page,
    desc=esc(desc), canon=esc(canon),
    ogimg=esc((SITE_URL + "/" + SEO.get("og_image", "") ) if SITE_URL else SEO.get("og_image", "")),
-   strip=(strip if strip_here else ""), tabs="".join(A(l,h,tab) for l,h in TABS),
+   strip=(strip if strip_here else ""), catnav=catnav(), tabs="".join(A(l,h,tab) for l,h in TABS),
    clock=sv("clock",13,2), menu=sv("menu",22), chev=sv("chev",14,2), search=sv("search",17),
    user=sv("user"), heart=sv("heart"), bag=sv("bag"),
    brandlogo=header_logo(), footlogo=footer_logo(), icons=favicon_links(),

@@ -1535,3 +1535,59 @@ footer .slot,footer .soon{color:#b9b0a4}
   .page-product .buy .pricerow{margin-bottom:10px}
   .page-product .sizeblock{margin:0 0 10px}
 }
+
+/* ---- sticky category bar --------------------------------------------------
+   There was nothing under the masthead: nav.main was read into NAV at import
+   and emitted by nothing at all, so the row simply did not exist.
+
+   Sticky rather than fixed, so it holds the place under the masthead at rest
+   and takes the top of the screen once the masthead scrolls away. z-index sits
+   above the hero and its arrows but under the filter drawer's scrim.
+
+   On a phone the eight labels cannot fit, so the row scrolls sideways inside
+   its own container - never the page, which stays locked. */
+.catnav{position:sticky;top:0;z-index:20;background:var(--bg);
+  border-bottom:1px solid var(--line)}
+.catnav .wrap{display:flex;align-items:stretch;gap:0;padding:0 28px;
+  overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none}
+.catnav .wrap::-webkit-scrollbar{display:none}
+.catnav a{display:inline-flex;align-items:center;white-space:nowrap;
+  padding:0 14px;min-height:42px;font-size:12.5px;font-weight:500;
+  color:var(--body);border-bottom:2px solid transparent;
+  transition:color .12s,border-color .12s}
+.catnav a:hover{color:var(--ink)}
+.catnav a.on{color:var(--ink);border-bottom-color:var(--gold);font-weight:600}
+.catnav a:focus-visible{outline:2px solid var(--gold-d);outline-offset:-3px}
+@media (max-width:900px){
+  .catnav .wrap{padding:0 10px}
+  .catnav a{padding:0 11px;min-height:40px;font-size:12px}
+}
+
+/* ---- category circles: the photograph, with nothing on top of it ----------
+   Each circle carried a product photograph on .circle::before and a white line
+   icon over it. The icon was the thing making them look busy - a glyph sitting
+   on a photograph, fighting it for the same few pixels - so the icon goes and
+   the photograph is left alone.
+
+   The tint overlay stays: it is what the hover lift works against, and at .16
+   it does not muddy the picture. */
+.cs a svg{display:none}
+
+/* ---- paying for the category bar on a phone -------------------------------
+   The bar is 41px in the flow at the top of every page, which pushed the two
+   layouts that were already tight over the edge: the second row of category
+   tiles came down to 2px of clearance at 375x812, and Add to bag went 20px
+   past the fold, straight back to the clipped state it was just fixed out of.
+
+   Taken back from the two places with slack rather than from the band, whose
+   1.85:1 has to stay exactly that: it is the phone banner asset's own ratio,
+   and any other number reintroduces the crop.
+
+   Circles 74px to 64px is 10px a row over two rows, and the gallery gives up
+   30px of a 285px square plus 8 more off the thumbnails that follow its width. */
+@media (max-width:700px){
+  .cs a .circle{max-width:64px;margin-bottom:6px}
+  .catstrip .cs{row-gap:8px}
+  .page-product .galmain{max-height:255px}
+}
