@@ -1654,3 +1654,38 @@ footer .slot,footer .soon{color:#b9b0a4}
   .cs{gap:8px}
   .cs a{flex:0 0 calc(25% - 6px)}
 }
+
+/* ---- scent notes: black satin, not a warning banner -----------------------
+   The panel was --gold-l with a cream border, which is the shape and colour a
+   browser or a framework uses for a caution message - so a factual note about
+   top, heart and base read as something being wrong.
+
+   Black satin instead, built in four layers: a vertical tonal ground so it is
+   not flat, two fine opposed diagonals for the weave, and one broad off-axis
+   band for the sheen a satin gives when light crosses it. A gold hairline and
+   an inside highlight along the top edge finish it, like light catching a fold.
+
+   Kept in the palette rather than introducing navy: this is --secondary, the
+   brand's own dark, so the panel belongs to the same family as the strip, the
+   footer and the buttons.
+
+   Measured against the worst case, which is the lightest tonal stop with the
+   full sheen on top of it, rgb(48,41,36): label #E8C87E 8.85:1, value #E4DCCE
+   10.51:1, icon #C9A567 6.17:1. The 9px label needs 4.5 and the icon 3.
+
+   The label is #E8C87E, the gold the hero eyebrow already uses, and not
+   --gold-l: --gold-l is #f6efdd, a near-white cream that was picked to sit
+   behind dark text, so on this ground it read as white and the gold accent
+   went missing. */
+.notestop{
+  background:
+    linear-gradient(103deg, rgba(255,255,255,.055) 0 14%, rgba(255,255,255,0) 34%,
+      rgba(255,255,255,.038) 52%, rgba(255,255,255,0) 74%, rgba(255,255,255,.022) 100%),
+    repeating-linear-gradient(45deg,  rgba(255,255,255,.016) 0 1px, rgba(255,255,255,0) 1px 3px),
+    repeating-linear-gradient(-45deg, rgba(0,0,0,.055) 0 1px, rgba(0,0,0,0) 1px 3px),
+    linear-gradient(180deg, #241d17 0%, var(--secondary) 55%, #110d0a 100%);
+  border:1px solid rgba(232,200,126,.16);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05), 0 1px 3px -1px rgba(23,19,16,.25)}
+.notestop .ni{color:#C9A567}
+.notestop b{color:#E8C87E}
+.notestop p{color:#E4DCCE}
