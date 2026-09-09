@@ -9,7 +9,7 @@ Source is assets/img/logo-emblem.png (transparent, square). Outputs:
   assets/img/favicon-32.png    modern browsers
   assets/img/favicon-16.png    small tab / bookmark bar
   assets/img/apple-touch-icon.png
-                               180x180 on the brand ink, inset — iOS composites
+                               180x180 on the brand ink, inset - iOS composites
                                transparency onto black and rounds the corners,
                                so this one cannot be transparent or edge-to-edge
 

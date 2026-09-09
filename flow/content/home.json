@@ -16,39 +16,39 @@
       "image_alt": "The BGS oud oil range with its leather case"
     },
     {
-      "eyebrow": "Order by 2:00 PM",
-      "headline": "Delivered today\nin Dubai.",
-      "body": "Same-day across Dubai for AED 25. Standard delivery is free over AED 150.",
+      "eyebrow": "Gift ready",
+      "headline": "Platinum Musk\nOUD.",
+      "body": "Reserve oud in 6 ml, AED 399, boxed and ribbon tied.",
       "primary": {
-        "label": "Shop ready today",
-        "href": "collection.html?cat=oud-oils"
+        "label": "See Platinum Musk",
+        "href": "product.html?p=platinum-musk-oud"
       },
       "secondary": {
-        "label": "Delivery info",
-        "href": "track-order.html"
+        "label": "Build a gift box",
+        "href": "gift-box.html"
       },
       "image": "assets/img/banner-5.jpg",
-      "image_alt": "Platinum Musk Oud boxed and ribboned"
+      "image_alt": "Platinum Musk OUD beside its ribboned box"
     },
     {
-      "eyebrow": "Start here",
-      "headline": "Discovery Trio,\nAED 129.",
-      "body": "Three 3 ml ouds. What you spend comes back as credit on your first full bottle.",
+      "eyebrow": "EDP sprays",
+      "headline": "Pride of Arabia.",
+      "body": "Citrus and green violet leaf, then violet and rose. 50 ml, AED 85.",
       "primary": {
-        "label": "Choose three",
-        "href": "gift-box.html"
+        "label": "See the spray",
+        "href": "product.html?p=pride-of-arabia"
       },
       "secondary": {
-        "label": "See all sets",
-        "href": "gift-box.html"
+        "label": "All EDP sprays",
+        "href": "collection.html?cat=edp"
       },
       "image": "assets/img/banner-1.jpg",
-      "image_alt": "A BGS oud oil"
+      "image_alt": "Pride of Arabia eau de parfum in a ring of powder"
     },
     {
       "eyebrow": "Gifting",
       "headline": "Three scents,\none wrapped box.",
-      "body": "Add a handwritten card and a recorded message. Prices never show on a gift receipt.",
+      "body": "Amore, Vibe and Be Mine, 50 ml each at AED 85.",
       "primary": {
         "label": "Build a gift box",
         "href": "gift-box.html"
@@ -62,18 +62,18 @@
     },
     {
       "eyebrow": "Reserve",
-      "headline": "Never\ndiscounted.",
-      "body": "Majlis OUD and Platinum Musk sit outside every discount the shop runs.",
+      "headline": "Majlis OUD,\ntwo sizes.",
+      "body": "6 ml at AED 650, 12 ml at AED 1295. Never discounted.",
       "primary": {
-        "label": "See Reserve",
-        "href": "collection.html?cat=reserve"
+        "label": "See Majlis OUD",
+        "href": "product.html?p=majlis-oud"
       },
       "secondary": {
-        "label": "Our story",
-        "href": "index.html"
+        "label": "All Reserve",
+        "href": "collection.html?cat=reserve"
       },
       "image": "assets/img/banner-3.jpg",
-      "image_alt": "Majlis Oud in 6 ml and 12 ml crystal"
+      "image_alt": "Majlis OUD in 6 ml and 12 ml crystal"
     }
   ],
   "sections": {

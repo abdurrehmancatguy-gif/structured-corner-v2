@@ -1,5 +1,5 @@
 :root{
-  /* Brand roles. These two are the record — every other name below is a use,
+  /* Brand roles. These two are the record - every other name below is a use,
      not an identity, so the roles are what a change should be made against.
      --primary  gold, the only hue in the mark, and the site's whole vocabulary
                 of emphasis. 3.88:1 on white, so it is never small text; that is
@@ -870,7 +870,7 @@ footer .wm{color:#fff}
 .quizband p{color:#E4D4DE}
 .quizband .eyebrow{color:#E9B7D8}
 
-/* the gold button was white-on-gold at 3.88:1 — under AA for its size.
+/* the gold button was white-on-gold at 3.88:1 - under AA for its size.
    Dark ink on the same gold is 4.77:1 and passes. */
 .btn.gold{color:var(--ink)}
 .btn.gold:hover{background:#b8862a;border-color:#b8862a}
@@ -1157,7 +1157,7 @@ footer .slot,footer .soon{color:#b9b0a4}
 [data-boxcta].ghost:hover{border-color:var(--ink)}
 
 /* ---- brand logo (masthead + footer), content-driven from settings.brand ----
-   The art carries the whole lockup — emblem, BGS and CORNER, in metallic gold
+   The art carries the whole lockup - emblem, BGS and CORNER, in metallic gold
    (tools/make_gold_logo.py). CORNER used to be live text beside it, which meant
    matching a condensed serif out of the CSS fallback stack and nudging the
    baseline by hand; it never matched, and could not on a device without Times.
@@ -1170,7 +1170,7 @@ footer .slot,footer .soon{color:#b9b0a4}
 /* ---- product grids: four across further down, on a tighter card ------------
    The grids dropped straight from four (or five) columns to two at 900px, so
    on a narrow laptop window or a zoomed page every product card blew up to
-   ~430px wide — a product card the size of a hero. Four now hold down to
+   ~430px wide - a product card the size of a hero. Four now hold down to
    900px, three to 700, two only on phones, and the card's padding, type and
    controls step down with the columns so four across reads compact rather
    than cramped. The 44px touch targets are kept for touch devices; only fine
@@ -1285,7 +1285,7 @@ footer .slot,footer .soon{color:#b9b0a4}
    It needs a 44px touch target and it must not make the row any taller: at
    min-height:44px it drove the row itself, 15px past the price, and spent
    above-the-fold budget the page does not have. So the box stays at the
-   price's own height and the ::after carries the tap area past the border —
+   price's own height and the ::after carries the tap area past the border -
    absolutely positioned, so it costs no layout at all. */
 .sharebtn{position:relative;display:inline-flex;align-items:center;gap:6px;
   margin-left:auto;align-self:center;background:none;
@@ -1301,7 +1301,7 @@ footer .slot,footer .soon{color:#b9b0a4}
    be positioned or dismissed. */
 .sharebtn.done{border-color:var(--green);color:var(--green)}
 .sharebtn.done svg{color:var(--green)}
-/* On a phone the label goes and the icon stands alone — the price is the thing
+/* On a phone the label goes and the icon stands alone - the price is the thing
    worth the width there, and the aria-label still names the action. */
 @media (max-width:700px){
   .sharebtn{padding:0 9px}

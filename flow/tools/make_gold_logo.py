@@ -1,14 +1,14 @@
 """Build the BGS CORNER lockup in metallic gold.
 
 The supplied art (assets/img/logo.png) is flat near-black: emblem + "BGS", and
-nothing else. CORNER used to be live HTML text beside it, which never matched —
+nothing else. CORNER used to be live HTML text beside it, which never matched -
 the art is set in a condensed serif and the CSS fallback stack could only offer
 Times New Roman, ~7% wider per letter, on a baseline guessed with a magic
 translate. Drawing the word into the art instead makes cap height and baseline
 exact by construction, and identical on every device.
 
 Bodoni 72 Bold is the closest face on the machine: inked width 1.9% off the
-art's, stem weight 1.5% off. Measured, not guessed — see the constants below.
+art's, stem weight 1.5% off. Measured, not guessed - see the constants below.
 
 Metal is a gradient, not a colour, so the ramp runs down the finished lockup
 and the original alpha stays as the shape. Two renditions, because one ramp

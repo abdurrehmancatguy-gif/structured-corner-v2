@@ -1,7 +1,7 @@
 """Static server for the BGS Corner front end.
 
 Sends no-store on every response. The default http.server sends Last-Modified,
-which let browsers keep serving stale HTML after a rebuild — several rounds of
+which let browsers keep serving stale HTML after a rebuild - several rounds of
 "the change didn't apply" traced back to exactly that.
 """
 import functools, http.server, socketserver, os, sys

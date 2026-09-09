@@ -1,4 +1,4 @@
-/* BGS Corner — front-end only. No backend, no persistence beyond this tab. */
+/* BGS Corner - front-end only. No backend, no persistence beyond this tab. */
 (function () {
   "use strict";
   var aed = function (n) {
@@ -31,7 +31,7 @@
       var total = unit * qty;
       l.querySelector("[data-lineprice]").textContent = unit ? aed(total) : "Free";
       subtotal += total;
-      // §6.1 — halo and gift-with-purchase lines are outside the ladder entirely
+      // §6.1 - halo and gift-with-purchase lines are outside the ladder entirely
       if (l.dataset.halo !== "1" && l.dataset.gift !== "1") {
         eligibleSub += total;
         eligibleUnits += qty;
@@ -60,7 +60,7 @@
     }
     if (q("[data-total]")) q("[data-total]").textContent = aed(total);
 
-    /* §10.6 — UAE VAT at 5%, shown as the component inside a tax-inclusive total */
+    /* §10.6 - UAE VAT at 5%, shown as the component inside a tax-inclusive total */
     var VAT_RATE = 0.05, VAT_ON = true;
     var vat = VAT_ON ? total - (total / (1 + VAT_RATE)) : 0;
     if (q("[data-vat]")) q("[data-vat]").textContent = aed(Math.round(vat * 100) / 100);
@@ -80,11 +80,11 @@
     set("[data-p3]", "[data-p3lb]", eligibleUnits / nextRung * 100, eligibleUnits + " of " + nextRung);
     if (q("[data-p3txt]")) {
       q("[data-p3txt]").textContent = eligibleUnits >= 6
-        ? "Saving 15% — the top rung"
+        ? "Saving 15%, the top rung"
         : "Add " + (nextRung - eligibleUnits) + " more to save " + (nextRung === 6 ? 15 : 10) + "%";
     }
 
-    /* §10.3 — COD withheld over AED 300 */
+    /* §10.3 - COD withheld over AED 300 */
     var cod = document.querySelector("[data-pay] .off");
     var note = q("[data-codnote]");
     var over = subtotal > 300;
@@ -332,7 +332,7 @@
 })();
 
 
-/* sticky buy bar: always available on mobile — the one control that must never
+/* sticky buy bar: always available on mobile - the one control that must never
    require scrolling to find */
 (function () {
   "use strict";
