@@ -471,6 +471,22 @@ raw background Bash. Use the Browser pane's `preview_start` with the `bgs-flow` 
    "blended in Dubai". These are commitments, not puffery - but if any is not true yet it
    must come out, and that is a more serious kind of claim than the ones already removed.
 7. **The backend is to be rebuilt later** - deliberately deferred.
+8. **Category / product cards: wanted as a "3D" breakout card.** Raised as
+   context on 2026-09-09, explicitly not for now. The reference is a card where
+   the product photograph **overflows the top edge of the panel** and casts a
+   soft shadow onto it, so the bottle reads as standing in front of the card
+   rather than inside it. Panel is a pale cream with a faint gold geometric
+   pattern; meta line in small grey caps (`EAU DE PARFUM / 100 ML / UNISEX`),
+   name in an italic serif under it, wishlist heart top-right, optional rating
+   chip top-left, circular carousel arrows outside the row.
+
+   **The blocker is the photography, not the CSS.** The breakout only works with
+   a cut-out product on transparency. Checked: every file in the supplied
+   "BGS Corner Website" set is `RGB` with **no alpha channel** at all, and the
+   site serves JPEGs, which cannot carry any. So this needs either
+   transparent-background PNGs from whoever shoots the product, or a
+   background-removal pass over the existing frames. Ask which before starting -
+   the CSS is the easy half.
 
 ---
 
