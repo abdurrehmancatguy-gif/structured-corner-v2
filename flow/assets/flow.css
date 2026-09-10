@@ -1775,3 +1775,19 @@ footer .slot,footer .soon{color:#b9b0a4}
   .tabbar a.on{color:var(--ink)}
   .tabbar a.on svg{stroke-width:2.1}
 }
+
+/* ---- category bar: the satin, not white -----------------------------------
+   A white bar under a white masthead read as one grey-bordered strip, with
+   nothing to say it was the navigation. It takes the same --satin as the notes
+   panels now, so the brand's dark frames the masthead top and bottom: the
+   delivery strip above, this below.
+
+   Light text on a lit ground, so it is measured at the brightest point the
+   satin reaches, rgb(80,73,68): idle #E4DCCE 6.49:1, active #E8C87E 5.47:1,
+   hover #fff higher still, against 4.5 for 12.5px text. The active state keeps
+   its underline as well as its colour, so it is not carried by colour alone. */
+.catnav{background:var(--satin);border-bottom:1px solid rgba(232,200,126,.16)}
+.catnav a{color:#E4DCCE}
+.catnav a:hover{color:#fff}
+.catnav a.on{color:#E8C87E;border-bottom-color:#E8C87E}
+.catnav a:focus-visible{outline-color:#E8C87E}
