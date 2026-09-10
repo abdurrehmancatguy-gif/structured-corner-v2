@@ -484,10 +484,14 @@ raw background Bash. Use the Browser pane's `preview_start` with the `bgs-flow` 
    and a soft shadow. The strip's top padding grows with the circle where there
    is a cut-out; phones keep 16px, which holds the rise without touching the fold.
 
-   Only Bakhoor has a cut-out: `assets/cat/bak.png`, the BGS BAKHOOR 4 tin. It
-   arrived with a checkerboard painted into the pixels (RGB, no alpha) and was
-   keyed out. The other six stay photographs until each has a real transparent
-   PNG; the JPEGs cannot carry alpha. Setting the flag on a category whose image
+   Two categories have cut-outs, both supplied with a checkerboard painted into
+   the pixels (RGB, no alpha) and keyed out. Bakhoor, `assets/cat/bak.png` (the
+   BGS BAKHOOR 4 tin), stands on the disc. Corporate Gifting,
+   `assets/cat/corporate.png`, is a skyscraper seen from below, cropped at the
+   bottom and wider than tall, so it has its own placement (`"cutout": "tower"`
+   -> class `pop-tower`): the facade fills the disc, the roof rises past the top,
+   and the lower floors' alpha follows the rim. The other five stay photographs
+   until each has a real transparent PNG; the JPEGs cannot carry alpha. Setting the flag on a category whose image
    is not a cut-out would show its photograph's background around the product.
    The rest of the reference (meta caps line, italic serif name, heart, rating
    chip) belongs to product cards and is not built.

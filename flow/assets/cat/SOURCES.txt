@@ -7,7 +7,7 @@ content/navigation.json ("image"), not in the stylesheet.
   floral.jpg  Pexels photos/1303087            Gift Sets
   fresh.jpg   Pexels photos/7269476            Discovery
   amber.jpg   Pexels photos/9127154            Shop by Occasion
-  sweet.jpg   Pexels photos/29873585           Corporate Gifting  (wrapped gifts)
+  corporate.png  skyscraper cut-out, supplied in chat   Corporate Gifting
 
 bak.png arrived with a checkerboard painted into the pixels: an RGB image with
 no alpha channel, so it only looked transparent. The checkerboard was keyed
@@ -17,4 +17,10 @@ navigation.json). 204x240, 256 colours.
 
 Pexels License: free for commercial use, no attribution required.
 https://www.pexels.com/license/
-The four Pexels images are placeholders for BGS Corner's own photography.
+The three Pexels images are placeholders for BGS Corner's own photography.
+
+corporate.png arrived the same way, a painted checkerboard in an RGB image. The
+building's edges are straight, so the key is a polygon fitted to them (flat roof
+and two sides, each within about a pixel). The picture was then composed for
+the circle: the facade fills the disc, the roof rises past the top, and the
+lower floors' alpha follows the rim. 253x300, 256 colours.

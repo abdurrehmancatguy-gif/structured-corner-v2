@@ -1763,7 +1763,8 @@ footer .slot,footer .soon{color:#b9b0a4}
    framed by it. The circle stops clipping; the cut-out is drawn wide and
    anchored low, so its top rises past the circle's edge while its base stays
    on the disc; and it casts a soft shadow onto the disc. The disc becomes the
-   panel: the category wash under a faint gold lattice.
+   panel: one cream for every breakout whatever the
+   category's own wash, under a faint gold lattice.
 
    Geometry, as fractions of the circle: 82% wide with the base 24% up keeps
    the base corners inside the circle (0.97 of the radius from the centre) and
@@ -1774,7 +1775,7 @@ footer .slot,footer .soon{color:#b9b0a4}
   background:
     repeating-linear-gradient(60deg,transparent 0 7px,rgba(168,121,30,.10) 7px 8px),
     repeating-linear-gradient(-60deg,transparent 0 7px,rgba(168,121,30,.10) 7px 8px),
-    var(--tint)}
+    var(--w-bak)}
 .cs a.pop .circle::before{content:"";position:absolute;left:17%;right:17%;bottom:18%;
   height:12%;border-radius:50%;
   background:radial-gradient(closest-side,rgba(23,19,16,.30),rgba(23,19,16,0))}
@@ -1801,3 +1802,17 @@ footer .slot,footer .soon{color:#b9b0a4}
   .catnav a + a::before{content:"";position:absolute;left:0;top:calc(50% - 7px);
     width:1px;height:14px;background:rgba(232,200,126,.35);pointer-events:none}
 }
+
+/* ---- breakout placement: a tower ------------------------------------------
+   Corporate Gifting's picture is a skyscraper seen from below, cropped at the
+   bottom by its frame and wider than it is tall, so the tin's placement (a
+   whole object standing on the disc) would leave its cut base floating in the
+   circle. Instead the facade fills the disc and the roof rises 20.5% of the
+   circle past the top edge: the upper floors stand out past the rim, the lower
+   ones stay inside it, and the image's alpha (baked into corporate.png) follows
+   the rim there, so no cut edge shows. The clip is baked into the picture, so
+   the picture must not move against the disc: no contact shadow and no hover
+   lift of its own; the whole circle still lifts. */
+.cs a.pop.pop-tower .circle::before{content:none}
+.cs a.pop.pop-tower .circle img{top:-20.5%;bottom:auto;left:-1.5%;width:103%;height:122%}
+.cs a.pop.pop-tower:hover .circle img{transform:none}

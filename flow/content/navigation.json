@@ -98,7 +98,8 @@
       "label": "Corporate Gifting",
       "href": "corporate.html",
       "tint": "sweet",
-      "image": "assets/cat/sweet.jpg"
+      "image": "assets/cat/corporate.png",
+      "cutout": "tower"
     }
   ],
   "footer": [
