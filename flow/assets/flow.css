@@ -1561,15 +1561,21 @@ footer .slot,footer .soon{color:#b9b0a4}
   .catnav a{padding:0 11px;min-height:40px;font-size:12px}
 }
 
-/* ---- category circles: the photograph, with nothing on top of it ----------
-   Each circle carried a product photograph on .circle::before and a white line
-   icon over it. The icon was the thing making them look busy - a glyph sitting
-   on a photograph, fighting it for the same few pixels - so the icon goes and
-   the photograph is left alone.
+/* ---- category circles: the photograph, and the category's icon under it ----
+   The icon used to sit ON the photograph, a glyph fighting the picture for the
+   same few pixels, and was taken off for that. It is back as the label instead:
+   under the circle, where the words were. The words overflowed - "Attars/Perfume"
+   has no space to break at, so at 375px it was 78px of text in a 76px cell - and
+   an icon cannot. The name is still on the link as aria-label and title, and
+   spelled out in the category bar above.
 
-   The tint overlay stays: it is what the hover lift works against, and at .16
-   it does not muddy the picture. */
-.cs a svg{display:none}
+   .circle no longer contains an svg at all, so nothing can land on the
+   photograph again by accident. span.cico matches the specificity of the
+   span:not(.circle) label rules above and comes after them. */
+.cs a span.cico{display:flex;align-items:center;justify-content:center;
+  height:24px;margin:0}
+.cs a span.cico svg{display:block;position:static;width:22px;height:22px;margin:0;
+  transform:none;top:auto;right:auto;bottom:auto;left:auto;color:var(--ink)}
 
 /* ---- paying for the category bar on a phone -------------------------------
    The bar is 41px in the flow at the top of every page, which pushed the two
@@ -1753,4 +1759,19 @@ footer .slot,footer .soon{color:#b9b0a4}
    Ten pixels off the gallery square, which the thumbnails follow. */
 @media (max-width:700px){
   .page-product .galmain{max-height:245px}
+}
+
+/* ---- tab bar: icons ---------------------------------------------------------
+   Icon-only by request. Each link keeps its label as aria-label and title (see
+   tab_link in build.py), and the active tab gets aria-current as well as ink and
+   a heavier stroke, so the state is not carried by colour alone.
+
+   Held to the height of the text bar it replaces, because two layouts are
+   measured against the fold that sits on top of it. */
+@media (max-width:900px){
+  .tabbar a{display:flex;align-items:center;justify-content:center;
+    padding:8px 0 9px;color:var(--mut)}
+  .tabbar a svg{display:block;width:21px;height:21px}
+  .tabbar a.on{color:var(--ink)}
+  .tabbar a.on svg{stroke-width:2.1}
 }

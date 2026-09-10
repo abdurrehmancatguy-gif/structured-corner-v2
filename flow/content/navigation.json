@@ -32,23 +32,28 @@
   "tabs": [
     {
       "label": "Home",
-      "href": "index.html"
+      "href": "index.html",
+      "icon": "home"
     },
     {
       "label": "Shop",
-      "href": "collection.html"
+      "href": "collection.html",
+      "icon": "shop"
     },
     {
       "label": "Gifts",
-      "href": "gift-box.html"
+      "href": "gift-box.html",
+      "icon": "c_gift"
     },
     {
       "label": "Bag",
-      "href": "cart.html"
+      "href": "cart.html",
+      "icon": "bag"
     },
     {
       "label": "Account",
-      "href": "account.html"
+      "href": "account.html",
+      "icon": "user"
     }
   ],
   "categories": [

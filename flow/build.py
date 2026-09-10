@@ -24,6 +24,8 @@ P = {
  "leaf":'<path d="M20 4C10 4 4 9 4 16c0 2 1 4 1 4s6-1 10-5 5-11 5-11z"/><path d="M5 20L14 11"/>',
  "drop":'<path d="M12 3s6 6.5 6 10.5a6 6 0 0 1-12 0C6 9.5 12 3 12 3z"/>',
  "chev":'<path d="M6 9l6 6 6-6"/>', "filter":'<path d="M3 6h18M7 12h10M11 18h2"/>',
+ "home":'<path d="M4 11.5 12 5l8 6.5"/><path d="M6 10.5V19h12v-8.5"/><path d="M10 19v-5h4v5"/>',
+ "shop":'<rect x="4.5" y="4.5" width="6" height="6" rx="1"/><rect x="13.5" y="4.5" width="6" height="6" rx="1"/><rect x="4.5" y="13.5" width="6" height="6" rx="1"/><rect x="13.5" y="13.5" width="6" height="6" rx="1"/>',
  "share":'<path d="M4 13v6a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-6"/><path d="M12 15V3.5"/><path d="M8 7.5l4-4 4 4"/>',
  "c_oil":'<rect x="9" y="2.5" width="6" height="3.5" rx="1"/><path d="M8 9.5C8 7.5 9.5 6 9.5 6h5S16 7.5 16 9.5V19a2.5 2.5 0 0 1-2.5 2.5h-3A2.5 2.5 0 0 1 8 19z"/><path d="M8 14h8"/>',
  "c_res":'<path d="M4 8l4 3 4-6 4 6 4-3-2 11H6z"/><path d="M6 19h12"/>',
@@ -79,9 +81,16 @@ def published(cat=None):
         rows = [r for r in rows if r.get("category") == cat]
     return sorted(rows, key=lambda r: r.get("order") or 0)
 
-ON = ' class="on"'
-def A(l, h, on):
-    return '<a href="%s"%s>%s</a>' % (h, ON if l == on else "", l)
+def tab_link(label, href, icon, on):
+    """One tab-bar entry, drawn as its icon. The label stays as the accessible
+       name - aria-label for screen readers, title for a pointer - because an
+       icon-only bar has nothing else to announce. A tab whose icon key is
+       missing from P falls back to its label, so a content edit that forgets
+       the icon gets a word rather than an empty slot."""
+    cur = ' class="on" aria-current="page"' if label == on else ""
+    face = sv(icon, 21, 1.6) if icon in P else esc(label)
+    return '<a href="%s" aria-label="%s" title="%s"%s>%s</a>' % (
+        esc(href), esc(label), esc(label), cur, face)
 def slug(t):
     import re as _r
     t = t.replace("&amp;","and").replace("&middot;"," ").replace("&rsquo;","")
@@ -133,7 +142,7 @@ def footer_logo():
             'BGS CORNER</div>')
 
 NAV = [(n["label"], n["href"]) for n in NAVC["main"]]
-TABS = [(n["label"], n["href"]) for n in NAVC["tabs"]]
+TABS = [(n["label"], n["href"], n.get("icon", "")) for n in NAVC["tabs"]]
 
 CATS = [(c["label"], c["href"], c["swatch"], c["photo"]) for c in NAVC["categories"]]
 def catnav():
@@ -152,7 +161,8 @@ def catnav():
 
 def catstrip():
     return ('<div class="catstrip"><div class="wrap"><div class="cs">' + "".join(
-        '<a class="c-{3}" href="{0}"><span class="circle">{1}</span><span>{2}</span></a>'.format(h, sv(ic, 30, 1.5), n, k)
+        '<a class="c-{3}" href="{0}" aria-label="{2}" title="{2}"><span class="circle"></span>'
+        '<span class="cico">{1}</span></a>'.format(h, sv(ic, 24, 1.5), esc(n), k)
         for n, h, ic, k in CATS) + '</div></div></div>')
 
 def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
@@ -205,7 +215,7 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
 """ % dict(title=title, body=body, cssv=CSSV, page=page,
    desc=esc(desc), canon=esc(canon),
    ogimg=esc((SITE_URL + "/" + SEO.get("og_image", "") ) if SITE_URL else SEO.get("og_image", "")),
-   catnav=catnav(), tabs="".join(A(l,h,tab) for l,h in TABS),
+   catnav=catnav(), tabs="".join(tab_link(l, h, ic, tab) for l, h, ic in TABS),
    clock=sv("clock",13,2), menu=sv("menu",22), chev=sv("chev",14,2), search=sv("search",17),
    user=sv("user"), heart=sv("heart"), bag=sv("bag"),
    brandlogo=header_logo(), footlogo=footer_logo(), icons=favicon_links(),
