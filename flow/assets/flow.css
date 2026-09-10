@@ -1789,3 +1789,15 @@ footer .slot,footer .soon{color:#b9b0a4}
    circle. Phones are untouched: their fold has 6px to spare at 375x812. */
 @media (min-width:701px){ .cs:has(> a.pop){padding-top:24px} }
 @media (min-width:901px){ .cs:has(> a.pop){padding-top:30px} }
+
+/* ---- category bar: separators ---------------------------------------------
+   A short gold hairline between neighbouring categories on the desktop bar,
+   hung off each link after the first at its left edge. The row has no gap and
+   every link is padded 14px a side, so that edge is the midpoint between two
+   labels. Phones do not get them: there the bar is pills, which separate
+   themselves, and a rule at the start of a wrapped row would point at nothing. */
+@media (min-width:901px){
+  .catnav a{position:relative}
+  .catnav a + a::before{content:"";position:absolute;left:0;top:calc(50% - 7px);
+    width:1px;height:14px;background:rgba(232,200,126,.35);pointer-events:none}
+}
