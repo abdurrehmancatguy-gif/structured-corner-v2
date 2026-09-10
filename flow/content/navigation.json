@@ -60,44 +60,45 @@
     {
       "label": "Attars/Perfume Oils",
       "href": "collection.html?cat=attars",
-      "swatch": "c_oil",
-      "photo": "oud"
+      "tint": "oud",
+      "image": "assets/cat/oud.jpg"
     },
     {
       "label": "Bakhoor",
       "href": "collection.html?cat=bakhoor",
-      "swatch": "c_bak",
-      "photo": "bak"
+      "tint": "bak",
+      "image": "assets/cat/bak.png",
+      "cutout": true
     },
     {
       "label": "EDP Sprays",
       "href": "collection.html?cat=edp",
-      "swatch": "c_edp",
-      "photo": "musk"
+      "tint": "musk",
+      "image": "assets/cat/musk.jpg"
     },
     {
       "label": "Gift Sets",
       "href": "gift-box.html",
-      "swatch": "c_gift",
-      "photo": "floral"
+      "tint": "floral",
+      "image": "assets/cat/floral.jpg"
     },
     {
       "label": "Discovery",
       "href": "collection.html?cat=gift-sets",
-      "swatch": "c_disc",
-      "photo": "fresh"
+      "tint": "fresh",
+      "image": "assets/cat/fresh.jpg"
     },
     {
       "label": "Shop by Occasion",
       "href": "gift-box.html",
-      "swatch": "c_occ",
-      "photo": "amber"
+      "tint": "amber",
+      "image": "assets/cat/amber.jpg"
     },
     {
       "label": "Corporate Gifting",
       "href": "corporate.html",
-      "swatch": "c_corp",
-      "photo": "sweet"
+      "tint": "sweet",
+      "image": "assets/cat/sweet.jpg"
     }
   ],
   "footer": [

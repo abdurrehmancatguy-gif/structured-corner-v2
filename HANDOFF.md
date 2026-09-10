@@ -471,22 +471,26 @@ raw background Bash. Use the Browser pane's `preview_start` with the `bgs-flow` 
    "blended in Dubai". These are commitments, not puffery - but if any is not true yet it
    must come out, and that is a more serious kind of claim than the ones already removed.
 7. **The backend is to be rebuilt later** - deliberately deferred.
-8. **Category / product cards: wanted as a "3D" breakout card.** Raised as
-   context on 2026-09-09, explicitly not for now. The reference is a card where
-   the product photograph **overflows the top edge of the panel** and casts a
-   soft shadow onto it, so the bottle reads as standing in front of the card
-   rather than inside it. Panel is a pale cream with a faint gold geometric
-   pattern; meta line in small grey caps (`EAU DE PARFUM / 100 ML / UNISEX`),
-   name in an italic serif under it, wishlist heart top-right, optional rating
-   chip top-left, circular carousel arrows outside the row.
+8. **Category cards: the "3D" breakout.** Raised on 2026-09-09 with a reference:
+   product cards where the cut-out product **overflows the top edge of the panel**
+   and casts a soft shadow onto it, so it reads as standing in front of the card,
+   on a pale cream panel with a faint gold geometric pattern.
 
-   **The blocker is the photography, not the CSS.** The breakout only works with
-   a cut-out product on transparency. Checked: every file in the supplied
-   "BGS Corner Website" set is `RGB` with **no alpha channel** at all, and the
-   site serves JPEGs, which cannot carry any. So this needs either
-   transparent-background PNGs from whoever shoots the product, or a
-   background-removal pass over the existing frames. Ask which before starting -
-   the CSS is the easy half.
+   **Built on the category circles, one category so far (2026-09-10).** A category
+   with `"cutout": true` in `navigation.json` gets class `pop`: its circle stops
+   clipping, and the cut-out is drawn at 82% of the circle's width with its base
+   24% up, so the top rises about 21% of the circle past the edge while the base
+   corners stay on the disc, over the category wash with a faint gold lattice
+   and a soft shadow. The strip's top padding grows with the circle where there
+   is a cut-out; phones keep 16px, which holds the rise without touching the fold.
+
+   Only Bakhoor has a cut-out: `assets/cat/bak.png`, the BGS BAKHOOR 4 tin. It
+   arrived with a checkerboard painted into the pixels (RGB, no alpha) and was
+   keyed out. The other six stay photographs until each has a real transparent
+   PNG; the JPEGs cannot carry alpha. Setting the flag on a category whose image
+   is not a cut-out would show its photograph's background around the product.
+   The rest of the reference (meta caps line, italic serif name, heart, rating
+   chip) belongs to product cards and is not built.
 
 ---
 

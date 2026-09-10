@@ -27,14 +27,8 @@ P = {
  "home":'<path d="M4 11.5 12 5l8 6.5"/><path d="M6 10.5V19h12v-8.5"/><path d="M10 19v-5h4v5"/>',
  "shop":'<rect x="4.5" y="4.5" width="6" height="6" rx="1"/><rect x="13.5" y="4.5" width="6" height="6" rx="1"/><rect x="4.5" y="13.5" width="6" height="6" rx="1"/><rect x="13.5" y="13.5" width="6" height="6" rx="1"/>',
  "share":'<path d="M4 13v6a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-6"/><path d="M12 15V3.5"/><path d="M8 7.5l4-4 4 4"/>',
- "c_oil":'<rect x="9" y="2.5" width="6" height="3.5" rx="1"/><path d="M8 9.5C8 7.5 9.5 6 9.5 6h5S16 7.5 16 9.5V19a2.5 2.5 0 0 1-2.5 2.5h-3A2.5 2.5 0 0 1 8 19z"/><path d="M8 14h8"/>',
- "c_res":'<path d="M4 8l4 3 4-6 4 6 4-3-2 11H6z"/><path d="M6 19h12"/>',
- "c_bak":'<path d="M6 14h12l-1.5 6h-9z"/><path d="M4 14h16"/><path d="M11 10c0-2 2-3 2-5 2 2 2 3.5 1.5 5"/>',
- "c_edp":'<rect x="9" y="8" width="6" height="13" rx="1.5"/><path d="M10.5 8V5h3v3M15 4h2M15 6.5h2M17 4v2.5"/>',
  "c_gift":'<rect x="3.5" y="9" width="17" height="11" rx="1"/><path d="M3.5 13h17M12 9v11"/><path d="M12 9S9.5 4 7.5 5.5 10 9 12 9zm0 0s2.5-5 4.5-3.5S14 9 12 9z"/>',
- "c_disc":'<circle cx="12" cy="12" r="8.5"/><path d="M14.5 9.5L10 11l-1.5 4.5L13 14z"/>',
- "c_occ":'<rect x="3.5" y="5" width="17" height="16" rx="1.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
- "c_corp":'<rect x="3" y="8" width="18" height="12" rx="1.5"/><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/>', "left":'<path d="M15 5l-7 7 7 7"/>', "right":'<path d="M9 5l7 7-7 7"/>', "check":'<path d="M5 12l5 5L19 7"/>',
+ "left":'<path d="M15 5l-7 7 7 7"/>', "right":'<path d="M9 5l7 7-7 7"/>', "check":'<path d="M5 12l5 5L19 7"/>',
 }
 def sv(k, w=18, s=1.6): return I(P[k], w, s)
 
@@ -144,7 +138,8 @@ def footer_logo():
 NAV = [(n["label"], n["href"]) for n in NAVC["main"]]
 TABS = [(n["label"], n["href"], n.get("icon", "")) for n in NAVC["tabs"]]
 
-CATS = [(c["label"], c["href"], c["swatch"], c["photo"]) for c in NAVC["categories"]]
+CATS = [(c["label"], c["href"], c["tint"], c["image"], c.get("cutout", False))
+        for c in NAVC["categories"]]
 def catnav():
     """The sticky category bar under the masthead.
 
@@ -156,14 +151,21 @@ def catnav():
     return ('<nav class="catnav" aria-label="Categories"><div class="wrap">'
             + "".join('<a href="%s" data-catnav="%s">%s</a>'
                       % (esc(h), esc(h.split("cat=")[1] if "cat=" in h else ""), esc(n))
-                      for n, h, ic, k in CATS)
+                      for n, h, k, img, cut in CATS)
             + '</div></nav>')
 
 def catstrip():
     return ('<div class="catstrip"><div class="wrap"><div class="cs">' + "".join(
-        '<a class="c-{3}" href="{0}" aria-label="{2}" title="{2}"><span class="circle"></span>'
-        '<span class="cico">{1}</span></a>'.format(h, sv(ic, 24, 1.5), esc(n), k)
-        for n, h, ic, k in CATS) + '</div></div></div>')
+        # The photograph is an <img> whose path comes from navigation.json, not
+        # a url() in flow.css, which used to name every file. A cut-out on
+        # transparency ("cutout": true) gets class pop and stands in front of its
+        # circle instead of being clipped by it. The label is text, with a break
+        # opportunity after "/": "Attars/Perfume" has no space, so without one it
+        # overflowed its cell at 375px - 78px of text in 76px.
+        '<a class="c-{2}{4}" href="{0}"><span class="circle"><img src="{3}" alt="" '
+        'width="108" height="108"></span><span>{1}</span></a>'.format(
+            esc(h), esc(n).replace("/", "/<wbr>"), k, esc(img), " pop" if cut else "")
+        for n, h, k, img, cut in CATS) + '</div></div></div>')
 
 def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
     """No category strip here. The circles are a homepage shelf now - the sticky

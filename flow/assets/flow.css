@@ -623,7 +623,6 @@ footer .wm{color:#fff}
 .cs{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;padding:16px 0}
 .cs a{display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px 6px;
  border-radius:var(--r);color:var(--body);text-align:center;transition:background .15s,color .15s}
-.cs a svg{color:var(--gold-d)}
 .cs a span{font-size:11.5px;line-height:1.25;font-weight:500}
 
 @media (max-width:1080px){ .cs{grid-template-columns:repeat(4,1fr)} }
@@ -633,7 +632,6 @@ footer .wm{color:#fff}
   .cs{grid-template-columns:repeat(4,1fr);gap:4px;padding:12px 0}
   .cs a{padding:8px 4px;gap:6px}
   .cs a span{font-size:10px}
-  .cs a svg{width:22px;height:22px}
 }
 @media (max-width:420px){ .cs{grid-template-columns:repeat(4,1fr)} }
 
@@ -647,7 +645,6 @@ footer .wm{color:#fff}
 .cs a{border:1px solid transparent;border-radius:var(--r);padding:16px 8px;gap:9px;
  font-weight:600;transition:transform .12s ease,box-shadow .15s,filter .15s}
 .cs a span{font-size:11.5px;letter-spacing:.01em}
-.cs a svg{color:inherit}
 
 .cs a.c-oud   {background:var(--w-oud);   color:var(--f-oud);   border-color:#d8e0cc}
 .cs a.c-res   {background:var(--w-res);   color:var(--f-res);   border-color:#d6d1c8}
@@ -719,18 +716,8 @@ footer .wm{color:#fff}
 .cs a > *{position:relative;z-index:1}
 .cs a::before{transition:transform .25s ease}
 
-.cs a.c-oud::before   {background-image:url("cat/oud.jpg")}
-.cs a.c-res::before   {background-image:url("cat/res.jpg")}
-.cs a.c-bak::before   {background-image:url("cat/bak.jpg")}
-.cs a.c-musk::before  {background-image:url("cat/musk.jpg")}
-.cs a.c-floral::before{background-image:url("cat/floral.jpg")}
-.cs a.c-fresh::before {background-image:url("cat/fresh.jpg")}
-.cs a.c-amber::before {background-image:url("cat/amber.jpg")}
-.cs a.c-sweet::before {background-image:url("cat/sweet.jpg")}
-
 /* the tint is the tile's own wash, so the ink stays legible on it */
 .cs a.c-oud{color:var(--f-oud);background:var(--w-oud);--tint:var(--w-oud)}
-.cs a.c-res{color:var(--f-res);background:var(--w-res);--tint:var(--w-res)}
 .cs a.c-bak{color:var(--f-bak);background:var(--w-bak);--tint:var(--w-bak)}
 .cs a.c-musk{color:var(--f-musk);background:var(--w-musk);--tint:var(--w-musk)}
 .cs a.c-floral{color:var(--f-floral);background:var(--w-floral);--tint:var(--w-floral)}
@@ -738,7 +725,6 @@ footer .wm{color:#fff}
 .cs a.c-amber {color:var(--f-amber); background:var(--w-amber)}
 .cs a.c-sweet {color:var(--f-sweet); background:var(--w-sweet)}
 .cs a.c-oud   {--tint:var(--w-oud)}
-.cs a.c-res   {--tint:var(--w-res)}
 .cs a.c-bak   {--tint:var(--w-bak)}
 .cs a.c-musk  {--tint:var(--w-musk)}
 .cs a.c-floral{--tint:var(--w-floral)}
@@ -758,7 +744,6 @@ footer .wm{color:#fff}
 @media (max-width:900px){
   .cs a{min-height:92px}
   .cs a::before,.cs a::after{inset:0 0 28px 0}
-  .cs a svg{top:11px;width:22px;height:22px}
   .cs a span{padding:7px 4px;font-size:10px}
 }
 
@@ -786,7 +771,6 @@ footer .wm{color:#fff}
 @media (max-width:900px){
   .cs{gap:10px;padding:16px 0}
   .cs a::before,.cs a::after,.cs a .circle{width:min(76px,92%)}
-  .cs a svg{width:24px;height:24px}
   .cs a span{font-size:10.5px}
   .cs a .circle{margin-bottom:8px}
 }
@@ -800,45 +784,23 @@ footer .wm{color:#fff}
 .cs a .circle{position:relative;width:100%;max-width:108px;aspect-ratio:1/1;
  border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;
  margin:0 auto 10px;background:var(--tint)}
-.cs a .circle::before{content:"";position:absolute;top:0;right:0;bottom:0;left:0;
- background-size:cover;background-position:center;transition:transform .22s ease}
-/* The flat .3 tint over the whole circle washed the photographs out. It drops
-   to .10, which leaves a hint of the category colour, and the icon gets its
-   own radial scrim instead. Measured: the brightest tile centre is 254, and a
-   .52 scrim puts a white icon at 3.24:1 there, so the photograph stays bright
-   at the edges while the glyph still reads. */
+.cs a .circle img{position:absolute;top:0;left:0;width:100%;height:100%;
+ object-fit:cover;transition:transform .22s ease}
+/* A hairline ring over the photograph, nothing more. The radial scrim that
+   sat here only existed to hold a white icon on the picture; with no icon it
+   was just darkening the middle of every photograph. */
 .cs a .circle::after{content:"";position:absolute;top:0;right:0;bottom:0;left:0;
- background:radial-gradient(circle at 50% 50%,
-   rgba(0,0,0,.52) 0%, rgba(0,0,0,.44) 26%, rgba(0,0,0,.16) 50%, rgba(0,0,0,0) 68%);
- opacity:1;
  box-shadow:inset 0 0 0 1px rgba(23,19,16,.10);border-radius:50%}
 .cs a .circle{background:var(--tint)}
-.cs a .circle::before{opacity:1}
 .cs a::before,.cs a::after{content:none}
-.cs a svg{position:relative;z-index:2;transform:none;color:#fff;width:30px;height:30px;
- filter:drop-shadow(0 1px 3px rgba(0,0,0,.85)) drop-shadow(0 0 10px rgba(0,0,0,.5))}
 .cs a span:not(.circle){position:static;background:none;border:0;padding:0;width:100%;
  text-align:center;font-size:12px;font-weight:600;line-height:1.25;color:inherit;z-index:auto}
-.cs a:hover .circle::before{transform:scale(1.06)}
-.cs a:hover .circle::after{opacity:.16}
-
-.cs a.c-oud    .circle::before{background-image:url("cat/oud.jpg")}
-.cs a.c-res    .circle::before{background-image:url("cat/res.jpg")}
-.cs a.c-bak    .circle::before{background-image:url("cat/bak.jpg")}
-.cs a.c-musk   .circle::before{background-image:url("cat/musk.jpg")}
-.cs a.c-floral .circle::before{background-image:url("cat/floral.jpg")}
-.cs a.c-fresh  .circle::before{background-image:url("cat/fresh.jpg")}
-.cs a.c-amber  .circle::before{background-image:url("cat/amber.jpg")}
-.cs a.c-sweet  .circle::before{background-image:url("cat/sweet.jpg")}
+.cs a:hover .circle img{transform:scale(1.06)}
 
 @media (max-width:900px){
   .cs a .circle{max-width:74px;margin-bottom:8px}
-  .cs a svg{width:24px;height:24px}
   .cs a span:not(.circle){font-size:10.5px}
 }
-/* reset the offsets left behind by earlier .cs a svg rules */
-.cs a svg{top:auto;right:auto;bottom:auto;left:auto;margin:0}
-@media (max-width:900px){ .cs a svg{top:auto;left:auto;width:24px;height:24px} }
 
 /* ---------- circles: lift off the page ---------- */
 .cs a .circle{
@@ -1561,21 +1523,6 @@ footer .slot,footer .soon{color:#b9b0a4}
   .catnav a{padding:0 11px;min-height:40px;font-size:12px}
 }
 
-/* ---- category circles: the photograph, and the category's icon under it ----
-   The icon used to sit ON the photograph, a glyph fighting the picture for the
-   same few pixels, and was taken off for that. It is back as the label instead:
-   under the circle, where the words were. The words overflowed - "Attars/Perfume"
-   has no space to break at, so at 375px it was 78px of text in a 76px cell - and
-   an icon cannot. The name is still on the link as aria-label and title, and
-   spelled out in the category bar above.
-
-   .circle no longer contains an svg at all, so nothing can land on the
-   photograph again by accident. span.cico matches the specificity of the
-   span:not(.circle) label rules above and comes after them. */
-.cs a span.cico{display:flex;align-items:center;justify-content:center;
-  height:24px;margin:0}
-.cs a span.cico svg{display:block;position:static;width:22px;height:22px;margin:0;
-  transform:none;top:auto;right:auto;bottom:auto;left:auto;color:var(--ink)}
 
 /* ---- paying for the category bar on a phone -------------------------------
    The bar is 41px in the flow at the top of every page, which pushed the two
@@ -1791,3 +1738,54 @@ footer .slot,footer .soon{color:#b9b0a4}
 .catnav a:hover{color:#fff}
 .catnav a.on{color:#E8C87E;border-bottom-color:#E8C87E}
 .catnav a:focus-visible{outline-color:#E8C87E}
+
+/* ---- category bar on a phone: pills ---------------------------------------
+   Where the bar wraps it becomes a set of chips: a gold hairline and a faint
+   fill on the satin, and the active one filled gold with dark text - ink on
+   #E8C87E, far past AA - so the current category reads at a glance. The desktop
+   underline does not survive the border shorthand, deliberately: a pill says
+   "selected" by filling, not by underlining.
+
+   Pills need gaps, and gaps cost the fold: with 5px of padding the second row
+   of circles cleared the tab bar by 1px at 375x812. The padding and row gap
+   are trimmed rather than the pills, which stay 24px, the minimum target size. */
+@media (max-width:900px){
+  .catnav .wrap{gap:4px 5px;padding:3px 8px}
+  .catnav a{min-height:24px;padding:0 9px;font-size:11px;border-radius:999px;
+    border:1px solid rgba(232,200,126,.3);background:rgba(255,255,255,.05)}
+  .catnav a:hover{border-color:rgba(232,200,126,.55)}
+  .catnav a.on{background:#E8C87E;border-color:#E8C87E;color:#171310;font-weight:600}
+}
+
+/* ---- category circles: the 3D breakout ------------------------------------
+   A category whose picture is a cut-out on transparency ("cutout": true in
+   navigation.json, class pop) stands in front of its circle instead of being
+   framed by it. The circle stops clipping; the cut-out is drawn wide and
+   anchored low, so its top rises past the circle's edge while its base stays
+   on the disc; and it casts a soft shadow onto the disc. The disc becomes the
+   panel: the category wash under a faint gold lattice.
+
+   Geometry, as fractions of the circle: 82% wide with the base 24% up keeps
+   the base corners inside the circle (0.97 of the radius from the centre) and
+   lifts the top about 21% of the circle past the edge. That overflow is paint,
+   not layout, so the strip's top padding has to hold it. Photographs keep the
+   clipped circle. */
+.cs a.pop .circle{overflow:visible;
+  background:
+    repeating-linear-gradient(60deg,transparent 0 7px,rgba(168,121,30,.10) 7px 8px),
+    repeating-linear-gradient(-60deg,transparent 0 7px,rgba(168,121,30,.10) 7px 8px),
+    var(--tint)}
+.cs a.pop .circle::before{content:"";position:absolute;left:17%;right:17%;bottom:18%;
+  height:12%;border-radius:50%;
+  background:radial-gradient(closest-side,rgba(23,19,16,.30),rgba(23,19,16,0))}
+.cs a.pop .circle img{top:auto;bottom:24%;left:9%;width:82%;height:auto;
+  object-fit:fill;z-index:1;transform-origin:50% 100%;
+  filter:drop-shadow(0 4px 3px rgba(23,19,16,.28))}
+.cs a.pop:hover .circle img{transform:translateY(-3px)}
+
+/* The strip's top padding is what holds the rise. 16px held the 12px of the
+   58px phone circle; the 74px and 108px circles rise 15 and 22px and met the
+   strip's top border. So where there is a cut-out, the padding grows with the
+   circle. Phones are untouched: their fold has 6px to spare at 375x812. */
+@media (min-width:701px){ .cs:has(> a.pop){padding-top:24px} }
+@media (min-width:901px){ .cs:has(> a.pop){padding-top:30px} }
