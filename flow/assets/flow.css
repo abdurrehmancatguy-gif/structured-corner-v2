@@ -1802,17 +1802,3 @@ footer .slot,footer .soon{color:#b9b0a4}
   .catnav a + a::before{content:"";position:absolute;left:0;top:calc(50% - 7px);
     width:1px;height:14px;background:rgba(232,200,126,.35);pointer-events:none}
 }
-
-/* ---- breakout placement: a tower ------------------------------------------
-   Corporate Gifting's picture is a skyscraper seen from below, cropped at the
-   bottom by its frame and wider than it is tall, so the tin's placement (a
-   whole object standing on the disc) would leave its cut base floating in the
-   circle. Instead the facade fills the disc and the roof rises 20.5% of the
-   circle past the top edge: the upper floors stand out past the rim, the lower
-   ones stay inside it, and the image's alpha (baked into corporate.png) follows
-   the rim there, so no cut edge shows. The clip is baked into the picture, so
-   the picture must not move against the disc: no contact shadow and no hover
-   lift of its own; the whole circle still lifts. */
-.cs a.pop.pop-tower .circle::before{content:none}
-.cs a.pop.pop-tower .circle img{top:-20.5%;bottom:auto;left:-1.5%;width:103%;height:122%}
-.cs a.pop.pop-tower:hover .circle img{transform:none}

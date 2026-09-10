@@ -159,14 +159,12 @@ def catstrip():
         # The photograph is an <img> whose path comes from navigation.json, not
         # a url() in flow.css, which used to name every file. A cut-out on
         # transparency ("cutout": true) gets class pop and stands in front of its
-        # circle instead of being clipped by it; a string names its own placement
-        # ("tower" -> pop-tower). The label is text, with a break
+        # circle instead of being clipped by it. The label is text, with a break
         # opportunity after "/": "Attars/Perfume" has no space, so without one it
         # overflowed its cell at 375px - 78px of text in 76px.
         '<a class="c-{2}{4}" href="{0}"><span class="circle"><img src="{3}" alt="" '
         'width="108" height="108"></span><span>{1}</span></a>'.format(
-            esc(h), esc(n).replace("/", "/<wbr>"), k, esc(img),
-            (" pop" + (" pop-" + cut if isinstance(cut, str) else "")) if cut else "")
+            esc(h), esc(n).replace("/", "/<wbr>"), k, esc(img), " pop" if cut else "")
         for n, h, k, img, cut in CATS) + '</div></div></div>')
 
 def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):

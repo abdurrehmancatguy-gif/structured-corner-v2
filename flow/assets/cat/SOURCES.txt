@@ -21,6 +21,8 @@ The three Pexels images are placeholders for BGS Corner's own photography.
 
 corporate.png arrived the same way, a painted checkerboard in an RGB image. The
 building's edges are straight, so the key is a polygon fitted to them (flat roof
-and two sides, each within about a pixel). The picture was then composed for
-the circle: the facade fills the disc, the roof rises past the top, and the
-lower floors' alpha follows the rim. 253x300, 256 colours.
+and two sides, each within about a pixel). The photo looks steeply up at the
+tower, which made it far wider at the bottom than a circle can hold, so its
+perspective was partly straightened (roof 36% of the base instead of 19%) and
+it was cut on a window line for a flat base. It stands on the disc like the
+Bakhoor tin. 204x240, 256 colours.

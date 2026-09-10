@@ -99,7 +99,7 @@
       "href": "corporate.html",
       "tint": "sweet",
       "image": "assets/cat/corporate.png",
-      "cutout": "tower"
+      "cutout": true
     }
   ],
   "footer": [
