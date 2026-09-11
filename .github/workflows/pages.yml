@@ -43,7 +43,8 @@ jobs:
       - name: Check the committed pages match a fresh build
         run: |
           cd flow && python3 build.py
-          git diff --exit-code -- . || { echo "flow/ is stale: run build.py and commit its output"; exit 1; }
+          # git status, not git diff: a generated file nobody committed counts too
+          test -z "$(git status --porcelain -- .)" || { git status --porcelain -- .; echo "flow/ is stale: run build.py and commit its output"; exit 1; }
 
       - name: Stage only what the site serves
         run: |

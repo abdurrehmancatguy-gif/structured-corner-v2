@@ -1,12 +1,20 @@
-# Fallback for when Netlify publishes the REPOSITORY ROOT instead of flow/.
+# Fallback for when Netlify publishes the REPOSITORY ROOT instead of _site.
 #
-# The correct setup is netlify.toml's `publish = "flow"`, and when that is in
+# The correct setup is netlify.toml's `publish = "_site"`, and when that is in
 # effect this file sits outside the publish directory and is ignored entirely.
-# But if the site's publish directory is overridden in the Netlify UI, or a
-# base directory makes the root netlify.toml get skipped, the root is served
-# instead - and the root has no index.html, so every path 404s.
+# But if the publish directory is overridden in the Netlify UI, or a base
+# directory makes the root netlify.toml get skipped, the root is served instead,
+# and the root has no index.html, so every path would 404.
 #
-# This rewrite makes that case work too: serve everything out of flow/.
-# 200 = rewrite (URL stays clean), not a 301 redirect. The ! forces it even
-# where a root file exists, so a root publish never serves the repo's files.
-/*  /flow/:splat  200!
+# The last rule serves everything out of flow/ in that case. 200 = rewrite (the
+# URL stays clean), and the ! forces it even where a root file exists, so the
+# repository's own files are never served. flow/ also holds the generator, its
+# content and tools, which _site leaves out; the rules above the catch-all
+# refuse them here too.
+/build.py                /flow/404.html  404!
+/server.py               /flow/404.html  404!
+/edp_data.json           /flow/404.html  404!
+/content/*               /flow/404.html  404!
+/tools/*                 /flow/404.html  404!
+/assets/cat/SOURCES.txt  /flow/404.html  404!
+/*                       /flow/:splat    200!

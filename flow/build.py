@@ -151,11 +151,11 @@ def favicon_links():
     if ic.get("ico"):
         tags.append('<link rel="icon" href="%s" sizes="any">' % esc(ic["ico"]))
     if ic.get("png32"):
-        tags.append('<link rel="icon" type="image/png" sizes="32x32" href="%s">' % esc(ic["png32"]))
+        tags.append('<link rel="icon" type="image/png" sizes="32x32" href="%s">' % esc(V(ic["png32"])))
     if ic.get("png16"):
-        tags.append('<link rel="icon" type="image/png" sizes="16x16" href="%s">' % esc(ic["png16"]))
+        tags.append('<link rel="icon" type="image/png" sizes="16x16" href="%s">' % esc(V(ic["png16"])))
     if ic.get("apple"):
-        tags.append('<link rel="apple-touch-icon" href="%s">' % esc(ic["apple"]))
+        tags.append('<link rel="apple-touch-icon" href="%s">' % esc(V(ic["apple"])))
     return "\n".join(tags)
 
 def footer_logo():
@@ -258,7 +258,7 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
    preload=PRELOAD if page == "page-product" else "",
    robots='<meta name="robots" content="noindex,follow">\n' if page in NOINDEX else "",
    desc=esc(desc), canon=esc(canon),
-   ogimg=esc((SITE_URL + "/" + SEO.get("og_image", "") ) if SITE_URL else SEO.get("og_image", "")),
+   ogimg=esc(((SITE_URL + "/") if SITE_URL else "") + (V(SEO["og_image"]) if SEO.get("og_image") else "")),
    catnav=catnav(), tabs="".join(tab_link(l, h, ic, tab) for l, h, ic in TABS),
    clock=sv("clock",13,2), menu=sv("menu",22), chev=sv("chev",14,2), search=sv("search",17),
    user=sv("user"), heart=sv("heart"), bag=sv("bag"),
