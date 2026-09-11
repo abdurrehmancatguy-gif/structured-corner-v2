@@ -84,5 +84,17 @@
     "bakhoor": "Bakhoor & home",
     "edp": "EDP sprays",
     "delivered_today": "Delivered today"
+  },
+  "reels": {
+    "title": "EDP sprays in motion",
+    "items": [
+      {"product": "amore", "video": "assets/video/amore.mp4", "still": "assets/video/amore.jpg"},
+      {"product": "soleil-frais", "video": "assets/video/soleil-frais.mp4", "still": "assets/video/soleil-frais.jpg"},
+      {"product": "vibe", "video": "assets/video/vibe.mp4", "still": "assets/video/vibe.jpg"},
+      {"product": "barcelona", "video": "assets/video/barcelona.mp4", "still": "assets/video/barcelona.jpg"},
+      {"product": "edward-the-black-prince", "video": "assets/video/edward.mp4", "still": "assets/video/edward.jpg"},
+      {"product": "soleil-frais", "video": "assets/video/soleil-frais-2.mp4", "still": "assets/video/soleil-frais-2.jpg"},
+      {"product": "barcelona", "video": "assets/video/barcelona-ad.mp4", "still": "assets/video/barcelona-ad.jpg"}
+    ]
   }
 }

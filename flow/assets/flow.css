@@ -1814,3 +1814,19 @@ footer .slot,footer .soon{color:#b9b0a4}
 .nojs{background:var(--secondary);color:#fff;text-align:center;padding:10px 16px;font-size:13px}
 .notfound{padding:48px 16px;text-align:center}
 .notfound h1{margin:0 0 18px}
+
+/* ---- product films: portrait cards in a row of their own ------------------
+   9:16 like the films. A phone shows two and a bit and swipes; a desktop shows
+   the whole row. The still sits under the film until it is playing. */
+.reelrow{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(150px,1fr);gap:12px;
+  overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding-bottom:2px}
+.reelrow::-webkit-scrollbar{display:none}
+.reel{position:relative;display:block;aspect-ratio:9/16;border-radius:var(--r);overflow:hidden;
+  background:var(--secondary);scroll-snap-align:start;color:#fff}
+.reel img,.reel video{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block}
+.reel video{opacity:0;transition:opacity .4s ease}
+.reel video.on{opacity:1}
+.reel span{position:absolute;left:0;right:0;bottom:0;padding:32px 12px 12px;font-size:14px;font-weight:600;
+  background:linear-gradient(rgba(23,19,16,0),rgba(23,19,16,.72))}
+@media (max-width:700px){ .reelrow{grid-auto-columns:42%;gap:10px} }
+@media (prefers-reduced-motion:reduce){ .reel video{transition:none} }

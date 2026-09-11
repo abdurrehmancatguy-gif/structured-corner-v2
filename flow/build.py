@@ -409,6 +409,29 @@ def hero_slides():
                esc(sl.get("headline", "")).replace("\n", " <br>"), esc(sl.get("body", "")), cta))
     return "".join(out)
 
+def reels():
+    """Portrait product films (9:16) in a row of their own under the EDP shelf.
+       Each card shows a still first; shop.js requests the muted film only once
+       the card is on screen and pauses it when it leaves, so a visitor who never
+       scrolls this far downloads none of it. The list is content (home.json
+       "reels"): the film, its still and the product the card links to."""
+    r = HOME.get("reels") or {}
+    items = [it for it in r.get("items", []) if it.get("video") and it.get("still")]
+    if not items:
+        return ""
+    cards = []
+    for it in items:
+        pid = it.get("product", "")
+        pr = PRODUCTS.get(pid) or {}
+        href = ("product.html?p=" + pid) if pr else "collection.html?cat=edp"
+        cards.append('<a class="reel" href="%s"><img src="%s" alt="" loading="lazy" decoding="async" '
+                     'width="480" height="854"><video data-src="%s" muted loop playsinline preload="none" '
+                     'aria-hidden="true"></video><span>%s</span></a>'
+                     % (esc(href), esc(V(it["still"])), esc(V(it["video"])), esc(it.get("label") or pr.get("name", ""))))
+    return ('<section class="alt reels"><div class="wrap">\n'
+            '  <div class="sec-h"><h2>%s</h2><a href="collection.html?cat=edp">All EDP sprays &rarr;</a></div>\n'
+            '  <div class="reelrow">%s</div>\n</div></section>\n' % (esc(r.get("title", "")), "".join(cards)))
+
 def hero_images():
     """One photograph per slide, so the carousel changes picture and not only
        words. Driven from home.json's hero_slides, like the copy is - a slide
@@ -532,7 +555,7 @@ home = """
   <div class="sec-h"><h2>EDP sprays</h2><a href="collection.html?cat=edp">All 9 &rarr;</a></div>
   <div class="grid g5">%(edp)s</div>
 </div></section>
-""" % dict(catstrip=catstrip(), usp=usp_strip(),
+%(reels)s""" % dict(reels=reels(), catstrip=catstrip(), usp=usp_strip(),
            hero=hero_slides(), hero_img=hero_images(), hero_dots=hero_dots(),
            hero_n=len(HOME["hero_slides"]),
            qb_eyebrow=COPY["quiz_banner"]["eyebrow"], qb_heading=COPY["quiz_banner"]["heading"],

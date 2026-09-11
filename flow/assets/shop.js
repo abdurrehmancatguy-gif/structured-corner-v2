@@ -1487,3 +1487,31 @@ bgsRun(function () {
   }
   tick(); setInterval(tick, 30000);
 });
+
+/* ---------- product films on the homepage ----------------------------------
+   Each card starts as a still. A film is requested only once its card is on
+   screen, plays muted and looped while it stays there, and pauses when it
+   leaves. With reduced motion or data saver on, the stills stay.
+--------------------------------------------------------------------------- */
+bgsRun(function () {
+  "use strict";
+  var films = document.querySelectorAll(".reel video[data-src]");
+  if (!films.length || !("IntersectionObserver" in window)) return;
+  var quiet = (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) ||
+              (navigator.connection && navigator.connection.saveData);
+  if (quiet) return;
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      var v = en.target;
+      if (en.isIntersecting) {
+        if (!v.getAttribute("src")) {
+          v.muted = true;
+          v.addEventListener("playing", function () { v.classList.add("on"); }, { once: true });
+          v.src = v.getAttribute("data-src");
+        }
+        var go = v.play(); if (go && go.catch) go.catch(function () {});
+      } else if (!v.paused) v.pause();
+    });
+  }, { threshold: 0.6 });
+  films.forEach(function (v) { io.observe(v); });
+});
