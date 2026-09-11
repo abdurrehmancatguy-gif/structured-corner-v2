@@ -219,8 +219,9 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
 <meta name="twitter:card" content="summary_large_image">
 %(icons)s
 %(preload)s<link rel="stylesheet" href="%(css)s"></head><body class="%(page)s">
+<noscript><div class="nojs">This shop needs JavaScript for products, the bag and checkout. Please turn it on in your browser.</div></noscript>
 <div class="strip"><div class="wrap">
-  <span>%(clock)s Order by 2:00 PM for delivery today in Dubai &middot; <b>3h 47m</b></span>
+  <span>%(clock)s Order by 2:00 PM for delivery today in Dubai<span data-cutoff hidden> &middot; <b></b></span></span>
   <span class="r"><span>Free UAE delivery over AED 150</span><span>Cash on delivery</span><a href="track-order.html">Track order</a><a href="#" data-langtoggle>العربية</a></span>
 </div></div>
 <div class="mast"><div class="wrap">
@@ -512,7 +513,7 @@ home = """
 <section style="padding-top:26px"><div class="wrap">
   <div class="grid g3 promos">
     <a class="promo" href="gift-box.html"><span class="none">Banner</span><div><b>Build a gift box</b><span>Three or six scents, wrapped</span></div></a>
-    <a class="promo" href="collection.html?cat=discovery"><span class="none">Banner</span><div><b>Discovery 3 ml</b><span>Credit back on your first bottle</span></div></a>
+    <a class="promo" href="collection.html?cat=gift-sets"><span class="none">Banner</span><div><b>Discovery 3 ml</b><span>Credit back on your first bottle</span></div></a>
     <a class="promo" href="corporate.html"><span class="none">Banner</span><div><b>Corporate gifting</b><span>Quote above 20 units</span></div></a>
   </div>
 </div></section>

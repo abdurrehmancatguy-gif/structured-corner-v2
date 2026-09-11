@@ -1807,3 +1807,10 @@ footer .slot,footer .soon{color:#b9b0a4}
    five banners loaded with the first. A slide is display:none until shop.js
    marks it "seen": the one showing, and after load its neighbours. */
 .heroimg img.hs:not(.seen){display:none}
+
+/* the bag count's [hidden] lost to display:flex, so an empty bag showed a 0 */
+.act .n[hidden]{display:none}
+.strip [data-cutoff][hidden]{display:none}
+.nojs{background:var(--secondary);color:#fff;text-align:center;padding:10px 16px;font-size:13px}
+.notfound{padding:48px 16px;text-align:center}
+.notfound h1{margin:0 0 18px}
