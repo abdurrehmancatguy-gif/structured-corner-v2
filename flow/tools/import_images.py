@@ -85,7 +85,7 @@ def order_shots(pid, names):
 
 # The category circles live at assets/cat/<key>.jpg, referenced by flow.css.
 # Only the four tiles that ARE a product category take real photography. Gift
-# Sets, Discovery, Shop by Occasion and Corporate Gifting are concepts, not
+# Sets, Build Your Gift Box, Shop by Occasion and Corporate Gifting are concepts, not
 # products: the Collection set gave four near-identical rows of bottles for
 # them, so they keep their Pexels stock (see assets/cat/SOURCES.txt) and this
 # tool leaves those files alone.

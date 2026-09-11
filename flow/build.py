@@ -193,6 +193,17 @@ def catnav():
                       for n, h, k, img, cut in CATS)
             + '</div></nav>')
 
+def footer_cols():
+    """The footer's link columns, from navigation.json (they used to be written
+       out in shell(), so an edit to the file changed nothing). A link with no
+       address yet is shown as text, as FAQ and Our story are."""
+    return "".join(
+        '  <div><h5>%s</h5>%s</div>\n' % (esc(col["heading"]), "".join(
+            '<a href="%s">%s</a>' % (esc(l["href"]), esc(l["label"])) if l.get("href")
+            else '<span class="soon">%s</span>' % esc(l["label"])
+            for l in col["links"]))
+        for col in NAVC["footer"])
+
 def catstrip():
     return ('<div class="catstrip"><div class="wrap"><div class="cs">' + "".join(
         # The photograph is an <img> whose path comes from navigation.json, not
@@ -250,9 +261,7 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
   <div>%(footlogo)s
     <p>BGS Corner General Trading LLC &middot; Dubai, UAE</p>
     <p>%(addr)s</p><div class="nl"><span class="field">Your email</span><span class="btn">Join</span></div></div>
-  <div><h5>Shop</h5><a href="collection.html?cat=attars">Attars/Perfume Oils</a><a href="collection.html">Bakhoor</a><a href="collection.html">EDP sprays</a><a href="gift-box.html">Gift sets</a></div>
-  <div><h5>Help</h5><a href="product.html?p=royal-amber&amp;tab=delivery">Delivery &amp; returns</a><a href="product.html?p=royal-amber&amp;tab=apply">How to apply oud</a><a href="track-order.html">Track your order</a><span class="soon">FAQ</span></div>
-  <div><h5>BGS Corner</h5><a href="account.html">Your account</a><span class="soon">Our story</span><a href="corporate.html">Corporate gifting</a><a href="corporate.html">Wholesale</a></div>
+%(footcols)s
 </div><div class="bot"><span>&copy; 2026 BGS Corner General Trading LLC</span>
 <span>Cards &middot; Apple Pay &middot; Tabby &middot; Tamara &middot; Cash on delivery</span></div></div></footer>
 <div class="tabbar">%(tabs)s</div>
@@ -267,7 +276,7 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
    catnav=catnav(), tabs="".join(tab_link(l, h, ic, tab) for l, h, ic in TABS),
    clock=sv("clock",13,2), menu=sv("menu",22), chev=sv("chev",14,2), search=sv("search",17),
    user=sv("user"), heart=sv("heart"), bag=sv("bag"),
-   brandlogo=header_logo(), footlogo=footer_logo(), icons=favicon_links(),
+   brandlogo=header_logo(), footlogo=footer_logo(), footcols=footer_cols(), icons=favicon_links(),
    addr=slot("address, hours, phone"))
 
 # ---------------------------------------------------------------- DATA
@@ -523,7 +532,7 @@ home = """
 </div></section>
 
 <section class="alt"><div class="wrap">
-  <div class="sec-h"><h2>Gift sets</h2><a href="gift-box.html">All sets &rarr;</a></div>
+  <div class="sec-h"><h2>Gift sets</h2><a href="collection.html?cat=gift-sets">All sets &rarr;</a></div>
   <div class="grid g5">%(sets)s</div>
 </div></section>
 
@@ -754,7 +763,7 @@ product = """
 # ---------------------------------------------------------------- GIFT BOX
 giftbox = """
 <section><div class="wrap">
-  <span class="eyebrow">Home / Gift sets / Build a box</span>
+  <span class="eyebrow">Home / Build Your Gift Box</span>
   <div class="sec-h" style="margin-top:10px"><div><h2 style="font-size:26px">Build a gift box</h2>
   <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">Three or six slots, filled from the house scents, leaving as one cart line with its contents itemised.</p></div></div>
   <div class="two">

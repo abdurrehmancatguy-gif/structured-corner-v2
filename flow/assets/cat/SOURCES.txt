@@ -5,7 +5,7 @@ content/navigation.json ("image"), not in the stylesheet.
   bak.png     BGS Corner product photography   Bakhoor  (BGS BAKHOOR 4 tin)
   edp.png     BGS Corner product, supplied in chat   EDP Sprays  (Pride of Arabia)
   floral.jpg  Pexels photos/1303087            Gift Sets
-  fresh.jpg   Pexels photos/7269476            Discovery
+  fresh.jpg   Pexels photos/7269476            Build Your Gift Box (was Discovery)
   amber.jpg   Pexels photos/9127154            Shop by Occasion
   corporate.png  skyscraper cut-out, supplied in chat   Corporate Gifting
 

@@ -131,6 +131,7 @@ bgsRun(function () {
   var AR = {
     "Oud Oils": "زيوت العود", "Reserve": "المجموعة الخاصة", "Bakhoor": "بخور",
     "EDP Sprays": "عطور", "Gift Sets": "أطقم الهدايا", "Discovery": "الاكتشاف",
+    "Build Your Gift Box": "جهّز علبة هديتك",
     "Shop by Occasion": "تسوق حسب المناسبة", "Corporate Gifting": "هدايا الشركات",
     "Account": "الحساب", "Wishlist": "المفضلة", "Bag": "الحقيبة",
     "Track order": "تتبع الطلب", "Home": "الرئيسية", "Shop": "المتجر", "Gifts": "الهدايا",
@@ -1471,7 +1472,7 @@ bgsRun(function () {
   var cat = new URLSearchParams(location.search).get("cat") || "";
   var page = location.pathname.split("/").pop() || "index.html";
 
-  /* First match only. Gift Sets and Shop by Occasion both point at
+  /* First match only. Build Your Gift Box and Shop by Occasion both point at
      gift-box.html in navigation.json, so a plain match lit two entries at once
      on that page. Two labels sharing one destination is a content question that
      is still open; until it is answered the bar should at least claim one

@@ -487,9 +487,12 @@ raw background Bash. Use the Browser pane's `preview_start` with the `bgs-flow` 
 
 1. **Pushing.** Every push to `origin/main` needs the owner's consent at the time; check
    `git log --oneline origin/main..HEAD` for what is waiting.
-2. **"Shop by Occasion" and "Gift Sets" both point at `gift-box.html`** - in `nav.main`
-   *and* in `nav.categories`. Two labels, one destination. Give Occasion its own page, point
-   it somewhere real, or remove it.
+2. **"Shop by Occasion" and "Build Your Gift Box" both point at `gift-box.html`** - in
+   `nav.categories`, which builds the category bar and the homepage circles (`nav.main` is
+   read by nothing). Two labels, one destination. Give Occasion its own
+   page, point it somewhere real, or remove it. (On 2026-09-11 the owner had "Gift Sets" go
+   to the gift sets page, `collection.html?cat=gift-sets`, and "Discovery" renamed "Build
+   Your Gift Box", for the builder.)
 3. **The voucher note shares `--gold-l` with the scent-notes panel**, so two unrelated things
    read as the same UI element. Options offered: neutralise the voucher note, drop the notes
    fill, or leave it.

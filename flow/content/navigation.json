@@ -14,11 +14,11 @@
     },
     {
       "label": "Gift Sets",
-      "href": "gift-box.html"
+      "href": "collection.html?cat=gift-sets"
     },
     {
-      "label": "Discovery",
-      "href": "collection.html"
+      "label": "Build Your Gift Box",
+      "href": "gift-box.html"
     },
     {
       "label": "Shop by Occasion",
@@ -80,13 +80,13 @@
     },
     {
       "label": "Gift Sets",
-      "href": "gift-box.html",
+      "href": "collection.html?cat=gift-sets",
       "tint": "floral",
       "image": "assets/cat/floral-216.jpg"
     },
     {
-      "label": "Discovery",
-      "href": "collection.html?cat=gift-sets",
+      "label": "Build Your Gift Box",
+      "href": "gift-box.html",
       "tint": "fresh",
       "image": "assets/cat/fresh-216.jpg"
     },
@@ -122,7 +122,7 @@
         },
         {
           "label": "Gift sets",
-          "href": "gift-box.html"
+          "href": "collection.html?cat=gift-sets"
         }
       ]
     },
