@@ -17,6 +17,20 @@ class NoCache(http.server.SimpleHTTPRequestHandler):
         super().end_headers()
     def log_message(self, fmt, *args):
         pass
+    def send_error(self, code, message=None, explain=None):
+        # A missing path gets the site's own 404.html, as Netlify and GitHub
+        # Pages serve it, instead of Python's bare "Error response" page.
+        if code == 404 and os.path.isfile("404.html"):
+            with open("404.html", "rb") as f:
+                body = f.read()
+            self.send_response(404, message)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            if self.command != "HEAD":
+                self.wfile.write(body)
+            return
+        super().send_error(code, message, explain)
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 class Server(socketserver.ThreadingMixIn, socketserver.TCPServer):
