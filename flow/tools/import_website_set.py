@@ -72,6 +72,12 @@ FRAME_ORDER = {
     "desert-breeze":           [4, 1, 2, 3],
 }
 
+# Frames the owner has taken off the site, by file name, so a re-import of the
+# same set leaves them out too.
+SKIP = {
+    "Imperial Crown 3.301 (1) (1).png",   # the cocktail glass, removed 2026-09-11
+}
+
 # Two exports of one frame look alike to within this mean grey-level
 # difference (out of 255) on a 32x32 thumbnail. Measured on the EDITED set:
 # its duplicate box shots differ by under 2, distinct frames by over 20.
@@ -130,6 +136,9 @@ def main():
     groups, unmapped = {}, {}
     for fn in sorted(os.listdir(src)):
         if not fn.lower().endswith((".png", ".jpg", ".jpeg")):
+            continue
+        if fn in SKIP:
+            print("  skipped %s (taken off the site)" % fn)
             continue
         label, idx = label_and_index(fn)
         pid = by_name.get(norm(label)) or ALIAS.get(norm(label)) or BAKHOOR_MAP.get(label)
