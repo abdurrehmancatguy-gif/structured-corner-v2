@@ -1,9 +1,9 @@
 Category circle photographs. Which file each circle shows is set in
 content/navigation.json ("image"), not in the stylesheet.
 
-  oud.jpg     BGS Corner product photography   Attars/Perfume Oils
+  attars.png  BGS Corner product, supplied in chat   Attars/Perfume Oils  (Royal Amber and BGS bottles)
   bak.png     BGS Corner product photography   Bakhoor  (BGS BAKHOOR 4 tin)
-  musk.jpg    BGS Corner product photography   EDP Sprays
+  edp.png     BGS Corner product, supplied in chat   EDP Sprays  (Pride of Arabia)
   floral.jpg  Pexels photos/1303087            Gift Sets
   fresh.jpg   Pexels photos/7269476            Discovery
   amber.jpg   Pexels photos/9127154            Shop by Occasion
@@ -26,3 +26,11 @@ tower, which made it far wider at the bottom than a circle can hold, so its
 perspective was partly straightened (roof 36% of the base instead of 19%) and
 it was cut on a window line for a flat base. It stands on the disc like the
 Bakhoor tin. 204x240, 256 colours.
+
+attars.png and edp.png arrived the same way, painted checkerboards in RGB
+images. The attar one's checkerboard is warped and as grey as the chrome, so it
+was keyed by texture: the checkerboard flips light and dark every few pixels,
+chrome is smooth, and the bottles are outlined in dark. The EDP bottle is
+cropped by its photo at the top of the cap and at the base, which reads as the
+cylinder's own flat ends. Both are normalised to 204x240 like the tin, so all
+the breakouts rise and stand alike. 256 colours.

@@ -484,15 +484,17 @@ raw background Bash. Use the Browser pane's `preview_start` with the `bgs-flow` 
    and a soft shadow. The strip's top padding grows with the circle where there
    is a cut-out; phones keep 16px, which holds the rise without touching the fold.
 
-   Two categories have cut-outs, both supplied with a checkerboard painted into
-   the pixels (RGB, no alpha) and keyed out, and both stand on the disc the same
-   way. Bakhoor is `assets/cat/bak.png`, the BGS BAKHOOR 4 tin. Corporate Gifting
-   is `assets/cat/corporate.png`, a skyscraper photographed looking steeply up:
-   too wide at the bottom for the circle as shot, so its perspective was partly
-   straightened (roof 36% of the base instead of 19%) and it was cut on a window
-   line for a flat base. The owner rejected a version clipped round to the rim.
-   The other five stay photographs until each has a real transparent PNG; the
-   JPEGs cannot carry alpha. Setting the flag on a category whose image
+   Four categories have cut-outs, all supplied with a checkerboard painted into
+   the pixels (RGB, no alpha) and keyed out, and all four stand on the disc the
+   same way, each normalised to a 204x240 canvas so they rise and sit alike:
+   Attars/Perfume Oils (`assets/cat/attars.png`, the Royal Amber and BGS
+   bottles), Bakhoor (`bak.png`, the BGS BAKHOOR 4 tin), EDP Sprays (`edp.png`,
+   Pride of Arabia, cropped by its photo at the cap and the base) and Corporate
+   Gifting (`corporate.png`, a skyscraper photographed looking steeply up: its
+   perspective was partly straightened, roof 36% of the base instead of 19%, and
+   it was cut on a window line for a flat base). The owner rejected a version
+   clipped round to the rim. The other three stay photographs until each has a
+   real transparent PNG; the JPEGs cannot carry alpha. Setting the flag on a category whose image
    is not a cut-out would show its photograph's background around the product.
    The rest of the reference (meta caps line, italic serif name, heart, rating
    chip) belongs to product cards and is not built.

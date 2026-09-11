@@ -61,7 +61,8 @@
       "label": "Attars/Perfume Oils",
       "href": "collection.html?cat=attars",
       "tint": "oud",
-      "image": "assets/cat/oud.jpg"
+      "image": "assets/cat/attars.png",
+      "cutout": true
     },
     {
       "label": "Bakhoor",
@@ -74,7 +75,8 @@
       "label": "EDP Sprays",
       "href": "collection.html?cat=edp",
       "tint": "musk",
-      "image": "assets/cat/musk.jpg"
+      "image": "assets/cat/edp.png",
+      "cutout": true
     },
     {
       "label": "Gift Sets",
