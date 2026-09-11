@@ -201,6 +201,10 @@ def catstrip():
             esc(h), esc(n).replace("/", "/<wbr>"), k, esc(V(img)), " pop" if cut else "")
         for n, h, k, img, cut in CATS) + '</div></div></div>')
 
+# The bag, checkout, confirmation, account and tracking pages are for someone
+# mid-purchase, not for search results.
+NOINDEX = {"page-cart", "page-checkout", "page-confirmed", "page-account", "page-track-order"}
+
 def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
     """No category strip here. The circles are a homepage shelf now - the sticky
        catnav carries the same eight destinations on every page, so a second copy
@@ -211,7 +215,7 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>%(title)s | BGS Corner</title>
 <meta name="description" content="%(desc)s">
-<link rel="canonical" href="%(canon)s">
+%(robots)s<link rel="canonical" href="%(canon)s">
 <meta property="og:type" content="website">
 <meta property="og:title" content="%(title)s | BGS Corner">
 <meta property="og:description" content="%(desc)s">
@@ -252,6 +256,7 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
 """ % dict(title=title, body=body, page=page, css=V("assets/flow.min.css"),
    catjs=V("assets/catalogue.js"), shopjs=V("assets/shop.js"),
    preload=PRELOAD if page == "page-product" else "",
+   robots='<meta name="robots" content="noindex,follow">\n' if page in NOINDEX else "",
    desc=esc(desc), canon=esc(canon),
    ogimg=esc((SITE_URL + "/" + SEO.get("og_image", "") ) if SITE_URL else SEO.get("og_image", "")),
    catnav=catnav(), tabs="".join(tab_link(l, h, ic, tab) for l, h, ic in TABS),
@@ -1188,3 +1193,22 @@ for fn, t, b, on, tab in PAGES:
                                       desc=PAGE_DESC.get(fn, SEO.get("default_description", "")),
                                       canon=canon))
 print("wrote", len(PAGES), "pages")
+
+# 404.html is served for a missing path at any depth, where a relative
+# assets/flow.css would point somewhere else, so it carries its own style and
+# works out its home link: the GitHub Pages copy lives under /structured-corner-v2/.
+pathlib.Path("404.html").write_text("""<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page not found | BGS Corner</title><meta name="robots" content="noindex">
+<style>body{margin:0;min-height:100vh;display:grid;place-items:center;text-align:center;
+background:#faf8f4;color:#171310;font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{padding:24px}h1{font:600 28px/1.2 Georgia,"Times New Roman",serif;margin:0 0 10px}
+a{display:inline-block;margin-top:18px;background:#171310;color:#fff;padding:12px 22px;text-decoration:none}</style>
+</head><body><main><h1>We couldn&rsquo;t find that page</h1><p>The link may be old or mistyped.</p>
+<a id="home" href="/">Go to the BGS Corner homepage</a></main>
+<script>document.getElementById("home").href=location.pathname.indexOf("/structured-corner-v2/")===0?"/structured-corner-v2/":"/";</script>
+</body></html>
+""")
+# Search results are thin, endless variations of one page.
+pathlib.Path("robots.txt").write_text("User-agent: *\nDisallow: /collection.html?q=\n")

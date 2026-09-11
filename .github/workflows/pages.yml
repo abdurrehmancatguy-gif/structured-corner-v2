@@ -5,8 +5,10 @@
 # artifact instead, so nothing has to be moved or duplicated, and Netlify keeps
 # deploying from the same commit unchanged.
 #
-# No build step runs here: build.py generates the HTML locally and the output is
-# committed, so the artifact is just the flow/ directory as it stands.
+# build.py generates the HTML locally and the output is committed. This
+# workflow rebuilds it and fails if the result differs, so a forgotten rebuild
+# never ships, then publishes only what the pages use: the HTML, favicon.ico,
+# robots.txt and assets/. The generator, content and tools stay out of it.
 
 name: Deploy to GitHub Pages
 
@@ -38,10 +40,22 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload flow/ as the Pages artifact
+      - name: Check the committed pages match a fresh build
+        run: |
+          cd flow && python3 build.py
+          git diff --exit-code -- . || { echo "flow/ is stale: run build.py and commit its output"; exit 1; }
+
+      - name: Stage only what the site serves
+        run: |
+          rm -rf _site && mkdir _site
+          cp flow/*.html flow/favicon.ico flow/robots.txt _site/
+          cp -R flow/assets _site/assets
+          rm -f _site/assets/cat/SOURCES.txt
+
+      - name: Upload the site as the Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: flow
+          path: _site
 
       - name: Deploy
         id: deployment

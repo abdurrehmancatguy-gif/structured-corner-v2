@@ -7,5 +7,6 @@
 # instead - and the root has no index.html, so every path 404s.
 #
 # This rewrite makes that case work too: serve everything out of flow/.
-# 200 = rewrite (URL stays clean), not a 301 redirect.
-/*  /flow/:splat  200
+# 200 = rewrite (URL stays clean), not a 301 redirect. The ! forces it even
+# where a root file exists, so a root publish never serves the repo's files.
+/*  /flow/:splat  200!
