@@ -628,6 +628,13 @@ collection = """
            chev=sv("chev", 13, 2), filt=sv("filter", 15, 1.9))
 
 # ---------------------------------------------------------------- PDP
+# One template serves every product and shop.js fills it in. What the template
+# has no value for (the notes strip, the spec lines) ships hidden and is shown
+# once filled, so no bare labels are drawn. Blocks that describe only some
+# kinds of product name them in data-cats: the notes and the pyramid are for
+# the perfumes, how to apply is for the oils. The credit-back note is about
+# buying the 3 ml, so it names that size in data-with-size. shop.js takes these
+# out of any other product's page.
 product = """
 <section><div class="wrap">
   <span class="eyebrow">Home / Attars / Royal Amber</span>
@@ -665,7 +672,7 @@ product = """
         <span class="stepper" data-stepper><button type="button" data-step="-1" aria-label="Decrease quantity">&minus;</button><i data-qty>1</i><button type="button" data-step="1" aria-label="Increase quantity">+</button></span>
         <button type="button" class="btn solid" style="flex-grow:1" data-add data-addqty>Add to bag: AED 75</button></div>
       <a class="btn block" href="gift-box.html" style="margin-bottom:12px">Send as a gift</a>
-      <div class="notestop" data-notestop>
+      <div class="notestop" data-notestop data-cats="edp attars" hidden>
         <div><span class="ni">%(leaf)s</span><b>Top</b><p data-note="top"></p></div>
         <div><span class="ni">%(hrt)s</span><b>Heart</b><p data-note="heart"></p></div>
         <div><span class="ni">%(drop)s</span><b>Base</b><p data-note="base"></p></div>
@@ -673,12 +680,12 @@ product = """
 
       <div class="belowbuy">
         <p class="story-slot" data-desc>%(desc)s</p>
-        <div class="note">Try the 3 ml first, the AED 45 comes back as a voucher on any bottle over AED 75, issued the day it is delivered.</div>
-        <div class="kv" data-specs style="margin-top:16px">
-          <div><span>Longevity</span><span>%(lon)s</span></div>
-          <div><span>Sillage</span><span>%(sil)s</span></div>
-          <div><span>Batch number</span><span>%(bat)s</span></div>
-          <div><span>Availability</span><span>%(av)s</span></div>
+        <div class="note" data-with-size="3 ml">Try the 3 ml first, the AED 45 comes back as a voucher on any bottle over AED 75, issued the day it is delivered.</div>
+        <div class="kv" data-specs style="margin-top:16px" hidden>
+          <div hidden><span>Longevity</span><span>%(lon)s</span></div>
+          <div hidden><span>Sillage</span><span>%(sil)s</span></div>
+          <div hidden><span>Batch number</span><span>%(bat)s</span></div>
+          <div hidden><span>Availability</span><span>%(av)s</span></div>
         </div>
         <div class="kv facts" style="margin-top:16px">
           <div><span>%(truck)s Delivery</span><span>Free over AED 150 &middot; same-day before 2 PM</span></div>
@@ -694,13 +701,13 @@ product = """
 </div>
 <section class="alt"><div class="wrap">
   <div class="tabs2" role="tablist">
-    <button type="button" class="on" data-tab="pyramid" role="tab" aria-selected="true">Scent pyramid</button>
-    <button type="button" data-tab="apply" role="tab" aria-selected="false">How to apply oud</button>
+    <button type="button" class="on" data-tab="pyramid" data-cats="edp attars" role="tab" aria-selected="true">Scent pyramid</button>
+    <button type="button" data-tab="apply" data-cats="attars" role="tab" aria-selected="false">How to apply oud</button>
     <button type="button" data-tab="ing" role="tab" aria-selected="false">Ingredients &amp; allergens</button>
     <button type="button" data-tab="delivery" role="tab" aria-selected="false">Delivery &amp; returns</button>
     <button type="button" data-tab="reviews" role="tab" aria-selected="false">Reviews</button>
   </div>
-  <div data-panel="pyramid">
+  <div data-panel="pyramid" data-cats="edp attars">
     <div class="grid g3">
       <div><span class="eyebrow">Top</span><p style="margin:8px 0 0" data-note="top"></p></div>
       <div><span class="eyebrow">Heart</span><p style="margin:8px 0 0" data-note="heart"></p></div>
@@ -708,7 +715,7 @@ product = """
     </div>
     <div class="note" data-pyrnote style="margin-top:20px" hidden>The scent pyramid is published for our EDP sprays. For the attars it is coming soon.</div>
   </div>
-  <div data-panel="apply" hidden>
+  <div data-panel="apply" data-cats="attars" hidden>
     <div class="grid g3">
       <div><span class="eyebrow">Where</span><p style="margin:8px 0 0">Wrists, the base of the throat, behind the ears. Warm points carry the oil.</p></div>
       <div><span class="eyebrow">How much</span><p style="margin:8px 0 0">These are oils, not sprays. One dab on each point is the dose; a 3 ml bottle lasts accordingly.</p></div>

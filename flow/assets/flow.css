@@ -1197,6 +1197,16 @@ footer .slot,footer .soon{color:#b9b0a4}
   .notestop b{grid-area:1/2}
   .notestop p{grid-area:1/3/2/4;margin:0}
 }
+/* shop.js hides the strip, the pyramid grid and the spec lines a product has
+   no values for, but their display:grid and display:flex outrank [hidden], so
+   they were drawn anyway as labels with nothing beside them */
+[data-notestop][hidden],[data-specs][hidden],[data-specs]>div[hidden],
+[data-panel="pyramid"] .grid[hidden]{display:none}
+/* with no story, no 3 ml note and no spec lines (bakhoor, gift sets, the oils
+   sold without a 3 ml), the delivery and payment rows are all that is left
+   under the buttons, and their own top rule is the divider, not a second line
+   just under this one */
+.buy .belowbuy:not(:has(> :not([hidden],.facts))){border-top:0;padding-top:0}
 
 /* the delivery and payment rows read as facts, not as greyed-out fine print.
    Scoped to that one block: on every .kv it turned the account and checkout

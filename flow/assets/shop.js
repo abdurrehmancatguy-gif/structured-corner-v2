@@ -302,7 +302,23 @@ bgsRun(function () {
         if (/Batch number/.test(k) && pr.sku) { r.firstElementChild.textContent = "Barcode"; v.textContent = pr.sku; }
       });
 
-      /* scent pyramid: fill the three note slots, or show the note line */
+      /* blocks for other kinds of product (data-cats), and the 3 ml
+         credit-back note where there is no 3 ml (data-with-size), come out
+         rather than hide, so the tabs further down count only what is left */
+      document.querySelectorAll("[data-cats]").forEach(function (el) {
+        if (el.getAttribute("data-cats").split(" ").indexOf(pr.cat) < 0) el.remove();
+      });
+      var sizeNames = (pr.sizes || []).map(function (x) {
+        return x.replace(/&middot;/g, "\u00b7").split("\u00b7")[0].trim();
+      });
+      document.querySelectorAll("[data-with-size]").forEach(function (el) {
+        if (sizeNames.indexOf(el.getAttribute("data-with-size")) < 0) el.remove();
+      });
+
+      /* scent pyramid: fill the three note slots, or show the note line. The
+         strip under the buttons ships hidden, having no notes of its own. */
+      var topstrip = document.querySelector("[data-notestop]");
+      if (topstrip) topstrip.hidden = !(pr.top || pr.heart || pr.base);
       if (pr.top || pr.heart || pr.base) {
         [["top", pr.top], ["heart", pr.heart], ["base", pr.base]].forEach(function (t) {
           document.querySelectorAll('[data-note="' + t[0] + '"]').forEach(function (el) {
@@ -314,8 +330,6 @@ bgsRun(function () {
       } else {
         var grid = document.querySelector('[data-panel="pyramid"] .grid');
         if (grid) grid.hidden = true;
-        var topstrip = document.querySelector("[data-notestop]");
-        if (topstrip) topstrip.hidden = true;
         var pn = document.querySelector("[data-pyrnote]");
         if (pn) pn.hidden = false;
       }
@@ -681,9 +695,10 @@ bgsRun(function () {
 
 /* ---------- PDP: keep the buy decision above the fold ----------------------
    The spec table is four rows that are all placeholders on most products, and
-   it used to sit between the price and Add to bag. It is below the button now,
-   and when nothing in it has a value it collapses to a single honest line
-   rather than four rows saying "not set".
+   it used to sit between the price and Add to bag. It is below the button now.
+   The table and its rows ship hidden; a row shows once the PDP above has
+   filled its value in, and the table only if one has, so there are no rows
+   saying "not set" and no labels with nothing beside them.
 --------------------------------------------------------------------------- */
 bgsRun(function () {
   "use strict";
@@ -694,13 +709,8 @@ bgsRun(function () {
     var v = r.lastElementChild;
     return v && !v.querySelector(".slot") && v.textContent.trim() !== "";
   });
-  if (withValue.length === 0) {
-    specs.hidden = true;
-  } else {
-    rows.forEach(function (r) {
-      if (withValue.indexOf(r) < 0) r.hidden = true;
-    });
-  }
+  specs.hidden = withValue.length === 0;
+  rows.forEach(function (r) { r.hidden = withValue.indexOf(r) < 0; });
 });
 
 
@@ -975,8 +985,13 @@ bgsRun(function () {
       pnl.hidden = pnl.getAttribute("data-panel") !== name;
     });
   }
+  /* the tab the address asks for, else the one marked on, else the first:
+     the PDP takes out tabs that do not apply to the product, the marked one
+     among them on bakhoor and gift sets */
   var want = new URLSearchParams(location.search).get("tab");
-  if (want && document.querySelector('[data-tab="' + want + '"]')) show(want);
+  var first = [].filter.call(tabs, function (t) { return t.getAttribute("data-tab") === want; })[0] ||
+              document.querySelector("[data-tab].on") || tabs[0];
+  show(first.getAttribute("data-tab"));
   tabs.forEach(function (t) {
     t.addEventListener("click", function () { show(t.getAttribute("data-tab")); });
     t.addEventListener("keydown", function (e) {
