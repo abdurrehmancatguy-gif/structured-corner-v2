@@ -392,7 +392,8 @@
       "imperial-crown-1.jpg",
       "imperial-crown-2.jpg",
       "imperial-crown-3.jpg",
-      "imperial-crown-4.jpg"
+      "imperial-crown-4.jpg",
+      "imperial-crown-5.jpg"
     ],
     "name_ar": "",
     "story_ar": [],
@@ -431,7 +432,8 @@
       "dark-leather-1.jpg",
       "dark-leather-2.jpg",
       "dark-leather-3.jpg",
-      "dark-leather-4.jpg"
+      "dark-leather-4.jpg",
+      "dark-leather-5.jpg"
     ],
     "name_ar": "",
     "story_ar": [],
@@ -470,7 +472,8 @@
       "royal-amber-1.jpg",
       "royal-amber-2.jpg",
       "royal-amber-3.jpg",
-      "royal-amber-4.jpg"
+      "royal-amber-4.jpg",
+      "royal-amber-5.jpg"
     ],
     "name_ar": "",
     "story_ar": [],
@@ -548,7 +551,8 @@
       "majestic-musk-1.jpg",
       "majestic-musk-2.jpg",
       "majestic-musk-3.jpg",
-      "majestic-musk-4.jpg"
+      "majestic-musk-4.jpg",
+      "majestic-musk-5.jpg"
     ],
     "name_ar": "",
     "story_ar": [],
@@ -665,7 +669,8 @@
       "magnolia-veil-1.jpg",
       "magnolia-veil-2.jpg",
       "magnolia-veil-3.jpg",
-      "magnolia-veil-4.jpg"
+      "magnolia-veil-4.jpg",
+      "magnolia-veil-5.jpg"
     ],
     "name_ar": "",
     "story_ar": [],
@@ -704,7 +709,8 @@
       "parisian-muse-1.jpg",
       "parisian-muse-2.jpg",
       "parisian-muse-3.jpg",
-      "parisian-muse-4.jpg"
+      "parisian-muse-4.jpg",
+      "parisian-muse-5.jpg"
     ],
     "name_ar": "",
     "story_ar": [],
@@ -743,7 +749,8 @@
       "velvet-spell-1.jpg",
       "velvet-spell-2.jpg",
       "velvet-spell-3.jpg",
-      "velvet-spell-4.jpg"
+      "velvet-spell-4.jpg",
+      "velvet-spell-5.jpg"
     ],
     "name_ar": "",
     "story_ar": [],
@@ -779,11 +786,10 @@
     "published": true,
     "order": 20,
     "images": [
-      "desert-breeze-5.jpg",
-      "desert-breeze-1.jpg",
-      "desert-breeze-3.jpg",
       "desert-breeze-4.jpg",
-      "desert-breeze-2.jpg"
+      "desert-breeze-1.jpg",
+      "desert-breeze-2.jpg",
+      "desert-breeze-3.jpg"
     ],
     "name_ar": "",
     "story_ar": [],
@@ -856,8 +862,7 @@
       "majlis-oud-2.jpg",
       "majlis-oud-3.jpg",
       "majlis-oud-4.jpg",
-      "majlis-oud-5.jpg",
-      "majlis-oud-6.jpg"
+      "majlis-oud-5.jpg"
     ],
     "name_ar": "",
     "story_ar": [],

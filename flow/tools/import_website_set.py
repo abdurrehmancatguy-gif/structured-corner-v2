@@ -66,8 +66,22 @@ FRAME_ORDER = {
     "be-mine":                 [1, 4, 2, 3],
     "edward-the-black-prince": [2, 3, 1, 4],
     "soleil-frais":            [2, 1, 3, 4],
-    "desert-breeze":           [5, 1, 3, 4, 2],
+    # EDITED set (2026-09-11): no bare single bottle, so the 6 ml + 3 ml pair
+    # leads, then the box, the desert scene and the flat-lay. Counted after
+    # the duplicate box shot is dropped (see same_picture).
+    "desert-breeze":           [4, 1, 2, 3],
 }
+
+# Two exports of one frame look alike to within this mean grey-level
+# difference (out of 255) on a 32x32 thumbnail. Measured on the EDITED set:
+# its duplicate box shots differ by under 2, distinct frames by over 20.
+SAME = 6
+
+
+def same_picture(a, b):
+    ta = list(Image.open(a).convert("L").resize((32, 32), Image.BILINEAR).getdata())
+    tb = list(Image.open(b).convert("L").resize((32, 32), Image.BILINEAR).getdata())
+    return sum(abs(x - y) for x, y in zip(ta, tb)) / len(ta) < SAME
 
 
 def label_and_index(filename):
@@ -135,6 +149,18 @@ def main():
     print("\npublished products this set does not cover: %d" % len(absent))
     for k in absent:
         print("  %-22s %s" % (k, products[k]["category"]))
+
+    # Some frames were exported twice under different names; showing the same
+    # picture twice in a gallery helps nobody, so later copies are dropped.
+    for pid in sorted(groups):
+        kept = []
+        for idx, fn in sorted(groups[pid]):
+            dup = next((k for _, k in kept if same_picture(src / fn, src / k)), None)
+            if dup:
+                print("  %-24s dropped %s (same picture as %s)" % (pid, fn, dup))
+            else:
+                kept.append((idx, fn))
+        groups[pid] = kept
 
     if dry:
         print()

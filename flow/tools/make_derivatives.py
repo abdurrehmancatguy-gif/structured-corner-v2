@@ -26,6 +26,11 @@ from PIL import Image
 FLOW = pathlib.Path(__file__).resolve().parent.parent
 IMG, CAT = FLOW / "assets" / "img", FLOW / "assets" / "cat"
 QUALITY = 78
+# "vibe-1-600.jpg" also looks like frame 600 of "vibe-1", so a copy must never be
+# taken for an original; without this a second run made copies of copies.
+# Banner copies ("banner-1-1320.jpg") look like product frames the same way, so
+# everything named banner- is handled by the banner branch alone.
+COPIES = ("-600.jpg", "-card-360.jpg", "-thumb.jpg", "-card.jpg")
 made = kept = 0
 
 
@@ -65,7 +70,8 @@ for src in sorted(IMG.glob("*.jpg")):
     if m:
         jpeg(src, IMG / ("%s-phone-750.jpg" % m.group(1) if m.group(2) else "%s-1320.jpg" % m.group(1)),
              750 if m.group(2) else 1320)
-    elif re.fullmatch(r"[a-z0-9-]+-\d+\.jpg", src.name):
+    elif (re.fullmatch(r"[a-z0-9-]+-\d+\.jpg", src.name) and not src.name.endswith(COPIES)
+          and not src.name.startswith("banner-")):
         stem = src.name[:-4]
         jpeg(src, IMG / (stem + "-600.jpg"), 600)
         jpeg(src, IMG / (stem + "-card-360.jpg"), 360)
@@ -76,4 +82,12 @@ for src in sorted(CAT.glob("*.jpg")):
 for name in ("logo-gold", "logo-gold-light"):
     png(IMG / (name + ".png"), IMG / (name + "-486.png"), 486)
 
-print("derivatives: %d written, %d already current" % (made, kept))
+# Copies whose original is gone (a re-import with fewer frames) go too, or they
+# would sit in assets/ referenced by nothing.
+removed = 0
+for folder, suffixes, ext in ((IMG, ("-600", "-card-360", "-thumb"), ".jpg"), (CAT, ("-216",), ".jpg")):
+    for suf in suffixes:
+        for d in folder.glob("*" + suf + ext):
+            if not (folder / (d.name[: -len(suf + ext)] + ext)).exists():
+                d.unlink(); removed += 1
+print("derivatives: %d written, %d already current, %d orphans removed" % (made, kept, removed))
