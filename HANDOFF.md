@@ -489,7 +489,7 @@ raw background Bash. Use the Browser pane's `preview_start` with the `bgs-flow` 
    same way, each normalised to a 204x240 canvas so they rise and sit alike:
    Attars/Perfume Oils (`assets/cat/attars.png`, the Royal Amber and BGS
    bottles), Bakhoor (`bak.png`, the BGS BAKHOOR 4 tin), EDP Sprays (`edp.png`,
-   Pride of Arabia, cropped by its photo at the cap and the base) and Corporate
+   the whole Pride of Arabia bottle) and Corporate
    Gifting (`corporate.png`, a skyscraper photographed looking steeply up: its
    perspective was partly straightened, roof 36% of the base instead of 19%, and
    it was cut on a window line for a flat base). The owner rejected a version

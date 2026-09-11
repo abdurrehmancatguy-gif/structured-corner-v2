@@ -31,6 +31,5 @@ attars.png and edp.png arrived the same way, painted checkerboards in RGB
 images. The attar one's checkerboard is warped and as grey as the chrome, so it
 was keyed by texture: the checkerboard flips light and dark every few pixels,
 chrome is smooth, and the bottles are outlined in dark. The EDP bottle is
-cropped by its photo at the top of the cap and at the base, which reads as the
-cylinder's own flat ends. Both are normalised to 204x240 like the tin, so all
+the whole Pride of Arabia bottle, cap and base included. Both are normalised to 204x240 like the tin, so all
 the breakouts rise and stand alike. 256 colours.
