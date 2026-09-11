@@ -44,14 +44,14 @@ structured-corner-v2/
 ├── UNDERSTANDING.md        older notes on the brief
 ├── FRONTEND-PROMPT.md      older brief text
 ├── REBUILD-PROMPT.md       older brief text
-├── netlify.toml            publish = "flow"
-├── _redirects              root fallback: /*  /flow/:splat  200
+├── netlify.toml            rebuild check, then copies the served files to _site and publishes it
+├── _redirects              root fallback: refuses flow/'s sources, then /*  /flow/:splat  200!
 ├── .github/workflows/
-│   └── pages.yml           uploads flow/ as the GitHub Pages artifact
+│   └── pages.yml           rebuild check, then uploads _site as the GitHub Pages artifact
 ├── .claude/launch.json     dev-server config, port 4310
 ├── design/                 Claude Design canvas artboards (.dc.html) + reference photos
 │                           NOT part of the shipped site
-└── flow/                   ←←← THE SITE. This directory is what gets published.
+└── flow/                   ←←← THE SITE. Its HTML, favicon.ico, robots.txt and assets/ are published.
     ├── build.py            1041 lines - the generator. Run it to rebuild every page.
     ├── server.py           24 lines - local no-cache static server (harmless)
     ├── content/            ←←← THE DATA. Edit here, not in the HTML.
@@ -134,6 +134,11 @@ Then open `http://localhost:4310`.
 `build.py` stamps a `?v=` token onto `flow.css`, `shop.js` **and** `catalogue.js`. The token
 is an md5 of all three files concatenated. **Always edit the assets first, then rebuild** -
 rebuilding before the edit leaves the browser on the old module.
+
+**After importing photos**, run `python3 tools/make_derivatives.py` from `flow/` before
+`build.py`. It writes the sized copies the pages use (`-600`, `-card-360` and `-thumb` for
+product photos, 750 and 1320 px banners, 486 px logos, 216 px circles), rewrites a copy only
+when its original is newer, and removes copies whose original is gone.
 
 ---
 
@@ -296,28 +301,13 @@ not allowed to claim either.
 
 ## 6. Git state
 
-**Branch:** `main` at `c1fdbcc`, **8 commits ahead of `origin/main` - not yet pushed.**
-Working tree clean.
+Run `git log --oneline origin/main..main` for what is committed but not pushed. A list kept
+here goes stale with every commit. Nothing is pushed without the owner's go-ahead (standing
+rule 1).
 
-Unpushed, oldest first:
-
-```
-75c4872  Remove the local admin backend
-49b2fe2  Make the cart real instead of a mock-up
-4641413  Scent notes to the top, VAT only at checkout, shorter gallery
-727bdc5  Move the scent notes under the buy controls, on gold
-e6952e1  Restore the product story, drop the dashes, fit the page to one screen
-b50543b  Put the bag back on the right edge on mobile
-2467d03  Fix a Be Mine line that argued against itself
-c1fdbcc  Stop the product copy claiming how the scents perform
-```
-
-**Two of these fix live production faults.** Until they are pushed, the deployed site still
-has them:
-
-- `75c4872` - `flow/admin/admin.html` and its `server.py` were **publicly downloadable**
-  from the live GitHub Pages site (both returned HTTP 200).
-- `4641413` - checkout renders the literal text **"Includes VAT at 5%%"**.
+The eight commits this section used to list as unpushed are all live, including `75c4872`
+(the public `flow/admin/` removed) and `4641413` (the "5%%" checkout text); both hosts were
+checked on 2026-09-10.
 
 ### Other branches (stale, kept for reference)
 
@@ -332,23 +322,30 @@ user's instruction. Do not resurrect it. The whole `app/` React tree, `flow/admi
 
 ## 7. Deployment
 
-Both targets serve the **same commit**, from `flow/`.
+Both hosts deploy every push to `main` and publish the same list of files: the eleven pages,
+`404.html`, `favicon.ico`, `robots.txt` and `assets/`. The generator (`build.py`,
+`server.py`), `content/`, `tools/` and `edp_data.json` are not published.
+
+Before publishing, both rebuild `flow/` and stop if anything differs from what is committed,
+new files included (`git status --porcelain`), so a forgotten rebuild never ships. The build
+is byte-identical under Python 3.9, 3.12 and 3.13.
 
 ### Netlify
-`netlify.toml` sets `publish = "flow"` with no build command. `_redirects` at the repo root
-is a belt-and-braces fallback (`/* → /flow/:splat 200`) for the case where the publish
-directory gets overridden in the Netlify UI and the root gets served instead - the root has
-no `index.html`, so without it every path 404s.
+`netlify.toml` runs that check, copies the list into `_site` and publishes `_site`, with
+`PYTHON_VERSION = "3.12"`. `/assets/*` is cached for a year as immutable and HTML as
+no-cache, so every asset URL carries `?v=<content hash>` (`V()` and `PV()` in `build.py`;
+product photos share their original's version, passed to `shop.js` in `catalogue.js`).
+`_redirects` at the repo root only matters if the root is ever published by mistake: it
+refuses `flow/`'s sources, then rewrites everything else into `flow/` (forced, `200!`).
 
 ### GitHub Pages
-`.github/workflows/pages.yml` runs on push to `main` (and on manual dispatch). Pages'
-"deploy from a branch" option can only serve the repo root or `/docs`, and the site lives in
-`flow/` - so the workflow uploads `flow/` as the Pages artifact instead. No build runs in CI;
-`build.py` output is committed.
+`.github/workflows/pages.yml` runs the same check and uploads `_site` as the Pages artifact.
+Pages sends `max-age=600` on everything and ignores query strings when caching. Its terms
+rule out running a shop on it (§10), so it should become a browse-only mirror or be retired
+once the shop has one host.
 
-**Open item:** a custom domain `bgs-corner` was entered in the GitHub Pages settings and is
-invalid. It needs to be **Removed** in Settings → Pages → Custom domain. Unconfirmed whether
-this was done.
+The custom-domain item that used to be open here is resolved: Pages reported no custom
+domain on 2026-09-10.
 
 ---
 
@@ -404,6 +401,15 @@ this was done.
     clinically* - **zero hits**. The two matches for "premium" and "100%" were a gift-box
     option literally named **Premium box** and a CSS `width:100%`.
 
+- **2026-09-11, ready for 100k users a day.** A five-part audit with adversarial verification
+  (hosting, page weight, caching, robustness, orders) led to: images sent at the size they
+  are shown and every asset versioned (`6894307`); one bad stored value no longer breaking
+  the shop, and search that finds things (`06a2801`); only the served files published,
+  behind a stale-build check (`07be981`); then the deploy review's fixes (`8ec201b`). First
+  views went from 420 to 900 KB to 155 to 356 KB, uncompressed.
+- **2026-09-11, the EDITED photo set** replaced the photos of 24 products (`9d35e07`), with
+  duplicate exports dropped and the bakhoor tins held back (§10, item 9).
+
 ---
 
 ## 9. Traps already hit - do not repeat
@@ -445,6 +451,15 @@ raw background Bash. Use the Browser pane's `preview_start` with the `bgs-flow` 
 **Chat-pasted images are recoverable.** They live as base64 in
 `~/.claude/projects/<slug>/<session-id>.jsonl`. Used twice on this project.
 `flow/tools/recover_pasted_velvet.py` is the working example.
+
+- **zsh does not split a variable holding several paths.** `git add $LIST` passes one bogus
+  path and the whole add fails; list the paths or use a glob.
+- **macOS `unzip` fails on non-ASCII file names with a misleading "disk full?"** and then
+  waits at a prompt. Extract with Python's `zipfile` instead.
+- **Headless Chrome will not make a window narrower than about 500px.** Render phone widths
+  inside an iframe of a wrapper page, or the screenshot is a cropped wider layout.
+- **A generated copy must never be taken for an original.** `vibe-1-600.jpg` and
+  `banner-1-1320.jpg` both look like frame numbers; `make_derivatives.py` skips them now.
 
 ---
 
@@ -498,6 +513,22 @@ raw background Bash. Use the Browser pane's `preview_start` with the `bgs-flow` 
    is not a cut-out would show its photograph's background around the product.
    The rest of the reference (meta caps line, italic serif name, heart, rating
    chip) belongs to product cards and is not built.
+
+9. **Which bakhoor tin is which product.** The EDITED set (2026-09-11) has 19 photos of five
+   tins labelled BGS BAKHOOR 1 to 5: in its file names, "Bukhoor white" is tin 1 (white),
+   "Bakhoor 2" tin 2 (white), "Bukhoor" tin 3 (blue), "Bakhoor 4" tin 4 (blue) and "Bakhoor
+   5" tin 5 (clear). "Bukhoor Blue" is a blue tin whose label cannot be read. The shop's five
+   bakhoor products (Shay, Compodi, Mattar, Falah, Philippine) have no photos, but nothing
+   says which tin is which, and a wrong tin is worse than none. Once the owner names them,
+   map the labels in `BAKHOOR_MAP` (`tools/import_website_set.py`) and rerun it.
+10. **Ciao and Gift box 2.** The set has four photos of a Ciao EDP, which is not a product,
+   and one of Amore, Vibe and Be Mine in a pink box, which could belong to more than one set.
+11. **Taking orders.** Checkout says "Order confirmed" but sends nothing anywhere. Until the
+   backend exists, orders could come in through Netlify Forms, a WhatsApp message or both.
+   That needs the owner's choice, form detection switched on in Netlify and a WhatsApp number.
+12. **Hosting for 100k users a day.** GitHub Pages' terms rule out a shop, and on Netlify's
+   credit-based plans that much traffic pauses the site, within hours on the free plan. One
+   host on a plan sized for it, with a custom domain, is needed; the owner chooses and pays.
 
 ---
 
