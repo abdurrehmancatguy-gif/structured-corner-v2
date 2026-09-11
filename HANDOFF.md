@@ -112,8 +112,11 @@ These came from the user directly and override defaults. Carry them into every s
 cd /Users/ajoomama/github/structured-corner-v2/flow && python3 build.py
 ```
 
-It prints `catalogue: 34 products` and `wrote 11 pages`. It must be run **from inside
-`flow/`** - it uses relative paths (`content/`, `assets/`).
+It prints `catalogue: 33 products` and `wrote 11 pages`. It must be run **from inside
+`flow/`** - it uses relative paths (`content/`, `assets/`). It exits with `build failed:` and
+a list when a page asks for a file that is not there, a photo's sized copy is missing or was
+made from an older photo, or an `.html` in `flow/` is not one it writes (both deploys stop on
+that, since every `.html` there is published).
 
 ### Run it locally
 
@@ -131,14 +134,20 @@ Then open `http://localhost:4310`.
 
 ### Cache-busting
 
-`build.py` stamps a `?v=` token onto `flow.css`, `shop.js` **and** `catalogue.js`. The token
-is an md5 of all three files concatenated. **Always edit the assets first, then rebuild** -
-rebuilding before the edit leaves the browser on the old module.
+Every asset URL carries `?v=` with the md5 of that one file (`V()` in `build.py`): the pages
+load `flow.min.css`, which `build.py` writes from `flow.css`, plus `shop.js` and
+`catalogue.js`, each with its own token. Product photos and all their sized copies share the
+version of the 1000 px original (`PV()`), salted with `DERIVATIVES`, which has to be bumped
+when the copies change without the original changing (a new quality or size).
+**Always edit the assets first, then rebuild** - rebuilding before the edit leaves the
+browser on the old module.
 
 **After importing photos**, run `python3 tools/make_derivatives.py` from `flow/` before
 `build.py`. It writes the sized copies the pages use (`-600`, `-card-360` and `-thumb` for
-product photos, 750 and 1320 px banners, 486 px logos, 216 px circles), rewrites a copy only
-when its original is newer, and removes copies whose original is gone.
+product photos, 750 and 1320 px banners, 486 px logos, 216 px circles) and removes copies
+whose original is gone. It redoes a copy when its source's bytes, or the size and quality,
+differ from what `tools/derivatives.json` records; commit that file with the images, because
+`build.py` checks the copies against it.
 
 ---
 
@@ -407,8 +416,14 @@ domain on 2026-09-10.
   the shop, and search that finds things (`06a2801`); only the served files published,
   behind a stale-build check (`07be981`); then the deploy review's fixes (`8ec201b`). First
   views went from 420 to 900 KB to 155 to 356 KB, uncompressed.
-- **2026-09-11, the EDITED photo set** replaced the photos of 24 products (`9d35e07`), with
-  duplicate exports dropped and the bakhoor tins held back until the next entry.
+- **2026-09-11, the EDITED photo set** (`9d35e07`). Its commit message overstates it: most
+  of the set is the 2026-09-08 photography again, byte for byte. What changed is nine
+  products and seven frames: a 6 ml + 3 ml pair added as frame 5 on six attars (Dark Leather,
+  Royal Amber, Majestic Musk, Magnolia Veil, Parisian Muse, Velvet Spell), a fruit scene on
+  Imperial Crown, and Desert Breeze and Majlis OUD reordered with one box shot each left out
+  as a second export. Discovery Trio, His & Hers and the Majlis smoke shot are the 09-08
+  files. The bakhoor tins were held back until the next entry. The importer now leaves
+  frames out only when they are listed by name in `DUPLICATES`; see §10 for the Majlis one.
 - **2026-09-11, bakhoor named after the tins.** On the owner's word the five bakhoor products
   became Bakhoor 1 to Bakhoor 5 (ids `bakhoor-1` to `bakhoor-5`), each with the photos of
   the tin carrying that number, closed tin on white first. The set had no closed shot of tin
@@ -470,8 +485,8 @@ raw background Bash. Use the Browser pane's `preview_start` with the `bgs-flow` 
 
 ## 10. Open decisions - waiting on the user
 
-1. **Push the 8 commits to `origin/main`?** Requires explicit consent. Two of them fix live
-   production faults (§6).
+1. **Pushing.** Every push to `origin/main` needs the owner's consent at the time; check
+   `git log --oneline origin/main..HEAD` for what is waiting.
 2. **"Shop by Occasion" and "Gift Sets" both point at `gift-box.html`** - in `nav.main`
    *and* in `nav.categories`. Two labels, one destination. Give Occasion its own page, point
    it somewhere real, or remove it.
@@ -485,7 +500,7 @@ raw background Bash. Use the Browser pane's `preview_start` with the `bgs-flow` 
    `his-and-hers-duo`, `majlis-ritual-set`, `oud-lover-s-flight`, `eid-royal-hamper`,
    `dubai-in-a-bottle` - every bakhoor and every gift set among them. Royal Amber's blank PDP
    story is this, not a bug.
-5. **Remove the invalid `bgs-corner` custom domain** in GitHub Pages settings.
+5. ~~Remove the invalid `bgs-corner` custom domain~~ - resolved, see §7.
 6. **Verify the operational claims are actually true.** The site states as fact: free
    delivery over AED 150, same-day before 2 PM, COD withheld over AED 300, "alcohol-free",
    "blended in Dubai". These are commitments, not puffery - but if any is not true yet it
@@ -532,6 +547,23 @@ raw background Bash. Use the Browser pane's `preview_start` with the `bgs-flow` 
 12. **Hosting for 100k users a day.** GitHub Pages' terms rule out a shop, and on Netlify's
    credit-based plans that much traffic pauses the site, within hours on the free plan. One
    host on a plan sized for it, with a custom domain, is needed; the owner chooses and pays.
+13. **Majlis OUD box art.** The set has two exports of the box shot: one with a plain box
+   base, one with "Dehn Al Oud / 12 ML" printed on it. The plain one is on the site; the
+   other is listed in `DUPLICATES` (`tools/import_website_set.py`). Which box is current?
+14. **Dark Leather has two pair shots**, frames 1 and 5, and the 6 ml label is silver in one
+   and black in the other. Keep both?
+15. **The bag charges the default size.** Picking "3 ml, AED 45" or "12 ml, AED 1,295" on an
+   attar changes the price shown, but the bag stores only the product and prices it at the
+   default size (AED 75 and AED 650). The bag needs to carry the size; until then the chips
+   could stop changing the price. Not changed yet because it reshapes the bag.
+16. **"Add box to bag" on the gift box** goes to the bag without adding the box. The bag has
+   no way to hold a box with its fee and discount yet; until it does, the button could say
+   what it really does. Same reason as 15.
+17. **Checkout shows fixed example totals**, whatever is in the bag. It is the locked area.
+18. **Collection page on a phone jumps once** as the grid fills after first paint (layout
+   shift 0.6, the same before 2026-09-11). Reserving the grid's height fixes it.
+19. **`site_url` is not set** in `content/settings.json`, so `og:image` and canonical URLs are
+   relative and link previews may show no picture. Set it once the shop's domain is chosen.
 
 ---
 

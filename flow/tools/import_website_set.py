@@ -89,6 +89,18 @@ SKIP = {
     "Imperial Crown 3.301 (1) (1).png",   # the cocktail glass, removed 2026-09-11
 }
 
+# Frames left out because another file already shows them, by file name,
+# chosen by eye. same_picture() below only points out candidates: it scores the
+# two Majlis box shots as alike although one has "Dehn Al Oud 12 ML" printed on
+# the box base, and no pixel threshold separates that pair from a real
+# duplicate.
+DUPLICATES = {
+    "Dessert Breeze 2 301 (1) (2).png",   # the same box shot exported twice
+    "Majlis Oud 2.301 (1) (2).png",       # box base printed "Dehn Al Oud 12 ML";
+                                          # the plain one is kept until the owner
+                                          # says which box art is current
+}
+
 # Two exports of one frame look alike to within this mean grey-level
 # difference (out of 255) on a 32x32 thumbnail. Measured on the EDITED set:
 # its duplicate box shots differ by under 2, distinct frames by over 20.
@@ -155,6 +167,9 @@ def main():
         if fn in SKIP:
             print("  skipped %s (taken off the site)" % fn)
             continue
+        if fn in DUPLICATES:
+            print("  skipped %s (listed in DUPLICATES)" % fn)
+            continue
         label, idx = label_and_index(fn)
         pid = by_name.get(norm(label)) or ALIAS.get(norm(label)) or BAKHOOR_MAP.get(label)
         if pid and pid in products:
@@ -174,17 +189,15 @@ def main():
     for k in absent:
         print("  %-22s %s" % (k, products[k]["category"]))
 
-    # Some frames were exported twice under different names; showing the same
-    # picture twice in a gallery helps nobody, so later copies are dropped.
+    # Some frames were exported twice under different names. Look-alikes are
+    # reported, not dropped: check them by eye and list real ones in DUPLICATES.
     for pid in sorted(groups):
-        kept = []
+        seen = []
         for idx, fn in sorted(groups[pid]):
-            dup = next((k for _, k in kept if same_picture(src / fn, src / k)), None)
-            if dup:
-                print("  %-24s dropped %s (same picture as %s)" % (pid, fn, dup))
-            else:
-                kept.append((idx, fn))
-        groups[pid] = kept
+            twin = next((k for k in seen if same_picture(src / fn, src / k)), None)
+            if twin:
+                print("  %-24s CHECK %s looks like %s" % (pid, fn, twin))
+            seen.append(fn)
 
     if dry:
         print()
@@ -211,10 +224,17 @@ def main():
                 stale.unlink()
                 removed += 1
         order = FRAME_ORDER.get(pid)
+        note = ""
         if order and sorted(order) == list(range(1, len(names) + 1)):
             names = [names[i - 1] for i in order]
+            note = "  reordered"
+        elif order:
+            # a frame was added, skipped or listed as a duplicate since the
+            # order was read off the contact sheets, so it no longer fits
+            note = "  WARNING: FRAME_ORDER has %d frames, the set %d; delivered order kept" % (
+                len(order), len(names))
         products[pid]["images"] = names
-        print("  %-24s %d%s" % (pid, len(names), "  reordered" if order else ""))
+        print("  %-24s %d%s" % (pid, len(names), note))
 
     CONTENT.write_text(json.dumps(products, indent=2, ensure_ascii=False) + "\n")
     print("\nwrote %d files, removed %d orphaned, updated products.json" % (written, removed))

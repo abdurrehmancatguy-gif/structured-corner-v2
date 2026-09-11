@@ -3,7 +3,7 @@
 #   B) BGS Corner Sheet.xlsx          (product lineup, weights, August selling prices)
 #   C) BGS_Perfume_Ingredients.xlsx   (EDP note profiles + barcodes)
 # No images. No data from any other source. Unsourced fields render as placeholders.
-import pathlib, hashlib, json, html, re, struct
+import pathlib, hashlib, json, html, re, struct, sys
 
 def esc(t):
     """Escape admin-authored free text so a typed & or < cannot break markup."""
@@ -29,7 +29,12 @@ DERIVATIVES = b"d1"
 def PV(name, suffix=""):
     h = _md5("assets/img/" + name, DERIVATIVES)
     return "assets/img/" + (name.replace(".jpg", suffix + ".jpg") if suffix else name) + ("?v=" + h if h else "")
-CARD_SIZES = "(max-width:560px) 50vw, (max-width:700px) 33vw, (max-width:900px) 25vw, 240px"
+# Card photos. On a phone two columns with a 16px wrap and a 13px gap make a
+# 165px card, which 50vw would call 187px and so send the 520 file where the
+# 360 is enough. The "Never discounted" row is one card per line up to 900px
+# and a third of the wrap above it, so it has its own.
+CARD_SIZES = "(max-width:560px) calc(50vw - 23px), (max-width:700px) 33vw, (max-width:900px) 25vw, 240px"
+FEAT_SIZES = "(max-width:900px) calc(100vw - 34px), 410px"
 GALLERY_SIZES = "(max-width:700px) 245px, (max-width:900px) 330px, 470px"
 def png_size(path):
     """Width and height from a PNG header, so the <img> reserves its box before
@@ -277,7 +282,7 @@ SETS = [("Discovery Trio","3 &times; 3 ml","129"),("His &amp; Hers Duo","2 &time
         ("Eid Royal Hamper","2 &times; 6 ml + EDP + bakhoor","299"),("Dubai in a Bottle","3 ml + mini bakhoor","79")]
 
 def card(name, meta, price, sizes=None, halo=False, notes=None, barcode=None, low=None,
-         pid=None, images=None):
+         pid=None, images=None, img_sizes=CARD_SIZES):
     key = pid or slug(name)
     b = '<span class="badge res">Reserve</span>' if halo else ''
     if low: b = '<span class="badge low">%s left</span>' % low
@@ -300,9 +305,9 @@ def card(name, meta, price, sizes=None, halo=False, notes=None, barcode=None, lo
   <div class="b"><span class="meta">%s</span><span class="nm">%s</span>%s
   %s<div class="pr"><b>AED %s</b></div>%s
   <button type="button" class="btn sm solid" data-add="%s" style="margin-top:4px">Add to bag</button></div></a>""" % (
-    key, ph_img(images, name), b, heart, meta, esc(name), nt, sz, price, hl, key)
+    key, ph_img(images, name, img_sizes), b, heart, meta, esc(name), nt, sz, price, hl, key)
 
-def ph_img(images, alt):
+def ph_img(images, alt, img_sizes=CARD_SIZES):
     """A real photograph if the product has one, the placeholder if not.
 
        Two frames are emitted when the product has them: the close-up, and the
@@ -316,14 +321,14 @@ def ph_img(images, alt):
         return PV(n, "-card"), "%s 360w, %s 520w" % (PV(n, "-card-360"), PV(n, "-card"))
     s, ss = srcs(images[0])
     out = ('<img class="ph-a" src="%s" srcset="%s" sizes="%s" alt="%s" loading="lazy" '
-           'decoding="async" width="520" height="520">' % (s, ss, CARD_SIZES, a))
+           'decoding="async" width="520" height="520">' % (s, ss, img_sizes, a))
     if len(images) > 1:
         # The hover-only second photo waits for a pointer or focus (shop.js). At
         # opacity 0 with a src it downloaded with the first on every card.
         s, ss = srcs(images[1])
         out += ('<img class="ph-b" data-src="%s" data-srcset="%s" sizes="%s" alt="" '
                 'aria-hidden="true" decoding="async" width="520" height="520">'
-                % (s, ss, CARD_SIZES))
+                % (s, ss, img_sizes))
     return out
 
 def money(n):
@@ -347,7 +352,7 @@ def _meta(pr):
 def _cards(cat, n=None):
     return _cards_from(published(cat)[:n])
 
-def _cards_from(rows):
+def _cards_from(rows, img_sizes=CARD_SIZES):
     out = []
     for pr in rows:
         sizes = ["%s &middot; AED %s" % (z["label"], money(z["price"])) for z in pr.get("sizes", [])] or None
@@ -356,7 +361,7 @@ def _cards_from(rows):
         if pr.get("top") or pr.get("heart"):
             notes = " &middot; ".join(x for x in (pr.get("top"), pr.get("heart")) if x)
         out.append(card(pr["name"], _meta(pr), money(pr["price"]), sizes=sizes, pid=pr["id"],
-                        images=pr.get("images"),
+                        images=pr.get("images"), img_sizes=img_sizes,
                         halo=pr.get("never_discount", False), notes=notes,
                         barcode=pr.get("barcode") or None,
                         low=(stock if isinstance(stock, int) and stock <= 5 else None)))
@@ -368,7 +373,7 @@ def halo_cards(n=None):
     """The pieces that sit outside every discount. This used to be the Reserve
        category; now that Reserve is folded into attars it selects on
        never_discount, which is what made them Reserve in the first place."""
-    return _cards_from([r for r in published() if r.get("never_discount")][:n])
+    return _cards_from([r for r in published() if r.get("never_discount")][:n], FEAT_SIZES)
 def bakhoor_cards(n=None): return _cards("bakhoor", n)
 def edp_cards(n=None):     return _cards("edp", n)
 def set_cards(n=None):     return _cards("gift-sets", n)
@@ -675,7 +680,7 @@ product = """
           <div><span>Batch number</span><span>%(bat)s</span></div>
           <div><span>Availability</span><span>%(av)s</span></div>
         </div>
-        <div class="kv" style="margin-top:16px">
+        <div class="kv facts" style="margin-top:16px">
           <div><span>%(truck)s Delivery</span><span>Free over AED 150 &middot; same-day before 2 PM</span></div>
           <div><span>%(cash)s Payment</span><span>Card &middot; Apple Pay &middot; Tabby &middot; Tamara &middot; COD</span></div>
         </div>
@@ -1181,14 +1186,17 @@ print("catalogue:", emit_catalogue(), "products")
 def minify_css(css):
     """The stylesheet ships without comments and spare whitespace: comments are
        a third of flow.css and half of what it compresses to. Quoted strings are
-       set aside first so nothing inside them changes. Spaces are dropped only
-       around { } ; , > and never around ":", where ".a :hover" and ".a:hover"
-       are different selectors."""
+       set aside so nothing inside them changes. Comments and strings are found
+       in one left-to-right pass: done one after the other, the apostrophe in a
+       comment like "the card's badge" paired with the next quote and took rules
+       with it. Spaces are dropped only around { } ; , > and never around ":",
+       where ".a :hover" and ".a:hover" are different selectors."""
     keep = []
     def hold(m):
+        if m.group(0).startswith("/*"):
+            return ""
         keep.append(m.group(0)); return "\x00%d\x00" % (len(keep) - 1)
-    css = re.sub(r'"(?:[^"\\\n]|\\.)*"|\'(?:[^\'\\\n]|\\.)*\'', hold, css)
-    css = re.sub(r"/\*.*?\*/", "", css, flags=re.S)
+    css = re.sub(r'/\*.*?\*/|"(?:[^"\\\n]|\\.)*"|\'(?:[^\'\\\n]|\\.)*\'', hold, css, flags=re.S)
     css = re.sub(r"\s+", " ", css)
     css = re.sub(r"\s*([{};,>])\s*", r"\1", css).replace(";}", "}")
     return re.sub("\x00(\\d+)\x00", lambda m: keep[int(m.group(1))], css).strip() + "\n"
@@ -1233,3 +1241,39 @@ a{display:inline-block;margin-top:18px;background:#171310;color:#fff;padding:12p
 """)
 # Search results are thin, endless variations of one page.
 pathlib.Path("robots.txt").write_text("User-agent: *\nDisallow: /collection.html?q=\n")
+
+# ---------------------------------------------------------------- CHECKS
+# The deploys stop when this script fails, and nothing else would notice a page
+# asking for a file that is not there: V() and PV() simply leave the ?v= off,
+# and the rebuild check compares only this script's output with the commit.
+def _problems():
+    out = []
+    out += ["missing: " + p for (p, salt), h in sorted(_VH.items()) if not h]
+    try:
+        made = json.loads(pathlib.Path("tools/derivatives.json").read_text())
+    except (OSError, ValueError):
+        made = {}
+    def whole(p):
+        return hashlib.md5(pathlib.Path(p).read_bytes()).hexdigest()
+    for pr in published():
+        for n in pr.get("images") or []:
+            orig = "assets/img/" + n
+            for suf in ("", "-card", "-600", "-card-360", "-thumb"):
+                f = "assets/img/" + n.replace(".jpg", suf + ".jpg")
+                if not pathlib.Path(f).exists():
+                    out.append("missing: " + f)
+                elif suf in ("-600", "-card-360", "-thumb") and pathlib.Path(orig).exists() \
+                        and (made.get(f) or [None, None])[1] != whole(orig):
+                    out.append("made from an older photo: %s (run tools/make_derivatives.py)" % f)
+    for dst, (src, h, _) in sorted(made.items()):
+        if pathlib.Path(src).exists() and whole(src) != h:
+            out.append("made from an older photo: %s (run tools/make_derivatives.py)" % dst)
+    # every *.html here is published, so one this script no longer writes would
+    # stay live; delete it, or add it back to PAGES
+    written = {fn for fn, *_ in PAGES} | {"404.html"}
+    out += ["not written by build.py but would be published: " + f.name
+            for f in sorted(pathlib.Path(".").glob("*.html")) if f.name not in written]
+    return sorted(set(out))
+PROBLEMS = _problems()
+if PROBLEMS:
+    sys.exit("build failed:\n  " + "\n  ".join(PROBLEMS))

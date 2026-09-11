@@ -16,7 +16,22 @@ function bgsProduct(id) {
    missing element) is logged and the rest still work. As one plain script, the
    first throw stopped every feature after it, the bag included. */
 function bgsRun(f) { try { f(); } catch (e) { if (window.console) console.error(e); } }
-var BGS_CARD_SIZES = "(max-width:560px) 50vw, (max-width:700px) 33vw, (max-width:900px) 25vw, 240px";
+/* Run fn once im has its picture (or has failed, or ms have passed), so a
+   carousel that jumps to a slide not yet downloaded fades onto the photo and
+   not onto an empty frame. */
+function bgsWhenLoaded(im, fn, ms) {
+  if (!im || im.complete) { fn(); return; }
+  var t, done = function () {
+    clearTimeout(t);
+    im.removeEventListener("load", done); im.removeEventListener("error", done);
+    fn();
+  };
+  t = setTimeout(done, ms || 2500);
+  im.addEventListener("load", done); im.addEventListener("error", done);
+}
+/* two columns with a 16px wrap and a 13px gap on a phone: 50vw would claim
+   187px of a 165px card and send the 520 file where the 360 is enough */
+var BGS_CARD_SIZES = "(max-width:560px) calc(50vw - 23px), (max-width:700px) 33vw, (max-width:900px) 25vw, 240px";
 bgsRun(function () {
   "use strict";
   var aed = function (n) {
@@ -168,9 +183,13 @@ bgsRun(function () {
 
   /* --- PDP renders whichever product the card named --- */
   var key = qs.get("p");
-  if (key && document.querySelector(".pdp")) {
-    var pr = bgsProduct(key);
+  if (document.querySelector(".pdp")) {
+    var pr = key ? bgsProduct(key) : null;
     if (pr) {
+      /* one template serves every product, so its canonical names the bare
+         page; point it at this product's own address */
+      var canon = document.querySelector('link[rel="canonical"]');
+      if (canon) canon.href = new URL("product.html?p=" + encodeURIComponent(key), canon.href).href;
       document.title = pr.name + ": " + pr.meta + " | BGS Corner";
       T(".buy h1", pr.name);
       var crumb = document.querySelector("section .eyebrow");
@@ -307,12 +326,23 @@ bgsRun(function () {
           '<p style="margin:8px 0 0">' + pr.ing + "</p>";
       }
     } else {
-      /* an id the catalogue does not have (retired, mistyped, or an Object
-         built-in): say so, instead of showing the template's placeholder
-         product with a button that cannot add it */
+      /* no id, or one the catalogue does not have (retired, mistyped, or an
+         Object built-in): say so, instead of showing the template's
+         placeholder product with a button that cannot add it. Everything
+         after the product section (the sticky bar, the tabs, the related
+         row) describes that placeholder too, so it goes with it. */
       var pdp = document.querySelector(".pdp");
-      if (pdp) pdp.innerHTML = '<div class="notfound"><h1>We couldn&rsquo;t find that product</h1>' +
+      pdp.innerHTML = '<div class="notfound"><h1>We couldn&rsquo;t find that product</h1>' +
         '<p><a class="btn solid" href="collection.html">See all products</a></p></div>';
+      var sec = pdp.closest("section"), next = sec && sec.nextElementSibling;
+      while (next) {
+        var gone = next;
+        next = next.nextElementSibling;
+        if (gone.tagName === "SECTION" || gone.classList.contains("stickybuy")) gone.remove();
+      }
+      document.body.classList.remove("has-sticky");
+      var nfc = document.querySelector("section .eyebrow");
+      if (nfc) nfc.textContent = "Home / Products";
       document.title = "Product not found | BGS Corner";
       var nr = document.createElement("meta"); nr.name = "robots"; nr.content = "noindex";
       document.head.appendChild(nr);
@@ -382,25 +412,32 @@ bgsRun(function () {
   var slides = root.querySelectorAll("[data-slide]");
   var dots = root.querySelectorAll("[data-dot]");
   var no = root.querySelector("[data-slideno]");
-  var i = 0, timer;
+  var i = 0, want = 0, timer;
 
   /* the photographs, one per slide, cross-fading with the copy */
   var shots = root.querySelectorAll(".heroimg .hs");
 
   function show(n) {
-    i = (n + slides.length) % slides.length;
-    slides.forEach(function (s, k) { s.classList.toggle("on", k === i); });
-    dots.forEach(function (d, k) { d.classList.toggle("on", k === i); });
-    var n = shots.length, near = document.readyState === "complete";
+    var t = i = want = (n + slides.length) % slides.length;
+    dots.forEach(function (d, k) { d.classList.toggle("on", k === t); });
+    if (no) no.textContent = t + 1;
+    var c = shots.length, near = document.readyState === "complete";
     shots.forEach(function (im, k) {
-      im.classList.toggle("on", k === i);
       /* hidden slides are display:none until "seen" (flow.css), so they do not
-         download with the first; the one showing, and after load its
-         neighbours, are let in so the fade lands on a decoded picture */
-      if (k === i || (near && (k === (i + 1) % n || k === (i - 1 + n) % n))) im.classList.add("seen");
-      if (k === (i + 1) % n) im.loading = "eager";
+         download with the first; the one showing, and once the page has
+         loaded its neighbours, are let in so the fade lands on a decoded
+         picture */
+      var next = near && (k === (t + 1) % c || k === (t - 1 + c) % c);
+      if (k === t || next) im.classList.add("seen");
+      if (next) im.loading = "eager";
     });
-    if (no) no.textContent = i + 1;
+    /* a dot can jump to a slide nobody has fetched: the copy and the photo
+       change together once it is in, unless a later click has moved on */
+    bgsWhenLoaded(shots[t], function () {
+      if (want !== t) return;
+      slides.forEach(function (s, k) { s.classList.toggle("on", k === t); });
+      shots.forEach(function (im, k) { im.classList.toggle("on", k === t); });
+    });
   }
   function go(step) { show(i + step); rest(); }
   function rest() {
@@ -566,7 +603,7 @@ bgsRun(function () {
   var slides = root.querySelectorAll("[data-gs]");
   var thumbs = root.querySelectorAll("[data-gt]");
   var num = root.querySelector("[data-gnum]");
-  var i = 0;
+  var i = 0, want = 0;
 
   /* slides after the first wait in data-src (see the PDP render above) */
   function arm(k) {
@@ -576,17 +613,26 @@ bgsRun(function () {
     im.srcset = im.getAttribute("data-srcset"); im.src = im.getAttribute("data-src");
     im.removeAttribute("data-src"); im.removeAttribute("data-srcset");
   }
-  addEventListener("load", function () { arm(i + 1); });
+  /* the neighbours both ways, since the prev arrow from the first frame wraps
+     to the last; not before the page has loaded */
+  addEventListener("load", function () { arm(i + 1); arm(i - 1); });
 
   function show(n) {
-    i = (n + slides.length) % slides.length;
-    slides.forEach(function (s, k) { s.classList.toggle("on", k === i); });
-    arm(i); arm(i + 1);
-    thumbs.forEach(function (t, k) {
-      t.classList.toggle("on", k === i);
-      t.setAttribute("aria-selected", k === i ? "true" : "false");
+    var t = i = want = (n + slides.length) % slides.length;
+    arm(t);
+    if (document.readyState === "complete") { arm(t + 1); arm(t - 1); }
+    thumbs.forEach(function (b, k) {
+      b.classList.toggle("on", k === t);
+      b.setAttribute("aria-selected", k === t ? "true" : "false");
     });
-    if (num) num.textContent = i + 1;
+    if (num) num.textContent = t + 1;
+    /* a thumbnail can jump to a frame not yet downloaded: keep the current
+       one up until it is in, unless a later click has moved on */
+    var im = slides[t] && slides[t].querySelector("img");
+    bgsWhenLoaded(im, function () {
+      if (want !== t) return;
+      slides.forEach(function (s, k) { s.classList.toggle("on", k === t); });
+    });
   }
 
   /* manual navigation: move, then reset the autoplay countdown so it doesn't
@@ -734,17 +780,29 @@ bgsRun(function () {
     history.replaceState(null, "", location.pathname + (q.toString() ? "?" + q : ""));
   }
   function inBand(pn, band) { var p = band.split("-"); return pn >= +p[0] && pn <= +p[1]; }
+  var SKIP = ["a", "an", "and", "for", "in", "of", "the", "to", "with"];
   function match(pr, st) {
     if (st.cat.length && st.cat.indexOf(pr.cat) < 0) return false;
     if (st.gender.length && (!pr.gender || st.gender.indexOf(pr.gender) < 0)) return false;
     if (st.price.length && !st.price.some(function (b) { return inBand(pr.pn, b); })) return false;
     if (st.ready && !(pr.stock > 0)) return false;
     if (st.q) {
-      /* every word must appear in the name, category or notes; a plural
-         also matches its singular, so "ouds" finds the ouds */
-      var hay = [pr.name, pr.crumb, pr.meta, pr.top, pr.heart, pr.base].join(" ").toLowerCase();
-      var has = function (w) { return hay.indexOf(w) > -1 || (w.length > 3 && /s$/.test(w) && hay.indexOf(w.slice(0, -1)) > -1); };
-      if (!st.q.toLowerCase().split(/\s+/).every(has)) return false;
+      /* every word must start a word in the name, category or notes, so
+         "her" finds Her and Hers but not leatHER; a plural also matches its
+         singular ("ouds", "lilies"), and "for", "the" and the like are not
+         required, so "for her" works */
+      var words = [pr.name, pr.crumb, pr.meta, pr.top, pr.heart, pr.base].join(" ")
+        .toLowerCase().split(/[^a-z0-9؀-ۿ]+/);
+      var starts = function (w) { return words.some(function (x) { return x.indexOf(w) === 0; }); };
+      var has = function (w) {
+        return starts(w) || (w.length > 3 && (
+          (/ies$/.test(w) && starts(w.slice(0, -3) + "y")) ||
+          (/es$/.test(w) && starts(w.slice(0, -2))) ||
+          (/s$/.test(w) && starts(w.slice(0, -1)))));
+      };
+      var ask = st.q.toLowerCase().split(/[^a-z0-9؀-ۿ]+/).filter(Boolean);
+      var need = ask.filter(function (w) { return SKIP.indexOf(w) < 0; });
+      if (!(need.length ? need : ask).every(has)) return false;
     }
     return true;
   }
@@ -797,7 +855,11 @@ bgsRun(function () {
   }
   function render() {
     var st = params();
-    document.querySelectorAll('form.search input[name="q"]').forEach(function (i) { if (!i.value) i.value = st.q; });
+    /* the boxes mirror the search in force, cleared when it is removed; the
+       one being typed in is left alone */
+    document.querySelectorAll('form.search input[name="q"]').forEach(function (i) {
+      if (document.activeElement !== i) i.value = st.q || "";
+    });
     var keys = Object.keys(CAT).filter(function (k) { return match(CAT[k], st); });
     if (st.sort === "price-asc")  keys.sort(function (a, b) { return CAT[a].pn - CAT[b].pn; });
     if (st.sort === "price-desc") keys.sort(function (a, b) { return CAT[b].pn - CAT[a].pn; });
@@ -1067,10 +1129,13 @@ bgsRun(function () {
 
     /* the picker cards are product links; adding must not navigate */
     var card = e.target.closest("[data-slots] ~ * .p, .two .grid.g4 .p");
-    if (card && card.getAttribute("href")) {
+    /* the card's heart and size chips have their own handlers */
+    if (card && card.getAttribute("href") && !e.target.closest("[data-wish], [data-size]")) {
       var key = new URLSearchParams(card.getAttribute("href").split("?")[1] || "").get("p");
       if (!bgsProduct(key)) return;
-      e.preventDefault(); e.stopPropagation();
+      /* Immediate: the bag's own click listener is on document too, and a
+         card's Add to bag would otherwise fill a slot and add to the bag */
+      e.preventDefault(); e.stopImmediatePropagation();
       if (picked.length >= size) {
         var cta = document.querySelector("[data-boxcta]");
         cta.textContent = "Box is full, remove one first";
@@ -1458,9 +1523,10 @@ bgsRun(function () {
 --------------------------------------------------------------------------- */
 bgsRun(function () {
   "use strict";
-  var touch = window.matchMedia && matchMedia("(hover:none)").matches;
+  /* asked on every hover, not once: a tablet can get a mouse after load */
+  var touch = window.matchMedia ? matchMedia("(hover:none)") : null;
   function arm(e) {
-    if (touch) return;
+    if (touch && touch.matches) return;
     var c = e.target.closest && e.target.closest(".p");
     var b = c && c.querySelector(".ph-b[data-src]");
     if (!b) return;

@@ -10,15 +10,20 @@ never sent a desktop file:
   <id>-<n>-thumb.jpg      gallery thumbnails and bag lines (51 to 108 px)
 Banners get a 750 px phone copy and a 1320 px desktop copy, category photos a
 216 px square (twice the largest circle), and the logos a 486 px copy (three
-times the phone logo, over twice the desktop one). A derivative is rewritten
-only when its source is newer, so reruns are cheap and importers need no change.
-If you change QUALITY or a size, bump DERIVATIVES in build.py as well: product
-photo URLs are versioned by their original, so rewritten copies need a new salt.
-If you change QUALITY or a size, bump DERIVATIVES in build.py as well: product
-photo URLs are versioned by their original, so rewritten copies need a new salt.
+times the phone logo, over twice the desktop one).
+
+A copy is rewritten only when the bytes of its source, or the size and quality
+it is made at, differ from the ones recorded in tools/derivatives.json, so
+reruns are cheap and importers need no change. Not by date: a photo put in
+place by Finder, cp -p or unzip keeps an old modification time and its copies
+would never be redone. build.py reads the same record and fails when a copy is
+missing or was made from an older photo, so commit it with the images.
+
 If you change QUALITY or a size, bump DERIVATIVES in build.py as well: product
 photo URLs are versioned by their original, so rewritten copies need a new salt.
 """
+import hashlib
+import json
 import pathlib
 import re
 from PIL import Image
@@ -31,16 +36,30 @@ QUALITY = 78
 # Banner copies ("banner-1-1320.jpg") look like product frames the same way, so
 # everything named banner- is handled by the banner branch alone.
 COPIES = ("-600.jpg", "-card-360.jpg", "-thumb.jpg", "-card.jpg")
+MANIFEST = FLOW / "tools" / "derivatives.json"
 made = kept = 0
+try:
+    before = json.loads(MANIFEST.read_text())
+except (OSError, ValueError):
+    before = {}
+record, sums = {}, {}
 
 
-def stale(src, dst):
-    return not dst.exists() or dst.stat().st_mtime < src.stat().st_mtime
+def rel(path):
+    return path.relative_to(FLOW).as_posix()
+
+
+def stale(src, dst, recipe):
+    if src not in sums:
+        sums[src] = hashlib.md5(src.read_bytes()).hexdigest()
+    entry = [rel(src), sums[src], recipe]
+    record[rel(dst)] = entry
+    return not dst.exists() or before.get(rel(dst)) != entry
 
 
 def jpeg(src, dst, width=None, square=None):
     global made, kept
-    if not stale(src, dst):
+    if not stale(src, dst, "jpeg q%d w%s s%s" % (QUALITY, width, square)):
         kept += 1
         return
     im = Image.open(src).convert("RGB")
@@ -56,7 +75,7 @@ def jpeg(src, dst, width=None, square=None):
 
 def png(src, dst, width):
     global made, kept
-    if not stale(src, dst):
+    if not stale(src, dst, "png w%d" % width):
         kept += 1
         return
     im = Image.open(src).convert("RGBA")
@@ -90,4 +109,5 @@ for folder, suffixes, ext in ((IMG, ("-600", "-card-360", "-thumb"), ".jpg"), (C
         for d in folder.glob("*" + suf + ext):
             if not (folder / (d.name[: -len(suf + ext)] + ext)).exists():
                 d.unlink(); removed += 1
+MANIFEST.write_text(json.dumps(record, indent=1, sort_keys=True) + "\n")
 print("derivatives: %d written, %d already current, %d orphans removed" % (made, kept, removed))
