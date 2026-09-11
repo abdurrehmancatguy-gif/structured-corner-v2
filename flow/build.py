@@ -270,8 +270,6 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
 ATTARS = ["Imperial Crown","Dark Leather","Royal Amber","Golden Bloom","Majestic Musk",
           "Musk Bloom","Belle Aura","Magnolia Veil","Parisian Muse","Velvet Spell","Desert Breeze","Seasonal slot"]
 OUD = [("Majlis OUD","6 ml","650"),("Majlis OUD","12 ml","1,295"),("Platinum Musk OUD","6 ml","399")]
-BAKHOOR = [("Shay","50 g","50"),("Compodi","50 g","50"),("Mattar","25 g","35"),
-           ("Falah","40 g","50"),("Philippine","20 g","35")]
 # EDP names: brief §3. Notes + barcode: BGS_Perfume_Ingredients.xlsx (only "Be Mine" is named there)
 EDP = json.loads(pathlib.Path('edp_data.json').read_text())
 SETS = [("Discovery Trio","3 &times; 3 ml","129"),("His &amp; Hers Duo","2 &times; 6 ml","149"),

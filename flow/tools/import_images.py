@@ -15,12 +15,9 @@ Sources are never modified; everything is written into assets/img/.
 
 WHY A MAPPING TABLE
 -------------------
-Most image sets are named after the product and match on their own. The five
-bakhoor sets are named "Bakhoor 1".."Bakhoor 5" after the tin label, not after
-the product names in the sheet (Shay, Compodi, Mattar, Falah, Philippine), so
-they cannot be matched automatically. Fill BAKHOOR_MAP in when the numbers are
-confirmed; until then those products keep their placeholders rather than
-risking the wrong tin on the wrong product.
+Most image sets are named after the product and match on their own, the five
+bakhoor sets included: they are named "Bakhoor 1".."Bakhoor 5" after the tin
+label, and so are the products. EXTRA_MAP covers the few that differ.
 """
 
 import json, pathlib, re, subprocess, sys, shutil, os
@@ -40,8 +37,6 @@ EXTRA_MAP = {
     "Solei Frais":  "soleil-frais",          # spelling differs from the sheet
     "Platinum Oud": "platinum-musk-oud",
 }
-# "Bakhoor 1".."Bakhoor 5" -> product id. Empty until the tins are identified.
-BAKHOOR_MAP = {}
 
 # Which shot is the bare product and which shows the box, per product, read off
 # contact sheets of every imported image. There is no pattern to inherit: the
@@ -201,7 +196,7 @@ def main():
     plan, skipped = {}, []
     for name, files in avail.items():
         pid = by_name.get(re.sub(r"[^a-z0-9]", "", name.lower())) \
-              or EXTRA_MAP.get(name) or BAKHOOR_MAP.get(name)
+              or EXTRA_MAP.get(name)
         if not pid or pid not in products:
             skipped.append(name)
             continue

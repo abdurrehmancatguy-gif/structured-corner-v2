@@ -408,7 +408,12 @@ domain on 2026-09-10.
   behind a stale-build check (`07be981`); then the deploy review's fixes (`8ec201b`). First
   views went from 420 to 900 KB to 155 to 356 KB, uncompressed.
 - **2026-09-11, the EDITED photo set** replaced the photos of 24 products (`9d35e07`), with
-  duplicate exports dropped and the bakhoor tins held back (§10, item 9).
+  duplicate exports dropped and the bakhoor tins held back until the next entry.
+- **2026-09-11, bakhoor named after the tins.** On the owner's word the five bakhoor products
+  became Bakhoor 1 to Bakhoor 5 (ids `bakhoor-1` to `bakhoor-5`), each with the photos of
+  the tin carrying that number, closed tin on white first. The set had no closed shot of tin
+  4; the owner sent it separately (a WhatsApp image). For a re-import, put it in the folder
+  as `Bakhoor 4.1.jpeg`, or tin 4 loses its first frame.
 
 ---
 
@@ -476,7 +481,7 @@ raw background Bash. Use the Browser pane's `preview_start` with the `bgs-flow` 
 4. **25 of the 34 products have no story.** `imperial-crown`, `dark-leather`, `royal-amber`,
    `golden-bloom`, `majestic-musk`, `musk-bloom`, `belle-aura`, `magnolia-veil`,
    `parisian-muse`, `velvet-spell`, `desert-breeze`, `seasonal-slot`, `majlis-oud`,
-   `platinum-musk-oud`, `shay`, `compodi`, `mattar`, `falah`, `philippine`, `discovery-trio`,
+   `platinum-musk-oud`, `bakhoor-1` to `bakhoor-5`, `discovery-trio`,
    `his-and-hers-duo`, `majlis-ritual-set`, `oud-lover-s-flight`, `eid-royal-hamper`,
    `dubai-in-a-bottle` - every bakhoor and every gift set among them. Royal Amber's blank PDP
    story is this, not a bug.
@@ -514,13 +519,11 @@ raw background Bash. Use the Browser pane's `preview_start` with the `bgs-flow` 
    The rest of the reference (meta caps line, italic serif name, heart, rating
    chip) belongs to product cards and is not built.
 
-9. **Which bakhoor tin is which product.** The EDITED set (2026-09-11) has 19 photos of five
-   tins labelled BGS BAKHOOR 1 to 5: in its file names, "Bukhoor white" is tin 1 (white),
-   "Bakhoor 2" tin 2 (white), "Bukhoor" tin 3 (blue), "Bakhoor 4" tin 4 (blue) and "Bakhoor
-   5" tin 5 (clear). "Bukhoor Blue" is a blue tin whose label cannot be read. The shop's five
-   bakhoor products (Shay, Compodi, Mattar, Falah, Philippine) have no photos, but nothing
-   says which tin is which, and a wrong tin is worse than none. Once the owner names them,
-   map the labels in `BAKHOOR_MAP` (`tools/import_website_set.py`) and rerun it.
+9. **Bakhoor sizes and prices.** The bakhoor products are now Bakhoor 1 to 5, after the tin
+   labels (§8). Their sizes and prices were carried over in order from the names they
+   replaced: Shay (1) 50 g AED 50, Compodi (2) 50 g AED 50, Mattar (3) 25 g AED 35, Falah
+   (4) 40 g AED 50, Philippine (5) 20 g AED 35. Nothing in the photos gives a weight, and
+   the five tins look the same size, so the owner should confirm each one.
 10. **Ciao and Gift box 2.** The set has four photos of a Ciao EDP, which is not a product,
    and one of Amore, Vibe and Be Mine in a pink box, which could belong to more than one set.
 11. **Taking orders.** Checkout says "Order confirmed" but sends nothing anywhere. Until the

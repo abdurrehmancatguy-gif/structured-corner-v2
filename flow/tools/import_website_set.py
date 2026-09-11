@@ -8,9 +8,11 @@ the delivered folder (unzip first); the source is never modified.
 
 WHY THIS DOES NOT CROP
 ----------------------
-Every file in this set is already 1254x1254. The older importer resizes the
-long side to 2x the target and centre-crops, which on an already-square source
-zooms into the middle and clips the bottle. Straight resize, no crop.
+Nearly every file in this set is already 1254x1254. The older importer resizes
+the long side to 2x the target and centre-crops, which on an already-square
+source zooms into the middle and clips the bottle. Straight resize, no crop.
+The odd one that is not square (Bakhoor 2.3 is 1176x1337) is trimmed to a
+centred square first, so it is not squashed.
 
 FRAME ORDER
 -----------
@@ -19,16 +21,20 @@ delivered numbering does not always agree, so FRAME_ORDER corrects the four
 sets where it does not. Without it a re-import would silently put a lifestyle
 shot or a second box in the gallery's second slot.
 
+BAKHOOR TINS
+------------
+The five bakhoor products are named after their tins, "Bakhoor 1" to
+"Bakhoor 5", as printed on the labels. "Bakhoor 2", "Bakhoor 4" and "Bakhoor 5"
+files match those names on their own; the files spelt "Bukhoor" are mapped in
+BAKHOOR_MAP, read off the labels in the photos. The set has no closed shot of
+tin 4; the owner sent one separately, so add it to the folder as
+"Bakhoor 4.1.jpeg" before a re-import or tin 4 loses its first frame.
+
 WHAT IT REFUSES TO GUESS
 ------------------------
-The bakhoor tins are labelled by tin number ("BGS BAKHOOR 1", "BGS BAKHOOR 3")
-and come in a blue and a white finish - two SKUs' worth of photography for five
-named products (Shay, Compodi, Mattar, Falah, Philippine). Nothing in the
-filenames says which tin is which product, so BAKHOOR_MAP stays empty and those
-five keep what they have. Same for "Ciao", which is a product with photography
-and no entry in products.json, and "Gift box 2", which shows an Amore/Vibe/Be
-Mine trio that could belong to more than one set. Wrong tin on the wrong product
-is worse than no new tin.
+"Ciao", which is a product with photography and no entry in products.json, and
+"Gift box 2", which shows an Amore/Vibe/Be Mine trio that could belong to more
+than one set. They are listed as not mapped and left alone.
 """
 import json
 import os
@@ -54,8 +60,13 @@ ALIAS = {
     "hisandher": "his-and-hers-duo",
     "beminewhitebackgroundwithbox": "be-mine",
 }
-# Tin number -> product id. Empty on purpose; see the module docstring.
-BAKHOOR_MAP = {}
+# Filename label -> bakhoor product id, for the "Bukhoor" spellings. Checked
+# against the tin label in each photo.
+BAKHOOR_MAP = {
+    "Bukhoor white": "bakhoor-1",             # white tin, label BAKHOOR 1
+    "Bukhoor": "bakhoor-3",                   # blue tin, label BAKHOOR 3
+    "Bukhoor Blue": "bakhoor-3",              # blue tin, label BAKHOOR 3
+}
 
 # Frame order, 1-based, for the sets where the delivered numbering does not put
 # the bare product first and the shot with the box second. Read off contact
@@ -116,6 +127,10 @@ def resize(src, dst, size):
         im = flat
     else:
         im = im.convert("RGB")
+    w, h = im.size
+    if w != h:
+        s = min(w, h)
+        im = im.crop(((w - s) // 2, (h - s) // 2, (w - s) // 2 + s, (h - s) // 2 + s))
     im.resize((size, size), Image.LANCZOS).save(
         dst, "JPEG", quality=QUALITY, optimize=True, progressive=True)
 
