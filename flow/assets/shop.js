@@ -1,4 +1,12 @@
 /* BGS Corner - front-end only. No backend, no persistence beyond this tab. */
+
+/* Photo URLs carry the photo's version from catalogue.js (BGS_IMGV), because
+   Netlify caches /assets/ for a year: bgsImg("vibe-1.jpg", "-600"). */
+function bgsImg(name, suffix) {
+  var v = window.BGS_IMGV, h = v && Object.prototype.hasOwnProperty.call(v, name) ? "?v=" + v[name] : "";
+  return "assets/img/" + (suffix ? name.replace(/\.jpg$/, suffix + ".jpg") : name) + h;
+}
+var BGS_CARD_SIZES = "(max-width:560px) 50vw, (max-width:700px) 33vw, (max-width:900px) 25vw, 240px";
 (function () {
   "use strict";
   var aed = function (n) {
@@ -221,16 +229,22 @@
           var d = document.createElement("div");
           d.className = "galslide" + (i === 0 ? " on" : "");
           d.setAttribute("data-gs", i);
-          d.innerHTML = '<img src="assets/img/' + src + '" alt="' + esc(pr.name) +
-            '" loading="' + (i ? "lazy" : "eager") + '" decoding="async">';
+          /* only the first slide loads now: the others are stacked at opacity
+             0 and would all download with it, so they wait in data-src until
+             the gallery shows them or their neighbour */
+          var set = bgsImg(src, "-600") + " 600w, " + bgsImg(src) + " 1000w";
+          d.innerHTML = '<img ' + (i ? 'data-src="' + bgsImg(src) + '" data-srcset="' + set + '"'
+                                     : 'src="' + bgsImg(src) + '" srcset="' + set + '" fetchpriority="high"') +
+            ' sizes="(max-width:700px) 245px, (max-width:900px) 330px, 470px" alt="' + esc(pr.name) +
+            '" width="1000" height="1000" decoding="async">';
           main.insertBefore(d, nav[0] || null);
         });
         if (thumbs) {
           thumbs.innerHTML = imgs.map(function (src, i) {
             return '<button type="button" class="galthumb' + (i === 0 ? " on" : "") +
               '" data-gt="' + i + '" aria-label="Image ' + (i + 1) + '">' +
-              '<img src="assets/img/' + src.replace(".jpg", "-card.jpg") +
-              '" alt="" loading="lazy" decoding="async"></button>';
+              '<img src="' + bgsImg(src, "-thumb") +
+              '" alt="" width="160" height="160" loading="lazy" decoding="async"></button>';
           }).join("");
           thumbs.style.gridTemplateColumns = "repeat(" + Math.min(imgs.length, 6) + ",1fr)";
           thumbs.hidden = imgs.length < 2;
@@ -357,11 +371,14 @@
     i = (n + slides.length) % slides.length;
     slides.forEach(function (s, k) { s.classList.toggle("on", k === i); });
     dots.forEach(function (d, k) { d.classList.toggle("on", k === i); });
+    var n = shots.length, near = document.readyState === "complete";
     shots.forEach(function (im, k) {
       im.classList.toggle("on", k === i);
-      /* a lazy image two slides ahead has not been asked for yet; start it
-         now so the fade lands on a decoded picture rather than a black box */
-      if (k === (i + 1) % shots.length) im.loading = "eager";
+      /* hidden slides are display:none until "seen" (flow.css), so they do not
+         download with the first; the one showing, and after load its
+         neighbours, are let in so the fade lands on a decoded picture */
+      if (k === i || (near && (k === (i + 1) % n || k === (i - 1 + n) % n))) im.classList.add("seen");
+      if (k === (i + 1) % n) im.loading = "eager";
     });
     if (no) no.textContent = i + 1;
   }
@@ -390,6 +407,10 @@
   root.addEventListener("mouseenter", function () { clearInterval(timer); });
   root.addEventListener("mouseleave", rest);
   show(0); rest();
+  addEventListener("load", function () {
+    var n = shots.length;
+    if (n > 1) { shots[1].classList.add("seen"); shots[n - 1].classList.add("seen"); }
+  });
 })();
 
 
@@ -527,9 +548,20 @@
   var num = root.querySelector("[data-gnum]");
   var i = 0;
 
+  /* slides after the first wait in data-src (see the PDP render above) */
+  function arm(k) {
+    var s = slides[(k + slides.length) % slides.length];
+    var im = s && s.querySelector("img[data-src]");
+    if (!im) return;
+    im.srcset = im.getAttribute("data-srcset"); im.src = im.getAttribute("data-src");
+    im.removeAttribute("data-src"); im.removeAttribute("data-srcset");
+  }
+  addEventListener("load", function () { arm(i + 1); });
+
   function show(n) {
     i = (n + slides.length) % slides.length;
     slides.forEach(function (s, k) { s.classList.toggle("on", k === i); });
+    arm(i); arm(i + 1);
     thumbs.forEach(function (t, k) {
       t.classList.toggle("on", k === i);
       t.setAttribute("aria-selected", k === i ? "true" : "false");
@@ -698,12 +730,13 @@
   function photo(pr) {
     var imgs = pr.images || [];
     if (!imgs.length) return '<span class="none">Product image</span>';
-    var c = function (n) { return n.replace(".jpg", "-card.jpg"); };
-    var o = '<img class="ph-a" src="assets/img/' + c(imgs[0]) + '" alt="' + esc(pr.name) +
+    var set = function (n) { return bgsImg(n, "-card-360") + " 360w, " + bgsImg(n, "-card") + " 520w"; };
+    var o = '<img class="ph-a" src="' + bgsImg(imgs[0], "-card") + '" srcset="' + set(imgs[0]) +
+            '" sizes="' + BGS_CARD_SIZES + '" alt="' + esc(pr.name) +
             '" loading="lazy" decoding="async" width="520" height="520">';
-    if (imgs.length > 1)
-      o += '<img class="ph-b" src="assets/img/' + c(imgs[1]) +
-           '" alt="" aria-hidden="true" loading="lazy" decoding="async" width="520" height="520">';
+    if (imgs.length > 1)   /* hover-only: loads on the first pointer or focus */
+      o += '<img class="ph-b" data-src="' + bgsImg(imgs[1], "-card") + '" data-srcset="' + set(imgs[1]) +
+           '" sizes="' + BGS_CARD_SIZES + '" alt="" aria-hidden="true" decoding="async" width="520" height="520">';
     return o;
   }
   function cardHTML(key, pr) {
@@ -1090,8 +1123,8 @@
   function lineHtml(l, p) {
     var halo = !!p.halo;
     var img = (p.images && p.images[0])
-      ? '<img src="assets/img/' + p.images[0].replace(/\.jpg$/, "-card.jpg") +
-        '" alt="' + (p.name || "").replace(/"/g, "&quot;") + '">'
+      ? '<img src="' + bgsImg(p.images[0], "-thumb") +
+        '" alt="' + (p.name || "").replace(/"/g, "&quot;") + '" width="160" height="160">'
       : '<span class="none">Image</span>';
     return '<div class="line" data-line data-id="' + l.id + '" data-unit="' + p.pn +
       '" data-halo="' + (halo ? "1" : "0") + '" data-gift="0">' +
@@ -1375,4 +1408,25 @@
   equalise();
   addEventListener("resize", equalise);
   if (phone.addEventListener) phone.addEventListener("change", equalise);
+})();
+
+/* ---------- the hover photo on product cards -------------------------------
+   A card's second photo only shows on hover or keyboard focus, so it is not
+   requested until a pointer or focus first reaches the card. At opacity 0 with
+   a src, every card near the viewport downloaded both photos. Touch screens
+   never show it (flow.css), so a tap does not fetch it either.
+--------------------------------------------------------------------------- */
+(function () {
+  "use strict";
+  var touch = window.matchMedia && matchMedia("(hover:none)").matches;
+  function arm(e) {
+    if (touch) return;
+    var c = e.target.closest && e.target.closest(".p");
+    var b = c && c.querySelector(".ph-b[data-src]");
+    if (!b) return;
+    b.srcset = b.getAttribute("data-srcset"); b.src = b.getAttribute("data-src");
+    b.removeAttribute("data-src"); b.removeAttribute("data-srcset");
+  }
+  document.addEventListener("pointerover", arm, { passive: true });
+  document.addEventListener("focusin", arm);
 })();

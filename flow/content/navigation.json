@@ -82,19 +82,19 @@
       "label": "Gift Sets",
       "href": "gift-box.html",
       "tint": "floral",
-      "image": "assets/cat/floral.jpg"
+      "image": "assets/cat/floral-216.jpg"
     },
     {
       "label": "Discovery",
       "href": "collection.html?cat=gift-sets",
       "tint": "fresh",
-      "image": "assets/cat/fresh.jpg"
+      "image": "assets/cat/fresh-216.jpg"
     },
     {
       "label": "Shop by Occasion",
       "href": "gift-box.html",
       "tint": "amber",
-      "image": "assets/cat/amber.jpg"
+      "image": "assets/cat/amber-216.jpg"
     },
     {
       "label": "Corporate Gifting",

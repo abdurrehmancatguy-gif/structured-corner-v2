@@ -3,12 +3,42 @@
 #   B) BGS Corner Sheet.xlsx          (product lineup, weights, August selling prices)
 #   C) BGS_Perfume_Ingredients.xlsx   (EDP note profiles + barcodes)
 # No images. No data from any other source. Unsourced fields render as placeholders.
-import pathlib, hashlib, json, html
+import pathlib, hashlib, json, html, re, struct
 
 def esc(t):
     """Escape admin-authored free text so a typed & or < cannot break markup."""
     return html.escape(str(t), quote=True)
-CSSV = hashlib.md5(pathlib.Path("assets/flow.css").read_bytes()).hexdigest()[:8]
+# Every asset URL carries ?v=<content hash>. Netlify caches /assets/* for a year
+# as immutable, so a file replaced under its own name has to change URL or
+# returning visitors keep the old one.
+_VH = {}
+def _md5(path, salt=b""):
+    if (path, salt) not in _VH:
+        try:
+            _VH[(path, salt)] = hashlib.md5(pathlib.Path(path).read_bytes() + salt).hexdigest()[:8]
+        except OSError:
+            _VH[(path, salt)] = ""
+    return _VH[(path, salt)]
+def V(path):
+    h = _md5(path)
+    return path + ("?v=" + h if h else "")
+# Product photos: one version per photo, from its 1000 px original, shared by the
+# copies tools/make_derivatives.py makes of it (-600, -card, -card-360, -thumb).
+# Bump DERIVATIVES when those copies change without the original changing.
+DERIVATIVES = b"d1"
+def PV(name, suffix=""):
+    h = _md5("assets/img/" + name, DERIVATIVES)
+    return "assets/img/" + (name.replace(".jpg", suffix + ".jpg") if suffix else name) + ("?v=" + h if h else "")
+CARD_SIZES = "(max-width:560px) 50vw, (max-width:700px) 33vw, (max-width:900px) 25vw, 240px"
+GALLERY_SIZES = "(max-width:700px) 245px, (max-width:900px) 330px, 470px"
+def png_size(path):
+    """Width and height from a PNG header, so the <img> reserves its box before
+       the file arrives. Anything that is not a PNG gets no size."""
+    try:
+        b = pathlib.Path(path).read_bytes()[:24]
+    except OSError:
+        return (0, 0)
+    return struct.unpack(">II", b[16:24]) if b[:8] == b"\x89PNG\r\n\x1a\n" else (0, 0)
 
 def I(d, w=18, s=1.6):
     return '<svg width="%d" height="%d" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="%s" stroke-linecap="round">%s</svg>' % (w, w, s, d)
@@ -106,8 +136,10 @@ def header_logo():
     so there is nothing to set beside it."""
     logo = BRAND.get("logo")
     if logo:
+        w, h = png_size(logo)
+        size = ' width="%d" height="%d"' % (w, h) if w else ""
         return ('<a class="logo" href="index.html">'
-                '<img class="brandmark" src="%s" alt="%s"></a>' % (esc(logo), _brand_alt()))
+                '<img class="brandmark" src="%s" alt="%s"%s></a>' % (esc(V(logo)), _brand_alt(), size))
     return ('<a class="logo" href="index.html"><span class="logomark">%s</span>'
             '<span class="wm">BGS CORNER</span></a>' % slot("logo"))
 
@@ -130,8 +162,10 @@ def footer_logo():
     """Footer brand: the lifted logo on the dark ground, else wordmark."""
     logo = BRAND.get("logo_light") or BRAND.get("logo")
     if logo:
-        return ('<img class="foot-logo" src="%s" alt="%s">'
-                % (esc(logo), _brand_alt()))
+        w, h = png_size(logo)
+        size = ' width="%d" height="%d"' % (w, h) if w else ""
+        return ('<img class="foot-logo" src="%s" alt="%s"%s loading="lazy" decoding="async">'
+                % (esc(V(logo)), _brand_alt(), size))
     return ('<div class="wm" style="color:#fff;font-size:20px;margin-bottom:14px">'
             'BGS CORNER</div>')
 
@@ -164,7 +198,7 @@ def catstrip():
         # overflowed its cell at 375px - 78px of text in 76px.
         '<a class="c-{2}{4}" href="{0}"><span class="circle"><img src="{3}" alt="" '
         'width="108" height="108"></span><span>{1}</span></a>'.format(
-            esc(h), esc(n).replace("/", "/<wbr>"), k, esc(img), " pop" if cut else "")
+            esc(h), esc(n).replace("/", "/<wbr>"), k, esc(V(img)), " pop" if cut else "")
         for n, h, k, img, cut in CATS) + '</div></div></div>')
 
 def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
@@ -184,7 +218,7 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
 <meta property="og:image" content="%(ogimg)s">
 <meta name="twitter:card" content="summary_large_image">
 %(icons)s
-<link rel="stylesheet" href="assets/flow.css?v=%(cssv)s"></head><body class="%(page)s">
+%(preload)s<link rel="stylesheet" href="%(css)s"></head><body class="%(page)s">
 <div class="strip"><div class="wrap">
   <span>%(clock)s Order by 2:00 PM for delivery today in Dubai &middot; <b>3h 47m</b></span>
   <span class="r"><span>Free UAE delivery over AED 150</span><span>Cash on delivery</span><a href="track-order.html">Track order</a><a href="#" data-langtoggle>العربية</a></span>
@@ -212,9 +246,11 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
 </div><div class="bot"><span>&copy; 2026 BGS Corner General Trading LLC</span>
 <span>Cards &middot; Apple Pay &middot; Tabby &middot; Tamara &middot; Cash on delivery</span></div></div></footer>
 <div class="tabbar">%(tabs)s</div>
-<script src="assets/catalogue.js?v=%(cssv)s"></script>
-<script src="assets/shop.js?v=%(cssv)s"></script></body></html>
-""" % dict(title=title, body=body, cssv=CSSV, page=page,
+<script src="%(catjs)s"></script>
+<script src="%(shopjs)s"></script></body></html>
+""" % dict(title=title, body=body, page=page, css=V("assets/flow.min.css"),
+   catjs=V("assets/catalogue.js"), shopjs=V("assets/shop.js"),
+   preload=PRELOAD if page == "page-product" else "",
    desc=esc(desc), canon=esc(canon),
    ogimg=esc((SITE_URL + "/" + SEO.get("og_image", "") ) if SITE_URL else SEO.get("og_image", "")),
    catnav=catnav(), tabs="".join(tab_link(l, h, ic, tab) for l, h, ic in TABS),
@@ -262,7 +298,7 @@ def card(name, meta, price, sizes=None, halo=False, notes=None, barcode=None, lo
   <button type="button" class="btn sm solid" data-add="%s" style="margin-top:4px">Add to bag</button></div></a>""" % (
     key, ph_img(images, name), b, heart, meta, esc(name), nt, sz, price, hl, key)
 
-def ph_img(images, alt, card_size=True):
+def ph_img(images, alt):
     """A real photograph if the product has one, the placeholder if not.
 
        Two frames are emitted when the product has them: the close-up, and the
@@ -272,14 +308,18 @@ def ph_img(images, alt, card_size=True):
     if not images:
         return '<span class="none">Product image</span>'
     a = alt.replace('"', "&quot;")
-    def src(n):
-        return n.replace(".jpg", "-card.jpg") if card_size else n
-    out = ('<img class="ph-a" src="assets/img/%s" alt="%s" loading="lazy" '
-           'decoding="async" width="520" height="520">' % (src(images[0]), a))
+    def srcs(n):
+        return PV(n, "-card"), "%s 360w, %s 520w" % (PV(n, "-card-360"), PV(n, "-card"))
+    s, ss = srcs(images[0])
+    out = ('<img class="ph-a" src="%s" srcset="%s" sizes="%s" alt="%s" loading="lazy" '
+           'decoding="async" width="520" height="520">' % (s, ss, CARD_SIZES, a))
     if len(images) > 1:
-        out += ('<img class="ph-b" src="assets/img/%s" alt="" aria-hidden="true" '
-                'loading="lazy" decoding="async" width="520" height="520">'
-                % src(images[1]))
+        # The hover-only second photo waits for a pointer or focus (shop.js). At
+        # opacity 0 with a src it downloaded with the first on every card.
+        s, ss = srcs(images[1])
+        out += ('<img class="ph-b" data-src="%s" data-srcset="%s" sizes="%s" alt="" '
+                'aria-hidden="true" decoding="async" width="520" height="520">'
+                % (s, ss, CARD_SIZES))
     return out
 
 def money(n):
@@ -384,13 +424,20 @@ def hero_images():
         # that centred the product at 375px pushed it off at 614px. The phone
         # asset is cropped 1.85:1 around the product, which is the band's exact
         # ratio, so there is nothing left to aim - centre is centre everywhere.
+        # Phones pick 750 or 1110 px, desktops 1320 or 2400, by width and
+        # density. Slides other than the first are display:none until shop.js
+        # marks them "seen" (flow.css), since opacity 0 does not stop a download.
         phone = src.replace(".jpg", "-phone.jpg")
         out.append(
             '<picture>'
-            '<source media="(max-width:900px)" srcset="%s">'
-            '<img class="hs%s" src="%s" alt="%s" width="2400" height="790"%s>'
+            '<source media="(max-width:900px)" srcset="%s 750w, %s 1110w" '
+            'sizes="(max-width:560px) 100vw, 560px">'
+            '<img class="hs%s" src="%s" srcset="%s 1320w, %s 2400w" '
+            'sizes="(max-width:1320px) 100vw, 1320px" alt="%s" width="2400" height="790"%s>'
             '</picture>'
-            % (esc(phone), " on" if i == 0 else "", esc(src),
+            % (esc(V(phone.replace(".jpg", "-750.jpg"))), esc(V(phone)),
+               " on seen" if i == 0 else "", esc(V(src)),
+               esc(V(src.replace(".jpg", "-1320.jpg"))), esc(V(src)),
                esc(sl.get("image_alt", "")),
                ' fetchpriority="high" decoding="async"' if i == 0
                else ' loading="lazy" decoding="async"'))
@@ -1083,8 +1130,12 @@ def emit_catalogue():
         if isinstance(o, list):  return [_clean(v) for v in o]
         if isinstance(o, str):   return unent(o)
         return o
+    # versions for the photos shop.js builds URLs for at runtime (see PV)
+    imgv = {n: _md5("assets/img/" + n, DERIVATIVES)
+            for pr in published() for n in (pr.get("images") or [])}
     pathlib.Path("assets/catalogue.js").write_text(
-        "window.BGS_CATALOGUE = " + json.dumps(_clean(cat), ensure_ascii=False) + ";\n")
+        "window.BGS_CATALOGUE = " + json.dumps(_clean(cat), ensure_ascii=False) + ";\n"
+        "window.BGS_IMGV = " + json.dumps({k: v for k, v in imgv.items() if v}, separators=(",", ":")) + ";\n")
     return len(cat)
 
 
@@ -1100,12 +1151,36 @@ PAGES = [("index.html","Attars, Bakhoor &amp; EDP Sprays: Blended in Dubai",home
          ("quiz.html","Test Your Scent: Five Questions, One Minute",quiz,"","Home"),
          ("corporate.html","Corporate Gifting: Co-Branded Oud and Bakhoor",corporate,"Corporate Gifting","Home")]
 print("catalogue:", emit_catalogue(), "products")
-# The ?v= token stamps flow.css, shop.js AND catalogue.js, so it must hash all
-# three (catalogue.js is written by emit_catalogue above). Hashing only flow.css
-# served stale JS after any content or script edit.
-CSSV = hashlib.md5(b"".join(
-    pathlib.Path("assets/" + f).read_bytes() for f in ("flow.css", "shop.js", "catalogue.js")
-)).hexdigest()[:8]
+def minify_css(css):
+    """The stylesheet ships without comments and spare whitespace: comments are
+       a third of flow.css and half of what it compresses to. Quoted strings are
+       set aside first so nothing inside them changes. Spaces are dropped only
+       around { } ; , > and never around ":", where ".a :hover" and ".a:hover"
+       are different selectors."""
+    keep = []
+    def hold(m):
+        keep.append(m.group(0)); return "\x00%d\x00" % (len(keep) - 1)
+    css = re.sub(r'"(?:[^"\\\n]|\\.)*"|\'(?:[^\'\\\n]|\\.)*\'', hold, css)
+    css = re.sub(r"/\*.*?\*/", "", css, flags=re.S)
+    css = re.sub(r"\s+", " ", css)
+    css = re.sub(r"\s*([{};,>])\s*", r"\1", css).replace(";}", "}")
+    return re.sub("\x00(\\d+)\x00", lambda m: keep[int(m.group(1))], css).strip() + "\n"
+pathlib.Path("assets/flow.min.css").write_text(minify_css(pathlib.Path("assets/flow.css").read_text()))
+
+def product_preload():
+    """product.html is one template for every product, and its main photo only
+       exists once catalogue.js and shop.js have run, so the browser finds it
+       late. This head script finds it early: it reads ?p= and preloads that
+       product's photo with the same candidates and sizes the gallery uses."""
+    m = {pr["id"]: [PV(pr["images"][0], "-600"), PV(pr["images"][0])]
+         for pr in published() if pr.get("images")}
+    return ('<script>(function(){var m=%s,p=new URLSearchParams(location.search).get("p"),'
+            'e=p&&Object.prototype.hasOwnProperty.call(m,p)&&m[p];if(!e)return;'
+            'var l=document.createElement("link");l.rel="preload";l.as="image";'
+            'l.fetchPriority="high";l.href=e[1];l.imageSrcset=e[0]+" 600w, "+e[1]+" 1000w";'
+            'l.imageSizes=%s;document.head.appendChild(l)})()</script>\n'
+            % (json.dumps(m, separators=(",", ":")), json.dumps(GALLERY_SIZES)))
+PRELOAD = product_preload()
 for fn, t, b, on, tab in PAGES:
     canon = (SITE_URL + "/" + fn) if SITE_URL else fn
     pathlib.Path(fn).write_text(shell(t, b, on, tab,                                       page="page-" + fn.replace(".html", ""),

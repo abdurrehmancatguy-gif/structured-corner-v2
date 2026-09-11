@@ -1194,7 +1194,6 @@ footer .slot,footer .soon{color:#b9b0a4}
   .notestop b{grid-area:1/2}
   .notestop p{grid-area:1/3/2/4;margin:0}
 }
-}
 
 /* the delivery and payment rows read as facts, not as greyed-out fine print */
 .kv span:first-child{color:var(--ink);font-weight:500;display:flex;align-items:center;gap:8px}
@@ -1281,7 +1280,7 @@ footer .slot,footer .soon{color:#b9b0a4}
    same width, so main and strip stay aligned.
 
    contain stays underneath as the guard for a source that is not square. */
-.gal{max-width:min(52vh,470px);margin-inline:auto}
+.gal{width:100%;max-width:min(52vh,470px);margin-inline:auto}
 .galmain img,.galslide img{object-fit:contain}
 @media (max-width:900px){ .gal{max-width:min(46vh,330px)} }
 
@@ -1802,3 +1801,9 @@ footer .slot,footer .soon{color:#b9b0a4}
   .catnav a + a::before{content:"";position:absolute;left:0;top:calc(50% - 7px);
     width:1px;height:14px;background:rgba(232,200,126,.35);pointer-events:none}
 }
+
+/* ---- hero: hidden slides stay unloaded ------------------------------------
+   The slides stack at opacity 0, and opacity does not stop a download, so all
+   five banners loaded with the first. A slide is display:none until shop.js
+   marks it "seen": the one showing, and after load its neighbours. */
+.heroimg img.hs:not(.seen){display:none}
