@@ -228,7 +228,8 @@ class BulkTests(unittest.TestCase):
             self.assertIn(want, found[i], res["rows"][i])
         st, out = self.apply(res["plan_id"])
         self.assertEqual((st, out["error"]["code"]), (422, "plan_has_errors"))
-        for bad in ("", "Title,Price\r\nx,1\r\n", "Handle,Price,price\r\nvibe,1,1\r\n"):
+        half_pair = "Handle,Title\r\nvibe,V" + chr(0xD800) + "\r\n"
+        for bad in ("", "Title,Price\r\nx,1\r\n", "Handle,Price,price\r\nvibe,1,1\r\n", half_pair):
             st, out = self.b.api("POST", "products/import", {"csv": bad, "mode": "dry-run"})
             self.assertEqual((st, out["error"]["code"]), (422, "bad_csv"), bad)
 

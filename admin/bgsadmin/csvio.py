@@ -126,7 +126,13 @@ def read(text):
     A problem with the file as a whole raises 422 bad_csv. A record the csv
     module cannot read (a quote that never closes, say) becomes the last row,
     with its line number: nothing after it can be trusted to line up."""
-    if len(text.encode("utf-8")) > MAX_BYTES:
+    try:
+        size = len(text.encode("utf-8"))
+    except UnicodeEncodeError:
+        # JSON can carry half of a UTF-16 pair, which is no character at all
+        # and could never be written to products.json.
+        raise ApiError(422, "bad_csv", "The file has a character in it that is not valid text.")
+    if size > MAX_BYTES:
         raise ApiError(413, "too_large", "The file is larger than %d MB." % (MAX_BYTES // (1024 * 1024)))
     if text.startswith(BOM):
         text = text[1:]
