@@ -488,7 +488,7 @@ bgsRun(function () {
      here as window.BGS_QUIZ: MAP is answer key -> the facets it favours and
      the label it shows, which the result files under the kind of question it
      answers (family, tone, occasion, sillage, season). A profile names its
-     product, whose name, price and barcode come from the catalogue. */
+     product, whose name, price, meta line and barcode come from the catalogue. */
   var PROFILES = QUIZ.profiles || [];
   var MAP = QUIZ.answers || {};
   var KINDS = QUIZ.kinds || [];
@@ -560,7 +560,7 @@ bgsRun(function () {
     name.textContent = item ? item.name : (R.unnamed || "") + " ";
     if (!item) name.appendChild(span("slot", R.unnamed_slot || ""));
     q("[data-rprice]").textContent = item ? "AED " + item.price : "";
-    q("[data-rmeta]").textContent = "EDP spray · 50 ml · " + best.pr.audience;
+    q("[data-rmeta]").textContent = item ? item.meta : "";
     q("[data-rnotes]").textContent = best.pr.notes;
     q("[data-rcode]").textContent = (item && item.sku) || "";
     q("[data-rscore]").textContent = (R.score || "")
