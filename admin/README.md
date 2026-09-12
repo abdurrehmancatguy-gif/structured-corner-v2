@@ -29,6 +29,12 @@ http://localhost:4310/). The preview configuration's `python3 flow/server.py
   Missing filter, coverage, add and remove, and a mark on entries whose
   English the built site no longer shows. It also counts each product's
   Arabic name and story, which the shop does not show yet.
+- **Scent quiz:** the questions and their answers (reworded, never added or
+  removed: an answer's key joins it to what it looks for), a grid of the
+  facets each answer looks for, where a facet can count twice, the result
+  profiles as products with their notes and facets, and the words on the
+  result and the page. The result takes the matched product's name, price,
+  meta line and barcode from the product itself.
 
 Every save is checked, written safely and followed by a rebuild of the site,
 so the preview shows it at once. If the site would not build with a change,
