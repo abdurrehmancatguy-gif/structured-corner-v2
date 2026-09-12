@@ -7,7 +7,7 @@ import { api } from "../lib/api.js";
 import { h, clear, useCss, nextId } from "../lib/dom.js";
 import { icon } from "../icons.js";
 import { banner, confirmDialog, toast, guard } from "../lib/ui.js";
-import { KINDS, dropZone, fmtBytes, progressList, progressRow, problems, sendOne } from "../lib/media.js";
+import { KINDS, dropZone, fmtBytes, mediaUrl, progressList, progressRow, problems, sendOne, wrote } from "../lib/media.js";
 import { cropDialog, BANNER_FRAMES, SQUARE_FRAME } from "../components/crop.js";
 
 const TABS = [
@@ -233,7 +233,7 @@ function preview(it) {
   const ok = (it.copies && it.copies.ok) || [];
   if (it.path.endsWith(".mp4")) {
     const poster = ok.find((p) => p.endsWith(".jpg"));
-    return h("video", { class: "fprev film", src: "/" + it.path, poster: poster ? "/" + poster : null, preload: "none",
+    return h("video", { class: "fprev film", src: mediaUrl(it.path), poster: poster ? mediaUrl(poster) : null, preload: "none",
       controls: true, muted: true, playsinline: true, "aria-label": "Play " + name });
   }
   let src = it.path;
@@ -242,7 +242,7 @@ function preview(it) {
     if (hit) { src = hit; break; }
   }
   return h("a", { class: "fprev-link", href: "/" + it.path, target: "_blank", rel: "noopener noreferrer", "aria-label": "Open " + name + " in a new tab" },
-    h("img", { class: "fprev" + (it.path.endsWith(".png") ? " alpha" : ""), src: "/" + src, alt: "", loading: "lazy" }));
+    h("img", { class: "fprev" + (it.path.endsWith(".png") ? " alpha" : ""), src: mediaUrl(src), alt: "", loading: "lazy" }));
 }
 
 function usedBy(it) {
@@ -354,6 +354,7 @@ async function restore(it, swap, msgs, again) {
   clear(msgs);
   try {
     await api("POST", "media/restore", { body: { trash_id: it.trash_id } });
+    wrote();
     toast(it.kind === "product-image"
       ? base(it.path) + " is back in the files. Put it on its product from that product's Photos."
       : "Restored.");

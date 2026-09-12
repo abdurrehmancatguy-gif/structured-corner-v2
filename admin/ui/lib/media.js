@@ -203,6 +203,14 @@ export async function waitJob(id, onTick) {
   }
 }
 
+// A logo, the emblem's icons or a restored file comes back under the name it
+// had, and the browser keeps showing the picture it already holds for that
+// address. After each save that writes files, previews ask with a new query
+// string, which the local server ignores.
+let fresh = "";
+export function wrote() { fresh = Date.now().toString(36); }
+export const mediaUrl = (path) => "/" + String(path).replace(/^\//, "") + (fresh ? "?v=" + fresh : "");
+
 // One file from start to finish. target(staged, info) gives the attach
 // target, or null when the owner cancels (the crop tool); rev() is read at
 // attach time, so each file in a row uses the version the one before saved.
@@ -222,9 +230,11 @@ export async function sendOne({ kind, file, row, target, rev }) {
   const res = await api("POST", "media/attach", { body: { staging_id: staged.staging_id, expect_rev: rev(), target: t } });
   if (res && res.job) {
     const out = await waitJob(res.job, (j) => row.step(j.state === "queued" ? "Waiting for the film converter" : "Converting the film for the web", null));
+    wrote();
     row.done("Saved");
     return out;
   }
+  wrote();
   row.done("Saved");
   return res;
 }

@@ -5,6 +5,7 @@
 import { h, clear, getPtr, setPtr, copy, nextId, thumb, useCss } from "./dom.js";
 import { icon } from "../icons.js";
 import { confirmDialog } from "./ui.js";
+import { mediaUrl } from "./media.js";
 
 export function makeCtx(app, extra = {}) {
   return Object.assign({
@@ -191,7 +192,7 @@ export function field(f, target, ptr, ctx) {
 // is not typed in; an upload, a reorder or a duplicated entry changes it.
 function mediaField(f, v, ptr, target, ctx, id) {
   useCss("media");
-  const src = v ? "/" + String(v) : null;
+  const src = v ? mediaUrl(v) : null;
   const prev = !src ? h("span", { class: "media-prev none" }, "No file")
     : f.type === "video" ? h("video", { class: "media-prev film", src, preload: "metadata", controls: true, muted: true, playsinline: true,
       "aria-label": "Play the " + f.label.toLowerCase() })

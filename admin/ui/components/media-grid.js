@@ -3,10 +3,10 @@
 // Moving and removing change the draft, which the save bar saves like any
 // other field; an upload is saved at once, and the product then reloads.
 import { api } from "../lib/api.js";
-import { h, clear, getPtr, setPtr, thumb, useCss, nextId } from "../lib/dom.js";
+import { h, clear, getPtr, setPtr, useCss, nextId } from "../lib/dom.js";
 import { iconBtn } from "../lib/forms.js";
 import { announce, banner, confirmDialog, toast, guard } from "../lib/ui.js";
-import { dropZone, progressList, progressRow, problems, saveFirst, sendOne } from "../lib/media.js";
+import { dropZone, mediaUrl, progressList, progressRow, problems, saveFirst, sendOne } from "../lib/media.js";
 
 const TITLES = ["Card image", "Hover image (box shot)"];
 
@@ -150,7 +150,8 @@ export function mediaGrid({ f, draft, ctx, pid, ed, app }) {
       onclick: () => move(i, 0, "make") }, "Make card image") : null;
     if (make) make.dataset.act = "make";
     return dragTile(h("li", { class: "mtile" + (i === 0 ? " first" : ""), draggable: "true" },
-      h("img", { src: thumb(name), alt: "", loading: "lazy", width: "156", height: "156", draggable: "false" }),
+      h("img", { src: mediaUrl("assets/img/" + name.replace(/\.jpg$/, "-thumb.jpg")), alt: "", loading: "lazy",
+        width: "156", height: "156", draggable: "false" }),
       h("span", { class: "m-label" }, title),
       h("span", { class: "m-name" }, name),
       h("div", { class: "m-actions" }, make,
