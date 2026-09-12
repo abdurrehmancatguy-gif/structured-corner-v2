@@ -8,8 +8,9 @@ visibleWhen ({"category": [...]}), rendered (False: saved but not shown on the
 site yet), locked (the reason, for payments and checkout), readonly (the
 reason, for things changed elsewhere), guarded, fields and itemLabel (rows),
 canAdd (rows), keyLabel, valueLabel and keyMaxLength (dictionary: text keys
-to text values, max counting entries). The UI renders forms from these; the
-server enforces them.
+to text values, max counting entries) and maxRepeat (tags: short lower-case
+words, each allowed that many times, once by default). The UI renders forms
+from these; the server enforces them.
 
 A module whose kind is "document" is a whole file, flow/content/<name>.json:
 adding a document means adding its module and its file, and the store, the

@@ -61,6 +61,9 @@ def refs(pid, products, docs):
     for other, d in products.items():
         if other != pid and pid in (d.get("related") or []):
             out.append({"where": "Related products of %s" % d.get("name", other), "link": "#/products/%s" % other})
+    for i, pr in enumerate((docs.get("quiz") or {}).get("profiles") or []):
+        if isinstance(pr, dict) and pr.get("product") == pid:
+            out.append({"where": "Scent quiz, profile %d" % (i + 1), "link": "#/content/quiz"})
     return out
 
 

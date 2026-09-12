@@ -157,6 +157,33 @@ def check(fields, data, prefix, errors, ctx):
                 check(f.get("fields", []), item, "%s/%d" % (ptr, i), errors, ctx)
         elif t == "dictionary":
             dictionary(f, v, ptr, errors)
+        elif t == "tags":
+            tags(f, v, ptr, errors)
+
+
+TAG = re.compile(r"^[a-z]+(?:-[a-z]+)*$")
+TIMES = {1: "once", 2: "twice"}
+
+
+def tags(f, v, ptr, errors):
+    """Short lower-case words, such as the facets a quiz answer looks for.
+    A word may appear up to maxRepeat times (once unless the field says
+    more): in the quiz a facet listed twice counts twice."""
+    if not isinstance(v, list) or not all(isinstance(x, str) for x in v):
+        errors.append(err(ptr, "type", "This must be a list of words."))
+        return
+    if f.get("min") is not None and len(v) < f["min"]:
+        errors.append(err(ptr, "too_few", "Pick at least %d." % f["min"]))
+    if f.get("max") is not None and len(v) > f["max"]:
+        errors.append(err(ptr, "too_many", "Keep this to %d." % f["max"]))
+    most = f.get("maxRepeat", 1)
+    for i, x in enumerate(v):
+        if not TAG.match(x) or len(x) > f.get("itemMaxLength", 40):
+            errors.append(err("%s/%d" % (ptr, i), "format",
+                              "Use one lower-case word, or words joined by hyphens, like citrus or white-floral."))
+        elif v.index(x) == i and v.count(x) > most:
+            errors.append(err("%s/%d" % (ptr, i), "repeated",
+                              "List %s %s at most." % (x, TIMES.get(most, "%d times" % most))))
 
 
 def escape(key):
