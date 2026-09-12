@@ -1,0 +1,19 @@
+/* Discounts: three rule cards side by side, the ladder as a small table, and
+   the plain lists of what stays in code. */
+.disc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;align-items:start;margin-bottom:16px}
+.disc-grid .card{margin-bottom:0}
+.disc-grid .card>.sub{margin:-6px 0 16px}
+.ladder-t{margin-bottom:10px}
+.ladder-t th,.ladder-t td{padding:6px 8px 6px 0;background:transparent;border-bottom:0;vertical-align:top}
+.ladder-t tbody tr:hover td{background:transparent}
+.ladder-t .input.num{max-width:130px}
+.ladder-t td.act{width:40px;padding-top:10px}
+.ladder-t .error{margin-left:0}
+.preview{margin:14px 0 0;padding:10px 14px;border-radius:var(--r-sm);background:#fcfaf6;border:1px solid var(--hair);font-size:13px}
+.preview p{margin:0}
+.preview p+p{margin-top:4px}
+.in-code{margin-top:16px;padding-top:14px;border-top:1px solid var(--hair)}
+.in-code h3{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin:0 0 6px;font-weight:650}
+.in-code ul{margin:0;padding-left:18px;color:var(--mut);font-size:13px}
+.in-code li+li{margin-top:3px}
+.disc-next{margin:-6px 0 16px}
