@@ -6,7 +6,7 @@
 // documents/pages: only that page's fields are drawn, under its sections'
 // headings, and a save writes the whole document and rebuilds the site.
 import { api } from "../lib/api.js";
-import { h, clear, useCss } from "../lib/dom.js";
+import { h, clear, useCss, getPtr, setPtr, copy } from "../lib/dom.js";
 import { mountEditor } from "../lib/editor.js";
 import { field, visible } from "../lib/forms.js";
 import { banner, guard } from "../lib/ui.js";
@@ -113,6 +113,16 @@ function detail(main, app, res, g) {
     subtitle: (g.about ? g.about + " " : "") + "Saving rebuilds the site.",
     load: async () => { const d = await api("GET", "documents/pages"); return { rev: d.rev, data: d.data, meta: d }; },
     put: (data, rev) => api("PUT", "documents/pages", { body: { data }, rev }),
+    // The draft is the whole document but the screen shows one page, so
+    // "Save mine over it" takes only this page's fields over to the newer
+    // copy: the other pages keep what was saved elsewhere in the meantime.
+    rebase: (current, draft) => {
+      for (const f of fields) {
+        const v = getPtr(draft, f.path);
+        if (v !== undefined) setPtr(current, f.path, copy(v));
+      }
+      return current;
+    },
     view: () => pageHref(app, g),
     actions: () => [viewLink(app, g)],
     form: (ctx, data) => {

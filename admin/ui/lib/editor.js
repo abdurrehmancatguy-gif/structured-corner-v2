@@ -96,6 +96,13 @@ export function mountEditor(main, app, opts) {
       if (pick === "theirs") await reload();
       else if (pick === "mine" && e.details) {
         server = { rev: e.details.current_rev, data: e.details.current, meta: server.meta };
+        // A screen that edits part of a document lays that part over the
+        // newer copy, so the rest keeps what was saved in the meantime.
+        if (opts.rebase) {
+          draft = opts.rebase(copy(e.details.current), draft);
+          draw();
+          update();
+        }
         await save();
       }
     } else if (e.code === "bad_token") {

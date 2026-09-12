@@ -64,6 +64,9 @@ def refs(pid, products, docs):
     for i, pr in enumerate((docs.get("quiz") or {}).get("profiles") or []):
         if isinstance(pr, dict) and pr.get("product") == pid:
             out.append({"where": "Scent quiz, profile %d" % (i + 1), "link": "#/content/quiz"})
+    band = ((docs.get("pages") or {}).get("index") or {}).get("discovery_band") or {}
+    if band.get("product") == pid:
+        out.append({"where": "Pages, Homepage bands, Discovery band", "link": "#/content/pages/home"})
     return out
 
 

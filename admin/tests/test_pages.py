@@ -21,6 +21,7 @@ import tempfile
 import unittest
 
 from box import Box
+import cdp_pipe
 
 PORT = int(os.environ.get("ADMIN_PAGES_PORT", "4743"))
 PORT2 = int(os.environ.get("ADMIN_PAGES2_PORT", "4744"))
@@ -209,6 +210,16 @@ class PagesTests(_Pages, unittest.TestCase):
         self.assertEqual(st, 422, res)
         self.assertIn("unknown_product", [e["code"] for e in res["error"]["details"]])
 
+    def test_the_discovery_band_product_cannot_be_deleted(self):
+        st, p = self.b.api("GET", "products/discovery-trio")
+        self.assertEqual(st, 200, p)
+        self.assertIn({"where": "Pages, Homepage bands, Discovery band", "link": "#/content/pages/home"}, p["refs"])
+        stored = (self.flow / "content" / "pages.json").read_bytes()
+        st, res = self.b.api("DELETE", "products/discovery-trio", rev=p["rev"])
+        self.assertEqual((st, res["error"]["code"]), (409, "referenced"), res)
+        self.assertIn("discovery-trio", self.b.content("products"))
+        self.assertEqual((self.flow / "content" / "pages.json").read_bytes(), stored)
+
     def test_rules_legal_name_and_title_suffix_come_from_settings(self):
         st, d = self.b.api("GET", "documents/settings")
         before = copy.deepcopy(d["data"])
@@ -243,6 +254,27 @@ class PagesTests(_Pages, unittest.TestCase):
         finally:
             self.restore(before)
         self.assertIn(slot, self.page("index.html"))
+
+    @unittest.skipUnless(os.path.exists(cdp_pipe.CHROME), "headless Chrome is not installed")
+    def test_spaces_around_the_stock_and_batch_labels_keep_their_rows(self):
+        # shop.js finds these rows by their label, which the page prints as typed
+        pr = self.b.content("products")["be-mine"]
+        self.assertTrue(pr["barcode"] and pr["stock"] > 5, pr)
+        before = self.doc()["data"]
+        st, res = self.put(lambda d: d["product"]["specs"].update(availability="Availability ", batch=" Batch number"))
+        self.assertEqual(st, 200, res)
+        c = cdp_pipe.Chrome()
+        try:
+            c.go("http://localhost:%d/product.html?p=be-mine" % self.PORT)
+            c.wait("document.readyState === 'complete' && !!window.BGS_COPY", 30)
+            rows = c.js("[...document.querySelectorAll('[data-specs] > div')].filter((r) => !r.hidden)"
+                        ".map((r) => [r.firstElementChild.textContent.trim(), r.lastElementChild.textContent.trim()])")
+            self.assertIn(["Availability", "In stock"], rows)
+            self.assertIn(["Barcode", pr["barcode"]], rows)
+            self.assertEqual(c.errors(), [])
+        finally:
+            c.close()
+            self.restore(before)
 
     # ---- what is refused ------------------------------------------------------------
 
@@ -380,12 +412,76 @@ class PagesPartTwoTests(_Pages, unittest.TestCase):
             js = global_in(self.flow, "BGS_COPY")
             self.assertEqual(js["cart"]["summary"]["free"], "No charge")
             self.assertEqual(js["cart"]["items"]["many"], "{n} things")
-            self.assertEqual(js["corporate"]["thanks_name"], "Thanks, {name}")
+            self.assertEqual(js["corporate"]["replies"]["thanks_name"], "Thanks, {name}")
             self.assertEqual(js["gift_box"]["summary"]["fill_many"], "{n} to fill")
         finally:
             self.restore(before)
         for n in names:
             self.assertEqual(self.page(n), pages[n], n)
+
+    def test_every_text_the_shop_script_reads_is_in_its_data(self):
+        # shop.js keeps its own copy of each text for a page with an older
+        # catalogue.js, so a path the data does not have would leave a Pages
+        # field saving without ever reaching the shop.
+        shop = (self.flow / "assets" / "shop.js").read_text(encoding="utf-8")
+        js = global_in(self.flow, "BGS_COPY")
+        calls = re.findall(r'bgsCopy(?:Html)?\(\s*"([^"]+)"\s*([,+])', shop)
+        self.assertGreater(len(calls), 40)
+        for path, joined in calls:
+            node = js
+            for part in path.rstrip(".").split("."):
+                self.assertIsInstance(node, dict, path)
+                self.assertIn(part, node, path)
+                node = node[part]
+            # a path shop.js finishes with a variable names a group of texts
+            self.assertIsInstance(node, dict if joined == "+" else str, path)
+
+    @unittest.skipUnless(os.path.exists(cdp_pipe.CHROME), "headless Chrome is not installed")
+    def test_saving_one_page_over_a_newer_copy_keeps_the_other_pages(self):
+        before = self.doc()["data"]
+        c = cdp_pipe.Chrome()
+        try:
+            c.go("http://localhost:%d/admin/#/content/pages/bag" % self.PORT)
+            c.wait("!!document.querySelector('.pg-form')", 30)
+            # the homepage bands are saved somewhere else while the bag is open
+            st, res = self.put(lambda d: d["index"]["discovery_band"].update(eyebrow="Begin here"))
+            self.assertEqual(st, 200, res)
+            c.js("""(() => { const l = [...document.querySelectorAll('label.f-label')]
+                       .find((x) => x.textContent.trim().startsWith('Checkout button'));
+                     const i = document.getElementById(l.htmlFor); i.value = 'Go to checkout';
+                     i.dispatchEvent(new Event('input', { bubbles: true })); })()""")
+            c.wait("[...document.querySelectorAll('button')].some((b) => b.textContent.trim() === 'Save')", 10)
+            c.js("[...document.querySelectorAll('button')].filter((b) => b.textContent.trim() === 'Save').pop().click()")
+            mine = "[...document.querySelectorAll('.dlg-actions button')].find((b) => b.textContent.trim() === 'Save mine over it')"
+            c.wait("!!" + mine, 40)
+            c.js(mine + ".click()")
+            c.wait("[...document.querySelectorAll('.toast')].some((t) => /Saved/.test(t.textContent))", 60)
+            data = self.b.content("pages")
+            self.assertEqual(data["cart"]["summary"]["checkout"], "Go to checkout")
+            self.assertEqual(data["index"]["discovery_band"]["eyebrow"], "Begin here")
+            self.assertIn("Begin here", self.page("index.html"))
+            self.assertEqual(c.errors(), [])
+        finally:
+            c.close()
+            self.restore(before)
+
+    @unittest.skipUnless(os.path.exists(cdp_pipe.CHROME), "headless Chrome is not installed")
+    def test_every_page_fits_a_phone(self):
+        st, s = self.b.api("GET", "schema")
+        groups = [g for g in s["resources"]["pages"]["resource"]["groups"] if not g.get("locked")]
+        c = cdp_pipe.Chrome(width=390)
+        try:
+            c.go("http://localhost:%d/admin/#/content/pages" % self.PORT)
+            c.wait("!!document.querySelector('.pg-list')", 30)
+            self.assertEqual(c.js("document.documentElement.scrollWidth"), 390)
+            for g in groups:
+                c.go("http://localhost:%d/admin/#/content/pages/%s" % (self.PORT, g["key"]))
+                c.wait("!!document.querySelector('.pg-form') && document.querySelector('main h1').textContent === %s"
+                       % json.dumps(g["label"]), 25)
+                self.assertEqual(c.js("document.documentElement.scrollWidth"), 390, g["key"])
+            self.assertEqual(c.errors(), [])
+        finally:
+            c.close()
 
     def test_the_404_title_ends_with_the_settings_suffix(self):
         self.assertIn("<title>Page not found | BGS Corner</title>", self.page("404.html"))
@@ -415,6 +511,44 @@ class PagesPartTwoTests(_Pages, unittest.TestCase):
             ("too_many", lambda d: d["account"]["loyalty"]["tiers"].append({"name": "Test", "note": "Test"})),
             ("too_few", lambda d: d["track"].update(stages=[])),
         ], "cart.html")
+
+    def test_a_brace_in_text_that_takes_no_token_is_refused_on_its_field(self):
+        # the build would either refuse it or print it as typed, so the save
+        # refuses it first, next to the field
+        self.refused([("format", change) for change in (
+            lambda d: d["product"].update(voucher_note="A voucher on any bottle over {free_over}."),
+            lambda d: d["corporate"]["replies"].update(thanks="Thank you {friend}"),
+            lambda d: d["cart"]["line"].update(remove="Remove {x}"),
+            lambda d: d["track"]["replies"].update(missing="Enter {query}"),
+            lambda d: d["gift_box"]["summary"].update(full="Full {n}"),
+            lambda d: d["cart"]["progress"].update(unlocked="Unlocked {free_over}"),
+            lambda d: d["cart"]["summary"].update(free="Free {x}"),
+            lambda d: d["track"]["stages"][0].update(body="Before {cutoff}"),
+            lambda d: d["index"]["discovery_band"].update(body="Over {free_over}"),
+            lambda d: d["shell"]["header"].update(bag="Bag }"),
+        )], "cart.html")
+        st, res = self.put(lambda d: d["corporate"]["replies"].update(thanks="Thank you {friend}"))
+        self.assertIn({"path": "/corporate/replies/thanks", "code": "format",
+                       "message": "This text takes no {tokens}; leave out braces."}, res["error"]["details"])
+
+    def test_the_build_stops_on_a_brace_in_text_that_takes_no_token(self):
+        # pages.json edited by hand, as a terminal or a Claude session can
+        def change(d):
+            d["product"]["voucher_note"] = "A voucher on any bottle over {free_over}."
+            d["track"]["stages"][0]["body"] = "Before {cutoff}"
+            d["product"]["share"]["copied"] = "Copied {x}"
+            d["product"]["specs"]["in_stock"] = "{n} in stock"
+            d["cart"]["summary"]["free"] = "Free {x}"
+            d["collection"]["genders"]["Him"] = "Him }"
+        err, changed = self.broken_build(change)
+        for msg in ("pages.json product.voucher_note has {free_over}, which it cannot use",
+                    "pages.json track.stages.0.body has {cutoff}, which it cannot use",
+                    "pages.json product.share.copied has {x}, which it cannot use",
+                    "pages.json product.specs.in_stock has {n}, which it cannot use",
+                    "pages.json cart.summary.free has {x}, which it cannot use",
+                    "pages.json collection.genders.Him has a brace that is not part of a {token}"):
+            self.assertIn(msg, err)
+        self.assertEqual(changed, [])
 
     def test_the_build_stops_on_broken_part_two_text_before_writing(self):
         def change(d):
