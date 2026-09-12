@@ -532,6 +532,53 @@ def bakhoor_cards(n=None): return _cards("bakhoor", n)
 def edp_cards(n=None):     return _cards("edp", n)
 def set_cards(n=None):     return _cards("gift-sets", n)
 
+# ---------------------------------------------------------------- shelves
+# The homepage's product rows. Which products a shelf draws from, where its
+# see-all link goes and its card image sizes are code; its heading (home.json
+# "sections"), how many cards it shows and the link's words (home.json
+# "shelves") are content. {n} in the link's words is the number of published
+# products the shelf draws from, counted here, so "All 13" stays true as
+# products come and go; a limit of null shows every one. A key an older
+# home.json lacks gets the shelf as it was before it moved into content; one
+# that is there but unreadable stops the build.
+SHELVES = {
+    "house_ouds": (lambda: published("attars"), "collection.html?cat=attars", CARD_SIZES),
+    # the never-discounted pieces, as halo_cards() picks them
+    "reserve": (lambda: [r for r in published() if r.get("never_discount")], "collection.html?cat=attars", FEAT_SIZES),
+    "gift_sets": (lambda: published("gift-sets"), "collection.html?cat=gift-sets", CARD_SIZES),
+    "bakhoor": (lambda: published("bakhoor"), "collection.html?cat=bakhoor", CARD_SIZES),
+    "edp": (lambda: published("edp"), "collection.html?cat=edp", CARD_SIZES),
+}
+_SHELF_WAS = {"house_ouds": (5, "All {n}"), "reserve": (None, "All attars"), "gift_sets": (5, "All sets"),
+              "bakhoor": (None, "Shop bakhoor"), "edp": (5, "All {n}")}
+_HEADING_WAS = {"house_ouds": "Attars and perfume oils", "reserve": "Never discounted", "gift_sets": "Gift sets",
+                "scent_family": "Shop by scent family", "bakhoor": "Bakhoor & home", "edp": "EDP sprays"}
+_BAD_HOME = []
+
+def heading(key):
+    """A homepage section heading from home.json "sections", escaped."""
+    t = (HOME.get("sections") or {}).get(key, _HEADING_WAS[key])
+    if not isinstance(t, str) or not t.strip():
+        _BAD_HOME.append("sections.%s must be text" % key)
+    return esc(t)
+
+def shelf(key):
+    """One shelf's heading row and its cards, as the home template prints them."""
+    pick, href, sizes = SHELVES[key]
+    rows = pick()
+    s = (HOME.get("shelves") or {}).get(key) or {}
+    limit = s.get("limit", _SHELF_WAS[key][0])
+    label = s.get("link_label", _SHELF_WAS[key][1])
+    if limit is not None and (isinstance(limit, bool) or not isinstance(limit, int) or limit < 1):
+        _BAD_HOME.append("shelves.%s.limit must be a whole number of at least 1, or null" % key)
+        limit = None
+    if not isinstance(label, str) or not label.strip():
+        _BAD_HOME.append("shelves.%s.link_label must be text" % key)
+        label = ""
+    head = '<div class="sec-h"><h2>%s</h2><a href="%s">%s &rarr;</a></div>' % (
+        heading(key), href, esc(label.replace("{n}", str(len(rows)))))
+    return head, _cards_from(rows[:limit], sizes)
+
 
 def usp_strip():
     """The four promises under the hero, from content/copy.json."""
@@ -634,6 +681,7 @@ def hero_dots():
                    for i in range(len(HOME["hero_slides"])))
 
 # ---------------------------------------------------------------- HOME
+_SH = {k: shelf(k) for k in SHELVES}
 home = """
 <div class="hero" data-carousel>
   <div class="heroimg">%(hero_img)s<span class="none corner"><b data-slideno>1</b>/%(hero_n)s</span></div>
@@ -660,7 +708,7 @@ home = """
 </div></section>
 
 <section class="alt"><div class="wrap">
-  <div class="sec-h"><h2>Attars and perfume oils</h2><a href="collection.html?cat=attars">All 13 &rarr;</a></div>
+  %(attars_h)s
   <div class="grid g5">%(attars)s</div>
 </div></section>
 
@@ -672,17 +720,17 @@ home = """
 </div></div></section>
 
 <section><div class="wrap">
-  <div class="sec-h"><h2>Never discounted</h2><a href="collection.html?cat=attars">All attars &rarr;</a></div>
+  %(oud_h)s
   <div class="grid feat">%(oud)s</div>
 </div></section>
 
 <section class="alt"><div class="wrap">
-  <div class="sec-h"><h2>Gift sets</h2><a href="collection.html?cat=gift-sets">All sets &rarr;</a></div>
+  %(sets_h)s
   <div class="grid g5">%(sets)s</div>
 </div></section>
 
 <section><div class="wrap">
-  <div class="sec-h"><h2>Shop by scent family</h2></div>
+  <div class="sec-h"><h2>%(fam_h)s</h2></div>
   <div class="fam">
     <a href="collection.html?family=oud-and-woods" style="background:var(--f-oud)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20c4-2 6-6 6-10M8 20c3-2 5-5 6-9M13 20c2-2 4-5 5-8"/><circle cx="17" cy="6" r="2.5"/></svg><b>Oud &amp; Woods</b><span>%(ct)s</span></a>
     <a href="collection.html?family=amber-and-spice" style="background:var(--f-amber)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.2 4.6L19 8.3l-3.5 3.4.9 4.9-4.4-2.4-4.4 2.4.9-4.9L5 8.3l4.8-.7z"/></svg><b>Amber &amp; Spice</b><span>%(ct)s</span></a>
@@ -704,12 +752,12 @@ home = """
 </div></section>
 
 <section class="alt"><div class="wrap">
-  <div class="sec-h"><h2>Bakhoor &amp; home</h2><a href="collection.html?cat=bakhoor">Shop bakhoor &rarr;</a></div>
+  %(bakhoor_h)s
   <div class="grid g5">%(bakhoor)s</div>
 </div></section>
 
 <section><div class="wrap">
-  <div class="sec-h"><h2>EDP sprays</h2><a href="collection.html?cat=edp">All 9 &rarr;</a></div>
+  %(edp_h)s
   <div class="grid g5">%(edp)s</div>
 </div></section>
 %(reels)s""" % dict(reels=reels(), catstrip=catstrip(), usp=usp_strip(),
@@ -719,8 +767,12 @@ home = """
            qb_body=COPY["quiz_banner"]["body"], qb_cta=COPY["quiz_banner"]["cta_label"],
            qb_href=COPY["quiz_banner"]["cta_href"],
            prev=sv("left",22,2), next=sv("right",22,2),
-           attars=attar_cards(5), oud=halo_cards(), sets=set_cards(5),
-           bakhoor=bakhoor_cards(), edp=edp_cards(5), ct=slot("count"))
+           attars_h=_SH["house_ouds"][0], attars=_SH["house_ouds"][1], oud_h=_SH["reserve"][0], oud=_SH["reserve"][1],
+           sets_h=_SH["gift_sets"][0], sets=_SH["gift_sets"][1], fam_h=heading("scent_family"),
+           bakhoor_h=_SH["bakhoor"][0], bakhoor=_SH["bakhoor"][1], edp_h=_SH["edp"][0], edp=_SH["edp"][1],
+           ct=slot("count"))
+if _BAD_HOME:
+    sys.exit("build failed:\n  " + "\n  ".join("home.json " + p for p in _BAD_HOME))
 
 # ---------------------------------------------------------------- COLLECTION
 # Only facets the content layer actually carries: category and price for all
