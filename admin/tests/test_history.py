@@ -197,6 +197,7 @@ class HistoryTests(unittest.TestCase):
         self.assertEqual((v1["data"]["price"], v1["current_rev"]), (p0, r2["rev"]))
         price = [e for e in v1["diff"] if e["path"] == "/price"][0]
         self.assertEqual((price["before"], price["after"]), ("AED %d" % p0, "AED %d" % (p0 + 6)))
+        self.assertEqual([e["text"] for e in v1["changes"]], ["Be Mine: price AED %d to AED %d" % (p0 + 6, p0)])
         path, body = "history/%s/restore" % local[1]["id"], {"resource": "products/be-mine"}
         self.assertEqual(b.api("POST", path, body)[0], 428)
         self.assertEqual(b.api("POST", path, body, rev=r1["rev"])[0], 412)
@@ -239,6 +240,8 @@ class HistoryTests(unittest.TestCase):
         v = self.version("20200101-120000", name)
         self.assertEqual({k["path"] for k in v["kept"]}, {"/images", "/order", "/legacy_note"})
         self.assertEqual((v["filled"], v["guarded"], v["blocked"]), (["/badge"], ["never_discount"], None))
+        self.assertFalse([e for e in v["changes"] if e["path"] in ("/images", "/order", "/legacy_note")])
+        self.assertTrue([e for e in v["diff"] if e["path"] == "/images"])
         path = "history/20200101-120000/restore"
         self.assertEqual(b.api("POST", path, {"resource": name}, rev=h["current_rev"])[0], 428)
         st, res = b.api("POST", path, {"resource": name, "confirm_guarded": ["never_discount"]}, rev=h["current_rev"])

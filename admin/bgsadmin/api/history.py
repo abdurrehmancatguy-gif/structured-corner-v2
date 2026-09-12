@@ -338,7 +338,10 @@ def get_version(req):
     res = Resource(req.query.get("resource"))
     data, meta = _version(req, res, req.params["hid"])
     current, rev = _current(req, res)
-    out = dict(meta, resource=res.name, data=data, current_rev=rev, diff=res.diff(data, current, _ctx(req)),
+    ctx = _ctx(req)
+    # diff compares this version with today's, for the side-by-side view;
+    # changes is what restoring it would do, locked and read-only fields kept.
+    out = dict(meta, resource=res.name, data=data, current_rev=rev, diff=res.diff(data, current, ctx), changes=[],
                kept=[], filled=[], guarded=[], blocked=None, same=_canon(data) == _canon(current))
     if data is None:
         out["blocked"] = "The product did not exist in this version."
@@ -347,7 +350,7 @@ def get_version(req):
     else:
         plan = _plan(res, data, current)
         out.update(kept=plan["kept"], filled=plan["filled"], guarded=plan["guarded"], blocked=plan["blocked"],
-                   same=_canon(plan["data"]) == _canon(current))
+                   same=_canon(plan["data"]) == _canon(current), changes=res.diff(current, plan["data"], ctx))
     return out
 
 
