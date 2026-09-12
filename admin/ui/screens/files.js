@@ -284,7 +284,8 @@ async function trashFile(it, msgs, refresh) {
   const c = it.copies || { ok: [], stale: [] };
   const n = c.ok.length + c.stale.length;
   const ok = await confirmDialog({ title: "Move " + name + " to the trash?",
-    body: [(n ? "It and its " + n + (n === 1 ? " sized copy" : " sized copies") : "It") + " leave the site's files now and wait in the trash, where you can restore them.",
+    body: [n ? "It and its " + n + (n === 1 ? " sized copy" : " sized copies") + " leave the site's files now and wait in the trash, where you can restore them."
+      : "It leaves the site's files now and waits in the trash, where you can restore it.",
       "It leaves the live site at the next publish."],
     confirm: "Move to trash", danger: true });
   if (!ok) return;
