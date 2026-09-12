@@ -8,7 +8,9 @@ itemMaxLength, pattern, patternHelp, enum, enumLabels, multiline, dir, social,
 visibleWhen ({"category": [...]}), rendered (False: saved but not shown on the
 site yet), locked (the reason, for payments and checkout), readonly (the
 reason, for things changed elsewhere), guarded, fields and itemLabel (rows),
-canAdd (rows). The UI renders forms from these; the server enforces them.
+canAdd (rows), group (the card a field sits in) and section (a heading inside
+a long group, such as one page's text under Pages). The UI renders forms from
+these; the server enforces them.
 
 A module whose kind is "document" is a whole file, flow/content/<name>.json:
 adding a document means adding its module and its file, and the store, the

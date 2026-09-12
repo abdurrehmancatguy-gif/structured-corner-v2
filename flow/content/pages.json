@@ -1,0 +1,190 @@
+{
+  "shell": {
+    "noscript": "This shop needs JavaScript for products, the bag and checkout. Please turn it on in your browser.",
+    "crumb_home": "Home",
+    "header": {
+      "account": "Account",
+      "wishlist": "Wishlist",
+      "bag": "Bag"
+    },
+    "footer": {
+      "contact": {
+        "address": "",
+        "hours": "",
+        "phone": ""
+      },
+      "newsletter": {
+        "placeholder": "Your email",
+        "button": "Join"
+      },
+      "copyright_year": 2026
+    }
+  },
+  "index": {
+    "discovery_band": {
+      "product": "discovery-trio",
+      "eyebrow": "Start here",
+      "heading": "Discovery Trio, {price}",
+      "body": "Three 3 ml ouds. Whatever you spend comes back as a single-use voucher on any bottle over AED 75, valid 60 days.",
+      "cta_label": "Choose three",
+      "cta_href": "gift-box.html"
+    },
+    "promos": [
+      {
+        "title": "Build a gift box",
+        "sub": "Three or six scents, wrapped",
+        "href": "gift-box.html"
+      },
+      {
+        "title": "Discovery 3 ml",
+        "sub": "Credit back on your first bottle",
+        "href": "collection.html?cat=gift-sets"
+      },
+      {
+        "title": "Corporate gifting",
+        "sub": "Quote above 20 units",
+        "href": "corporate.html"
+      }
+    ],
+    "families": {
+      "oud-and-woods": "Oud & Woods",
+      "amber-and-spice": "Amber & Spice",
+      "musk-and-clean": "Musk & Clean",
+      "floral-veil": "Floral Veil",
+      "fresh-and-citrus": "Fresh & Citrus",
+      "sweet-and-gourmand": "Sweet & Gourmand",
+      "reserve": "Reserve",
+      "bakhoor-and-home": "Bakhoor & Home"
+    },
+    "reels_link": {
+      "label": "All EDP sprays",
+      "href": "collection.html?cat=edp"
+    }
+  },
+  "collection": {
+    "crumb_categories": "Categories",
+    "filters": {
+      "heading": "Filters",
+      "clear": "Clear all",
+      "show": "Show {n} products",
+      "category": "Category",
+      "price": "Price",
+      "gender": "Gender"
+    },
+    "price_bands": {
+      "0-49": "Under AED 50",
+      "50-100": "AED 50-100",
+      "100-200": "AED 100-200",
+      "200-999999": "AED 200+"
+    },
+    "genders": {
+      "Him": "Him",
+      "Her": "Her",
+      "Unisex": "Unisex"
+    },
+    "count": "{n} products",
+    "sort": {
+      "featured": "Sort: Featured",
+      "price-asc": "Price: low to high",
+      "price-desc": "Price: high to low",
+      "name": "Name: A to Z"
+    },
+    "empty": {
+      "title": "Nothing matches those filters.",
+      "body": "Try removing one, or clear them all.",
+      "clear": "Clear all filters"
+    }
+  },
+  "product": {
+    "share": {
+      "label": "Share",
+      "copied": "Link copied",
+      "failed": "Could not copy"
+    },
+    "size_label": "Size",
+    "gift_cta": {
+      "label": "Send as a gift",
+      "href": "gift-box.html"
+    },
+    "notes": {
+      "top": "Top",
+      "heart": "Heart",
+      "base": "Base"
+    },
+    "voucher_note": "Try the 3 ml first, the AED 45 comes back as a voucher on any bottle over AED 75, issued the day it is delivered.",
+    "specs": {
+      "longevity": "Longevity",
+      "sillage": "Sillage",
+      "batch": "Batch number",
+      "barcode": "Barcode",
+      "availability": "Availability",
+      "only_left": "Only {n} left",
+      "in_stock": "In stock"
+    },
+    "facts": {
+      "delivery_label": "Delivery",
+      "delivery": "Free over {free_over} · same-day before {cutoff_short}"
+    },
+    "tabs": {
+      "pyramid": "Scent pyramid",
+      "apply": "How to apply oud",
+      "ing": "Ingredients & allergens",
+      "delivery": "Delivery & returns",
+      "reviews": "Reviews"
+    },
+    "pyramid": {
+      "top": "Top",
+      "heart": "Heart",
+      "base": "Base",
+      "missing": "The scent pyramid is published for our EDP sprays. For the attars it is coming soon."
+    },
+    "apply_steps": [
+      {
+        "title": "Where",
+        "body": "Wrists, the base of the throat, behind the ears. Warm points carry the oil."
+      },
+      {
+        "title": "How much",
+        "body": "These are oils, not sprays. One dab on each point is the dose; a 3 ml bottle lasts accordingly."
+      },
+      {
+        "title": "Do not rub",
+        "body": "Press the points together rather than rubbing, which breaks the top notes."
+      }
+    ],
+    "apply_note": "Every blend in the shop is alcohol-free and oil based.",
+    "ingredients": {
+      "missing": "Full ingredient and allergen lists are published for our EDP sprays. This one is coming soon.",
+      "heading": "Declared ingredients"
+    },
+    "delivery_rows": [
+      {
+        "title": "UAE delivery",
+        "body": "Free over {free_over}. {delivery_fee} below that. UAE only."
+      },
+      {
+        "title": "Same-day Dubai",
+        "body": "{sameday_fee}, for orders placed before the {cutoff} cutoff."
+      },
+      {
+        "title": "Returns",
+        "body": "Exchange on sealed items. Opened fragrance cannot be returned."
+      }
+    ],
+    "reviews_empty": {
+      "title": "No reviews yet.",
+      "body": "Reviews open after the first orders are delivered. Nothing appears here that a buyer has not left."
+    },
+    "related": {
+      "heading": "Complete the ritual",
+      "link_label": "More",
+      "link_href": "collection.html"
+    },
+    "not_found": {
+      "title": "We couldn’t find that product",
+      "cta": "See all products",
+      "crumb": "Products",
+      "page_title": "Product not found"
+    }
+  }
+}
