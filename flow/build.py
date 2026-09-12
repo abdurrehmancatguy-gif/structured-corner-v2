@@ -250,10 +250,12 @@ if _BAD_CATS:
 EXTRA_GLOBALS.append(("BGS_CATS", lambda: CAT_TEXT))
 
 # ---------------------------------------------------------------- page text
-# The words of every page's shell, the homepage bands, the collection page and
-# the product page are content: pages.json, with the top strip and the search
-# hint in copy.json and the legal name, location and title suffix in
-# settings.json. The templates below print them through page_text(), which
+# The words of every page's shell, the homepage bands and the collection,
+# product, gift box, bag, tracking, corporate, account and 404 pages are
+# content: pages.json, with the top strip and the search hint in copy.json
+# and the legal name, location and title suffix in settings.json. Checkout
+# and the order confirmation keep theirs in code: they are locked. The
+# templates below print them through page_text(), which
 # escapes them and fills in the {tokens} a text may carry: a store rule, so
 # the words follow Settings; {n}, a count shop.js keeps up to date; or the
 # Discovery band's {price}, read from its product. What shop.js writes into
@@ -325,6 +327,17 @@ def grid_rows(rows):
 
 def page_href(path):
     return esc(raw_text(path))
+
+def js_text(path, need=(), allow=()):
+    """Text shop.js fills in and sets with textContent. Its {tokens} are
+    checked the way page_text checks a template's, but it stays as the
+    document holds it: shop.js fills the tokens itself."""
+    page_text(path, {t: "" for t in tuple(need) + tuple(allow)}, need=need)
+    return raw_text(path)
+
+def kv_rows(rows, indent):
+    """Label-and-value lines, as the pages' .kv lists lay them out."""
+    return indent.join("<div><span>%s</span><span>%s</span></div>" % r for r in rows)
 
 COPY_JS = {}
 EXTRA_GLOBALS.append(("BGS_COPY", lambda: COPY_JS))
@@ -1142,45 +1155,81 @@ product = """
    truck=sv("truck",16), cash=sv("cash",16),
    leaf=sv("leaf",15), hrt=sv("heart",15), drop=sv("drop",15),
    share=sv("share",15), rel=attar_cards(4))
-if _BAD_PAGES:
-    sys.exit("build failed:\n  " + "\n  ".join(_BAD_PAGES))
 
 # ---------------------------------------------------------------- GIFT BOX
+# The builder's words are content, pages.json "gift_box"; the slot sizes, the
+# six attars in the picker and the amounts are code and store rules. The page
+# opens on an empty three-slot box, so it prints the words shop.js writes for
+# that box, and what shop.js writes as the box fills reaches it as
+# BGS_COPY["gift_box"]. The gift options are words only: nothing lets a
+# visitor choose one yet.
+def _gift_options():
+    rows = page_rows("gift_box.options", ("label", "value"))
+    out = []
+    for i, (label, value) in enumerate(rows):
+        lit = _value("gift_box.options.%d.highlight" % i)
+        if not isinstance(lit, bool):
+            _BAD_PAGES.append("pages.json gift_box.options.%d.highlight must be true or false" % i)
+        out.append("<div><span>%s</span><span%s>%s</span></div>" % (
+            label, ' style="color:var(--green);font-weight:600"' if lit is True else "", value))
+    return "\n          ".join(out)
+
+GIFT_BOX_TEXT = {
+    "b_crumb": CRUMB_HOME + " / " + page_text("gift_box.crumb"),
+    "b_title": page_text("gift_box.title"), "b_intro": page_text("gift_box.intro"),
+    "b_pick": page_text("gift_box.picker_heading"),
+    "b_scents": page_text("gift_box.summary.scents_many", {"n": "0"}, need=("n",)),
+    "b_box": page_text("gift_box.summary.box_label"),
+    "b_disc": page_text("gift_box.summary.discount_label", {"box_at": esc(RULE_TEXT["rule_box_at"])}),
+    "b_total": page_text("gift_box.summary.total_label"),
+    "b_fill": page_text("gift_box.summary.fill_many", {"n": "3"}, need=("n",)),
+    "b_opts_h": page_text("gift_box.options_heading"),
+    "b_opts": _gift_options(),
+}
+for _n in (3, 6):
+    GIFT_BOX_TEXT["b_size%d" % _n] = page_text("gift_box.size_label", {"n": str(_n)}, need=("n",))
+COPY_JS["gift_box"] = {
+    "slots": {"filled": js_text("gift_box.slots.filled", allow=("n",)), "remove": js_text("gift_box.slots.remove"),
+              "empty": js_text("gift_box.slots.empty", allow=("n",)), "choose": js_text("gift_box.slots.choose"),
+              "pick": js_text("gift_box.slots.pick")},
+    "summary": {k: js_text("gift_box.summary." + k, need=("n",))
+                for k in ("scents_one", "scents_many", "fill_one", "fill_many")},
+}
+COPY_JS["gift_box"]["summary"].update(add=js_text("gift_box.summary.add", allow=("total",)),
+                                      full=js_text("gift_box.summary.full"))
+
 giftbox = """
 <section><div class="wrap">
-  <span class="eyebrow">Home / Build Your Gift Box</span>
-  <div class="sec-h" style="margin-top:10px"><div><h2 style="font-size:26px">Build a gift box</h2>
-  <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">Three or six slots, filled from the house scents, leaving as one cart line with its contents itemised.</p></div></div>
+  <span class="eyebrow">%(b_crumb)s</span>
+  <div class="sec-h" style="margin-top:10px"><div><h2 style="font-size:26px">%(b_title)s</h2>
+  <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">%(b_intro)s</p></div></div>
   <div class="two">
     <div>
       <div class="pills" style="margin-bottom:18px">
-        <button type="button" class="pill on" data-boxsize="3">3 slots</button>
-        <button type="button" class="pill" data-boxsize="6">6 slots</button></div>
+        <button type="button" class="pill on" data-boxsize="3">%(b_size3)s</button>
+        <button type="button" class="pill" data-boxsize="6">%(b_size6)s</button></div>
       <div class="grid g3" data-slots style="margin-bottom:22px"></div>
-      <div class="sec-h"><h2 style="font-size:17px">Add to the box</h2></div>
+      <div class="sec-h"><h2 style="font-size:17px">%(b_pick)s</h2></div>
       <div class="grid g4">%(pick)s</div>
     </div>
     <div>
       <div class="sum">
-        <div class="r"><span data-boxn>0 scents</span><span data-boxscents>AED 0</span></div>
-        <div class="r"><span>Premium box</span><span>%(rule_box_fee)s</span></div>
-        <div class="r" data-boxdisc style="color:var(--faint)"><span>Volume discount at %(rule_box_at)s</span><span>&minus;%(rule_box_pct)s%%</span></div>
-        <div class="r t"><span>Total</span><span data-boxtotal>%(rule_box_fee)s</span></div>
-        <button type="button" class="btn ghost block" data-boxcta style="margin-top:12px">Fill 3 more slots</button>
+        <div class="r"><span data-boxn>%(b_scents)s</span><span data-boxscents>AED 0</span></div>
+        <div class="r"><span>%(b_box)s</span><span>%(rule_box_fee)s</span></div>
+        <div class="r" data-boxdisc style="color:var(--faint)"><span>%(b_disc)s</span><span>&minus;%(rule_box_pct)s%%</span></div>
+        <div class="r t"><span>%(b_total)s</span><span data-boxtotal>%(rule_box_fee)s</span></div>
+        <button type="button" class="btn ghost block" data-boxcta style="margin-top:12px">%(b_fill)s</button>
       </div>
       <div class="sum" style="margin-top:16px;background:#fff">
-        <span class="eyebrow">Gift options</span>
+        <span class="eyebrow">%(b_opts_h)s</span>
         <div class="kv" style="margin-top:10px">
-          <div><span>Wrap &amp; handwritten card</span><span>+AED 10</span></div>
-          <div><span>QR video message &middot; 60s</span><span style="color:var(--green);font-weight:600">Free</span></div>
-          <div><span>Scheduled delivery date</span><span>Up to +30 days</span></div>
-          <div><span>Ship to recipient &middot; hide prices</span><span>Off</span></div>
+          %(b_opts)s
         </div>
       </div>
     </div>
   </div>
 </div></section>
-""" % dict(RULE_TEXT, pick=attar_cards(6))
+""" % dict(RULE_TEXT, pick=attar_cards(6), **GIFT_BOX_TEXT)
 
 def stepper(qty, fixed=False):
     if fixed:
@@ -1200,35 +1249,68 @@ def cline(name, meta, unit, qty, extra="", halo=False, gift=False):
       unit, "1" if halo else "0", "1" if gift else "0", name, meta,
       stepper(qty, gift), extra, "{:,.0f}".format(unit * qty) if unit else "0")
 
+# The bag's words are content, pages.json "cart". The payment chips and the
+# cash on delivery note belong to checkout and stay here, and the amounts
+# beside the labels are placeholders shop.js replaces. The third bar opens
+# with the store rules' own wording (RULE_TEXT). What shop.js writes once it
+# has counted the bag (the bars' progress, the item count, the line and
+# gift-line words) reaches it as BGS_COPY["cart"].
+_GIFT_TOKENS = {"gift": esc(_gift_name(_GIFT_LABEL)),
+                "gift_over": esc(_aed(RULES["gift_with_purchase"]["threshold"]))}
+CART_TEXT = {
+    "c_title": page_text("cart.title"),
+    "c_cont": page_text("cart.continue.label"), "c_cont_href": page_href("cart.continue.href"),
+    "c_p1": page_text("cart.progress.free_delivery", RULE_TOKENS),
+    "c_p2": page_text("cart.progress.gift", _GIFT_TOKENS),
+    "c_unlocked": page_text("cart.progress.unlocked"),
+    "c_empty": page_text("cart.empty.text"), "c_empty_cta": page_text("cart.empty.cta_label"),
+    "c_empty_href": page_href("cart.empty.cta_href"),
+    "c_note": page_text("cart.never_discount_note"),
+}
+for _k in ("subtotal", "discount", "delivery", "free", "total", "checkout"):
+    CART_TEXT["c_" + _k] = page_text("cart.summary." + _k)
+COPY_JS["cart"] = {
+    "progress": {"unlocked": raw_text("cart.progress.unlocked"),
+                 "to_go": js_text("cart.progress.to_go", need=("amount",)),
+                 "ladder_next": js_text("cart.progress.ladder_next", need=("n",), allow=("pct",)),
+                 "ladder_top": js_text("cart.progress.ladder_top", allow=("pct",)),
+                 "ladder_count": js_text("cart.progress.ladder_count", need=("n",), allow=("goal",))},
+    "items": {k: js_text("cart.items." + k, need=("n",)) for k in ("one", "many")},
+    "line": {k: js_text("cart.line." + k) for k in ("no_image", "remove")},
+    "gift_line": {"placeholder": js_text("cart.gift_line.placeholder"),
+                  "meta": js_text("cart.gift_line.meta", allow=("amount",))},
+    "summary": {"free": raw_text("cart.summary.free")},
+}
+
 cart = """
 <section><div class="wrap">
-  <div class="sec-h"><h2 style="font-size:26px">Your bag<span data-bagitems></span></h2><a href="collection.html">Continue shopping &rarr;</a></div>
+  <div class="sec-h"><h2 style="font-size:26px">%(c_title)s<span data-bagitems></span></h2><a href="%(c_cont_href)s">%(c_cont)s &rarr;</a></div>
   <div class="two">
     <div>
       <div class="sum" data-cartprogress style="background:#fff;margin-bottom:18px">
-        <div class="prog"><div class="lb"><span>Free UAE delivery over %(rule_free_over)s</span><b data-p1lb style="color:var(--green)">Unlocked</b></div><div class="tr"><i data-p1 style="width:100%%"></i></div></div>
-        <div class="prog" style="margin-top:14px"><div class="lb"><span>%(rule_gift_bar)s</span><b data-p2lb style="color:var(--green)">Unlocked</b></div><div class="tr"><i data-p2 style="width:100%%"></i></div></div>
+        <div class="prog"><div class="lb"><span>%(c_p1)s</span><b data-p1lb style="color:var(--green)">%(c_unlocked)s</b></div><div class="tr"><i data-p1 style="width:100%%"></i></div></div>
+        <div class="prog" style="margin-top:14px"><div class="lb"><span>%(c_p2)s</span><b data-p2lb style="color:var(--green)">%(c_unlocked)s</b></div><div class="tr"><i data-p2 style="width:100%%"></i></div></div>
         <div class="prog" style="margin-top:14px"><div class="lb"><span data-p3txt>%(rule_p3_text)s</span><b data-p3lb style="color:var(--gold-d)">%(rule_p3_label)s</b></div><div class="tr"><i class="part" data-p3 style="width:%(rule_p3_width)s%%"></i></div></div>
       </div>
       <div data-cartlines></div>
       <div data-cartempty class="empty" hidden>
-        <p style="margin-bottom:16px">Your bag is empty.</p>
-        <a class="btn solid" href="collection.html">Browse the collection</a>
+        <p style="margin-bottom:16px">%(c_empty)s</p>
+        <a class="btn solid" href="%(c_empty_href)s">%(c_empty_cta)s</a>
       </div>
-      <div data-cartnote class="note" style="margin-top:16px" hidden>Reserve pieces are never discounted, on any offer, at any basket size, so they sit outside the volume ladder.</div>
+      <div data-cartnote class="note" style="margin-top:16px" hidden>%(c_note)s</div>
     </div>
     <div data-cartsummary><div class="sum">
-      <div class="r"><span>Subtotal</span><span data-subtotal>AED 0</span></div>
-      <div class="r" style="color:var(--green)" data-tierrow><span>Volume discount &middot; <b data-tierpct>%(rule_tier_pct)s</b>%%</span><span data-tieramt>&minus; AED 19.50</span></div>
-      <div class="r"><span>Delivery</span><span data-delivery style="color:var(--green)">Free</span></div>
-      <div class="r t"><span>Total</span><span data-total>AED 825.50</span></div>
-      <a class="btn solid block" href="checkout.html" style="margin-top:12px">Checkout</a>
+      <div class="r"><span>%(c_subtotal)s</span><span data-subtotal>AED 0</span></div>
+      <div class="r" style="color:var(--green)" data-tierrow><span>%(c_discount)s &middot; <b data-tierpct>%(rule_tier_pct)s</b>%%</span><span data-tieramt>&minus; AED 19.50</span></div>
+      <div class="r"><span>%(c_delivery)s</span><span data-delivery style="color:var(--green)">%(c_free)s</span></div>
+      <div class="r t"><span>%(c_total)s</span><span data-total>AED 825.50</span></div>
+      <a class="btn solid block" href="checkout.html" style="margin-top:12px">%(c_checkout)s</a>
       <div class="pay" data-pay style="margin-top:14px;justify-content:center"><span>Card</span><span>Apple Pay</span><span>Tabby</span><span>Tamara</span><span class="off">COD</span></div>
       <p data-codnote style="font-size:11.5px;color:var(--mut);margin:12px 0 0;text-align:center">Cash on delivery is withheld over AED 300.</p>
     </div></div>
   </div>
 </div></section>
-""" % dict(RULE_TEXT, vat=slot("VAT registration expected ~month 9"))
+""" % dict(RULE_TEXT, vat=slot("VAT registration expected ~month 9"), **CART_TEXT)
 
 # The bag and the gift box above print these rules; shop.js prices with them.
 EXTRA_GLOBALS.append(("BGS_RULES", lambda: RULES))
@@ -1279,62 +1361,123 @@ confirmed = """
   <div style="display:flex;gap:12px;margin-top:24px"><a class="btn solid" href="track-order.html">Track this order</a><a class="btn" href="index.html">Keep shopping</a></div>
 </div></section>
 """ % dict(check=sv("check",26,2.6), num=slot("generated at checkout"), trn=slot("TRN, registration expected ~month 9"))
+# The corporate page's words are content, pages.json "corporate". The band's
+# button jumps to the form below it, so its target stays here. The name and
+# email boxes' hints are also their names for screen readers; the other two
+# keep a shorter name. The form sends nothing yet, and its replies (shop.js,
+# BGS_COPY["corporate"]) say so.
+_CORP_TIER = ('<div class="sum" style="background:#fff"><span class="eyebrow">%s</span><div class="tier">%s</div>'
+              '<p style="font-size:12.5px;color:var(--mut);margin:0">%s</p></div>')
+CORPORATE_TEXT = {
+    "k_title": page_text("corporate.title"), "k_intro": page_text("corporate.intro"),
+    "k_tiers": "\n    ".join(_CORP_TIER % r for r in page_rows("corporate.tiers", ("units", "price", "note"))),
+    "k_band_h": page_text("corporate.band.heading"), "k_band_p": page_text("corporate.band.body"),
+    "k_band_cta": page_text("corporate.band.cta_label"),
+}
+for _k in ("name", "email", "occasion", "units", "send"):
+    CORPORATE_TEXT["k_" + _k] = page_text("corporate.form." + _k)
+COPY_JS["corporate"] = {
+    "invalid_email": js_text("corporate.replies.invalid_email"),
+    "thanks": js_text("corporate.replies.thanks"),
+    "thanks_name": js_text("corporate.replies.thanks_name", need=("name",)),
+    "quote": js_text("corporate.replies.quote"),
+    "quote_units": js_text("corporate.replies.quote_units", need=("n",)),
+    "not_sent": js_text("corporate.replies.not_sent"),
+}
+
 corporate = """
 <section><div class="wrap">
-  <div class="sec-h"><div><h2 style="font-size:26px">Corporate gifting</h2>
-  <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">Above 20 units this becomes a quote, not a checkout.</p></div></div>
+  <div class="sec-h"><div><h2 style="font-size:26px">%(k_title)s</h2>
+  <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">%(k_intro)s</p></div></div>
   <div class="grid g4" style="margin-bottom:24px">
-    <div class="sum" style="background:#fff"><span class="eyebrow">10 units</span><div class="tier">%(s)s</div><p style="font-size:12.5px;color:var(--mut);margin:0">Co-branding options</p></div>
-    <div class="sum" style="background:#fff"><span class="eyebrow">25 units</span><div class="tier">%(s)s</div><p style="font-size:12.5px;color:var(--mut);margin:0">Co-branding options</p></div>
-    <div class="sum" style="background:#fff"><span class="eyebrow">50 units</span><div class="tier">%(s)s</div><p style="font-size:12.5px;color:var(--mut);margin:0">Co-branding options</p></div>
-    <div class="sum" style="background:#fff"><span class="eyebrow">100 units</span><div class="tier">Quote</div><p style="font-size:12.5px;color:var(--mut);margin:0">Full co-branding</p></div>
+    %(k_tiers)s
   </div>
-  <div class="band"><div><h3>Tell us the occasion and the headcount</h3><p>Above 20 units this becomes a quote rather than a checkout. Send the details and we will come back with pricing.</p></div><a class="btn gold" href="#corporate-form">Request a quote</a></div>
+  <div class="band"><div><h3>%(k_band_h)s</h3><p>%(k_band_p)s</p></div><a class="btn gold" href="#corporate-form">%(k_band_cta)s</a></div>
   <div id="corporate-form" style="margin-top:22px;max-width:560px">
-    <div class="grid g2" style="margin-bottom:12px"><input class="field" data-cq="name" aria-label="Your name" placeholder="Your name"><input class="field" data-cq="email" type="email" aria-label="Work email" placeholder="Work email"></div>
-    <div class="grid g2" style="margin-bottom:12px"><input class="field" data-cq="occasion" aria-label="Occasion" placeholder="Occasion (Eid, wedding, staff gift)"><input class="field" data-cq="units" type="number" aria-label="Units" placeholder="Headcount / units"></div>
-    <button type="button" class="btn solid" data-cqsend>Send enquiry</button>
+    <div class="grid g2" style="margin-bottom:12px"><input class="field" data-cq="name" aria-label="%(k_name)s" placeholder="%(k_name)s"><input class="field" data-cq="email" type="email" aria-label="%(k_email)s" placeholder="%(k_email)s"></div>
+    <div class="grid g2" style="margin-bottom:12px"><input class="field" data-cq="occasion" aria-label="Occasion" placeholder="%(k_occasion)s"><input class="field" data-cq="units" type="number" aria-label="Units" placeholder="%(k_units)s"></div>
+    <button type="button" class="btn solid" data-cqsend>%(k_send)s</button>
     <p class="note" data-cqresult hidden style="margin:10px 0 0"></p>
   </div>
 </div></section>
-""" % dict(s="On quote")
+""" % CORPORATE_TEXT
+
+# The tracking page's words are content, pages.json "track". The order
+# number box's hint is also its name for screen readers, so both print the
+# one value. The replies its button gives reach shop.js as BGS_COPY["track"].
+TRACK_TEXT = {
+    "t_crumb": CRUMB_HOME + " / " + page_text("track.crumb"),
+    "t_title": page_text("track.title"), "t_intro": page_text("track.intro"),
+    "t_number": page_text("track.form.number"), "t_phone": page_text("track.form.phone"),
+    "t_button": page_text("track.form.button"),
+    "t_stages_h": page_text("track.stages_heading"),
+    "t_stages": kv_rows(page_rows("track.stages", ("label", "body")), "\n    "),
+    "t_note": page_text("track.whatsapp_note"),
+}
+COPY_JS["track"] = {"missing": js_text("track.replies.missing"),
+                    "looking": js_text("track.replies.looking", allow=("query",))}
 
 track = """
 <section><div class="wrap" style="max-width:720px">
-  <span class="eyebrow">Home / Track order</span>
-  <div class="sec-h" style="margin-top:10px"><div><h2 style="font-size:26px">Track your order</h2>
-  <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">Enter the order number from your confirmation, or the phone number you ordered with.</p></div></div>
-  <div class="grid g2" style="margin-bottom:14px"><input class="field" data-ordernum aria-label="Order number" placeholder="Order number"><input class="field" data-orderphone type="tel" aria-label="Phone number" placeholder="Phone &middot; UAE"></div>
-  <button type="button" class="btn solid block" data-findorder style="margin-bottom:10px">Find my order</button>
+  <span class="eyebrow">%(t_crumb)s</span>
+  <div class="sec-h" style="margin-top:10px"><div><h2 style="font-size:26px">%(t_title)s</h2>
+  <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">%(t_intro)s</p></div></div>
+  <div class="grid g2" style="margin-bottom:14px"><input class="field" data-ordernum aria-label="%(t_number)s" placeholder="%(t_number)s"><input class="field" data-orderphone type="tel" aria-label="Phone number" placeholder="%(t_phone)s"></div>
+  <button type="button" class="btn solid block" data-findorder style="margin-bottom:10px">%(t_button)s</button>
   <p class="note" data-findresult hidden style="margin:0 0 26px"></p>
-  <span class="eyebrow">Where it will be</span>
+  <span class="eyebrow">%(t_stages_h)s</span>
   <div class="kv" style="margin-top:10px">
-    <div><span>Placed</span><span>Order confirmed, payment taken</span></div>
-    <div><span>Confirmed</span><span>COD orders wait here until confirmed</span></div>
-    <div><span>Packed</span><span>Picked at the kiosk</span></div>
-    <div><span>Shipped</span><span>Courier reference appears here</span></div>
-    <div><span>Delivered</span><span>Credit-back voucher issues at this point</span></div>
+    %(t_stages)s
   </div>
-  <div class="note" style="margin-top:20px">Order updates can also come by WhatsApp, the opt-in is on the confirmation page, unticked by default.</div>
+  <div class="note" style="margin-top:20px">%(t_note)s</div>
 </div></section>
-"""
+""" % TRACK_TEXT
+
+# The account page's words are content, pages.json "account". A customer's
+# own details (name, phone, drops, credit, orders, voucher, code) stay
+# placeholders until login and the database arrive, and the account menu
+# stays here with them, naming the programme from content as the badge and
+# the heading do. The badge shows the first tier, where every customer
+# starts. The "How it works" link goes nowhere yet, so its target stays here.
+_TIERS = page_rows("account.loyalty.tiers", ("name", "note"))
+ACCOUNT_TEXT = {
+    "a_crumb": CRUMB_HOME + " / " + page_text("account.crumb"),
+    "a_prog": page_text("account.programme"),
+    "a_tier": _TIERS[0][0] if _TIERS else "",
+    "a_tiers": "\n          ".join('<div class="t%s"><b>%s</b><span>%s</span></div>' % ((" on" if i == 0 else "",) + r)
+                                  for i, r in enumerate(_TIERS)),
+    "a_next": page_text("account.loyalty.next_tier"),
+    "a_how": page_text("account.loyalty.how_label"),
+    "a_perks": kv_rows(page_rows("account.loyalty.perks", ("label", "who")), "\n          "),
+    "a_shop_href": page_href("account.orders.cta_href"),
+}
+for _k in ("drops", "credit", "orders"):
+    ACCOUNT_TEXT["a_%s" % _k] = page_text("account.stats.%s.label" % _k)
+    ACCOUNT_TEXT["a_%s_note" % _k] = page_text("account.stats.%s.note" % _k)
+for _part, _keys in (("wallet", ("heading", "voucher_label", "redeem_label", "redeem", "expires_label", "expires", "note")),
+                     ("referral", ("heading", "copy_label", "friend_label", "friend", "you_label", "you", "referred_label")),
+                     ("orders", ("heading", "track_label", "empty_title", "empty_body", "cta_label")),
+                     ("consent", ("heading", "phone_label", "email_label", "language_label", "language",
+                                  "order_updates", "offers", "note"))):
+    for _k in _keys:
+        ACCOUNT_TEXT["a_%s_%s" % (_part, _k)] = page_text("account.%s.%s" % (_part, _k))
 
 account = """
 <section><div class="wrap">
-  <span class="eyebrow">Home / Account</span>
+  <span class="eyebrow">%(a_crumb)s</span>
   <div class="acct-head">
     <div>
       <h2 style="font-size:26px;margin:8px 0 6px">%(name)s</h2>
       <p style="color:var(--mut);font-size:13.5px;margin:0">%(contact)s</p>
     </div>
-    <div class="tierbadge"><span class="eyebrow gold-d">BGS One</span><b>%(tier)s</b></div>
+    <div class="tierbadge"><span class="eyebrow gold-d">%(a_prog)s</span><b>%(a_tier)s</b></div>
   </div>
 
   <div class="acct">
     <nav class="acctnav">
       <a class="on" href="account.html">Overview</a>
       <a href="account.html">Orders</a>
-      <a href="account.html">BGS One &amp; wallet</a>
+      <a href="account.html">%(a_prog)s &amp; wallet</a>
       <a href="account.html">Referrals</a>
       <a href="account.html">Addresses</a>
       <a href="account.html">Details &amp; consent</a>
@@ -1343,73 +1486,68 @@ account = """
 
     <div class="acctbody">
       <div class="grid g3" style="margin-bottom:26px">
-        <div class="sum" style="background:#fff"><span class="eyebrow">Drops</span><div class="tier">%(drops)s</div><p class="mini">1 drop per AED 1 &middot; 100 drops = AED 5 credit</p></div>
-        <div class="sum" style="background:#fff"><span class="eyebrow">Wallet credit</span><div class="tier">%(credit)s</div><p class="mini">Credit-back vouchers and referral credit</p></div>
-        <div class="sum" style="background:#fff"><span class="eyebrow">Orders</span><div class="tier">%(orders)s</div><p class="mini">Lifetime, all channels</p></div>
+        <div class="sum" style="background:#fff"><span class="eyebrow">%(a_drops)s</span><div class="tier">%(drops)s</div><p class="mini">%(a_drops_note)s</p></div>
+        <div class="sum" style="background:#fff"><span class="eyebrow">%(a_credit)s</span><div class="tier">%(credit)s</div><p class="mini">%(a_credit_note)s</p></div>
+        <div class="sum" style="background:#fff"><span class="eyebrow">%(a_orders)s</span><div class="tier">%(orders)s</div><p class="mini">%(a_orders_note)s</p></div>
       </div>
 
-      <div class="sec-h"><h2 style="font-size:17px">BGS One</h2><a href="#">How it works &rarr;</a></div>
+      <div class="sec-h"><h2 style="font-size:17px">%(a_prog)s</h2><a href="#">%(a_how)s &rarr;</a></div>
       <div class="sum" style="background:#fff;margin-bottom:26px">
         <div class="tiers">
-          <div class="t on"><b>Musk</b><span>0 lifetime</span></div>
-          <div class="t"><b>Amber</b><span>500 lifetime</span></div>
-          <div class="t"><b>Oud</b><span>1,500 lifetime</span></div>
+          %(a_tiers)s
         </div>
         <div class="tr" style="margin:14px 0 10px"><i class="part" style="width:%(tierpct)s"></i></div>
-        <p class="mini" style="margin:0">%(tiernext)s</p>
+        <p class="mini" style="margin:0">%(a_next)s</p>
         <div class="kv" style="margin-top:14px">
-          <div><span>Birthday oud</span><span>Oud tier</span></div>
-          <div><span>Early access to a drop</span><span>Amber and Oud</span></div>
-          <div><span>Double-drop events</span><span>When running</span></div>
+          %(a_perks)s
         </div>
       </div>
 
-      <div class="sec-h"><h2 style="font-size:17px">Wallet</h2></div>
+      <div class="sec-h"><h2 style="font-size:17px">%(a_wallet_heading)s</h2></div>
       <div class="sum" style="background:#fff;margin-bottom:26px">
         <div class="kv">
-          <div><span>Credit-back voucher &middot; 3 ml purchase</span><span>%(voucher)s</span></div>
-          <div><span>Redeemable on</span><span>Any bottle over AED 75</span></div>
-          <div><span>Expires</span><span>60 days from issue</span></div>
+          <div><span>%(a_wallet_voucher_label)s</span><span>%(voucher)s</span></div>
+          <div><span>%(a_wallet_redeem_label)s</span><span>%(a_wallet_redeem)s</span></div>
+          <div><span>%(a_wallet_expires_label)s</span><span>%(a_wallet_expires)s</span></div>
         </div>
-        <p class="mini" style="margin:12px 0 0">Issued automatically the day a 3 ml order is delivered. Single use.</p>
+        <p class="mini" style="margin:12px 0 0">%(a_wallet_note)s</p>
       </div>
 
-      <div class="sec-h"><h2 style="font-size:17px">Refer a friend</h2></div>
+      <div class="sec-h"><h2 style="font-size:17px">%(a_referral_heading)s</h2></div>
       <div class="sum" style="background:#fff;margin-bottom:26px">
-        <div class="refbox"><span class="code">%(refcode)s</span><span class="btn sm">Copy link</span></div>
+        <div class="refbox"><span class="code">%(refcode)s</span><span class="btn sm">%(a_referral_copy_label)s</span></div>
         <div class="kv" style="margin-top:14px">
-          <div><span>They get</span><span>AED 20 off a first order over AED 99</span></div>
-          <div><span>You get</span><span>AED 20 credit, 3 days after their delivery</span></div>
-          <div><span>Referred so far</span><span>%(referred)s</span></div>
+          <div><span>%(a_referral_friend_label)s</span><span>%(a_referral_friend)s</span></div>
+          <div><span>%(a_referral_you_label)s</span><span>%(a_referral_you)s</span></div>
+          <div><span>%(a_referral_referred_label)s</span><span>%(referred)s</span></div>
         </div>
       </div>
 
-      <div class="sec-h"><h2 style="font-size:17px">Recent orders</h2><a href="track-order.html">Track an order &rarr;</a></div>
+      <div class="sec-h"><h2 style="font-size:17px">%(a_orders_heading)s</h2><a href="track-order.html">%(a_orders_track_label)s &rarr;</a></div>
       <div class="sum" style="background:#fff;margin-bottom:26px">
         <div class="emptystate">
-          <b>No orders yet</b>
-          <p class="mini">Orders placed as a guest with this phone number will appear here once the number is verified.</p>
-          <a class="btn sm" href="collection.html">Start shopping</a>
+          <b>%(a_orders_empty_title)s</b>
+          <p class="mini">%(a_orders_empty_body)s</p>
+          <a class="btn sm" href="%(a_shop_href)s">%(a_orders_cta_label)s</a>
         </div>
       </div>
 
-      <div class="sec-h"><h2 style="font-size:17px">Details &amp; consent</h2></div>
+      <div class="sec-h"><h2 style="font-size:17px">%(a_consent_heading)s</h2></div>
       <div class="sum" style="background:#fff">
         <div class="kv">
-          <div><span>Phone</span><span>%(contact)s</span></div>
-          <div><span>Email</span><span>%(email)s</span></div>
-          <div><span>Language</span><span>English &middot; العربية</span></div>
+          <div><span>%(a_consent_phone_label)s</span><span>%(contact)s</span></div>
+          <div><span>%(a_consent_email_label)s</span><span>%(email)s</span></div>
+          <div><span>%(a_consent_language_label)s</span><span>%(a_consent_language)s</span></div>
         </div>
-        <label class="consent"><input type="checkbox">Order updates on WhatsApp</label>
-        <label class="consent"><input type="checkbox">Offers and new drops on WhatsApp</label>
-        <p class="mini" style="margin:10px 0 0">Each opt-in is stored with its time, source and language. Opting out here also stops messages sent from the CRM.</p>
+        <label class="consent"><input type="checkbox">%(a_consent_order_updates)s</label>
+        <label class="consent"><input type="checkbox">%(a_consent_offers)s</label>
+        <p class="mini" style="margin:10px 0 0">%(a_consent_note)s</p>
       </div>
     </div>
   </div>
 </div></section>
-""" % dict(name=slot("customer name"), contact=slot("phone"), email=slot("email"),
-           tier="Musk", drops=slot("0"), credit=slot("AED 0"), orders=slot("0"),
-           tierpct="0%", tiernext="500 lifetime drops to Amber",
+""" % dict(ACCOUNT_TEXT, name=slot("customer name"), contact=slot("phone"), email=slot("email"),
+           drops=slot("0"), credit=slot("AED 0"), orders=slot("0"), tierpct="0%",
            voucher=slot("none active"), refcode=slot("unique code per customer"),
            referred=slot("0"))
 
@@ -1587,6 +1725,17 @@ PAGES = [("index.html","Attars, Bakhoor &amp; EDP Sprays: Blended in Dubai",home
          ("account.html","Your Account: BGS One, Wallet and Referrals",account,"","Account"),
          ("quiz.html","Test Your Scent: Five Questions, One Minute",quiz,"","Home"),
          ("corporate.html","Corporate Gifting: Co-Branded Oud and Bakhoor",corporate,"Corporate Gifting","Home")]
+# 404.html is written after the pages, but its words (pages.json
+# "not_found") are read here with the rest. Its tab title ends with the same
+# suffix from Settings as every other page's.
+NOT_FOUND_TEXT = {"title": page_text("not_found.title"), "suffix": SHELL_TEXT["title_suffix"],
+                  "heading": page_text("not_found.heading"), "body": page_text("not_found.body"),
+                  "button": page_text("not_found.button")}
+
+# Every page's text has been read by now. Stop before anything is written if
+# any of it was missing or broken, naming each problem once.
+if _BAD_PAGES:
+    sys.exit("build failed:\n  " + "\n  ".join(dict.fromkeys(_BAD_PAGES)))
 print("catalogue:", emit_catalogue(), "products")
 def minify_css(css):
     """The stylesheet ships without comments and spare whitespace: comments are
@@ -1634,16 +1783,16 @@ print("wrote", len(PAGES), "pages")
 pathlib.Path("404.html").write_text("""<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Page not found | BGS Corner</title><meta name="robots" content="noindex">
+<title>%(title)s | %(suffix)s</title><meta name="robots" content="noindex">
 <style>body{margin:0;min-height:100vh;display:grid;place-items:center;text-align:center;
 background:#faf8f4;color:#171310;font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 main{padding:24px}h1{font:600 28px/1.2 Georgia,"Times New Roman",serif;margin:0 0 10px}
 a{display:inline-block;margin-top:18px;background:#171310;color:#fff;padding:12px 22px;text-decoration:none;border-radius:999px}</style>
-</head><body><main><h1>We couldn&rsquo;t find that page</h1><p>The link may be old or mistyped.</p>
-<a id="home" href="/">Go to the BGS Corner homepage</a></main>
+</head><body><main><h1>%(heading)s</h1><p>%(body)s</p>
+<a id="home" href="/">%(button)s</a></main>
 <script>document.getElementById("home").href=location.pathname.indexOf("/structured-corner-v2/")===0?"/structured-corner-v2/":"/";</script>
 </body></html>
-""")
+""" % NOT_FOUND_TEXT)
 # Search results are thin, endless variations of one page.
 pathlib.Path("robots.txt").write_text("User-agent: *\nDisallow: /collection.html?q=\n")
 

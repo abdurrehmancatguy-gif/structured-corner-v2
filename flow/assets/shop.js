@@ -37,6 +37,20 @@ function bgsCopy(path, fallback) {
 }
 /* the end of every tab title: " | BGS Corner" */
 function bgsTitleSuffix() { return " | " + bgsCopy("title_suffix", "BGS Corner"); }
+/* The same text for markup a script builds as a string (the bag lines, the
+   gift box slots), escaped so "Wrap & card" reads as typed. */
+function bgsCopyHtml(path, fallback) {
+  return bgsCopy(path, fallback).replace(/&/g, "&amp;").replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+/* Fills a text's {tokens}: bgsFill("Only {n} left", { n: 3 }). One pass with
+   a function, so a visitor's own words (a name, an order number) go in as
+   typed and are never read as a token or a replacement pattern. */
+function bgsFill(text, vals) {
+  return text.replace(/\{([a-z_]+)\}/g, function (m, k) {
+    return Object.prototype.hasOwnProperty.call(vals, k) ? String(vals[k]) : m;
+  });
+}
 /* Each feature below runs on its own: an error in one (bad data in storage, a
    missing element) is logged and the rest still work. As one plain script, the
    first throw stopped every feature after it, the bag included. */
@@ -81,6 +95,8 @@ bgsRun(function () {
   var FREE_AT = bgsRule("free_delivery_over", 150), FEE = bgsRule("delivery_fee", 12);
   var GIFT_AT = bgsRule("gift_with_purchase.threshold", 300);
   var LADDER = bgsRule("volume_ladder", [{ units: 3, percent: 10 }, { units: 6, percent: 15 }]);
+  /* the bag's words, from pages.json (BGS_COPY.cart); the sums are the engine's */
+  var FREE = bgsCopy("cart.summary.free", "Free"), UNLOCKED = bgsCopy("cart.progress.unlocked", "Unlocked");
   function recalc() {
     var lines = document.querySelectorAll("[data-line]");
     if (!lines.length) return;
@@ -90,7 +106,7 @@ bgsRun(function () {
       var unit = parseFloat(l.dataset.unit) || 0;
       var qty = parseInt(l.querySelector("[data-qty]") ? l.querySelector("[data-qty]").textContent : "1", 10);
       var total = unit * qty;
-      l.querySelector("[data-lineprice]").textContent = unit ? aed(total) : "Free";
+      l.querySelector("[data-lineprice]").textContent = unit ? aed(total) : FREE;
       subtotal += total;
       // §6.1 - halo and gift-with-purchase lines are outside the ladder entirely
       if (l.dataset.halo !== "1" && l.dataset.gift !== "1") {
@@ -118,7 +134,7 @@ bgsRun(function () {
       }
     }
     if (q("[data-delivery]")) {
-      q("[data-delivery]").textContent = freeShip ? "Free" : aed(FEE);
+      q("[data-delivery]").textContent = freeShip ? FREE : aed(FEE);
       q("[data-delivery]").style.color = freeShip ? "var(--green)" : "";
     }
     if (q("[data-total]")) q("[data-total]").textContent = aed(total);
@@ -135,16 +151,21 @@ bgsRun(function () {
       if (q(bar)) q(bar).style.width = Math.min(100, pctWidth) + "%";
       if (q(lb)) q(lb).textContent = text;
     };
+    var toGo = function (amount) {
+      return bgsFill(bgsCopy("cart.progress.to_go", "{amount} to go"), { amount: aed(amount) });
+    };
     set("[data-p1]", "[data-p1lb]", subtotal / FREE_AT * 100,
-        freeShip ? "Unlocked" : aed(FREE_AT - subtotal) + " to go");
+        freeShip ? UNLOCKED : toGo(FREE_AT - subtotal));
     set("[data-p2]", "[data-p2lb]", subtotal / GIFT_AT * 100,
-        subtotal >= GIFT_AT ? "Unlocked" : aed(GIFT_AT - subtotal) + " to go");
+        subtotal >= GIFT_AT ? UNLOCKED : toGo(GIFT_AT - subtotal));
     var top = LADDER[LADDER.length - 1], nextRung = next ? next.units : top.units;
-    set("[data-p3]", "[data-p3lb]", eligibleUnits / nextRung * 100, eligibleUnits + " of " + nextRung);
+    set("[data-p3]", "[data-p3lb]", eligibleUnits / nextRung * 100,
+        bgsFill(bgsCopy("cart.progress.ladder_count", "{n} of {goal}"), { n: eligibleUnits, goal: nextRung }));
     if (q("[data-p3txt]")) {
       q("[data-p3txt]").textContent = next
-        ? "Add " + (nextRung - eligibleUnits) + " more to save " + next.percent + "%"
-        : "Saving " + top.percent + "%, the top rung";
+        ? bgsFill(bgsCopy("cart.progress.ladder_next", "Add {n} more to save {pct}%"),
+                  { n: nextRung - eligibleUnits, pct: next.percent })
+        : bgsFill(bgsCopy("cart.progress.ladder_top", "Saving {pct}%, the top rung"), { pct: top.percent });
     }
 
     /* §10.3 - COD withheld over AED 300 */
@@ -1092,7 +1113,8 @@ bgsRun(function () {
 /* ---------- track order + corporate enquiry (front-end only) ----------------
    There is no backend, and these say so rather than pretending. Find-my-order
    validates the number and reveals the standard status sequence; the corporate
-   form validates an email and acknowledges the enquiry.
+   form validates an email and acknowledges the enquiry. Their replies are
+   content (BGS_COPY.track and .corporate); the email check stays here.
 --------------------------------------------------------------------------- */
 bgsRun(function () {
   "use strict";
@@ -1103,8 +1125,12 @@ bgsRun(function () {
       var phone = (document.querySelector("[data-orderphone]") || {}).value || "";
       var out = document.querySelector("[data-findresult]");
       out.hidden = false;
-      if (!num.trim() && !phone.trim()) { out.textContent = "Enter your order number, or the phone you ordered with."; return; }
-      out.textContent = "Looking for " + (num.trim() || phone.trim()) + ". Live courier tracking connects with the backend; the stages below are the standard sequence your order moves through.";
+      if (!num.trim() && !phone.trim()) {
+        out.textContent = bgsCopy("track.replies.missing", "Enter your order number, or the phone you ordered with.");
+        return;
+      }
+      out.textContent = bgsFill(bgsCopy("track.replies.looking", "Looking for {query}. Live courier tracking connects with the backend; the stages below are the standard sequence your order moves through."),
+                                { query: num.trim() || phone.trim() });
     });
   }
   var send = document.querySelector("[data-cqsend]");
@@ -1114,8 +1140,17 @@ bgsRun(function () {
       var out = document.querySelector("[data-cqresult]");
       out.hidden = false;
       var email = g("email");
-      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { out.textContent = "Enter a valid work email so we can reply."; return; }
-      out.textContent = "Thank you" + (g("name") ? ", " + g("name") : "") + ". We will come back with a quote" + (g("units") ? " for " + g("units") + " units" : "") + ". This form is front-end only for now; the enquiry is not yet sent anywhere.";
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        out.textContent = bgsCopy("corporate.replies.invalid_email", "Enter a valid work email so we can reply.");
+        return;
+      }
+      var name = g("name"), units = g("units");
+      out.textContent =
+        (name ? bgsFill(bgsCopy("corporate.replies.thanks_name", "Thank you, {name}"), { name: name })
+              : bgsCopy("corporate.replies.thanks", "Thank you")) + ". " +
+        (units ? bgsFill(bgsCopy("corporate.replies.quote_units", "We will come back with a quote for {n} units"), { n: units })
+               : bgsCopy("corporate.replies.quote", "We will come back with a quote")) + ". " +
+        bgsCopy("corporate.replies.not_sent", "This form is front-end only for now; the enquiry is not yet sent anywhere.");
     });
   }
 });
@@ -1133,23 +1168,30 @@ bgsRun(function () {
   var BOX_FEE = bgsRule("giftbox_fee", 25);
   var BOX_AT = bgsRule("giftbox_volume_discount_at", 3), BOX_PCT = bgsRule("giftbox_volume_discount_percent", 10);
   var size = 3, picked = [];
+  /* the slots' words, from pages.json (BGS_COPY.gift_box), escaped for the
+     slot markup below */
+  var T = {
+    filled: bgsCopyHtml("gift_box.slots.filled", "Slot {n}"), remove: bgsCopyHtml("gift_box.slots.remove", "tap to remove"),
+    empty: bgsCopyHtml("gift_box.slots.empty", "Slot {n} empty"), choose: bgsCopyHtml("gift_box.slots.choose", "Choose a scent"),
+    pick: bgsCopyHtml("gift_box.slots.pick", "Pick from below")
+  };
 
   function priceOf(k) { var p = bgsProduct(k); return (p && p.pn) || 0; }
 
   function renderSlots() {
     var html = "";
     for (var i = 0; i < size; i++) {
-      var k = picked[i];
+      var k = picked[i], slotNo = { n: i + 1 };
       if (k) {
         html += '<button type="button" class="p slot-filled" data-unpick="' + i + '">' +
-          '<div class="ph"><span class="none">Slot ' + (i + 1) + "</span></div>" +
+          '<div class="ph"><span class="none">' + bgsFill(T.filled, slotNo) + "</span></div>" +
           '<div class="b"><span class="nm">' + CAT[k].name + "</span>" +
-          '<span class="notes">AED ' + CAT[k].price + ' &middot; tap to remove</span></div></button>';
+          '<span class="notes">AED ' + CAT[k].price + " &middot; " + T.remove + "</span></div></button>";
       } else {
         html += '<div class="p" style="border-style:dashed"><div class="ph" style="background:var(--alt)">' +
-          '<span class="none">Slot ' + (i + 1) + ' empty</span></div>' +
-          '<div class="b"><span class="nm" style="color:var(--faint)">Choose a scent</span>' +
-          '<span class="notes">Pick from below</span></div></div>';
+          '<span class="none">' + bgsFill(T.empty, slotNo) + "</span></div>" +
+          '<div class="b"><span class="nm" style="color:var(--faint)">' + T.choose + "</span>" +
+          '<span class="notes">' + T.pick + "</span></div></div>";
       }
     }
     slotsHost.innerHTML = html;
@@ -1163,7 +1205,8 @@ bgsRun(function () {
     var total = scents + BOX_FEE - disc;
 
     var q = function (s) { return document.querySelector(s); };
-    q("[data-boxn]").textContent = n + (n === 1 ? " scent" : " scents");
+    q("[data-boxn]").textContent = bgsFill(n === 1 ? bgsCopy("gift_box.summary.scents_one", "{n} scent")
+                                                   : bgsCopy("gift_box.summary.scents_many", "{n} scents"), { n: n });
     q("[data-boxscents]").textContent = "AED " + scents;
     var dr = q("[data-boxdisc]");
     dr.style.color = n >= BOX_AT ? "var(--green)" : "var(--faint)";
@@ -1172,10 +1215,11 @@ bgsRun(function () {
 
     var cta = q("[data-boxcta]"), left = size - n;
     if (left > 0) {
-      cta.textContent = "Fill " + left + (left === 1 ? " more slot" : " more slots");
+      cta.textContent = bgsFill(left === 1 ? bgsCopy("gift_box.summary.fill_one", "Fill {n} more slot")
+                                           : bgsCopy("gift_box.summary.fill_many", "Fill {n} more slots"), { n: left });
       cta.classList.add("ghost"); cta.classList.remove("solid");
     } else {
-      cta.textContent = "Add box to bag: AED " + total;
+      cta.textContent = bgsFill(bgsCopy("gift_box.summary.add", "Add box to bag: {total}"), { total: "AED " + total });
       cta.classList.add("solid"); cta.classList.remove("ghost");
     }
   }
@@ -1211,7 +1255,7 @@ bgsRun(function () {
       e.preventDefault(); e.stopImmediatePropagation();
       if (picked.length >= size) {
         var cta = document.querySelector("[data-boxcta]");
-        cta.textContent = "Box is full, remove one first";
+        cta.textContent = bgsCopy("gift_box.summary.full", "Box is full, remove one first");
         setTimeout(renderSummary, 1800);
         return;
       }
@@ -1288,7 +1332,8 @@ bgsRun(function () {
       el.hidden = n === 0;
     });
     var label = document.querySelector("[data-bagitems]");
-    if (label) label.textContent = n ? " · " + n + (n === 1 ? " item" : " items") : "";
+    if (label) label.textContent = n ? " · " + bgsFill(n === 1 ? bgsCopy("cart.items.one", "{n} item")
+                                                               : bgsCopy("cart.items.many", "{n} items"), { n: n }) : "";
   }
 
   function money(n) {
@@ -1300,7 +1345,7 @@ bgsRun(function () {
     var img = (p.images && p.images[0])
       ? '<img src="' + bgsImg(p.images[0], "-thumb") +
         '" alt="' + (p.name || "").replace(/"/g, "&quot;") + '" width="160" height="160">'
-      : '<span class="none">Image</span>';
+      : '<span class="none">' + bgsCopyHtml("cart.line.no_image", "Image") + "</span>";
     return '<div class="line" data-line data-id="' + l.id + '" data-unit="' + p.pn +
       '" data-halo="' + (halo ? "1" : "0") + '" data-gift="0">' +
       '<a class="im" href="product.html?p=' + l.id + '">' + img + '</a>' +
@@ -1311,17 +1356,18 @@ bgsRun(function () {
         '<i data-qty>' + l.qty + '</i>' +
         '<button type="button" data-step="1" aria-label="Increase quantity">+</button></span>' +
       (halo ? '<div class="norm" style="margin-top:6px">Never discounted</div>' : "") +
-      '<button type="button" class="lrem" data-remove="' + l.id + '">Remove</button>' +
+      '<button type="button" class="lrem" data-remove="' + l.id + '">' + bgsCopyHtml("cart.line.remove", "Remove") + "</button>" +
       '</div>' +
       '<div class="lprice"><span data-lineprice>' + money(p.pn * l.qty) + '</span></div></div>';
   }
 
   function giftHtml() {
     return '<div class="line" data-line data-unit="0" data-halo="0" data-gift="1">' +
-      '<div class="im"><span class="none">Gift</span></div>' +
+      '<div class="im"><span class="none">' + bgsCopyHtml("cart.gift_line.placeholder", "Gift") + "</span></div>" +
       '<div class="linfo"><div class="lname">' + GIFT_LABEL.replace(/&/g, "&amp;").replace(/</g, "&lt;") + '</div>' +
-      '<div class="lmeta">Gift with purchase over ' + money(GIFT_AT) + '</div></div>' +
-      '<div class="lprice"><span data-lineprice>Free</span></div></div>';
+      '<div class="lmeta">' + bgsFill(bgsCopyHtml("cart.gift_line.meta", "Gift with purchase over {amount}"), { amount: money(GIFT_AT) }) +
+      "</div></div>" +
+      '<div class="lprice"><span data-lineprice>' + bgsCopyHtml("cart.summary.free", "Free") + "</span></div></div>";
   }
 
   function render() {

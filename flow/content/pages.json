@@ -186,5 +186,271 @@
       "crumb": "Products",
       "page_title": "Product not found"
     }
+  },
+  "gift_box": {
+    "crumb": "Build Your Gift Box",
+    "title": "Build a gift box",
+    "intro": "Three or six slots, filled from the house scents, leaving as one cart line with its contents itemised.",
+    "size_label": "{n} slots",
+    "picker_heading": "Add to the box",
+    "slots": {
+      "filled": "Slot {n}",
+      "remove": "tap to remove",
+      "empty": "Slot {n} empty",
+      "choose": "Choose a scent",
+      "pick": "Pick from below"
+    },
+    "summary": {
+      "scents_one": "{n} scent",
+      "scents_many": "{n} scents",
+      "box_label": "Premium box",
+      "discount_label": "Volume discount at {box_at}",
+      "total_label": "Total",
+      "fill_one": "Fill {n} more slot",
+      "fill_many": "Fill {n} more slots",
+      "add": "Add box to bag: {total}",
+      "full": "Box is full, remove one first"
+    },
+    "options_heading": "Gift options",
+    "options": [
+      {
+        "label": "Wrap & handwritten card",
+        "value": "+AED 10",
+        "highlight": false
+      },
+      {
+        "label": "QR video message · 60s",
+        "value": "Free",
+        "highlight": true
+      },
+      {
+        "label": "Scheduled delivery date",
+        "value": "Up to +30 days",
+        "highlight": false
+      },
+      {
+        "label": "Ship to recipient · hide prices",
+        "value": "Off",
+        "highlight": false
+      }
+    ]
+  },
+  "cart": {
+    "title": "Your bag",
+    "continue": {
+      "label": "Continue shopping",
+      "href": "collection.html"
+    },
+    "progress": {
+      "free_delivery": "Free UAE delivery over {free_over}",
+      "gift": "Free {gift} over {gift_over}",
+      "unlocked": "Unlocked",
+      "to_go": "{amount} to go",
+      "ladder_next": "Add {n} more to save {pct}%",
+      "ladder_top": "Saving {pct}%, the top rung",
+      "ladder_count": "{n} of {goal}"
+    },
+    "items": {
+      "one": "{n} item",
+      "many": "{n} items"
+    },
+    "line": {
+      "no_image": "Image",
+      "remove": "Remove"
+    },
+    "gift_line": {
+      "placeholder": "Gift",
+      "meta": "Gift with purchase over {amount}"
+    },
+    "empty": {
+      "text": "Your bag is empty.",
+      "cta_label": "Browse the collection",
+      "cta_href": "collection.html"
+    },
+    "never_discount_note": "Reserve pieces are never discounted, on any offer, at any basket size, so they sit outside the volume ladder.",
+    "summary": {
+      "subtotal": "Subtotal",
+      "discount": "Volume discount",
+      "delivery": "Delivery",
+      "free": "Free",
+      "total": "Total",
+      "checkout": "Checkout"
+    }
+  },
+  "track": {
+    "crumb": "Track order",
+    "title": "Track your order",
+    "intro": "Enter the order number from your confirmation, or the phone number you ordered with.",
+    "form": {
+      "number": "Order number",
+      "phone": "Phone · UAE",
+      "button": "Find my order"
+    },
+    "replies": {
+      "missing": "Enter your order number, or the phone you ordered with.",
+      "looking": "Looking for {query}. Live courier tracking connects with the backend; the stages below are the standard sequence your order moves through."
+    },
+    "stages_heading": "Where it will be",
+    "stages": [
+      {
+        "label": "Placed",
+        "body": "Order confirmed, payment taken"
+      },
+      {
+        "label": "Confirmed",
+        "body": "COD orders wait here until confirmed"
+      },
+      {
+        "label": "Packed",
+        "body": "Picked at the kiosk"
+      },
+      {
+        "label": "Shipped",
+        "body": "Courier reference appears here"
+      },
+      {
+        "label": "Delivered",
+        "body": "Credit-back voucher issues at this point"
+      }
+    ],
+    "whatsapp_note": "Order updates can also come by WhatsApp, the opt-in is on the confirmation page, unticked by default."
+  },
+  "corporate": {
+    "title": "Corporate gifting",
+    "intro": "Above 20 units this becomes a quote, not a checkout.",
+    "tiers": [
+      {
+        "units": "10 units",
+        "price": "On quote",
+        "note": "Co-branding options"
+      },
+      {
+        "units": "25 units",
+        "price": "On quote",
+        "note": "Co-branding options"
+      },
+      {
+        "units": "50 units",
+        "price": "On quote",
+        "note": "Co-branding options"
+      },
+      {
+        "units": "100 units",
+        "price": "Quote",
+        "note": "Full co-branding"
+      }
+    ],
+    "band": {
+      "heading": "Tell us the occasion and the headcount",
+      "body": "Above 20 units this becomes a quote rather than a checkout. Send the details and we will come back with pricing.",
+      "cta_label": "Request a quote"
+    },
+    "form": {
+      "name": "Your name",
+      "email": "Work email",
+      "occasion": "Occasion (Eid, wedding, staff gift)",
+      "units": "Headcount / units",
+      "send": "Send enquiry"
+    },
+    "replies": {
+      "invalid_email": "Enter a valid work email so we can reply.",
+      "thanks": "Thank you",
+      "thanks_name": "Thank you, {name}",
+      "quote": "We will come back with a quote",
+      "quote_units": "We will come back with a quote for {n} units",
+      "not_sent": "This form is front-end only for now; the enquiry is not yet sent anywhere."
+    }
+  },
+  "account": {
+    "crumb": "Account",
+    "programme": "BGS One",
+    "stats": {
+      "drops": {
+        "label": "Drops",
+        "note": "1 drop per AED 1 · 100 drops = AED 5 credit"
+      },
+      "credit": {
+        "label": "Wallet credit",
+        "note": "Credit-back vouchers and referral credit"
+      },
+      "orders": {
+        "label": "Orders",
+        "note": "Lifetime, all channels"
+      }
+    },
+    "loyalty": {
+      "how_label": "How it works",
+      "tiers": [
+        {
+          "name": "Musk",
+          "note": "0 lifetime"
+        },
+        {
+          "name": "Amber",
+          "note": "500 lifetime"
+        },
+        {
+          "name": "Oud",
+          "note": "1,500 lifetime"
+        }
+      ],
+      "next_tier": "500 lifetime drops to Amber",
+      "perks": [
+        {
+          "label": "Birthday oud",
+          "who": "Oud tier"
+        },
+        {
+          "label": "Early access to a drop",
+          "who": "Amber and Oud"
+        },
+        {
+          "label": "Double-drop events",
+          "who": "When running"
+        }
+      ]
+    },
+    "wallet": {
+      "heading": "Wallet",
+      "voucher_label": "Credit-back voucher · 3 ml purchase",
+      "redeem_label": "Redeemable on",
+      "redeem": "Any bottle over AED 75",
+      "expires_label": "Expires",
+      "expires": "60 days from issue",
+      "note": "Issued automatically the day a 3 ml order is delivered. Single use."
+    },
+    "referral": {
+      "heading": "Refer a friend",
+      "copy_label": "Copy link",
+      "friend_label": "They get",
+      "friend": "AED 20 off a first order over AED 99",
+      "you_label": "You get",
+      "you": "AED 20 credit, 3 days after their delivery",
+      "referred_label": "Referred so far"
+    },
+    "orders": {
+      "heading": "Recent orders",
+      "track_label": "Track an order",
+      "empty_title": "No orders yet",
+      "empty_body": "Orders placed as a guest with this phone number will appear here once the number is verified.",
+      "cta_label": "Start shopping",
+      "cta_href": "collection.html"
+    },
+    "consent": {
+      "heading": "Details & consent",
+      "phone_label": "Phone",
+      "email_label": "Email",
+      "language_label": "Language",
+      "language": "English · العربية",
+      "order_updates": "Order updates on WhatsApp",
+      "offers": "Offers and new drops on WhatsApp",
+      "note": "Each opt-in is stored with its time, source and language. Opting out here also stops messages sent from the CRM."
+    }
+  },
+  "not_found": {
+    "title": "Page not found",
+    "heading": "We couldn’t find that page",
+    "body": "The link may be old or mistyped.",
+    "button": "Go to the BGS Corner homepage"
   }
 }
