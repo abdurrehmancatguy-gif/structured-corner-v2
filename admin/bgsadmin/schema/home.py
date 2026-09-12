@@ -1,5 +1,6 @@
 """The homepage (flow/content/home.json)."""
-RESOURCE = {"name": "home", "label": "Homepage", "kind": "document"}
+RESOURCE = {"name": "home", "label": "Homepage", "kind": "document",
+            "intro": "The homepage banner, the product films and the section headings."}
 
 NOT_SHOWN = "Saved, but the shop does not use this yet: the site still has it written into its code."
 UPLOAD = "New banner images and films arrive with the media stage; duplicate a slide to start from its picture."

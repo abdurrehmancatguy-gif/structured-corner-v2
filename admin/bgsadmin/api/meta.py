@@ -2,7 +2,7 @@
 import sys
 
 from .. import schema as schema_mod
-from ..config import DOCUMENTS, PAGES
+from ..config import PAGES
 from ..routes import Route
 from ..service import saved
 
@@ -32,7 +32,7 @@ def get_schema(req):
 def status(req):
     store = req.app.store
     revs = {"products": store.products()[1]}
-    for n in DOCUMENTS:
+    for n in schema_mod.document_names():
         revs[n] = store.doc(n)[1]
     return {"revs": revs, "external": store.external_changes(), "busy": store.busy(), "build": req.app.build}
 

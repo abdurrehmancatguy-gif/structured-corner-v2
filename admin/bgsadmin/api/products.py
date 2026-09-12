@@ -9,7 +9,6 @@ import urllib.parse
 
 from .. import schema as schema_mod
 from .. import validate
-from ..config import DOCUMENTS
 from ..errors import ApiError
 from ..routes import ID, Route
 from ..service import enforce, ordered_like, precondition, saved
@@ -88,7 +87,7 @@ def get_product(req):
     pid = req.params["id"]
     data, rev = store.product(pid)
     products, _ = store.products()
-    docs = {n: store.doc(n)[0] for n in DOCUMENTS}
+    docs = {n: store.doc(n)[0] for n in schema_mod.document_names()}
     return {"id": pid, "rev": rev, "data": data, "refs": refs(pid, products, docs)}
 
 
@@ -174,7 +173,7 @@ def delete_product(req):
             raise ApiError(404, "not_found", "There is no product with the id %s." % pid)
         cur = products[pid]
         precondition(req, rev_of(cur), cur)
-        found = refs(pid, products, {n: txn.load(n) for n in DOCUMENTS})
+        found = refs(pid, products, {n: txn.load(n) for n in schema_mod.document_names()})
         if found:
             raise ApiError(409, "referenced", "Take it out of these places first.", {"refs": found})
         del products[pid]

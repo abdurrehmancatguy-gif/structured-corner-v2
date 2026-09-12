@@ -4,44 +4,59 @@ import { h, clear } from "./lib/dom.js";
 import { icon } from "./icons.js";
 import { mountChrome, guard, savebar, confirmDialog, banner } from "./lib/ui.js";
 
-// The whole navigation from the plan, in Shopify's order. Entries without a
-// screen yet say so; the ones that need the database or login are shown but
-// switched off, with the reason.
+// The whole navigation from the plan, in Shopify's order. Each entry names
+// its screen module (ui/screens/<screen>.js); one not written yet shows the
+// plain "Not built yet" page. The entries that need the database or login
+// are shown but switched off, with the reason.
 const NAV = [
   { hash: "#/", label: "Home", icon: "home", screen: "home" },
   { label: "Orders", icon: "orders", off: "Arrives with the database" },
   { hash: "#/products", label: "Products", icon: "tag", screen: "products", kids: [
-    { hash: "#/inventory", label: "Inventory", screen: "todo", arg: "inventory" },
-    { hash: "#/bulk", label: "Bulk editor", screen: "todo", arg: "bulk" },
-    { hash: "#/import", label: "Import and export", screen: "todo", arg: "import" },
+    { hash: "#/inventory", label: "Inventory", screen: "inventory" },
+    { hash: "#/bulk", label: "Bulk editor", screen: "bulk" },
+    { hash: "#/import", label: "Import and export", screen: "import" },
   ] },
-  { hash: "#/collections", label: "Collections", icon: "grid", screen: "todo", arg: "collections" },
+  { hash: "#/collections", label: "Collections", icon: "grid", screen: "collections" },
   { label: "Customers", icon: "users", off: "Arrives with the database" },
   { group: "Content" },
   { hash: "#/content/home", label: "Homepage", icon: "layout", screen: "document", arg: "home" },
   { hash: "#/content/navigation", label: "Navigation", icon: "menu", screen: "document", arg: "navigation" },
   { hash: "#/content/copy", label: "Site text", icon: "text", screen: "document", arg: "copy" },
-  { hash: "#/content/pages", label: "Pages", icon: "text", screen: "todo", arg: "pages" },
-  { hash: "#/content/quiz", label: "Scent quiz", icon: "help", screen: "todo", arg: "quiz" },
-  { hash: "#/content/translations", label: "Translations", icon: "globe", screen: "todo", arg: "translations" },
-  { hash: "#/content/files", label: "Files", icon: "image", screen: "todo", arg: "files" },
-  { hash: "#/discounts", label: "Discounts", icon: "percent", screen: "todo", arg: "discounts" },
+  { hash: "#/content/pages", label: "Pages", icon: "text", screen: "pages" },
+  { hash: "#/content/quiz", label: "Scent quiz", icon: "help", screen: "quiz" },
+  { hash: "#/content/translations", label: "Translations", icon: "globe", screen: "translations" },
+  { hash: "#/content/files", label: "Files", icon: "image", screen: "files" },
+  { hash: "#/discounts", label: "Discounts", icon: "percent", screen: "discounts" },
   { label: "Analytics", icon: "chart", off: "Arrives with the database" },
   { group: "Online store" },
-  { hash: "#/publish", label: "Publish", icon: "upload", screen: "todo", arg: "publish" },
-  { hash: "#/history", label: "History", icon: "clock", screen: "todo", arg: "history" },
+  { hash: "#/publish", label: "Publish", icon: "upload", screen: "publish" },
+  { hash: "#/history", label: "History", icon: "clock", screen: "history" },
   { hash: "#/settings", label: "Settings", icon: "gear", screen: "document", arg: "settings" },
 ];
 
-const app = { state: { schema: null, session: null, products: null } };
+// Screens can listen to the status poll (hooks.status) and add small things
+// to the top bar (topSlot), so a new area never has to edit this file.
+const app = { state: { schema: null, session: null, products: null }, hooks: { status: [] }, topSlot: null, poll: () => poll() };
 let main, side, chip, current = "#/";
 
+// "#/products/be-mine" opens one product. Any other deeper address belongs to
+// the section it starts with, and the rest reaches that screen as `sub`:
+// "#/history/products/be-mine" gives History the sub "products/be-mine".
 function route(hash) {
   const m = hash.match(/^#\/products\/([a-z0-9-]+)$/);
   if (m) return { screen: "product", arg: m[1], nav: "#/products" };
-  const flat = NAV.flatMap((n) => [n].concat(n.kids || []));
-  const hit = flat.find((n) => n.hash === hash) || flat[0];
-  return { screen: hit.screen, arg: hit.arg, nav: hit.hash, label: hit.label };
+  const flat = NAV.flatMap((n) => [n].concat(n.kids || [])).filter((n) => n.hash);
+  let hit = flat.find((n) => n.hash === hash);
+  let sub = "";
+  if (!hit) {
+    hit = flat.filter((n) => n.hash !== "#/" && hash.startsWith(n.hash + "/"))
+      .sort((a, b) => b.hash.length - a.hash.length)[0];
+    if (hit) {
+      try { sub = decodeURIComponent(hash.slice(hit.hash.length + 1)); } catch (e) { sub = ""; }
+    }
+  }
+  hit = hit || flat[0];
+  return { screen: hit.screen, arg: hit.arg, sub, nav: hit.hash, label: hit.label };
 }
 
 function drawNav(active) {
@@ -56,6 +71,18 @@ function drawNav(active) {
   }))));
 }
 
+// A screen module that is not there yet fails to load as a failed fetch (a
+// TypeError naming the module); one that exists but breaks shows its error.
+async function loadScreen(r) {
+  try {
+    return await import("./screens/" + r.screen + ".js");
+  } catch (e) {
+    if (!(e instanceof TypeError) || !/fetch|import|module/i.test(e.message || "")) throw e;
+    r.arg = r.screen;
+    return import("./screens/todo.js");
+  }
+}
+
 async function show(hash) {
   const r = route(hash);
   current = hash;
@@ -65,8 +92,8 @@ async function show(hash) {
   drawNav(r.nav);
   clear(main).append(h("p", { class: "loading" }, "Loading"));
   try {
-    const mod = await import("./screens/" + r.screen + ".js");
-    await mod.render(main, { arg: r.arg, label: r.label, app });
+    const mod = await loadScreen(r);
+    await mod.render(main, { arg: r.arg, sub: r.sub, label: r.label, app });
   } catch (e) {
     clear(main).append(banner({ tone: "critical", title: e.message || "This screen did not load." }));
   }
@@ -97,6 +124,9 @@ async function poll() {
     chip.className = "chip" + (b.ok === false ? " bad" : "");
     chip.title = st.external && st.external.length ? "Changed outside the admin: " + st.external.join(", ") : "";
     if (st.external && st.external.length) chip.textContent += " · changed outside";
+    for (const fn of app.hooks.status) {
+      try { fn(st); } catch (e) { /* a listener never stops the poll */ }
+    }
   } catch (e) {
     chip.textContent = e.code === "bad_token" ? "Admin restarted: reload" : "Server not answering";
     chip.className = "chip bad";
@@ -110,12 +140,14 @@ async function boot() {
   chip = h("span", { class: "chip" }, "Preview ready");
   main = h("main", { id: "main", tabindex: "-1" });
   side = h("aside", { class: "side" });
+  app.topSlot = h("span", { class: "top-slot" });
   root.append(
     h("header", { class: "top" },
       h("button", { class: "icon-btn menu-btn", type: "button", "aria-label": "Menu", onclick: () => document.body.classList.toggle("nav-open") }, icon("menu", 20)),
       h("a", { class: "brand", href: "#/" }, h("img", { src: "/assets/img/logo-gold-light-486.png", alt: "BGS Corner", width: "150", height: "22" })),
       h("span", { class: "badge local", title: "This admin runs on this computer only. Nothing goes live until you publish." }, "Local admin"),
       h("span", { class: "spacer" }),
+      app.topSlot,
       chip,
       h("a", { class: "btn ghost-light", href: "/", target: "_blank", rel: "noopener noreferrer" }, icon("external", 16), h("span", { class: "hide-sm" }, "View store"))),
     h("div", { class: "layout" }, side, main));

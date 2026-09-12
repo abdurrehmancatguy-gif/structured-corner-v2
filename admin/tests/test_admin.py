@@ -4,83 +4,19 @@
 
 Every test that writes does so in the clone, on a spare port, with --no-push.
 """
-import http.client
 import json
 import os
-import pathlib
-import re
-import shutil
-import subprocess
-import sys
-import tempfile
-import time
 import unittest
 
-ADMIN = pathlib.Path(__file__).resolve().parent.parent
-REPO = ADMIN.parent
+from box import Box
+
 PORT = int(os.environ.get("ADMIN_TEST_PORT", "4731"))
-
-
-class Box:
-    """A clone of the repo with the admin server running on it."""
-
-    def __init__(self):
-        self.tmp = tempfile.mkdtemp(prefix="bgsadmin-")
-        self.repo = pathlib.Path(self.tmp) / "repo"
-        subprocess.run(["git", "clone", "-q", str(REPO), str(self.repo)], check=True)
-        self.proc = subprocess.Popen([sys.executable, str(ADMIN / "server.py"), "--port", str(PORT),
-                                      "--repo", str(self.repo), "--no-push"],
-                                     stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        for _ in range(100):
-            try:
-                if self.raw("GET", "/")[0] == 200:
-                    break
-            except OSError:
-                time.sleep(0.1)
-        else:
-            raise RuntimeError("the admin server did not start")
-        st, _, body = self.raw("GET", "/admin/", headers={"Sec-Fetch-Mode": "navigate", "Sec-Fetch-Dest": "document", "Sec-Fetch-Site": "none"})
-        self.token = re.search(rb'name="admin-token" content="([^"]+)"', body).group(1).decode()
-
-    def raw(self, method, path, body=None, headers=None, host=None):
-        c = http.client.HTTPConnection("127.0.0.1", PORT, timeout=60)
-        h = {"Host": host if host is not None else "localhost:%d" % PORT}
-        h.update(headers or {})
-        c.request(method, path, body=body, headers=h)
-        r = c.getresponse()
-        out = (r.status, dict(r.getheaders()), r.read())
-        c.close()
-        return out
-
-    def api(self, method, path, body=None, rev=None, token=True, origin=True, ctype="application/json", headers=None):
-        h = {}
-        if token:
-            h["X-Admin-Token"] = self.token
-        if origin and method not in ("GET", "HEAD"):
-            h["Origin"] = "http://localhost:%d" % PORT
-        data = None
-        if body is not None:
-            data = body if isinstance(body, bytes) else json.dumps(body).encode()
-            h["Content-Type"] = ctype
-        if rev:
-            h["If-Match"] = '"%s"' % rev
-        h.update(headers or {})
-        st, hd, raw = self.raw(method, "/admin/api/v1/" + path, data, h)
-        return st, (json.loads(raw) if raw else None)
-
-    def content(self, name):
-        return json.loads((self.repo / "flow" / "content" / ("%s.json" % name)).read_text())
-
-    def close(self):
-        self.proc.terminate()
-        self.proc.wait(10)
-        shutil.rmtree(self.tmp, ignore_errors=True)
 
 
 class AdminTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.b = Box()
+        cls.b = Box(PORT)
 
     @classmethod
     def tearDownClass(cls):
