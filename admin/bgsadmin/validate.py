@@ -38,6 +38,10 @@ def text_problem(s, multiline=False):
             continue
         if ord(ch) < 32 or ord(ch) == 127:
             return "control", "Remove the invisible character (a line break or tab) from this field."
+        # half of a UTF-16 pair (a JSON \ud800 escape): no file can be written
+        # with it, so it is refused here rather than failing at the write
+        if 0xD800 <= ord(ch) <= 0xDFFF:
+            return "control", "Remove the broken character from this field."
         if ch in (chr(0x2014), chr(0x2015)):     # the long dashes the repo does not use
             return "em_dash", "Use a hyphen or a colon instead of a long dash."
     if "%%" in s:

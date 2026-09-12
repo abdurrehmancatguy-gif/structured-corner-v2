@@ -109,6 +109,32 @@ class AdminTests(unittest.TestCase):
         st, res = b.api("PUT", "products/vibe", {"data": dict(d["data"], name="Vibe " + chr(0x2014) + " new")}, rev=d["rev"])
         self.assertEqual(st, 422)
 
+    def test_half_a_character_pair_is_refused(self):
+        # A JSON \ud800 escape decodes to half of a UTF-16 pair, which no
+        # content file can be written with: the save answers 422 on the field
+        # instead of failing at the write, and nothing changes.
+        b = self.b
+        half = chr(0xD800)
+        d = self._product("vibe")
+        bad = dict(d["data"], name="Vibe " + half)
+        st, res = b.api("PUT", "products/vibe", {"data": bad}, rev=d["rev"])
+        self.assertEqual(st, 422, res)
+        self.assertEqual([(e["path"], e["code"]) for e in res["error"]["details"]], [("/name", "control")])
+        st, res = b.api("POST", "products/bulk", {"changes": [{"id": "vibe", "rev": d["rev"], "data": bad}]})
+        self.assertEqual(st, 422, res)
+        self.assertEqual([(e["path"], e["code"]) for e in res["error"]["details"]["errors"]["vibe"]], [("/name", "control")])
+        self.assertEqual(self._product("vibe")["rev"], d["rev"])
+        st, doc = b.api("GET", "documents/translations")
+        self.assertEqual(st, 200)
+        for entry, part in (({"Shop " + half: "x"}, "key"), ({"Shop now": "x " + half}, "value")):
+            ar = dict(doc["data"]["ar"])
+            ar.update(entry)
+            st, res = b.api("PUT", "documents/translations", {"data": {"ar": ar}}, rev=doc["rev"])
+            self.assertEqual(st, 422, res)
+            self.assertEqual([(e["code"], e["part"], e["key"]) for e in res["error"]["details"]],
+                             [("control", part, next(iter(entry)))])
+        self.assertEqual(b.api("GET", "documents/translations")[1]["rev"], doc["rev"])
+
     def test_readonly_unknown_and_guarded_fields(self):
         b = self.b
         d = self._product("vibe")

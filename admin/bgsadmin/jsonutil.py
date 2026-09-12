@@ -55,5 +55,7 @@ def canonical(obj):
 
 
 def dumps(obj):
-    """Compact JSON for API responses."""
-    return json.dumps(obj, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    """Compact JSON for API responses. A refusal can name text the request
+    sent, such as a dictionary key holding half of a UTF-16 pair, which UTF-8
+    cannot carry; it goes out as its \\u escape, which reads back the same."""
+    return json.dumps(obj, ensure_ascii=False, separators=(",", ":")).encode("utf-8", "backslashreplace")
