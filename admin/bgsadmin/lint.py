@@ -1,11 +1,11 @@
 """Warnings that never block a save: site text that states a store rule the
 settings no longer hold.
 
-The promises under the banner and the top strip restate the delivery
-threshold and fee, the same-day fee and cutoff and cash on delivery in their
-own words. build.py prints its own copies of those numbers from settings, but
-the text in copy.json is typed by hand, so a rule change leaves it saying the
-old number. Each AED amount and time of day is read with the words around it,
+The promises under the banner restate the delivery threshold and fee, the
+same-day fee and cutoff and cash on delivery in their own words. build.py
+prints its own copies of those numbers from settings, and the top strip names
+them as {tokens} the build fills in, but text typed by hand keeps the old
+number when a rule changes. Each AED amount and time of day is read with the words around it,
 and with the other text of the same entry (a promise's detail is read with its
 headline), to tell which rule it states.
 

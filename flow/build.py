@@ -75,7 +75,7 @@ CONTENT_DIR = pathlib.Path("content")
 
 def load_content():
     out = {}
-    for f in ("settings", "navigation", "copy", "home", "products"):
+    for f in ("settings", "navigation", "copy", "home", "products", "pages"):
         out[f] = json.loads((CONTENT_DIR / (f + ".json")).read_text())
     return out
 
@@ -249,6 +249,129 @@ if _BAD_CATS:
     sys.exit("build failed:\n  " + "\n  ".join("copy.json " + p for p in _BAD_CATS))
 EXTRA_GLOBALS.append(("BGS_CATS", lambda: CAT_TEXT))
 
+# ---------------------------------------------------------------- page text
+# The words of every page's shell, the homepage bands and the collection,
+# product, gift box, bag, tracking, corporate, account and 404 pages are
+# content: pages.json, with the top strip and the search hint in copy.json
+# and the legal name, location and title suffix in settings.json. Checkout
+# and the order confirmation keep theirs in code: they are locked. The
+# templates below print them through page_text(), which
+# escapes them and fills in the {tokens} a text may carry: a store rule, so
+# the words follow Settings; {n}, a count shop.js keeps up to date; or the
+# Discovery band's {price}, read from its product. What shop.js writes into
+# these pages after they load reaches it as window.BGS_COPY: each page's part
+# of the build adds its own strings to COPY_JS. A value that is missing, empty
+# or has a token its place does not fill stops the build, listed with the
+# others, rather than print a blank or a brace.
+_BAD_PAGES = []
+_TOKEN = re.compile(r"\{([a-z_]*)\}")
+RULE_TOKENS = {"free_over": RULE_TEXT["rule_free_over"], "delivery_fee": RULE_TEXT["rule_delivery_fee"],
+               "sameday_fee": RULE_TEXT["rule_sameday_fee"], "cutoff": RULE_TEXT["rule_cutoff"],
+               "cutoff_short": RULE_TEXT["rule_cutoff_short"]}
+RULE_TOKENS = {k: esc(v) for k, v in RULE_TOKENS.items()}
+
+def _value(path, doc="pages"):
+    """The value at a dotted path in a content document, or None."""
+    cur = C[doc]
+    for part in path.split("."):
+        if isinstance(cur, dict):
+            cur = cur.get(part)
+        elif isinstance(cur, list) and part.isdigit() and int(part) < len(cur):
+            cur = cur[int(part)]
+        else:
+            return None
+    return cur
+
+def raw_text(path, doc="pages", empty_ok=False):
+    """Text as the document holds it: for shop.js, which sets it with
+    textContent and fills its own {n}."""
+    v = _value(path, doc)
+    if not isinstance(v, str) or not (empty_ok or v.strip()):
+        _BAD_PAGES.append("%s.json %s must be text" % (doc, path))
+        return ""
+    return v
+
+def page_text(path, tokens=None, doc="pages", need=(), empty_ok=False):
+    """Text for a template, escaped. Where the place takes tokens (tokens is a
+    dict), each {token} is then replaced by its value, which is already
+    markup-safe (plain text escaped, or a tag the build made, like the count
+    shop.js updates); elsewhere a brace is only a character."""
+    v = raw_text(path, doc, empty_ok)
+    if tokens is None:
+        return esc(v)
+    where = "%s.json %s" % (doc, path)
+    for t in need:
+        if "{%s}" % t not in v:
+            _BAD_PAGES.append("%s must contain {%s}" % (where, t))
+    if re.search(r"[{}]", _TOKEN.sub("", v)):
+        _BAD_PAGES.append("%s has a brace that is not part of a {token}" % where)
+    def fill(m):
+        if m.group(1) in tokens:
+            return tokens[m.group(1)]
+        _BAD_PAGES.append("%s has {%s}, which it cannot use" % (where, m.group(1)))
+        return ""
+    return _TOKEN.sub(fill, esc(v))
+
+def page_rows(path, parts, tokens=None):
+    """A list of entries in pages.json, each as a tuple of its parts' text."""
+    rows = _value(path)
+    if not isinstance(rows, list) or not rows or not all(isinstance(r, dict) for r in rows):
+        _BAD_PAGES.append("pages.json %s must be a list of entries" % path)
+        return []
+    return [tuple(page_text("%s.%d.%s" % (path, i, p), tokens) for p in parts) for i in range(len(rows))]
+
+def grid_rows(rows):
+    """Heading-and-sentence cells, as the product page's tabs lay them out."""
+    return "\n      ".join('<div><span class="eyebrow">%s</span><p style="margin:8px 0 0">%s</p></div>' % r
+                           for r in rows)
+
+def page_href(path):
+    return esc(raw_text(path))
+
+def js_text(path, need=(), allow=()):
+    """Text shop.js fills in and sets with textContent. Its {tokens} are
+    checked the way page_text checks a template's, but it stays as the
+    document holds it: shop.js fills the tokens itself."""
+    page_text(path, {t: "" for t in tuple(need) + tuple(allow)}, need=need)
+    return raw_text(path)
+
+def kv_rows(rows, indent):
+    """Label-and-value lines, as the pages' .kv lists lay them out."""
+    return indent.join("<div><span>%s</span><span>%s</span></div>" % r for r in rows)
+
+COPY_JS = {}
+EXTRA_GLOBALS.append(("BGS_COPY", lambda: COPY_JS))
+
+# The shell every page shares. The legal name, when cleared, falls back to the
+# store's name, so the footer never says a bare copyright sign.
+_LEGAL = SETTINGS.get("legal_name") or SETTINGS.get("name") or ""
+_YEAR = _value("shell.footer.copyright_year")
+if isinstance(_YEAR, bool) or not isinstance(_YEAR, int) or not 2000 <= _YEAR <= 2100:
+    _BAD_PAGES.append("pages.json shell.footer.copyright_year must be a year")
+    _YEAR = 0
+_CONTACT = [page_text("shell.footer.contact." + k, empty_ok=True) for k in ("address", "hours", "phone")]
+SHELL_TEXT = {
+    "title_suffix": page_text("seo.default_title_suffix", doc="settings"),
+    "noscript": page_text("shell.noscript"),
+    "countdown": page_text("strip.countdown_line", RULE_TOKENS, doc="copy"),
+    "strip_links": "".join(
+        ('<a href="%s">%s</a>' % (esc(l.get("href")), page_text("strip.right_links.%d.label" % i, RULE_TOKENS, doc="copy"))
+         if isinstance(l, dict) and l.get("href") else
+         "<span>%s</span>" % page_text("strip.right_links.%d.label" % i, RULE_TOKENS, doc="copy"))
+        for i, l in enumerate(_value("strip.right_links", "copy") or [])),
+    "search_ph": page_text("search_placeholder", doc="copy"),
+    "act_account": page_text("shell.header.account"),
+    "act_wishlist": page_text("shell.header.wishlist"),
+    "act_bag": page_text("shell.header.bag"),
+    "nl_placeholder": page_text("shell.footer.newsletter.placeholder"),
+    "nl_button": page_text("shell.footer.newsletter.button"),
+    "legal_line": " &middot; ".join(esc(x) for x in (_LEGAL, SETTINGS.get("location") or "") if x),
+    "copyright": "&copy; %d %s" % (_YEAR, esc(_LEGAL)),
+}
+CRUMB_HOME = page_text("shell.crumb_home")
+COPY_JS["title_suffix"] = raw_text("seo.default_title_suffix", doc="settings")
+COPY_JS["crumb_home"] = raw_text("shell.crumb_home")
+
 def tab_link(label, href, icon, on):
     """One tab-bar entry, drawn as its icon. The label stays as the accessible
        name - aria-label for screen readers, title for a pointer - because an
@@ -380,45 +503,45 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
     return """<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>%(title)s | BGS Corner</title>
+<title>%(title)s | %(title_suffix)s</title>
 <meta name="description" content="%(desc)s">
 %(robots)s<link rel="canonical" href="%(canon)s">
 <meta property="og:type" content="website">
-<meta property="og:title" content="%(title)s | BGS Corner">
+<meta property="og:title" content="%(title)s | %(title_suffix)s">
 <meta property="og:description" content="%(desc)s">
 <meta property="og:image" content="%(ogimg)s">
 <meta name="twitter:card" content="summary_large_image">
 %(icons)s
 %(preload)s<link rel="stylesheet" href="%(css)s"></head><body class="%(page)s">
-<noscript><div class="nojs">This shop needs JavaScript for products, the bag and checkout. Please turn it on in your browser.</div></noscript>
+<noscript><div class="nojs">%(noscript)s</div></noscript>
 <div class="strip"><div class="wrap">
-  <span>%(clock)s Order by %(rule_cutoff)s for delivery today in Dubai<span data-cutoff hidden> &middot; <b></b></span></span>
-  <span class="r"><span>Free UAE delivery over %(rule_free_over)s</span><span>Cash on delivery</span><a href="track-order.html">Track order</a><a href="#" data-langtoggle>العربية</a></span>
+  <span>%(clock)s %(countdown)s<span data-cutoff hidden> &middot; <b></b></span></span>
+  <span class="r">%(strip_links)s<a href="#" data-langtoggle>العربية</a></span>
 </div></div>
 <div class="mast"><div class="wrap">
   %(brandlogo)s
   <form class="search" action="collection.html" method="get" role="search">
-    <input name="q" aria-label="Search products" placeholder="Search ouds, oud, bakhoor&hellip;"><button type="submit" class="go" aria-label="Search">%(search)s</button></form>
+    <input name="q" aria-label="Search products" placeholder="%(search_ph)s"><button type="submit" class="go" aria-label="Search">%(search)s</button></form>
   <div class="acts">
-    <a class="act" href="account.html">%(user)s<span>Account</span></a>
-    <a class="act" href="account.html">%(heart)s<span>Wishlist</span></a>
-    <a class="act" href="cart.html">%(bag)s<span>Bag</span><i class="n" data-bagcount hidden>0</i></a>
+    <a class="act" href="account.html">%(user)s<span>%(act_account)s</span></a>
+    <a class="act" href="account.html">%(heart)s<span>%(act_wishlist)s</span></a>
+    <a class="act" href="cart.html">%(bag)s<span>%(act_bag)s</span><i class="n" data-bagcount hidden>0</i></a>
   </div>
 </div>
-<div class="msearch"><form class="search" action="collection.html" method="get" role="search"><input name="q" aria-label="Search products" placeholder="Search ouds, oud, bakhoor&hellip;"><button type="submit" class="go" aria-label="Search">%(search)s</button></form></div></div>
+<div class="msearch"><form class="search" action="collection.html" method="get" role="search"><input name="q" aria-label="Search products" placeholder="%(search_ph)s"><button type="submit" class="go" aria-label="Search">%(search)s</button></form></div></div>
 %(catnav)s
 %(body)s
 <footer><div class="wrap"><div class="cols">
   <div>%(footlogo)s
-    <p>BGS Corner General Trading LLC &middot; Dubai, UAE</p>
-    <p>%(addr)s</p><div class="nl"><span class="field">Your email</span><span class="btn">Join</span></div></div>
+    <p>%(legal_line)s</p>
+    <p>%(addr)s</p><div class="nl"><span class="field">%(nl_placeholder)s</span><span class="btn">%(nl_button)s</span></div></div>
 %(footcols)s
-</div><div class="bot"><span>&copy; 2026 BGS Corner General Trading LLC</span>
+</div><div class="bot"><span>%(copyright)s</span>
 <span>Cards &middot; Apple Pay &middot; Tabby &middot; Tamara &middot; Cash on delivery</span></div></div></footer>
 <div class="tabbar">%(tabs)s</div>
 <script src="%(catjs)s"></script>
 <script src="%(shopjs)s"></script></body></html>
-""" % dict(title=title, body=body, page=page, css=V("assets/flow.min.css"),
+""" % dict(SHELL_TEXT, title=title, body=body, page=page, css=V("assets/flow.min.css"),
    catjs=V("assets/catalogue.js"), shopjs=V("assets/shop.js"),
    preload=PRELOAD if page == "page-product" else "",
    robots='<meta name="robots" content="noindex,follow">\n' if page in NOINDEX else "",
@@ -426,10 +549,10 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
    ogimg=esc(((SITE_URL + "/") if SITE_URL else "") + (V(SEO["og_image"]) if SEO.get("og_image") else "")),
    catnav=catnav(), tabs="".join(tab_link(l, h, ic, tab) for l, h, ic in TABS),
    clock=sv("clock",13,2), menu=sv("menu",22), chev=sv("chev",14,2), search=sv("search",17),
-   rule_cutoff=RULE_TEXT["rule_cutoff"], rule_free_over=RULE_TEXT["rule_free_over"],
    user=sv("user"), heart=sv("heart"), bag=sv("bag"),
    brandlogo=header_logo(), footlogo=footer_logo(), footcols=footer_cols(), icons=favicon_links(),
-   addr=slot("address, hours, phone"))
+   # while no contact detail is filled in, the footer keeps the placeholder it has always shown
+   addr=" &middot; ".join(x for x in _CONTACT if x) or slot("address, hours, phone"))
 
 # ---------------------------------------------------------------- DATA
 # names + sizes: BGS Corner Sheet.xlsx "OUD & Bakhoor Stock"; prices: brief §3
@@ -640,8 +763,37 @@ def reels():
                      'aria-hidden="true"></video><span>%s</span></a>'
                      % (esc(href), esc(V(it["still"])), esc(V(it["video"])), esc(it.get("label") or pr.get("name", ""))))
     return ('<section class="alt reels"><div class="wrap">\n'
-            '  <div class="sec-h"><h2>%s</h2><a href="collection.html?cat=edp">All EDP sprays &rarr;</a></div>\n'
-            '  <div class="reelrow">%s</div>\n</div></section>\n' % (esc(r.get("title", "")), "".join(cards)))
+            '  <div class="sec-h"><h2>%s</h2><a href="%s">%s &rarr;</a></div>\n'
+            '  <div class="reelrow">%s</div>\n</div></section>\n'
+            % (esc(r.get("title", "")), page_href("index.reels_link.href"), page_text("index.reels_link.label"),
+               "".join(cards)))
+
+def discovery_band():
+    """The band under the attars shelf, from pages.json. Its heading's {price}
+    is its product's price, so the band follows the product."""
+    pid = _value("index.discovery_band.product")
+    pr = PRODUCTS.get(pid) if isinstance(pid, str) else None
+    if not isinstance(pr, dict):
+        _BAD_PAGES.append("pages.json index.discovery_band.product names no product")
+        pr = {}
+    price = esc("AED " + money(pr.get("price")))
+    return {"db_eyebrow": page_text("index.discovery_band.eyebrow"),
+            "db_heading": page_text("index.discovery_band.heading", {"price": price}),
+            "db_body": page_text("index.discovery_band.body"),
+            "db_cta": page_text("index.discovery_band.cta_label"),
+            "db_href": page_href("index.discovery_band.cta_href")}
+
+def promos():
+    """The promo tiles. Their pictures are still the Banner placeholder."""
+    return "\n    ".join(
+        '<a class="promo" href="%s"><span class="none">Banner</span><div><b>%s</b><span>%s</span></div></a>' % (href, t, s)
+        for t, s, href in page_rows("index.promos", ("title", "sub", "href")))
+
+# The scent family tiles' links, colours and drawings stay in the template;
+# their words come from pages.json "index.families", keyed by the same slug.
+FAMILY_SLUGS = ("oud-and-woods", "amber-and-spice", "musk-and-clean", "floral-veil", "fresh-and-citrus",
+                "sweet-and-gourmand", "reserve", "bakhoor-and-home")
+FAMILY_TEXT = {"fam_" + s.replace("-", "_"): page_text("index.families." + s) for s in FAMILY_SLUGS}
 
 def hero_images():
     """One photograph per slide, so the carousel changes picture and not only
@@ -720,10 +872,10 @@ home = """
 </div></section>
 
 <section><div class="wrap"><div class="band">
-  <div><span class="eyebrow gold-d">Start here</span>
-    <h3>Discovery Trio, AED 129</h3>
-    <p>Three 3 ml ouds. Whatever you spend comes back as a single-use voucher on any bottle over AED 75, valid 60 days.</p></div>
-  <a class="btn gold" href="gift-box.html">Choose three</a>
+  <div><span class="eyebrow gold-d">%(db_eyebrow)s</span>
+    <h3>%(db_heading)s</h3>
+    <p>%(db_body)s</p></div>
+  <a class="btn gold" href="%(db_href)s">%(db_cta)s</a>
 </div></div></section>
 
 <section><div class="wrap">
@@ -739,22 +891,20 @@ home = """
 <section><div class="wrap">
   <div class="sec-h"><h2>%(fam_h)s</h2></div>
   <div class="fam">
-    <a href="collection.html?family=oud-and-woods" style="background:var(--f-oud)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20c4-2 6-6 6-10M8 20c3-2 5-5 6-9M13 20c2-2 4-5 5-8"/><circle cx="17" cy="6" r="2.5"/></svg><b>Oud &amp; Woods</b><span>%(ct)s</span></a>
-    <a href="collection.html?family=amber-and-spice" style="background:var(--f-amber)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.2 4.6L19 8.3l-3.5 3.4.9 4.9-4.4-2.4-4.4 2.4.9-4.9L5 8.3l4.8-.7z"/></svg><b>Amber &amp; Spice</b><span>%(ct)s</span></a>
-    <a href="collection.html?family=musk-and-clean" style="background:var(--f-musk)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.5 6 10.5A6 6 0 0 1 6 13.5C6 9.5 12 3 12 3z"/></svg><b>Musk &amp; Clean</b><span>%(ct)s</span></a>
-    <a href="collection.html?family=floral-veil" style="background:var(--f-floral)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.5"/><path d="M12 3a3.2 3.2 0 0 1 0 6.4M12 21a3.2 3.2 0 0 0 0-6.4M3 12a3.2 3.2 0 0 1 6.4 0M21 12a3.2 3.2 0 0 0-6.4 0"/></svg><b>Floral Veil</b><span>%(ct)s</span></a>
-    <a href="collection.html?family=fresh-and-citrus" style="background:var(--f-fresh)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17M3.5 12h17M6 6l12 12M18 6L6 18"/></svg><b>Fresh &amp; Citrus</b><span>%(ct)s</span></a>
-    <a href="collection.html?family=sweet-and-gourmand" style="background:var(--f-sweet)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 21V10a5 5 0 0 1 10 0v11z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg><b>Sweet &amp; Gourmand</b><span>%(ct)s</span></a>
-    <a href="collection.html?family=reserve" style="background:var(--f-res)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8l4 3 4-6 4 6 4-3-2 11H6z"/></svg><b>Reserve</b><span>%(ct)s</span></a>
-    <a href="collection.html?family=bakhoor-and-home" style="background:var(--f-bak)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14h12l-1.5 6h-9z"/><path d="M4 14h16"/><path d="M11 10c0-2 2-3 2-5 2 2 2 3.5 1.5 5"/></svg><b>Bakhoor &amp; Home</b><span>%(ct)s</span></a>
+    <a href="collection.html?family=oud-and-woods" style="background:var(--f-oud)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20c4-2 6-6 6-10M8 20c3-2 5-5 6-9M13 20c2-2 4-5 5-8"/><circle cx="17" cy="6" r="2.5"/></svg><b>%(fam_oud_and_woods)s</b><span>%(ct)s</span></a>
+    <a href="collection.html?family=amber-and-spice" style="background:var(--f-amber)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.2 4.6L19 8.3l-3.5 3.4.9 4.9-4.4-2.4-4.4 2.4.9-4.9L5 8.3l4.8-.7z"/></svg><b>%(fam_amber_and_spice)s</b><span>%(ct)s</span></a>
+    <a href="collection.html?family=musk-and-clean" style="background:var(--f-musk)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.5 6 10.5A6 6 0 0 1 6 13.5C6 9.5 12 3 12 3z"/></svg><b>%(fam_musk_and_clean)s</b><span>%(ct)s</span></a>
+    <a href="collection.html?family=floral-veil" style="background:var(--f-floral)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.5"/><path d="M12 3a3.2 3.2 0 0 1 0 6.4M12 21a3.2 3.2 0 0 0 0-6.4M3 12a3.2 3.2 0 0 1 6.4 0M21 12a3.2 3.2 0 0 0-6.4 0"/></svg><b>%(fam_floral_veil)s</b><span>%(ct)s</span></a>
+    <a href="collection.html?family=fresh-and-citrus" style="background:var(--f-fresh)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17M3.5 12h17M6 6l12 12M18 6L6 18"/></svg><b>%(fam_fresh_and_citrus)s</b><span>%(ct)s</span></a>
+    <a href="collection.html?family=sweet-and-gourmand" style="background:var(--f-sweet)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 21V10a5 5 0 0 1 10 0v11z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg><b>%(fam_sweet_and_gourmand)s</b><span>%(ct)s</span></a>
+    <a href="collection.html?family=reserve" style="background:var(--f-res)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8l4 3 4-6 4 6 4-3-2 11H6z"/></svg><b>%(fam_reserve)s</b><span>%(ct)s</span></a>
+    <a href="collection.html?family=bakhoor-and-home" style="background:var(--f-bak)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14h12l-1.5 6h-9z"/><path d="M4 14h16"/><path d="M11 10c0-2 2-3 2-5 2 2 2 3.5 1.5 5"/></svg><b>%(fam_bakhoor_and_home)s</b><span>%(ct)s</span></a>
   </div>
 </div></section>
 
 <section style="padding-top:26px"><div class="wrap">
   <div class="grid g3 promos">
-    <a class="promo" href="gift-box.html"><span class="none">Banner</span><div><b>Build a gift box</b><span>Three or six scents, wrapped</span></div></a>
-    <a class="promo" href="collection.html?cat=gift-sets"><span class="none">Banner</span><div><b>Discovery 3 ml</b><span>Credit back on your first bottle</span></div></a>
-    <a class="promo" href="corporate.html"><span class="none">Banner</span><div><b>Corporate gifting</b><span>Quote above 20 units</span></div></a>
+    %(promos)s
   </div>
 </div></section>
 
@@ -767,7 +917,7 @@ home = """
   %(edp_h)s
   <div class="grid g5">%(edp)s</div>
 </div></section>
-%(reels)s""" % dict(reels=reels(), catstrip=catstrip(), usp=usp_strip(),
+%(reels)s""" % dict(discovery_band(), promos=promos(), reels=reels(), catstrip=catstrip(), usp=usp_strip(),
            hero=hero_slides(), hero_img=hero_images(), hero_dots=hero_dots(),
            hero_n=len(HOME["hero_slides"]),
            qb_eyebrow=COPY["quiz_banner"]["eyebrow"], qb_heading=COPY["quiz_banner"]["heading"],
@@ -777,7 +927,7 @@ home = """
            attars_h=_SH["house_ouds"][0], attars=_SH["house_ouds"][1], oud_h=_SH["reserve"][0], oud=_SH["reserve"][1],
            sets_h=_SH["gift_sets"][0], sets=_SH["gift_sets"][1], fam_h=heading("scent_family"),
            bakhoor_h=_SH["bakhoor"][0], bakhoor=_SH["bakhoor"][1], edp_h=_SH["edp"][0], edp=_SH["edp"][1],
-           ct=slot("count"))
+           ct=slot("count"), **FAMILY_TEXT)
 if _BAD_HOME:
     sys.exit("build failed:\n  " + "\n  ".join("home.json " + p for p in _BAD_HOME))
 
@@ -786,12 +936,21 @@ if _BAD_HOME:
 # products, gender for the EDP sprays. Family/tone/occasion/season are in the
 # brief taxonomy but have no per-product value in any source, so they are not
 # offered as controls that would do nothing.
+#
+# The values are code: shop.js reads a price band as its range (999999 is
+# open-ended) and compares a gender with the products' own. The headings and
+# the words beside each box are content, pages.json "collection".
+PRICE_BANDS = ("0-49", "50-100", "100-200", "200-999999")
+GENDERS = ("Him", "Her", "Unisex")
 FACETS_LIVE = [
-    ("Category", "cat", [(CAT_TEXT[k]["label"], k) for k in CAT_KEYS]),
-    ("Price", "price", [("Under AED 50", "0-49"), ("AED 50-100", "50-100"),
-                        ("AED 100-200", "100-200"), ("AED 200+", "200-999999")]),
-    ("Gender", "gender", [("Him", "Him"), ("Her", "Her"), ("Unisex", "Unisex")]),
+    (page_text("collection.filters.category"), "cat", [(CAT_TEXT[k]["label"], k) for k in CAT_KEYS]),
+    (page_text("collection.filters.price"), "price", [(raw_text("collection.price_bands." + b), b) for b in PRICE_BANDS]),
+    (page_text("collection.filters.gender"), "gender", [(raw_text("collection.genders." + g), g) for g in GENDERS]),
 ]
+# the count shop.js replaces on load; 34 is what the page has always shipped
+_COUNT = {"n": '<span data-count>34</span>'}
+COPY_JS["collection"] = {"crumb_categories": raw_text("collection.crumb_categories"),
+                         "genders": {g: raw_text("collection.genders." + g) for g in GENDERS}}
 
 def facet_live(title, key, rows):
     return '<div class="fbox"><h4>%s</h4>%s</div>' % (title, "".join(
@@ -800,37 +959,37 @@ def facet_live(title, key, rows):
 
 collection = """
 <section><div class="wrap">
-  <span class="eyebrow" data-crumb>Home / %(all_crumb)s</span>
+  <span class="eyebrow" data-crumb>%(crumb_home)s / %(all_crumb)s</span>
   <div class="sec-h" style="margin-top:10px"><div>
     <h2 style="font-size:26px" data-title>%(all_title)s</h2>
     <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0;max-width:70ch" data-intro>%(all_intro)s</p></div></div>
   <div class="plp">
     <div class="side" data-filters>
-      <div class="drawerhead"><b>Filters</b><button type="button" class="closex" data-closefilters aria-label="Close filters">&times;</button></div>
-      <div class="toolbar" style="border:0;padding:0;margin-bottom:6px"><b style="font-size:13px">Filters</b><button type="button" class="linkbtn" data-clearall>Clear all</button></div>
+      <div class="drawerhead"><b>%(f_heading)s</b><button type="button" class="closex" data-closefilters aria-label="Close filters">&times;</button></div>
+      <div class="toolbar" style="border:0;padding:0;margin-bottom:6px"><b style="font-size:13px">%(f_heading)s</b><button type="button" class="linkbtn" data-clearall>%(f_clear)s</button></div>
       %(facets)s
-      <div class="draweractions"><button type="button" class="btn solid block" data-closefilters>Show <span data-count>34</span> products</button></div>
+      <div class="draweractions"><button type="button" class="btn solid block" data-closefilters>%(f_show)s</button></div>
     </div>
     <div class="scrim" data-closefilters></div>
     <div>
       <div class="toolbar">
-        <button type="button" class="filterbtn" data-openfilters>%(filt)s Filters <i class="fcount" data-fcount hidden>0</i></button>
+        <button type="button" class="filterbtn" data-openfilters>%(filt)s %(f_heading)s <i class="fcount" data-fcount hidden>0</i></button>
         <div class="pills" data-pills></div>
         <div style="display:flex;gap:12px;align-items:center">
-          <span style="font-size:13px;color:var(--mut)"><span data-count>34</span> products</span>
+          <span style="font-size:13px;color:var(--mut)">%(count)s</span>
           <label class="sel"><span class="none-visual">Sort</span>
             <select data-sort aria-label="Sort products">
-              <option value="featured">Sort: Featured</option>
-              <option value="price-asc">Price: low to high</option>
-              <option value="price-desc">Price: high to low</option>
-              <option value="name">Name: A to Z</option>
+              <option value="featured">%(sort_featured)s</option>
+              <option value="price-asc">%(sort_price_asc)s</option>
+              <option value="price-desc">%(sort_price_desc)s</option>
+              <option value="name">%(sort_name)s</option>
             </select>%(chev)s</label></div>
       </div>
       <div class="grid g4" data-grid></div>
       <div class="emptystate" data-empty hidden>
-        <b>Nothing matches those filters.</b>
-        <p style="color:var(--mut);font-size:13.5px;margin:6px 0 14px">Try removing one, or clear them all.</p>
-        <button type="button" class="btn ghost" data-clearall>Clear all filters</button>
+        <b>%(empty_title)s</b>
+        <p style="color:var(--mut);font-size:13.5px;margin:6px 0 14px">%(empty_body)s</p>
+        <button type="button" class="btn ghost" data-clearall>%(empty_clear)s</button>
       </div>
     </div>
   </div>
@@ -838,7 +997,14 @@ collection = """
 """ % dict(facets="".join(facet_live(t, k, r) for t, k, r in FACETS_LIVE),
            chev=sv("chev", 13, 2), filt=sv("filter", 15, 1.9),
            all_crumb=esc(CAT_TEXT["all"]["crumb"]), all_title=esc(CAT_TEXT["all"]["label"]),
-           all_intro=esc(CAT_TEXT["all"]["intro"]))
+           all_intro=esc(CAT_TEXT["all"]["intro"]), crumb_home=CRUMB_HOME,
+           f_heading=page_text("collection.filters.heading"), f_clear=page_text("collection.filters.clear"),
+           f_show=page_text("collection.filters.show", _COUNT, need=("n",)),
+           count=page_text("collection.count", _COUNT, need=("n",)),
+           sort_featured=page_text("collection.sort.featured"), sort_price_asc=page_text("collection.sort.price-asc"),
+           sort_price_desc=page_text("collection.sort.price-desc"), sort_name=page_text("collection.sort.name"),
+           empty_title=page_text("collection.empty.title"), empty_body=page_text("collection.empty.body"),
+           empty_clear=page_text("collection.empty.clear"))
 
 # ---------------------------------------------------------------- PDP
 # One template serves every product and shop.js fills it in. What the template
@@ -848,9 +1014,46 @@ collection = """
 # the perfumes, how to apply is for the oils. The credit-back note is about
 # buying the 3 ml, so it names that size in data-with-size. shop.js takes these
 # out of any other product's page.
+#
+# The words are content, pages.json "product"; the tab ids, data-cats and the
+# payment line (checkout) stay here. The delivery lines carry the store rules
+# as {tokens}, and what shop.js writes once it knows the product (the barcode
+# and stock rows, the share button's replies, the page for an unknown product)
+# reaches it as BGS_COPY["product"].
+PRODUCT_TEXT = {
+    "crumb_home": CRUMB_HOME, "p_share": page_text("product.share.label"), "p_size": page_text("product.size_label"),
+    "p_gift": page_text("product.gift_cta.label"), "p_gift_href": page_href("product.gift_cta.href"),
+    "p_voucher": page_text("product.voucher_note"),
+    "p_fact_label": page_text("product.facts.delivery_label"),
+    "p_fact": page_text("product.facts.delivery", RULE_TOKENS),
+    "p_pyr_missing": page_text("product.pyramid.missing"),
+    "p_apply": grid_rows(page_rows("product.apply_steps", ("title", "body"))),
+    "p_apply_note": page_text("product.apply_note"),
+    "p_ing_missing": page_text("product.ingredients.missing"),
+    "p_delivery": grid_rows(page_rows("product.delivery_rows", ("title", "body"), RULE_TOKENS)),
+    "p_rev_title": page_text("product.reviews_empty.title"), "p_rev_body": page_text("product.reviews_empty.body"),
+    "p_rel_h": page_text("product.related.heading"), "p_rel_link": page_text("product.related.link_label"),
+    "p_rel_href": page_href("product.related.link_href"),
+}
+for _k in ("top", "heart", "base"):
+    PRODUCT_TEXT["p_note_" + _k] = page_text("product.notes." + _k)
+    PRODUCT_TEXT["p_pyr_" + _k] = page_text("product.pyramid." + _k)
+for _k in ("longevity", "sillage", "batch", "availability"):
+    PRODUCT_TEXT["p_spec_" + _k] = page_text("product.specs." + _k)
+for _k in ("pyramid", "apply", "ing", "delivery", "reviews"):
+    PRODUCT_TEXT["p_tab_" + _k] = page_text("product.tabs." + _k)
+COPY_JS["product"] = {
+    "share": {k: raw_text("product.share." + k) for k in ("label", "copied", "failed")},
+    "specs": {k: raw_text("product.specs." + k) for k in ("availability", "in_stock", "only_left", "batch", "barcode")},
+    "ingredients": {"heading": raw_text("product.ingredients.heading")},
+    "not_found": {k: raw_text("product.not_found." + k) for k in ("title", "cta", "crumb", "page_title")},
+}
+if "{n}" not in COPY_JS["product"]["specs"]["only_left"]:
+    _BAD_PAGES.append("pages.json product.specs.only_left must contain {n}")
+
 product = """
 <section><div class="wrap">
-  <span class="eyebrow">Home / Attars / Royal Amber</span>
+  <span class="eyebrow">%(crumb_home)s / Attars / Royal Amber</span>
   <div class="pdp">
     <div class="gal" data-gallery>
       <div class="galmain">
@@ -878,30 +1081,30 @@ product = """
              decision was measured to fit a 900px screen with 2px to spare, so
              anything that adds height here pushes it off. -->
         <button type="button" class="sharebtn" data-share
-                aria-label="Share this product">%(share)s<span data-sharelabel>Share</span></button></div>
-      <div class="sizeblock" data-sizeblock><span class="eyebrow">Size</span>
+                aria-label="Share this product">%(share)s<span data-sharelabel>%(p_share)s</span></button></div>
+      <div class="sizeblock" data-sizeblock><span class="eyebrow">%(p_size)s</span>
         <div class="sizes" style="gap:8px"><button type="button" data-size="3 ml &middot; AED 45">3 ml &middot; AED 45</button><button type="button" class="on" data-size="6 ml &middot; AED 75">6 ml &middot; AED 75</button></div></div>
       <div class="atcrow">
         <span class="stepper" data-stepper><button type="button" data-step="-1" aria-label="Decrease quantity">&minus;</button><i data-qty>1</i><button type="button" data-step="1" aria-label="Increase quantity">+</button></span>
         <button type="button" class="btn solid" style="flex-grow:1" data-add data-addqty>Add to bag: AED 75</button></div>
-      <a class="btn block" href="gift-box.html" style="margin-bottom:12px">Send as a gift</a>
+      <a class="btn block" href="%(p_gift_href)s" style="margin-bottom:12px">%(p_gift)s</a>
       <div class="notestop" data-notestop data-cats="edp attars" hidden>
-        <div><span class="ni">%(leaf)s</span><b>Top</b><p data-note="top"></p></div>
-        <div><span class="ni">%(hrt)s</span><b>Heart</b><p data-note="heart"></p></div>
-        <div><span class="ni">%(drop)s</span><b>Base</b><p data-note="base"></p></div>
+        <div><span class="ni">%(leaf)s</span><b>%(p_note_top)s</b><p data-note="top"></p></div>
+        <div><span class="ni">%(hrt)s</span><b>%(p_note_heart)s</b><p data-note="heart"></p></div>
+        <div><span class="ni">%(drop)s</span><b>%(p_note_base)s</b><p data-note="base"></p></div>
       </div>
 
       <div class="belowbuy">
         <p class="story-slot" data-desc>%(desc)s</p>
-        <div class="note" data-with-size="3 ml">Try the 3 ml first, the AED 45 comes back as a voucher on any bottle over AED 75, issued the day it is delivered.</div>
+        <div class="note" data-with-size="3 ml">%(p_voucher)s</div>
         <div class="kv" data-specs style="margin-top:16px" hidden>
-          <div hidden><span>Longevity</span><span>%(lon)s</span></div>
-          <div hidden><span>Sillage</span><span>%(sil)s</span></div>
-          <div hidden><span>Batch number</span><span>%(bat)s</span></div>
-          <div hidden><span>Availability</span><span>%(av)s</span></div>
+          <div hidden><span>%(p_spec_longevity)s</span><span>%(lon)s</span></div>
+          <div hidden><span>%(p_spec_sillage)s</span><span>%(sil)s</span></div>
+          <div hidden><span>%(p_spec_batch)s</span><span>%(bat)s</span></div>
+          <div hidden><span>%(p_spec_availability)s</span><span>%(av)s</span></div>
         </div>
         <div class="kv facts" style="margin-top:16px">
-          <div><span>%(truck)s Delivery</span><span>Free over %(rule_free_over)s &middot; same-day before %(rule_cutoff_short)s</span></div>
+          <div><span>%(truck)s %(p_fact_label)s</span><span>%(p_fact)s</span></div>
           <div><span>%(cash)s Payment</span><span>Card &middot; Apple Pay &middot; Tabby &middot; Tamara &middot; COD</span></div>
         </div>
       </div>
@@ -914,50 +1117,46 @@ product = """
 </div>
 <section class="alt"><div class="wrap">
   <div class="tabs2" role="tablist">
-    <button type="button" class="on" data-tab="pyramid" data-cats="edp attars" role="tab" aria-selected="true">Scent pyramid</button>
-    <button type="button" data-tab="apply" data-cats="attars" role="tab" aria-selected="false">How to apply oud</button>
-    <button type="button" data-tab="ing" role="tab" aria-selected="false">Ingredients &amp; allergens</button>
-    <button type="button" data-tab="delivery" role="tab" aria-selected="false">Delivery &amp; returns</button>
-    <button type="button" data-tab="reviews" role="tab" aria-selected="false">Reviews</button>
+    <button type="button" class="on" data-tab="pyramid" data-cats="edp attars" role="tab" aria-selected="true">%(p_tab_pyramid)s</button>
+    <button type="button" data-tab="apply" data-cats="attars" role="tab" aria-selected="false">%(p_tab_apply)s</button>
+    <button type="button" data-tab="ing" role="tab" aria-selected="false">%(p_tab_ing)s</button>
+    <button type="button" data-tab="delivery" role="tab" aria-selected="false">%(p_tab_delivery)s</button>
+    <button type="button" data-tab="reviews" role="tab" aria-selected="false">%(p_tab_reviews)s</button>
   </div>
   <div data-panel="pyramid" data-cats="edp attars">
     <div class="grid g3">
-      <div><span class="eyebrow">Top</span><p style="margin:8px 0 0" data-note="top"></p></div>
-      <div><span class="eyebrow">Heart</span><p style="margin:8px 0 0" data-note="heart"></p></div>
-      <div><span class="eyebrow">Base</span><p style="margin:8px 0 0" data-note="base"></p></div>
+      <div><span class="eyebrow">%(p_pyr_top)s</span><p style="margin:8px 0 0" data-note="top"></p></div>
+      <div><span class="eyebrow">%(p_pyr_heart)s</span><p style="margin:8px 0 0" data-note="heart"></p></div>
+      <div><span class="eyebrow">%(p_pyr_base)s</span><p style="margin:8px 0 0" data-note="base"></p></div>
     </div>
-    <div class="note" data-pyrnote style="margin-top:20px" hidden>The scent pyramid is published for our EDP sprays. For the attars it is coming soon.</div>
+    <div class="note" data-pyrnote style="margin-top:20px" hidden>%(p_pyr_missing)s</div>
   </div>
   <div data-panel="apply" data-cats="attars" hidden>
     <div class="grid g3">
-      <div><span class="eyebrow">Where</span><p style="margin:8px 0 0">Wrists, the base of the throat, behind the ears. Warm points carry the oil.</p></div>
-      <div><span class="eyebrow">How much</span><p style="margin:8px 0 0">These are oils, not sprays. One dab on each point is the dose; a 3 ml bottle lasts accordingly.</p></div>
-      <div><span class="eyebrow">Do not rub</span><p style="margin:8px 0 0">Press the points together rather than rubbing, which breaks the top notes.</p></div>
+      %(p_apply)s
     </div>
-    <div class="note" style="margin-top:20px">Every blend in the shop is alcohol-free and oil based.</div>
+    <div class="note" style="margin-top:20px">%(p_apply_note)s</div>
   </div>
   <div data-panel="ing" hidden>
-    <div data-ingpanel><p style="margin:0;color:var(--mut)">Full ingredient and allergen lists are published for our EDP sprays. This one is coming soon.</p></div>
+    <div data-ingpanel><p style="margin:0;color:var(--mut)">%(p_ing_missing)s</p></div>
   </div>
   <div data-panel="delivery" hidden>
     <div class="grid g3">
-      <div><span class="eyebrow">UAE delivery</span><p style="margin:8px 0 0">Free over %(rule_free_over)s. %(rule_delivery_fee)s below that. UAE only.</p></div>
-      <div><span class="eyebrow">Same-day Dubai</span><p style="margin:8px 0 0">%(rule_sameday_fee)s, for orders placed before the %(rule_cutoff)s cutoff.</p></div>
-      <div><span class="eyebrow">Returns</span><p style="margin:8px 0 0">Exchange on sealed items. Opened fragrance cannot be returned.</p></div>
+      %(p_delivery)s
     </div>
   </div>
   <div data-panel="reviews" hidden>
     <div class="emptystate" style="text-align:left;padding:20px 0">
-      <b>No reviews yet.</b>
-      <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">Reviews open after the first orders are delivered. Nothing appears here that a buyer has not left.</p>
+      <b>%(p_rev_title)s</b>
+      <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">%(p_rev_body)s</p>
     </div>
   </div>
 </div></section>
 <section><div class="wrap">
-  <div class="sec-h"><h2>Complete the ritual</h2><a href="collection.html">More &rarr;</a></div>
+  <div class="sec-h"><h2>%(p_rel_h)s</h2><a href="%(p_rel_href)s">%(p_rel_link)s &rarr;</a></div>
   <div class="grid g4">%(rel)s</div>
 </div></section>
-""" % dict(RULE_TEXT, gprev=sv("left",20,2), gnext=sv("right",20,2), fam=slot("family"), tone=slot("tone"), gen=slot("gender"), rev=slot("no reviews yet"),
+""" % dict(PRODUCT_TEXT, gprev=sv("left",20,2), gnext=sv("right",20,2), fam=slot("family"), tone=slot("tone"), gen=slot("gender"), rev=slot("no reviews yet"),
    desc="", lon="", sil="",
    bat="", av="",
    truck=sv("truck",16), cash=sv("cash",16),
@@ -965,41 +1164,79 @@ product = """
    share=sv("share",15), rel=attar_cards(4))
 
 # ---------------------------------------------------------------- GIFT BOX
+# The builder's words are content, pages.json "gift_box"; the slot sizes, the
+# six attars in the picker and the amounts are code and store rules. The page
+# opens on an empty three-slot box, so it prints the words shop.js writes for
+# that box, and what shop.js writes as the box fills reaches it as
+# BGS_COPY["gift_box"]. The gift options are words only: nothing lets a
+# visitor choose one yet.
+def _gift_options():
+    rows = page_rows("gift_box.options", ("label", "value"))
+    out = []
+    for i, (label, value) in enumerate(rows):
+        lit = _value("gift_box.options.%d.highlight" % i)
+        if not isinstance(lit, bool):
+            _BAD_PAGES.append("pages.json gift_box.options.%d.highlight must be true or false" % i)
+        out.append("<div><span>%s</span><span%s>%s</span></div>" % (
+            label, ' style="color:var(--green);font-weight:600"' if lit is True else "", value))
+    return "\n          ".join(out)
+
+GIFT_BOX_TEXT = {
+    "b_crumb": CRUMB_HOME + " / " + page_text("gift_box.crumb"),
+    "b_title": page_text("gift_box.title"), "b_intro": page_text("gift_box.intro"),
+    "b_pick": page_text("gift_box.picker_heading"),
+    "b_scents": page_text("gift_box.summary.scents_many", {"n": "0"}, need=("n",)),
+    "b_box": page_text("gift_box.summary.box_label"),
+    "b_disc": page_text("gift_box.summary.discount_label", {"box_at": esc(RULE_TEXT["rule_box_at"])}),
+    "b_total": page_text("gift_box.summary.total_label"),
+    "b_fill": page_text("gift_box.summary.fill_many", {"n": "3"}, need=("n",)),
+    "b_opts_h": page_text("gift_box.options_heading"),
+    "b_opts": _gift_options(),
+}
+for _n in (3, 6):
+    GIFT_BOX_TEXT["b_size%d" % _n] = page_text("gift_box.size_label", {"n": str(_n)}, need=("n",))
+COPY_JS["gift_box"] = {
+    "slots": {"filled": js_text("gift_box.slots.filled", allow=("n",)), "remove": js_text("gift_box.slots.remove"),
+              "empty": js_text("gift_box.slots.empty", allow=("n",)), "choose": js_text("gift_box.slots.choose"),
+              "pick": js_text("gift_box.slots.pick")},
+    "summary": {k: js_text("gift_box.summary." + k, need=("n",))
+                for k in ("scents_one", "scents_many", "fill_one", "fill_many")},
+}
+COPY_JS["gift_box"]["summary"].update(add=js_text("gift_box.summary.add", allow=("total",)),
+                                      full=js_text("gift_box.summary.full"))
+
 giftbox = """
 <section><div class="wrap">
-  <span class="eyebrow">Home / Build Your Gift Box</span>
-  <div class="sec-h" style="margin-top:10px"><div><h2 style="font-size:26px">Build a gift box</h2>
-  <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">Three or six slots, filled from the house scents, leaving as one cart line with its contents itemised.</p></div></div>
+  <span class="eyebrow">%(b_crumb)s</span>
+  <div class="sec-h" style="margin-top:10px"><div><h2 style="font-size:26px">%(b_title)s</h2>
+  <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">%(b_intro)s</p></div></div>
   <div class="two">
     <div>
       <div class="pills" style="margin-bottom:18px">
-        <button type="button" class="pill on" data-boxsize="3">3 slots</button>
-        <button type="button" class="pill" data-boxsize="6">6 slots</button></div>
+        <button type="button" class="pill on" data-boxsize="3">%(b_size3)s</button>
+        <button type="button" class="pill" data-boxsize="6">%(b_size6)s</button></div>
       <div class="grid g3" data-slots style="margin-bottom:22px"></div>
-      <div class="sec-h"><h2 style="font-size:17px">Add to the box</h2></div>
+      <div class="sec-h"><h2 style="font-size:17px">%(b_pick)s</h2></div>
       <div class="grid g4">%(pick)s</div>
     </div>
     <div>
       <div class="sum">
-        <div class="r"><span data-boxn>0 scents</span><span data-boxscents>AED 0</span></div>
-        <div class="r"><span>Premium box</span><span>%(rule_box_fee)s</span></div>
-        <div class="r" data-boxdisc style="color:var(--faint)"><span>Volume discount at %(rule_box_at)s</span><span>&minus;%(rule_box_pct)s%%</span></div>
-        <div class="r t"><span>Total</span><span data-boxtotal>%(rule_box_fee)s</span></div>
-        <button type="button" class="btn ghost block" data-boxcta style="margin-top:12px">Fill 3 more slots</button>
+        <div class="r"><span data-boxn>%(b_scents)s</span><span data-boxscents>AED 0</span></div>
+        <div class="r"><span>%(b_box)s</span><span>%(rule_box_fee)s</span></div>
+        <div class="r" data-boxdisc style="color:var(--faint)"><span>%(b_disc)s</span><span>&minus;%(rule_box_pct)s%%</span></div>
+        <div class="r t"><span>%(b_total)s</span><span data-boxtotal>%(rule_box_fee)s</span></div>
+        <button type="button" class="btn ghost block" data-boxcta style="margin-top:12px">%(b_fill)s</button>
       </div>
       <div class="sum" style="margin-top:16px;background:#fff">
-        <span class="eyebrow">Gift options</span>
+        <span class="eyebrow">%(b_opts_h)s</span>
         <div class="kv" style="margin-top:10px">
-          <div><span>Wrap &amp; handwritten card</span><span>+AED 10</span></div>
-          <div><span>QR video message &middot; 60s</span><span style="color:var(--green);font-weight:600">Free</span></div>
-          <div><span>Scheduled delivery date</span><span>Up to +30 days</span></div>
-          <div><span>Ship to recipient &middot; hide prices</span><span>Off</span></div>
+          %(b_opts)s
         </div>
       </div>
     </div>
   </div>
 </div></section>
-""" % dict(RULE_TEXT, pick=attar_cards(6))
+""" % dict(RULE_TEXT, pick=attar_cards(6), **GIFT_BOX_TEXT)
 
 def stepper(qty, fixed=False):
     if fixed:
@@ -1019,35 +1256,68 @@ def cline(name, meta, unit, qty, extra="", halo=False, gift=False):
       unit, "1" if halo else "0", "1" if gift else "0", name, meta,
       stepper(qty, gift), extra, "{:,.0f}".format(unit * qty) if unit else "0")
 
+# The bag's words are content, pages.json "cart". The payment chips and the
+# cash on delivery note belong to checkout and stay here, and the amounts
+# beside the labels are placeholders shop.js replaces. The third bar opens
+# with the store rules' own wording (RULE_TEXT). What shop.js writes once it
+# has counted the bag (the bars' progress, the item count, the line and
+# gift-line words) reaches it as BGS_COPY["cart"].
+_GIFT_TOKENS = {"gift": esc(_gift_name(_GIFT_LABEL)),
+                "gift_over": esc(_aed(RULES["gift_with_purchase"]["threshold"]))}
+CART_TEXT = {
+    "c_title": page_text("cart.title"),
+    "c_cont": page_text("cart.continue.label"), "c_cont_href": page_href("cart.continue.href"),
+    "c_p1": page_text("cart.progress.free_delivery", RULE_TOKENS),
+    "c_p2": page_text("cart.progress.gift", _GIFT_TOKENS),
+    "c_unlocked": page_text("cart.progress.unlocked"),
+    "c_empty": page_text("cart.empty.text"), "c_empty_cta": page_text("cart.empty.cta_label"),
+    "c_empty_href": page_href("cart.empty.cta_href"),
+    "c_note": page_text("cart.never_discount_note"),
+}
+for _k in ("subtotal", "discount", "delivery", "free", "total", "checkout"):
+    CART_TEXT["c_" + _k] = page_text("cart.summary." + _k)
+COPY_JS["cart"] = {
+    "progress": {"unlocked": raw_text("cart.progress.unlocked"),
+                 "to_go": js_text("cart.progress.to_go", need=("amount",)),
+                 "ladder_next": js_text("cart.progress.ladder_next", need=("n",), allow=("pct",)),
+                 "ladder_top": js_text("cart.progress.ladder_top", allow=("pct",)),
+                 "ladder_count": js_text("cart.progress.ladder_count", need=("n",), allow=("goal",))},
+    "items": {k: js_text("cart.items." + k, need=("n",)) for k in ("one", "many")},
+    "line": {k: js_text("cart.line." + k) for k in ("no_image", "remove")},
+    "gift_line": {"placeholder": js_text("cart.gift_line.placeholder"),
+                  "meta": js_text("cart.gift_line.meta", allow=("amount",))},
+    "summary": {"free": raw_text("cart.summary.free")},
+}
+
 cart = """
 <section><div class="wrap">
-  <div class="sec-h"><h2 style="font-size:26px">Your bag<span data-bagitems></span></h2><a href="collection.html">Continue shopping &rarr;</a></div>
+  <div class="sec-h"><h2 style="font-size:26px">%(c_title)s<span data-bagitems></span></h2><a href="%(c_cont_href)s">%(c_cont)s &rarr;</a></div>
   <div class="two">
     <div>
       <div class="sum" data-cartprogress style="background:#fff;margin-bottom:18px">
-        <div class="prog"><div class="lb"><span>Free UAE delivery over %(rule_free_over)s</span><b data-p1lb style="color:var(--green)">Unlocked</b></div><div class="tr"><i data-p1 style="width:100%%"></i></div></div>
-        <div class="prog" style="margin-top:14px"><div class="lb"><span>%(rule_gift_bar)s</span><b data-p2lb style="color:var(--green)">Unlocked</b></div><div class="tr"><i data-p2 style="width:100%%"></i></div></div>
+        <div class="prog"><div class="lb"><span>%(c_p1)s</span><b data-p1lb style="color:var(--green)">%(c_unlocked)s</b></div><div class="tr"><i data-p1 style="width:100%%"></i></div></div>
+        <div class="prog" style="margin-top:14px"><div class="lb"><span>%(c_p2)s</span><b data-p2lb style="color:var(--green)">%(c_unlocked)s</b></div><div class="tr"><i data-p2 style="width:100%%"></i></div></div>
         <div class="prog" style="margin-top:14px"><div class="lb"><span data-p3txt>%(rule_p3_text)s</span><b data-p3lb style="color:var(--gold-d)">%(rule_p3_label)s</b></div><div class="tr"><i class="part" data-p3 style="width:%(rule_p3_width)s%%"></i></div></div>
       </div>
       <div data-cartlines></div>
       <div data-cartempty class="empty" hidden>
-        <p style="margin-bottom:16px">Your bag is empty.</p>
-        <a class="btn solid" href="collection.html">Browse the collection</a>
+        <p style="margin-bottom:16px">%(c_empty)s</p>
+        <a class="btn solid" href="%(c_empty_href)s">%(c_empty_cta)s</a>
       </div>
-      <div data-cartnote class="note" style="margin-top:16px" hidden>Reserve pieces are never discounted, on any offer, at any basket size, so they sit outside the volume ladder.</div>
+      <div data-cartnote class="note" style="margin-top:16px" hidden>%(c_note)s</div>
     </div>
     <div data-cartsummary><div class="sum">
-      <div class="r"><span>Subtotal</span><span data-subtotal>AED 0</span></div>
-      <div class="r" style="color:var(--green)" data-tierrow><span>Volume discount &middot; <b data-tierpct>%(rule_tier_pct)s</b>%%</span><span data-tieramt>&minus; AED 19.50</span></div>
-      <div class="r"><span>Delivery</span><span data-delivery style="color:var(--green)">Free</span></div>
-      <div class="r t"><span>Total</span><span data-total>AED 825.50</span></div>
-      <a class="btn solid block" href="checkout.html" style="margin-top:12px">Checkout</a>
+      <div class="r"><span>%(c_subtotal)s</span><span data-subtotal>AED 0</span></div>
+      <div class="r" style="color:var(--green)" data-tierrow><span>%(c_discount)s &middot; <b data-tierpct>%(rule_tier_pct)s</b>%%</span><span data-tieramt>&minus; AED 19.50</span></div>
+      <div class="r"><span>%(c_delivery)s</span><span data-delivery style="color:var(--green)">%(c_free)s</span></div>
+      <div class="r t"><span>%(c_total)s</span><span data-total>AED 825.50</span></div>
+      <a class="btn solid block" href="checkout.html" style="margin-top:12px">%(c_checkout)s</a>
       <div class="pay" data-pay style="margin-top:14px;justify-content:center"><span>Card</span><span>Apple Pay</span><span>Tabby</span><span>Tamara</span><span class="off">COD</span></div>
       <p data-codnote style="font-size:11.5px;color:var(--mut);margin:12px 0 0;text-align:center">Cash on delivery is withheld over AED 300.</p>
     </div></div>
   </div>
 </div></section>
-""" % dict(RULE_TEXT, vat=slot("VAT registration expected ~month 9"))
+""" % dict(RULE_TEXT, vat=slot("VAT registration expected ~month 9"), **CART_TEXT)
 
 # The bag and the gift box above print these rules; shop.js prices with them.
 EXTRA_GLOBALS.append(("BGS_RULES", lambda: RULES))
@@ -1098,62 +1368,123 @@ confirmed = """
   <div style="display:flex;gap:12px;margin-top:24px"><a class="btn solid" href="track-order.html">Track this order</a><a class="btn" href="index.html">Keep shopping</a></div>
 </div></section>
 """ % dict(check=sv("check",26,2.6), num=slot("generated at checkout"), trn=slot("TRN, registration expected ~month 9"))
+# The corporate page's words are content, pages.json "corporate". The band's
+# button jumps to the form below it, so its target stays here. The name and
+# email boxes' hints are also their names for screen readers; the other two
+# keep a shorter name. The form sends nothing yet, and its replies (shop.js,
+# BGS_COPY["corporate"]) say so.
+_CORP_TIER = ('<div class="sum" style="background:#fff"><span class="eyebrow">%s</span><div class="tier">%s</div>'
+              '<p style="font-size:12.5px;color:var(--mut);margin:0">%s</p></div>')
+CORPORATE_TEXT = {
+    "k_title": page_text("corporate.title"), "k_intro": page_text("corporate.intro"),
+    "k_tiers": "\n    ".join(_CORP_TIER % r for r in page_rows("corporate.tiers", ("units", "price", "note"))),
+    "k_band_h": page_text("corporate.band.heading"), "k_band_p": page_text("corporate.band.body"),
+    "k_band_cta": page_text("corporate.band.cta_label"),
+}
+for _k in ("name", "email", "occasion", "units", "send"):
+    CORPORATE_TEXT["k_" + _k] = page_text("corporate.form." + _k)
+COPY_JS["corporate"] = {
+    "invalid_email": js_text("corporate.replies.invalid_email"),
+    "thanks": js_text("corporate.replies.thanks"),
+    "thanks_name": js_text("corporate.replies.thanks_name", need=("name",)),
+    "quote": js_text("corporate.replies.quote"),
+    "quote_units": js_text("corporate.replies.quote_units", need=("n",)),
+    "not_sent": js_text("corporate.replies.not_sent"),
+}
+
 corporate = """
 <section><div class="wrap">
-  <div class="sec-h"><div><h2 style="font-size:26px">Corporate gifting</h2>
-  <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">Above 20 units this becomes a quote, not a checkout.</p></div></div>
+  <div class="sec-h"><div><h2 style="font-size:26px">%(k_title)s</h2>
+  <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">%(k_intro)s</p></div></div>
   <div class="grid g4" style="margin-bottom:24px">
-    <div class="sum" style="background:#fff"><span class="eyebrow">10 units</span><div class="tier">%(s)s</div><p style="font-size:12.5px;color:var(--mut);margin:0">Co-branding options</p></div>
-    <div class="sum" style="background:#fff"><span class="eyebrow">25 units</span><div class="tier">%(s)s</div><p style="font-size:12.5px;color:var(--mut);margin:0">Co-branding options</p></div>
-    <div class="sum" style="background:#fff"><span class="eyebrow">50 units</span><div class="tier">%(s)s</div><p style="font-size:12.5px;color:var(--mut);margin:0">Co-branding options</p></div>
-    <div class="sum" style="background:#fff"><span class="eyebrow">100 units</span><div class="tier">Quote</div><p style="font-size:12.5px;color:var(--mut);margin:0">Full co-branding</p></div>
+    %(k_tiers)s
   </div>
-  <div class="band"><div><h3>Tell us the occasion and the headcount</h3><p>Above 20 units this becomes a quote rather than a checkout. Send the details and we will come back with pricing.</p></div><a class="btn gold" href="#corporate-form">Request a quote</a></div>
+  <div class="band"><div><h3>%(k_band_h)s</h3><p>%(k_band_p)s</p></div><a class="btn gold" href="#corporate-form">%(k_band_cta)s</a></div>
   <div id="corporate-form" style="margin-top:22px;max-width:560px">
-    <div class="grid g2" style="margin-bottom:12px"><input class="field" data-cq="name" aria-label="Your name" placeholder="Your name"><input class="field" data-cq="email" type="email" aria-label="Work email" placeholder="Work email"></div>
-    <div class="grid g2" style="margin-bottom:12px"><input class="field" data-cq="occasion" aria-label="Occasion" placeholder="Occasion (Eid, wedding, staff gift)"><input class="field" data-cq="units" type="number" aria-label="Units" placeholder="Headcount / units"></div>
-    <button type="button" class="btn solid" data-cqsend>Send enquiry</button>
+    <div class="grid g2" style="margin-bottom:12px"><input class="field" data-cq="name" aria-label="%(k_name)s" placeholder="%(k_name)s"><input class="field" data-cq="email" type="email" aria-label="%(k_email)s" placeholder="%(k_email)s"></div>
+    <div class="grid g2" style="margin-bottom:12px"><input class="field" data-cq="occasion" aria-label="Occasion" placeholder="%(k_occasion)s"><input class="field" data-cq="units" type="number" aria-label="Units" placeholder="%(k_units)s"></div>
+    <button type="button" class="btn solid" data-cqsend>%(k_send)s</button>
     <p class="note" data-cqresult hidden style="margin:10px 0 0"></p>
   </div>
 </div></section>
-""" % dict(s="On quote")
+""" % CORPORATE_TEXT
+
+# The tracking page's words are content, pages.json "track". The order
+# number box's hint is also its name for screen readers, so both print the
+# one value. The replies its button gives reach shop.js as BGS_COPY["track"].
+TRACK_TEXT = {
+    "t_crumb": CRUMB_HOME + " / " + page_text("track.crumb"),
+    "t_title": page_text("track.title"), "t_intro": page_text("track.intro"),
+    "t_number": page_text("track.form.number"), "t_phone": page_text("track.form.phone"),
+    "t_button": page_text("track.form.button"),
+    "t_stages_h": page_text("track.stages_heading"),
+    "t_stages": kv_rows(page_rows("track.stages", ("label", "body")), "\n    "),
+    "t_note": page_text("track.whatsapp_note"),
+}
+COPY_JS["track"] = {"missing": js_text("track.replies.missing"),
+                    "looking": js_text("track.replies.looking", allow=("query",))}
 
 track = """
 <section><div class="wrap" style="max-width:720px">
-  <span class="eyebrow">Home / Track order</span>
-  <div class="sec-h" style="margin-top:10px"><div><h2 style="font-size:26px">Track your order</h2>
-  <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">Enter the order number from your confirmation, or the phone number you ordered with.</p></div></div>
-  <div class="grid g2" style="margin-bottom:14px"><input class="field" data-ordernum aria-label="Order number" placeholder="Order number"><input class="field" data-orderphone type="tel" aria-label="Phone number" placeholder="Phone &middot; UAE"></div>
-  <button type="button" class="btn solid block" data-findorder style="margin-bottom:10px">Find my order</button>
+  <span class="eyebrow">%(t_crumb)s</span>
+  <div class="sec-h" style="margin-top:10px"><div><h2 style="font-size:26px">%(t_title)s</h2>
+  <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">%(t_intro)s</p></div></div>
+  <div class="grid g2" style="margin-bottom:14px"><input class="field" data-ordernum aria-label="%(t_number)s" placeholder="%(t_number)s"><input class="field" data-orderphone type="tel" aria-label="Phone number" placeholder="%(t_phone)s"></div>
+  <button type="button" class="btn solid block" data-findorder style="margin-bottom:10px">%(t_button)s</button>
   <p class="note" data-findresult hidden style="margin:0 0 26px"></p>
-  <span class="eyebrow">Where it will be</span>
+  <span class="eyebrow">%(t_stages_h)s</span>
   <div class="kv" style="margin-top:10px">
-    <div><span>Placed</span><span>Order confirmed, payment taken</span></div>
-    <div><span>Confirmed</span><span>COD orders wait here until confirmed</span></div>
-    <div><span>Packed</span><span>Picked at the kiosk</span></div>
-    <div><span>Shipped</span><span>Courier reference appears here</span></div>
-    <div><span>Delivered</span><span>Credit-back voucher issues at this point</span></div>
+    %(t_stages)s
   </div>
-  <div class="note" style="margin-top:20px">Order updates can also come by WhatsApp, the opt-in is on the confirmation page, unticked by default.</div>
+  <div class="note" style="margin-top:20px">%(t_note)s</div>
 </div></section>
-"""
+""" % TRACK_TEXT
+
+# The account page's words are content, pages.json "account". A customer's
+# own details (name, phone, drops, credit, orders, voucher, code) stay
+# placeholders until login and the database arrive, and the account menu
+# stays here with them, naming the programme from content as the badge and
+# the heading do. The badge shows the first tier, where every customer
+# starts. The "How it works" link goes nowhere yet, so its target stays here.
+_TIERS = page_rows("account.loyalty.tiers", ("name", "note"))
+ACCOUNT_TEXT = {
+    "a_crumb": CRUMB_HOME + " / " + page_text("account.crumb"),
+    "a_prog": page_text("account.programme"),
+    "a_tier": _TIERS[0][0] if _TIERS else "",
+    "a_tiers": "\n          ".join('<div class="t%s"><b>%s</b><span>%s</span></div>' % ((" on" if i == 0 else "",) + r)
+                                  for i, r in enumerate(_TIERS)),
+    "a_next": page_text("account.loyalty.next_tier"),
+    "a_how": page_text("account.loyalty.how_label"),
+    "a_perks": kv_rows(page_rows("account.loyalty.perks", ("label", "who")), "\n          "),
+    "a_shop_href": page_href("account.orders.cta_href"),
+}
+for _k in ("drops", "credit", "orders"):
+    ACCOUNT_TEXT["a_%s" % _k] = page_text("account.stats.%s.label" % _k)
+    ACCOUNT_TEXT["a_%s_note" % _k] = page_text("account.stats.%s.note" % _k)
+for _part, _keys in (("wallet", ("heading", "voucher_label", "redeem_label", "redeem", "expires_label", "expires", "note")),
+                     ("referral", ("heading", "copy_label", "friend_label", "friend", "you_label", "you", "referred_label")),
+                     ("orders", ("heading", "track_label", "empty_title", "empty_body", "cta_label")),
+                     ("consent", ("heading", "phone_label", "email_label", "language_label", "language",
+                                  "order_updates", "offers", "note"))):
+    for _k in _keys:
+        ACCOUNT_TEXT["a_%s_%s" % (_part, _k)] = page_text("account.%s.%s" % (_part, _k))
 
 account = """
 <section><div class="wrap">
-  <span class="eyebrow">Home / Account</span>
+  <span class="eyebrow">%(a_crumb)s</span>
   <div class="acct-head">
     <div>
       <h2 style="font-size:26px;margin:8px 0 6px">%(name)s</h2>
       <p style="color:var(--mut);font-size:13.5px;margin:0">%(contact)s</p>
     </div>
-    <div class="tierbadge"><span class="eyebrow gold-d">BGS One</span><b>%(tier)s</b></div>
+    <div class="tierbadge"><span class="eyebrow gold-d">%(a_prog)s</span><b>%(a_tier)s</b></div>
   </div>
 
   <div class="acct">
     <nav class="acctnav">
       <a class="on" href="account.html">Overview</a>
       <a href="account.html">Orders</a>
-      <a href="account.html">BGS One &amp; wallet</a>
+      <a href="account.html">%(a_prog)s &amp; wallet</a>
       <a href="account.html">Referrals</a>
       <a href="account.html">Addresses</a>
       <a href="account.html">Details &amp; consent</a>
@@ -1162,73 +1493,68 @@ account = """
 
     <div class="acctbody">
       <div class="grid g3" style="margin-bottom:26px">
-        <div class="sum" style="background:#fff"><span class="eyebrow">Drops</span><div class="tier">%(drops)s</div><p class="mini">1 drop per AED 1 &middot; 100 drops = AED 5 credit</p></div>
-        <div class="sum" style="background:#fff"><span class="eyebrow">Wallet credit</span><div class="tier">%(credit)s</div><p class="mini">Credit-back vouchers and referral credit</p></div>
-        <div class="sum" style="background:#fff"><span class="eyebrow">Orders</span><div class="tier">%(orders)s</div><p class="mini">Lifetime, all channels</p></div>
+        <div class="sum" style="background:#fff"><span class="eyebrow">%(a_drops)s</span><div class="tier">%(drops)s</div><p class="mini">%(a_drops_note)s</p></div>
+        <div class="sum" style="background:#fff"><span class="eyebrow">%(a_credit)s</span><div class="tier">%(credit)s</div><p class="mini">%(a_credit_note)s</p></div>
+        <div class="sum" style="background:#fff"><span class="eyebrow">%(a_orders)s</span><div class="tier">%(orders)s</div><p class="mini">%(a_orders_note)s</p></div>
       </div>
 
-      <div class="sec-h"><h2 style="font-size:17px">BGS One</h2><a href="#">How it works &rarr;</a></div>
+      <div class="sec-h"><h2 style="font-size:17px">%(a_prog)s</h2><a href="#">%(a_how)s &rarr;</a></div>
       <div class="sum" style="background:#fff;margin-bottom:26px">
         <div class="tiers">
-          <div class="t on"><b>Musk</b><span>0 lifetime</span></div>
-          <div class="t"><b>Amber</b><span>500 lifetime</span></div>
-          <div class="t"><b>Oud</b><span>1,500 lifetime</span></div>
+          %(a_tiers)s
         </div>
         <div class="tr" style="margin:14px 0 10px"><i class="part" style="width:%(tierpct)s"></i></div>
-        <p class="mini" style="margin:0">%(tiernext)s</p>
+        <p class="mini" style="margin:0">%(a_next)s</p>
         <div class="kv" style="margin-top:14px">
-          <div><span>Birthday oud</span><span>Oud tier</span></div>
-          <div><span>Early access to a drop</span><span>Amber and Oud</span></div>
-          <div><span>Double-drop events</span><span>When running</span></div>
+          %(a_perks)s
         </div>
       </div>
 
-      <div class="sec-h"><h2 style="font-size:17px">Wallet</h2></div>
+      <div class="sec-h"><h2 style="font-size:17px">%(a_wallet_heading)s</h2></div>
       <div class="sum" style="background:#fff;margin-bottom:26px">
         <div class="kv">
-          <div><span>Credit-back voucher &middot; 3 ml purchase</span><span>%(voucher)s</span></div>
-          <div><span>Redeemable on</span><span>Any bottle over AED 75</span></div>
-          <div><span>Expires</span><span>60 days from issue</span></div>
+          <div><span>%(a_wallet_voucher_label)s</span><span>%(voucher)s</span></div>
+          <div><span>%(a_wallet_redeem_label)s</span><span>%(a_wallet_redeem)s</span></div>
+          <div><span>%(a_wallet_expires_label)s</span><span>%(a_wallet_expires)s</span></div>
         </div>
-        <p class="mini" style="margin:12px 0 0">Issued automatically the day a 3 ml order is delivered. Single use.</p>
+        <p class="mini" style="margin:12px 0 0">%(a_wallet_note)s</p>
       </div>
 
-      <div class="sec-h"><h2 style="font-size:17px">Refer a friend</h2></div>
+      <div class="sec-h"><h2 style="font-size:17px">%(a_referral_heading)s</h2></div>
       <div class="sum" style="background:#fff;margin-bottom:26px">
-        <div class="refbox"><span class="code">%(refcode)s</span><span class="btn sm">Copy link</span></div>
+        <div class="refbox"><span class="code">%(refcode)s</span><span class="btn sm">%(a_referral_copy_label)s</span></div>
         <div class="kv" style="margin-top:14px">
-          <div><span>They get</span><span>AED 20 off a first order over AED 99</span></div>
-          <div><span>You get</span><span>AED 20 credit, 3 days after their delivery</span></div>
-          <div><span>Referred so far</span><span>%(referred)s</span></div>
+          <div><span>%(a_referral_friend_label)s</span><span>%(a_referral_friend)s</span></div>
+          <div><span>%(a_referral_you_label)s</span><span>%(a_referral_you)s</span></div>
+          <div><span>%(a_referral_referred_label)s</span><span>%(referred)s</span></div>
         </div>
       </div>
 
-      <div class="sec-h"><h2 style="font-size:17px">Recent orders</h2><a href="track-order.html">Track an order &rarr;</a></div>
+      <div class="sec-h"><h2 style="font-size:17px">%(a_orders_heading)s</h2><a href="track-order.html">%(a_orders_track_label)s &rarr;</a></div>
       <div class="sum" style="background:#fff;margin-bottom:26px">
         <div class="emptystate">
-          <b>No orders yet</b>
-          <p class="mini">Orders placed as a guest with this phone number will appear here once the number is verified.</p>
-          <a class="btn sm" href="collection.html">Start shopping</a>
+          <b>%(a_orders_empty_title)s</b>
+          <p class="mini">%(a_orders_empty_body)s</p>
+          <a class="btn sm" href="%(a_shop_href)s">%(a_orders_cta_label)s</a>
         </div>
       </div>
 
-      <div class="sec-h"><h2 style="font-size:17px">Details &amp; consent</h2></div>
+      <div class="sec-h"><h2 style="font-size:17px">%(a_consent_heading)s</h2></div>
       <div class="sum" style="background:#fff">
         <div class="kv">
-          <div><span>Phone</span><span>%(contact)s</span></div>
-          <div><span>Email</span><span>%(email)s</span></div>
-          <div><span>Language</span><span>English &middot; العربية</span></div>
+          <div><span>%(a_consent_phone_label)s</span><span>%(contact)s</span></div>
+          <div><span>%(a_consent_email_label)s</span><span>%(email)s</span></div>
+          <div><span>%(a_consent_language_label)s</span><span>%(a_consent_language)s</span></div>
         </div>
-        <label class="consent"><input type="checkbox">Order updates on WhatsApp</label>
-        <label class="consent"><input type="checkbox">Offers and new drops on WhatsApp</label>
-        <p class="mini" style="margin:10px 0 0">Each opt-in is stored with its time, source and language. Opting out here also stops messages sent from the CRM.</p>
+        <label class="consent"><input type="checkbox">%(a_consent_order_updates)s</label>
+        <label class="consent"><input type="checkbox">%(a_consent_offers)s</label>
+        <p class="mini" style="margin:10px 0 0">%(a_consent_note)s</p>
       </div>
     </div>
   </div>
 </div></section>
-""" % dict(name=slot("customer name"), contact=slot("phone"), email=slot("email"),
-           tier="Musk", drops=slot("0"), credit=slot("AED 0"), orders=slot("0"),
-           tierpct="0%", tiernext="500 lifetime drops to Amber",
+""" % dict(ACCOUNT_TEXT, name=slot("customer name"), contact=slot("phone"), email=slot("email"),
+           drops=slot("0"), credit=slot("AED 0"), orders=slot("0"), tierpct="0%",
            voucher=slot("none active"), refcode=slot("unique code per customer"),
            referred=slot("0"))
 
@@ -1394,6 +1720,17 @@ PAGES = [("index.html","Attars, Bakhoor &amp; EDP Sprays: Blended in Dubai",home
          ("account.html","Your Account: BGS One, Wallet and Referrals",account,"","Account"),
          ("quiz.html","Test Your Scent: Five Questions, One Minute",quiz,"","Home"),
          ("corporate.html","Corporate Gifting: Co-Branded Oud and Bakhoor",corporate,"Corporate Gifting","Home")]
+# 404.html is written after the pages, but its words (pages.json
+# "not_found") are read here with the rest. Its tab title ends with the same
+# suffix from Settings as every other page's.
+NOT_FOUND_TEXT = {"title": page_text("not_found.title"), "suffix": SHELL_TEXT["title_suffix"],
+                  "heading": page_text("not_found.heading"), "body": page_text("not_found.body"),
+                  "button": page_text("not_found.button")}
+
+# Every page's text has been read by now. Stop before anything is written if
+# any of it was missing or broken, naming each problem once.
+if _BAD_PAGES:
+    sys.exit("build failed:\n  " + "\n  ".join(dict.fromkeys(_BAD_PAGES)))
 print("catalogue:", emit_catalogue(), "products")
 def minify_css(css):
     """The stylesheet ships without comments and spare whitespace: comments are
@@ -1441,16 +1778,16 @@ print("wrote", len(PAGES), "pages")
 pathlib.Path("404.html").write_text("""<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Page not found | BGS Corner</title><meta name="robots" content="noindex">
+<title>%(title)s | %(suffix)s</title><meta name="robots" content="noindex">
 <style>body{margin:0;min-height:100vh;display:grid;place-items:center;text-align:center;
 background:#faf8f4;color:#171310;font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 main{padding:24px}h1{font:600 28px/1.2 Georgia,"Times New Roman",serif;margin:0 0 10px}
 a{display:inline-block;margin-top:18px;background:#171310;color:#fff;padding:12px 22px;text-decoration:none;border-radius:999px}</style>
-</head><body><main><h1>We couldn&rsquo;t find that page</h1><p>The link may be old or mistyped.</p>
-<a id="home" href="/">Go to the BGS Corner homepage</a></main>
+</head><body><main><h1>%(heading)s</h1><p>%(body)s</p>
+<a id="home" href="/">%(button)s</a></main>
 <script>document.getElementById("home").href=location.pathname.indexOf("/structured-corner-v2/")===0?"/structured-corner-v2/":"/";</script>
 </body></html>
-""")
+""" % NOT_FOUND_TEXT)
 # Search results are thin, endless variations of one page.
 pathlib.Path("robots.txt").write_text("User-agent: *\nDisallow: /collection.html?q=\n")
 

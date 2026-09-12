@@ -1,9 +1,9 @@
 {
   "strip": {
-    "countdown_line": "Order by 2:00 PM for delivery today in Dubai",
+    "countdown_line": "Order by {cutoff} for delivery today in Dubai",
     "right_links": [
       {
-        "label": "Free UAE delivery over AED 150",
+        "label": "Free UAE delivery over {free_over}",
         "href": ""
       },
       {
