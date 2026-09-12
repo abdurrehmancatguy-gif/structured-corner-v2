@@ -512,11 +512,11 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
     return """<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>%(title)s | %(title_suffix)s</title>
+<title>%(full_title)s</title>
 <meta name="description" content="%(desc)s">
 %(robots)s<link rel="canonical" href="%(canon)s">
 <meta property="og:type" content="website">
-<meta property="og:title" content="%(title)s | %(title_suffix)s">
+<meta property="og:title" content="%(full_title)s">
 <meta property="og:description" content="%(desc)s">
 <meta property="og:image" content="%(ogimg)s">
 <meta name="twitter:card" content="summary_large_image">
@@ -551,6 +551,7 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
 <script src="%(catjs)s"></script>
 <script src="%(shopjs)s"></script></body></html>
 """ % dict(SHELL_TEXT, title=title, body=body, page=page, css=V("assets/flow.min.css"),
+   full_title=(title + " | " + SHELL_TEXT["title_suffix"]) if title else SHELL_TEXT["title_suffix"],
    catjs=V("assets/catalogue.js"), shopjs=V("assets/shop.js"),
    preload=PRELOAD if page == "page-product" else "",
    robots='<meta name="robots" content="noindex,follow">\n' if page in NOINDEX else "",
@@ -1718,7 +1719,9 @@ def emit_catalogue():
     return len(cat)
 
 
-PAGES = [("index.html","Attars, Bakhoor &amp; EDP Sprays: Blended in Dubai",home,"","Home"),
+# An empty title leaves the tab with the Title suffix from Settings alone:
+# the homepage is just "BGS Corner".
+PAGES = [("index.html","",home,"","Home"),
          ("collection.html","Attars and Perfume Oils: Alcohol-Free, 3 ml and 6 ml",collection,"Attars/Perfume Oils","Shop"),
          ("product.html","Royal Amber",product,"Attars/Perfume Oils","Shop"),
          ("gift-box.html","Build a Gift Box: Three or Six Scents, Wrapped",giftbox,"Gift Sets","Gifts"),
