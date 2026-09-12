@@ -423,7 +423,7 @@ export async function render(main, { app }) {
   // is wrong, marked, so the owner sees what arrived; read-only cells, cells
   // a product does not use and cells past the edge are skipped and counted.
   function onPaste(e) {
-    if (editing || !cells.length || e.target.closest("input, select")) return;
+    if (editing || !cells.length) return;
     const text = e.clipboardData ? e.clipboardData.getData("text/plain") : "";
     if (!text) return;
     e.preventDefault();
