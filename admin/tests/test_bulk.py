@@ -86,7 +86,7 @@ class BulkTests(unittest.TestCase):
 
     def test_bulk_save_is_all_or_nothing(self):
         (r1, d1), (r2, d2) = self.product("be-mine"), self.product("vibe")
-        st, res = self.bulk([("be-mine", r1, dict(d1, price=90)), ("vibe", r2, dict(d2, price=0, images=[]))])
+        st, res = self.bulk([("be-mine", r1, dict(d1, price=90)), ("vibe", r2, dict(d2, price=0, order=999))])
         self.assertEqual(st, 422, res)
         errors = res["error"]["details"]["errors"]
         self.assertEqual(sorted(errors), ["vibe"])
