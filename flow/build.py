@@ -1043,73 +1043,59 @@ account = """
            voucher=slot("none active"), refcode=slot("unique code per customer"),
            referred=slot("0"))
 
+# ---------------------------------------------------------------- scent quiz
+# The quiz lives in content/quiz.json. The questions and their answers are
+# printed here; what each answer looks for, the profiles it is scored against
+# and the words shop.js writes into the result reach it as window.BGS_QUIZ.
+# An answer's key joins the two, which is why keys never change.
+QUIZ = json.loads((CONTENT_DIR / "quiz.json").read_text(encoding="utf-8"))
+_QKEYS = [o["key"] for q in QUIZ["questions"] for o in q["options"]]
+_QP = []
+if len(set(_QKEYS)) != len(_QKEYS) or sorted(_QKEYS) != sorted(a["key"] for a in QUIZ["answers"]):
+    _QP.append("quiz.json: each answer of each question needs one entry in answers, under its key")
+if "{n}" not in QUIZ["page"]["step_label"]:
+    _QP.append("quiz.json: the step line needs {n} where the question number goes")
+if _QP:
+    sys.exit("build failed:\n  " + "\n  ".join(_QP))
+
+def quiz_card(i, q):
+    """One question with its answers; only the first shows until one is picked."""
+    opts = "\n".join('        <button type="button" data-a="%s">%s%s</button>' % (
+        esc(o["key"]), esc(o["label"]), "<span>%s</span>" % esc(o["sub"]) if o.get("sub") else "")
+        for o in q["options"])
+    return ('    <div class="qcard" data-q="%d"%s>\n      <h2>%s</h2>\n      <div class="qopts%s">\n%s\n'
+            '      </div>\n    </div>\n' % (i, " hidden" if i else "", esc(q["title"]),
+                                           " qopts-2" if q.get("columns") == 2 else "", opts))
+
+def quiz_global():
+    """What shop.js needs to score the answers and word the result: each
+       question's kind (the result files an answer's label under it), each
+       answer's facets and label, the profiles, and the result's own words."""
+    r = QUIZ["result"]
+    return {"kinds": [q["kind"] for q in QUIZ["questions"]],
+            "answers": {a["key"]: {"facets": a["facets"], "label": a["label"]} for a in QUIZ["answers"]},
+            "profiles": QUIZ["profiles"],
+            "result": {k: r[k] for k in ("title_fallback", "score", "unnamed", "unnamed_slot")}}
+EXTRA_GLOBALS.append(("BGS_QUIZ", quiz_global))
+
 quiz = """
 <section><div class="wrap" style="max-width:760px">
-  <span class="eyebrow">Home / Test your scent</span>
+  <span class="eyebrow">%(crumb)s</span>
 
   <div class="quiz" data-quiz>
-    <div class="qprog"><i data-qbar style="width:20%"></i></div>
-    <span class="qstep">Question <b data-qnum>1</b> of 5 &middot; under a minute</span>
+    <div class="qprog"><i data-qbar style="width:%(bar)s"></i></div>
+    <span class="qstep">%(step)s</span>
 
-    <div class="qcard" data-q="0">
-      <h2>When will you wear it?</h2>
-      <div class="qopts">
-        <button type="button" data-a="daily">Every day<span>Work, errands, the school run</span></button>
-        <button type="button" data-a="office">The office<span>Close to the skin, nothing loud</span></button>
-        <button type="button" data-a="evening">Evenings out<span>Dinner, weddings, long nights</span></button>
-        <button type="button" data-a="majlis">The majlis<span>Guests, oud, the good room</span></button>
-      </div>
-    </div>
-
-    <div class="qcard" data-q="1" hidden>
-      <h2>What should it feel like?</h2>
-      <div class="qopts">
-        <button type="button" data-a="bold">Bold<span>Announces itself</span></button>
-        <button type="button" data-a="soft">Soft<span>Quiet, skin-close</span></button>
-        <button type="button" data-a="warm">Warm<span>Spiced, resinous</span></button>
-        <button type="button" data-a="fresh">Fresh<span>Bright and clean</span></button>
-      </div>
-    </div>
-
-    <div class="qcard" data-q="2" hidden>
-      <h2>Which of these draws you first?</h2>
-      <div class="qopts qopts-2">
-        <button type="button" data-a="citrus">Cut lemon and bergamot</button>
-        <button type="button" data-a="rose">Rose and jasmine</button>
-        <button type="button" data-a="spice">Clove, cinnamon, pepper</button>
-        <button type="button" data-a="sweet">Vanilla and tonka</button>
-        <button type="button" data-a="violet">Powdery violet and iris</button>
-        <button type="button" data-a="wood">Agarwood and resin</button>
-      </div>
-    </div>
-
-    <div class="qcard" data-q="3" hidden>
-      <h2>How much should it carry?</h2>
-      <div class="qopts">
-        <button type="button" data-a="intimate">Only up close<span>Intimate</span></button>
-        <button type="button" data-a="noticeable">Arm&rsquo;s length<span>Noticeable</span></button>
-        <button type="button" data-a="room">Fills the room<span>Room-filling</span></button>
-      </div>
-    </div>
-
-    <div class="qcard" data-q="4" hidden>
-      <h2>Which half of the year?</h2>
-      <div class="qopts">
-        <button type="button" data-a="summer">Gulf summer<span>Has to survive the heat</span></button>
-        <button type="button" data-a="winter">Cooler months<span>Room for something heavier</span></button>
-        <button type="button" data-a="both">All year<span>One bottle, no thinking</span></button>
-      </div>
-    </div>
-
-    <button type="button" class="qback" data-qback hidden>&larr; Back</button>
+%(cards)s
+    <button type="button" class="qback" data-qback hidden>%(back)s</button>
   </div>
 
   <div class="qresult" data-qresult hidden>
-    <span class="eyebrow gold-d">Your profile</span>
+    <span class="eyebrow gold-d">%(r_eyebrow)s</span>
     <h2 class="qtitle" data-rtitle></h2>
     <div class="pills" data-rpills style="margin:14px 0 22px"></div>
 
-    <div class="sec-h"><h2 style="font-size:17px">Closest to what you described</h2></div>
+    <div class="sec-h"><h2 style="font-size:17px">%(r_heading)s</h2></div>
     <div class="sum" style="background:#fff;margin-bottom:12px">
       <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap">
         <div style="min-width:0">
@@ -1119,13 +1105,13 @@ quiz = """
         <div style="font-weight:700;font-size:16px">AED 89</div>
       </div>
       <div class="kv" style="margin-top:14px">
-        <div><span>Declared aroma facets</span><span data-rnotes style="text-align:right;max-width:60%"></span></div>
-        <div><span>Barcode</span><span data-rcode></span></div>
-        <div><span>Match strength</span><span data-rscore></span></div>
+        <div><span>%(r_notes_label)s</span><span data-rnotes style="text-align:right;max-width:60%%"></span></div>
+        <div><span>%(r_barcode_label)s</span><span data-rcode></span></div>
+        <div><span>%(r_score_label)s</span><span data-rscore></span></div>
       </div>
       <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
-        <a class="btn solid" href="collection.html?cat=edp">See it</a>
-        <button type="button" class="btn" data-qretake>Retake the quiz</button>
+        <a class="btn solid" href="collection.html?cat=edp">%(r_see_label)s</a>
+        <button type="button" class="btn" data-qretake>%(r_retake_label)s</button>
       </div>
     </div>
 
@@ -1152,7 +1138,12 @@ quiz = """
     </div>
   </div>
 </div></section>
-"""
+""" % dict(crumb=esc(QUIZ["page"]["crumb"]), back=esc(QUIZ["page"]["back"]),
+           step=esc(QUIZ["page"]["step_label"]).replace("{n}", "<b data-qnum>1</b>")
+                                              .replace("{total}", str(len(QUIZ["questions"]))),
+           bar="%g%%" % (100.0 / len(QUIZ["questions"])),
+           cards="\n".join(quiz_card(i, q) for i, q in enumerate(QUIZ["questions"])),
+           **{"r_" + k: esc(v) for k, v in QUIZ["result"].items()})
 
 # --- emit the product catalogue for the client, from one source ---
 def unent(t):
