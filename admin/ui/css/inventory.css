@@ -1,6 +1,8 @@
 /* Inventory: a narrow stock field per row, the row tinted while its number
    differs from the saved one (the bulk editor's changed-cell tint), and a
    problem written under the field it is about. */
+/* The table scrolls inside its card on a phone instead of widening the page. */
+.inv-card .table-wrap{contain:inline-size}
 .inv-cell{display:flex;align-items:center;gap:10px}
 .inv-stock{width:110px;min-height:36px;text-align:right;font-variant-numeric:tabular-nums}
 .inv-row.changed td{background:var(--gold-l)}

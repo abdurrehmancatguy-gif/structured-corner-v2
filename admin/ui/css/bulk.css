@@ -5,7 +5,9 @@
 .bulk-status{margin:0;padding:8px 14px;font-size:12.5px;font-weight:600;border-bottom:1px solid var(--hair)}
 .bulk-status:empty{display:none}
 .bulk-stale .b-actions{display:flex;flex-wrap:wrap;gap:8px}
-.bulk-wrap{overflow:auto;max-height:calc(100vh - 300px);min-height:220px;scroll-padding:44px 0 0 240px}
+/* contain:inline-size keeps the grid's width out of the page's: on a phone
+   the one-column layout would otherwise widen to fit the grid. */
+.bulk-wrap{overflow:auto;max-height:calc(100vh - 300px);min-height:220px;scroll-padding:44px 0 0 240px;contain:inline-size}
 .grid{border-collapse:separate;border-spacing:0;min-width:100%}
 .grid th,.grid td{border-bottom:1px solid var(--hair);border-right:1px solid var(--hair);text-align:left;vertical-align:top}
 .g-h{position:sticky;top:0;z-index:2;padding:10px 12px;background:#fcfaf6;border-bottom:1px solid var(--line);

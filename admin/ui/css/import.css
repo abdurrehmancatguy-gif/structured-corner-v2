@@ -16,6 +16,8 @@
 .imp-checked{margin:0 0 12px}
 .imp-filters{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
 .imp-filters .btn[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+/* The check's table scrolls inside its card on a phone instead of widening the page. */
+.imp-body .table-wrap{contain:inline-size}
 .imp-table td{vertical-align:top}
 .imp-changes{border-collapse:collapse;font-size:12.5px;margin:0 0 4px}
 .imp-changes th,.imp-changes td{padding:3px 14px 3px 0;border:0;background:none;text-align:left;vertical-align:top;

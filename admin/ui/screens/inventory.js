@@ -31,7 +31,7 @@ export async function render(main, { app }) {
       h("h1", { tabindex: "-1" }, "Inventory"),
       h("p", { class: "sub" }, "Products that track their stock. Change any number and save once: every changed row is saved together, or none is."))),
     note,
-    h("section", { class: "card flush" },
+    h("section", { class: "card flush inv-card" },
       h("div", { class: "toolbar" },
         h("label", { class: "search" }, icon("search", 16),
           h("input", { class: "input", type: "search", placeholder: "Search products", "aria-label": "Search products",
