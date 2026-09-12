@@ -4,8 +4,8 @@ temporary clone to see that each one draws from the shop's own data.
 
     /usr/bin/python3 -m unittest discover -s admin/tests -p 'test_bulk_screens.py'
 
-Typing, the grid's keys, pasting and the saves need a live browser session
-and are not covered here; test_bulk.py covers the server side of the saves.
+Typing, the grid's keys, pasting and the saves are in test_bulk_ui.py, which
+drives the screens in Chrome; test_bulk.py covers the server side of the saves.
 """
 import os
 import pathlib
