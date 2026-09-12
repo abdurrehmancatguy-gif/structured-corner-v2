@@ -121,18 +121,46 @@ class HistoryTests(unittest.TestCase):
         text = json.dumps(data, indent=2, ensure_ascii=False) + "\n"
         (self.backups / ("%s.%s.json" % (name, stamp))).write_text(text, encoding="utf-8")
 
-    def test_a_version_with_other_slides_cannot_bring_their_pictures(self):
-        cur = self.b.content("home")
+    def test_a_version_with_other_answers_cannot_move_their_keys(self):
+        # A list whose entries carry a field the admin cannot change (a quiz
+        # answer's key) cannot gain or lose an entry through a restore.
+        cur = self.b.content("quiz")
         old = copy.deepcopy(cur)
-        del old["hero_slides"][-1]
-        self.craft("home", "20200101-120000", old)
-        h = self.history("documents/home")
-        v = self.version("20200101-120000", "documents/home")
-        self.assertIn("Banner slides", v["blocked"] or "")
-        st, res = self.b.api("POST", "history/20200101-120000/restore", {"resource": "documents/home"}, rev=h["current_rev"])
+        del old["answers"][-1]
+        self.craft("quiz", "20200101-120000", old)
+        h = self.history("documents/quiz")
+        v = self.version("20200101-120000", "documents/quiz")
+        self.assertIn("What each answer looks for: this version has %d and the site has %d"
+                      % (len(old["answers"]), len(cur["answers"])), v["blocked"] or "")
+        st, res = self.b.api("POST", "history/20200101-120000/restore", {"resource": "documents/quiz"}, rev=h["current_rev"])
         self.assertEqual(st, 409, res)
         self.assertEqual(res["error"]["code"], "cannot_restore")
-        self.assertEqual(self.b.content("home"), cur)
+        self.assertEqual(self.b.content("quiz"), cur)
+
+    def test_a_version_with_other_slides_restores_onto_real_pictures(self):
+        # Banner pictures are upload fields, so a version with another number
+        # of slides can be restored, as long as every picture it names is a
+        # file the site has: a picture that is gone is a 422 on its slide.
+        b = self.b
+        cur = b.content("home")
+        fewer = copy.deepcopy(cur)
+        del fewer["hero_slides"][-1]
+        gone = copy.deepcopy(fewer)
+        gone["hero_slides"][0]["image"] = "assets/img/banner-gone.jpg"
+        self.craft("home", "20200101-120000", gone)
+        self.craft("home", "20200101-120001", fewer)
+        h = self.history("documents/home")
+        self.assertIsNone(self.version("20200101-120000", "documents/home")["blocked"])
+        st, res = b.api("POST", "history/20200101-120000/restore", {"resource": "documents/home"}, rev=h["current_rev"])
+        self.assertEqual(st, 422, res)
+        self.assertEqual([(e["path"], e["code"]) for e in res["error"]["details"]], [("/hero_slides/0/image", "missing_file")])
+        self.assertEqual(b.content("home"), cur)
+        st, res = b.api("POST", "history/20200101-120001/restore", {"resource": "documents/home"}, rev=h["current_rev"])
+        self.assertEqual(st, 200, res)
+        self.assertEqual(b.content("home")["hero_slides"], fewer["hero_slides"])
+        st, res = b.api("PUT", "documents/home", {"data": cur}, rev=res["rev"])       # the slide back
+        self.assertEqual(st, 200, res)
+        self.assertEqual(b.content("home"), cur)
 
     def test_committed_versions(self):
         h = self.history("documents/home")
@@ -243,9 +271,12 @@ class HistoryTests(unittest.TestCase):
         h = self.history(name)
         self.assertEqual([i["source"] for i in h["items"] if i["id"] == "20200101-120000"], ["local"])
         v = self.version("20200101-120000", name)
-        self.assertEqual({k["path"] for k in v["kept"]}, {"/images", "/order", "/legacy_note"})
+        # photos are editable since the media stage, so their old order comes
+        # back (each is still in the library); the product order stays
+        self.assertEqual({k["path"] for k in v["kept"]}, {"/order", "/legacy_note"})
         self.assertEqual((v["filled"], v["guarded"], v["blocked"]), (["/badge"], ["never_discount"], None))
-        self.assertFalse([e for e in v["changes"] if e["path"] in ("/images", "/order", "/legacy_note")])
+        self.assertFalse([e for e in v["changes"] if e["path"] in ("/order", "/legacy_note")])
+        self.assertTrue([e for e in v["changes"] if e["path"] == "/images"])
         self.assertTrue([e for e in v["diff"] if e["path"] == "/images"])
         path = "history/20200101-120000/restore"
         self.assertEqual(b.api("POST", path, {"resource": name}, rev=h["current_rev"])[0], 428)
@@ -253,9 +284,24 @@ class HistoryTests(unittest.TestCase):
         self.assertEqual(st, 200, res)
         now = b.content("products")[pid]
         self.assertEqual((now["price"], now["never_discount"], now["badge"]), (cur["price"] + 7, old["never_discount"], ""))
-        self.assertEqual((now["images"], now["order"]), (cur["images"], cur["order"]))
+        self.assertEqual((now["images"], now["order"]), (old["images"], cur["order"]))
         self.assertNotIn("legacy_note", now)
-        self.assertEqual({k["path"] for k in res["kept"]}, {"/images", "/order", "/legacy_note"})
+        self.assertEqual({k["path"] for k in res["kept"]}, {"/order", "/legacy_note"})
+
+    def test_a_restored_photo_must_still_be_in_the_library(self):
+        b = self.b
+        products = b.content("products")
+        # an attar, so the versions the other tests count stay theirs
+        pid = next(p for p, d in products.items() if d.get("category") == "attars" and d.get("images"))
+        cur = products[pid]
+        old = copy.deepcopy(cur)
+        old["images"] = [cur["images"][0], pid + "-99.jpg"]
+        self.craft("products", "20200101-120002", dict(products, **{pid: old}))
+        h = self.history("products/" + pid)
+        st, res = b.api("POST", "history/20200101-120002/restore", {"resource": "products/" + pid}, rev=h["current_rev"])
+        self.assertEqual(st, 422, res)
+        self.assertEqual([(e["path"], e["code"]) for e in res["error"]["details"]], [("/images/1", "missing_file")])
+        self.assertEqual(b.content("products")[pid], cur)
 
 
 if __name__ == "__main__":

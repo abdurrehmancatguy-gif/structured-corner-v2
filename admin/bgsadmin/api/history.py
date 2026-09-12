@@ -28,7 +28,7 @@ from .. import diff, gitops, validate
 from .. import schema as schema_mod
 from ..errors import ApiError
 from ..routes import Route
-from ..service import changed, enforce, field_for, ordered_like, precondition, saved
+from ..service import changed, enforce, field_for, flatten, ordered_like, precondition, saved
 from ..store.jsonstore import rev_of
 from ..validate import MISSING, get
 from .meta import schemas
@@ -378,10 +378,16 @@ def restore(req):
             raise ApiError(409, "cannot_restore", plan["blocked"])
         new = ordered_like(cur, plan["data"])
         enforce(res.fields, cur, new, [c for c in confirmed if isinstance(c, str)])
+        # The checks a save from the editors makes on photos, pictures and
+        # films: a name the version brings back must still be a file the site
+        # has (with every size, for a product photo); names today's version
+        # already holds are not checked again.
         if res.product:
-            errors, warnings = validate.product(res.key, new, products, res.fields, ctx)
+            errors, warnings = validate.product(res.key, new, products, res.fields, dict(ctx, img_dir=cfg.assets / "img"))
         else:
-            errors, warnings = validate.document(res.key, new, res.fields, dict(ctx, products=store.products()[0]))
+            known = {v for v in flatten(cur).values() if isinstance(v, str)}
+            errors, warnings = validate.document(res.key, new, res.fields, dict(
+                ctx, products=store.products()[0], flow_dir=cfg.flow, known_media=known))
         if errors:
             for e in errors:
                 e["label"] = diff.pointer_label(res.fields, e["path"])
