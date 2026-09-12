@@ -112,6 +112,39 @@ class PublishServerTests(unittest.TestCase):
     def head(self):
         return git(self.b.repo, "rev-parse", "HEAD")
 
+    def settings_change(self, **store):
+        st, d = self.b.api("GET", "documents/settings")
+        self.assertEqual(st, 200, d)
+        data = dict(d["data"], store=dict(d["data"]["store"], **store))
+        st, res = self.b.api("PUT", "documents/settings", {"data": data}, rev=d["rev"])
+        self.assertEqual(st, 200, res)
+        return res
+
+    def test_a_locked_page_mismatch_blocks_the_commit(self):
+        b = self.b
+        # A settings change that leaves checkout and confirmed as they are
+        # commits fine: the store name touches no delivery rule.
+        self.settings_change(name="BGS Corner Test")
+        ch = self.changes()
+        self.assertNotIn("locked_pages", [x["id"] for x in ch["blocking"]])
+        self.assertTrue(ch["can_commit"], ch["blocking"])
+        git(b.repo, "checkout", "-q", "--", ".")
+        git(b.repo, "clean", "-q", "-f", "-d")
+        # Raising free delivery updates the strip, product page and bag, but the
+        # locked checkout page still says AED 150. The mismatch must not go live.
+        res = self.settings_change(free_delivery_over=200)
+        self.assertTrue(any(w["code"] == "locked_page" for w in res["warnings"]), res["warnings"])
+        ch = self.changes()
+        block = [x for x in ch["blocking"] if x["id"] == "locked_pages"]
+        self.assertTrue(block, ch["blocking"])
+        self.assertIn("Checkout", block[0]["message"])
+        self.assertFalse(ch["can_commit"])
+        head = self.head()
+        st, res = self.commit("Raise free delivery to AED 200", ch["paths_digest"])
+        self.assertEqual(st, 422, res)
+        self.assertEqual(res["error"]["code"], "checks_failed")
+        self.assertEqual(self.head(), head)
+
     def test_commit_takes_only_admin_paths(self):
         b = self.b
         new = self.price("be-mine", 5)

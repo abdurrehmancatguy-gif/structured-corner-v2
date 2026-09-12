@@ -585,6 +585,23 @@ def sized_copies(cfg, path):
     return []
 
 
+def orphan_copies(cfg):
+    """The sized copies make_derivatives sweeps because their original is gone
+    (a re-import with fewer frames, or a file removed outside the admin). A
+    media save runs make_derivatives, which deletes these; the transaction
+    snapshots them so a failed build puts them back and the sweep is not
+    reported as a file the build should not have changed."""
+    out = []
+    for folder, suffixes in ((cfg.assets / "img", ("-600", "-card-360", "-thumb")), (cfg.assets / "cat", ("-216",))):
+        if not folder.is_dir():
+            continue
+        for suf in suffixes:
+            for d in folder.glob("*" + suf + ".jpg"):
+                if not (folder / (d.name[: -len(suf + ".jpg")] + ".jpg")).exists():
+                    out.append(d)
+    return out
+
+
 def companions(cfg, path):
     """Every file made from an original: its sized copies, a frame's -card
     (written with it, not by make_derivatives), a film's poster and the

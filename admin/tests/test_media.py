@@ -277,6 +277,29 @@ class MediaTests(unittest.TestCase):
         st, res = self.attach(sid, prod["rev"], {"kind": "product-image", "product": "amore"})
         self.assertEqual(st, 200, res)
 
+    def test_a_save_sweeps_an_orphan_copy_instead_of_failing(self):
+        # A sized copy without its original (a file removed outside the admin)
+        # is swept by make_derivatives on the next media save. That sweep used
+        # to be reported as a file the build should not have changed, failing
+        # the save with a confusing message and not putting the copy back.
+        b = self.b
+        img = self.flow / "assets" / "img"
+        orphan = img / "zz-9-600.jpg"
+        shutil.copy(str(img / "amore-1-600.jpg"), str(orphan))
+        st, media = b.api("GET", "media")
+        self.assertEqual(st, 200, media)
+        self.assertIn("assets/img/zz-9-600.jpg", [i["path"] for i in media["items"] if i["kind"] == "orphan"])
+        products = (self.flow / "content" / "products.json").read_bytes()
+        st, res = self.stage("product-image", jpeg(1200, 1200), "image/jpeg")
+        sid = res["staging_id"]
+        st, prod = b.api("GET", "products/vibe")
+        st, res = self.attach(sid, prod["rev"], {"kind": "product-image", "product": "vibe"})
+        self.assertEqual(st, 200, res)
+        self.assertTrue(res["build"]["ok"])
+        # the orphan is gone (swept, as make_derivatives does) and the product saved
+        self.assertFalse(orphan.exists(), "the orphan copy should have been swept")
+        self.assertNotEqual((self.flow / "content" / "products.json").read_bytes(), products)
+
     # ---- the other kinds -----------------------------------------------------
 
     def test_banner_category_cutout_logo_and_emblem(self):

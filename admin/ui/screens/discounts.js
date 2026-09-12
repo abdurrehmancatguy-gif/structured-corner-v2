@@ -94,11 +94,12 @@ const aed = (n) => "AED " + n.toLocaleString("en-US");
 const isLower = (c) => !!c && c === c.toLowerCase() && c !== c.toUpperCase();
 
 // The bag's progress bar calls the gift by the part of its label before the
-// comma, its capital dropped unless the word is in capitals: build.py words
-// it the same way.
+// comma, its capital dropped only when the rest of the phrase is lower case
+// too, so a proper name keeps its capitals: build.py words it the same way.
 function giftName(label) {
   const name = String(label).split(",")[0].trim();
-  return isLower(name[1]) ? name[0].toLowerCase() + name.slice(1) : name;
+  const rest = name.split(/\s+/).slice(1);
+  return isLower(name[1]) && rest.every((w) => isLower(w[0])) ? name[0].toLowerCase() + name.slice(1) : name;
 }
 
 function ladderText(data) {

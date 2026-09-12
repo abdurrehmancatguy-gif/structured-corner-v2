@@ -152,9 +152,13 @@ def _aed(n):
 
 def _gift_name(label):
     """'Mystery oud, 3 ml' reads 'mystery oud' inside a sentence: the part
-    before the size, its capital dropped unless the word is in capitals."""
+    before the size, its capital dropped only when the rest of the phrase is
+    lower case too, so a proper name like 'Royal Amber sample' keeps its
+    capitals."""
     name = label.split(",")[0].strip()
-    return name[:1].lower() + name[1:] if name[1:2].islower() else name
+    words = name.split()
+    lower_rest = all(w[:1].islower() for w in words[1:])
+    return name[:1].lower() + name[1:] if name[1:2].islower() and lower_rest else name
 
 def _ladder_bar(n):
     """The bag's third progress bar with n items counted, as the page shows it
@@ -644,7 +648,7 @@ def _cards(cat, n=None):
 def _cards_from(rows, img_sizes=CARD_SIZES):
     out = []
     for pr in rows:
-        sizes = ["%s &middot; AED %s" % (z["label"], money(z["price"])) for z in pr.get("sizes", [])] or None
+        sizes = ["%s &middot; AED %s" % (esc(z["label"]), money(z["price"])) for z in pr.get("sizes", [])] or None
         stock = pr.get("stock")
         notes = None
         if pr.get("top") or pr.get("heart"):

@@ -261,6 +261,13 @@ class Txn:
         tdir.mkdir(parents=True)
         files = []
         paths = [cfg.content_file(n) for n in writes] + cfg.generated_files() + list(self.extra)
+        if self.media:
+            # make_derivatives sweeps sized copies whose original is gone; snapshot
+            # them (and so allow their removal) or a save right after a file changed
+            # outside the admin would fail on the sweep and not put the copy back.
+            from .. import media
+            have = set(paths)
+            paths += [o for o in media.orphan_copies(cfg) if o not in have]
         for i, p in enumerate(paths):
             if p.exists():
                 shutil.copy2(p, tdir / ("%d.bin" % i))

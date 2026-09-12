@@ -155,7 +155,10 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:38px;cursor:p
 .toolbar .search svg{position:absolute;left:14px;color:var(--faint);pointer-events:none}
 .toolbar .search .input{padding-left:38px}
 .toolbar select.input{width:auto;min-width:170px}
-.table-wrap{overflow-x:auto}
+/* A wide table scrolls inside its own box instead of widening the page on a
+   narrow window; position:relative also keeps absolutely placed screen-reader
+   headers ("Status", "Remove", "Order") from escaping it. */
+.table-wrap{overflow-x:auto;position:relative;contain:inline-size}
 .table{width:100%;border-collapse:collapse}
 .table th{font-size:12px;text-align:left;color:var(--mut);font-weight:650;padding:10px 14px;border-bottom:1px solid var(--line);background:#fcfaf6}
 .table td{padding:8px 14px;border-bottom:1px solid var(--hair);vertical-align:middle}

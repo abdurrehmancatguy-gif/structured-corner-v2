@@ -230,15 +230,25 @@ def _esc(k):
     return str(k).replace("~", "~0").replace("/", "~1")
 
 
-def _fill_doc(new, cur, prefix, filled):
+def _fill_doc(new, cur, prefix, filled, fields):
     """A document has no defaults of its own: a key the old version lacks
-    keeps today's value, at every level of nesting."""
+    keeps today's value, at every level of nesting. A dictionary field (a
+    translations map, whose keys are free-form text) is one field, so it is
+    taken from the version whole and never merged with today's keys; otherwise
+    a key the version dropped would come back and History could never remove an
+    added entry."""
     for k, v in cur.items():
+        p = prefix + "/" + _esc(k)
         if k not in new:
             new[k] = copy.deepcopy(v)
-            filled.append(prefix + "/" + _esc(k))
-        elif isinstance(v, dict) and isinstance(new[k], dict):
-            _fill_doc(new[k], v, prefix + "/" + _esc(k), filled)
+            filled.append(p)
+        elif isinstance(v, dict) and isinstance(new[k], dict) and not _is_dictionary(fields, p):
+            _fill_doc(new[k], v, p, filled, fields)
+
+
+def _is_dictionary(fields, ptr):
+    f = field_for(fields, ptr)[0]
+    return bool(f) and f.get("type") == "dictionary"
 
 
 def _owner(ptr, chain, blocker):
@@ -302,7 +312,7 @@ def _plan(res, version, current):
                 new[k] = copy.deepcopy(v)
                 filled.append("/" + k)
     else:
-        _fill_doc(new, current, "", filled)
+        _fill_doc(new, current, "", filled, res.fields)
     kept, seen, blocked = [], set(), None
     for ptr in changed(current, new):
         f, parents = field_for(res.fields, ptr)

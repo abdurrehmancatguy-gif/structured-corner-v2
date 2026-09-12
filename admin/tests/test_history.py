@@ -198,6 +198,29 @@ class HistoryTests(unittest.TestCase):
         self.assertEqual(now["store"]["sameday_cutoff"], cur["store"]["sameday_cutoff"])
         self.assertEqual(list(now["store"]), list(cur["store"]))
 
+    def test_restoring_removes_a_translation_added_since(self):
+        # A dictionary field (translations /ar) is one field: restoring an
+        # older version replaces it whole, so an entry added since is removed,
+        # rather than being filled back in from today's keys.
+        b = self.b
+        d = self.get("documents/translations")
+        ar = dict(d["data"]["ar"])
+        ar["Zzz added label"] = "زد"
+        st, res = b.api("PUT", "documents/translations", {"data": {"ar": ar}}, rev=d["rev"])
+        self.assertEqual(st, 200, res)
+        self.assertIn("Zzz added label", b.content("translations")["ar"])
+        local = [i for i in self.history("documents/translations")["items"] if i["source"] == "local"]
+        self.assertTrue(local, "the save left no local version")
+        hid = local[0]["id"]
+        v = self.version(hid, "documents/translations")
+        self.assertFalse(v["same"], "the previous version should differ now")
+        self.assertNotIn("/ar/Zzz added label", v["filled"])
+        self.assertTrue(v["changes"], "restoring should be shown as a change")
+        cur_rev = self.history("documents/translations")["current_rev"]
+        st, out = b.api("POST", "history/%s/restore" % hid, {"resource": "documents/translations"}, rev=cur_rev)
+        self.assertEqual(st, 200, out)
+        self.assertNotIn("Zzz added label", b.content("translations")["ar"])
+
     def test_document_save_summary_names_the_card(self):
         b = self.b
         d = self.get("documents/copy")

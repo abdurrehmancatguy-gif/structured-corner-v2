@@ -121,6 +121,21 @@ class RulesTests(unittest.TestCase):
         finally:
             self.restore(before)
 
+    def test_gift_bar_keeps_a_proper_name_capital(self):
+        before, _ = self.settings()
+        try:
+            st, res = self.put_settings(lambda s: s.update(
+                gift_with_purchase={"threshold": 300, "label": "Royal Amber sample, 3 ml"}))
+            self.assertEqual(st, 200, res)
+            self.assertIn("<span>Free Royal Amber sample over AED 300</span>", self.page("cart.html"))
+            # a phrase that is lower case after the first word still lower-cases
+            st, res = self.put_settings(lambda s: s.update(
+                gift_with_purchase={"threshold": 300, "label": "Mystery oud, 3 ml"}))
+            self.assertEqual(st, 200, res)
+            self.assertIn("<span>Free mystery oud over AED 300</span>", self.page("cart.html"))
+        finally:
+            self.restore(before)
+
     def test_locked_pages_still_say_what_lint_expects(self):
         # lint.LOCKED_PAGES holds what these two locked pages say; the built
         # pages are the check that it is still true
@@ -156,6 +171,21 @@ class RulesTests(unittest.TestCase):
         st, res = self.put_settings(lambda s: s.update(free_delivery_over=2001))
         self.assertEqual(st, 422)
         self.assertEqual(rules_in(self.flow)["volume_ladder"], [{"units": 3, "percent": 10}, {"units": 6, "percent": 15}])
+
+    def test_box_discount_threshold_cannot_exceed_the_box(self):
+        before, _ = self.settings()
+        try:
+            # the biggest box holds six scents, so a threshold above six could
+            # never apply and is refused
+            st, res = self.put_settings(lambda s: s.update(giftbox_volume_discount_at=8))
+            self.assertEqual(st, 422, res)
+            self.assertIn("/store/giftbox_volume_discount_at", [d["path"] for d in res["error"]["details"]])
+            # six itself is allowed
+            st, res = self.put_settings(lambda s: s.update(giftbox_volume_discount_at=6))
+            self.assertEqual(st, 200, res)
+            self.assertEqual(rules_in(self.flow)["giftbox_volume_discount_at"], 6)
+        finally:
+            self.restore(before)
 
     def test_cash_on_delivery_and_vat_stay_locked(self):
         for key, value in (("cod_max_order", 400), ("cod_fee", 5), ("vat_rate_percent", 0), ("vat_inclusive", False)):
