@@ -24,8 +24,9 @@ const IN_CODE = {
   ],
   box: [
     "The gift box page works its total out in shop.js as scents are picked.",
+    "Its Add box to bag button opens the bag without putting the box in it, so the fee and discount show on that page only. Adding the box to the bag is a code change.",
     "The box holds 3 or 6 scents; the sizes are part of the page's code.",
-    "Never-discounted products are not yet left out of the box discount: that needs a fix in shop.js.",
+    "The box discount counts every scent picked; it does not leave out never-discounted products.",
     "VAT and cash on delivery stay locked with checkout.",
   ],
   gift: [
@@ -118,7 +119,7 @@ function ladderText(data) {
 function boxText(data) {
   const s = data.store || {};
   const out = [];
-  if (whole(s.giftbox_fee)) out.push("The box adds " + aed(s.giftbox_fee) + " to the price of the scents.");
+  if (whole(s.giftbox_fee)) out.push("The gift box page adds " + aed(s.giftbox_fee) + " to the price of the scents.");
   const at = s.giftbox_volume_discount_at, pct = s.giftbox_volume_discount_percent;
   if (whole(at) && whole(pct)) {
     out.push(pct + "% off the scents once the box holds " + at + (at === 1 ? " scent." : " scents."));
