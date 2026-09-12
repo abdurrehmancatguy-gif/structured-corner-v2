@@ -173,6 +173,9 @@ async function boot() {
   show(location.hash || "#/");
   poll();
   setInterval(poll, 5000);
+  // A screen that adds to the top bar exports topbar(app), called once here
+  // so its chip shows on every screen.
+  for (const name of ["publish"]) import("./screens/" + name + ".js").then((m) => m.topbar && m.topbar(app)).catch(() => {});
 }
 
 boot();

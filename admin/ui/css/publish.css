@@ -1,0 +1,55 @@
+/* Publish: the three steps as tabs, the rows of checks, and the lists of what
+   a commit or a publish carries. */
+.pub-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 18px}
+.pub-tab{display:inline-flex;align-items:center;min-height:36px;padding:0 16px;border-radius:var(--pill);
+  border:1px solid var(--line);background:#fff;text-decoration:none;font-weight:600}
+.pub-tab:hover{border-color:#b9ae9e}
+.pub-tab.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.pub-bar{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap;margin:-8px 0 16px}
+
+.pub-list{list-style:none;margin:0;padding:0}
+.pub-list li{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--hair);flex-wrap:wrap}
+.pub-list li:last-child{border-bottom:0}
+.pub-path{font:12.5px/1.4 ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere;min-width:0}
+.pub-size{margin-left:auto;color:var(--faint);font-size:12px;white-space:nowrap}
+.pub-detail{display:block;color:var(--mut);font-size:12.5px;overflow-wrap:anywhere}
+.pub-lead{margin:-8px 0 12px}
+.pub-thumb{width:40px;height:40px;object-fit:cover;border-radius:10px;border:1px solid var(--line);background:#fff}
+.pub-group{margin-top:14px}
+.pub-group:first-of-type{margin-top:0}
+.pub-group h3,.pub-said h3{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--mut);margin:0 0 4px;font-weight:650}
+.pub-said>div+div{margin-top:14px}
+.pub-more>summary{cursor:pointer;font-weight:600;padding:4px 0;min-height:32px;display:flex;align-items:center;gap:4px}
+.pub-more>summary .muted{font-weight:400}
+
+.pub-checks li{align-items:flex-start;flex-wrap:nowrap}
+.pub-mark{display:inline-flex;padding-top:2px}
+.pub-checks .ok .pub-mark{color:var(--green)}
+.pub-checks .bad .pub-mark{color:var(--red)}
+.pub-checks .bad{font-weight:600}
+.pub-checks .pub-detail{font-weight:400}
+
+.pub-commits li{align-items:flex-start;flex-wrap:nowrap}
+.pub-c-main{flex:1;min-width:0}
+.pub-c-subject{font-weight:650;overflow-wrap:anywhere}
+.badge.amber{background:var(--amber-l);color:var(--amber)}
+
+.pub-commit .btn.primary,.pub-go .btn.primary{margin-top:4px}
+.pub-commit .error[hidden]{display:none}
+.pub-tick{margin:4px 0 14px;align-items:flex-start;font-weight:600}
+.pub-tick input{margin-top:3px}
+.pub-job{display:flex;align-items:center;gap:10px;margin:14px 0 0;font-weight:600}
+.pub-spin{display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--ink);
+  animation:spin .8s linear infinite}
+.pub-log td{vertical-align:top}
+
+/* the top bar's chip, a link to this screen */
+.top .pub-chip{text-decoration:none}
+.top .pub-chip:hover{background:rgba(255,255,255,.16)}
+.top .pub-chip[hidden]{display:none}
+
+@media (prefers-reduced-motion:reduce){ .pub-spin{animation:none} }
+@media (max-width:900px){
+  .pub-bar{justify-content:flex-start;margin-top:0}
+  .pub-commits li{flex-wrap:wrap}
+}

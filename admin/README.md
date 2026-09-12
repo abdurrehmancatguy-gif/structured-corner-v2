@@ -24,6 +24,12 @@ http://localhost:4310/). The preview configuration's `python3 flow/server.py
   the footer.
 - **Site text** and **Settings** (store details, delivery and gift box rules,
   brand text, social links).
+- **Publish:** what was saved since the last commit, in plain sentences and
+  by file, committed once you have read it, after the admin rebuilds the site
+  from exactly those files the way both deploys will. Then a check of GitHub
+  lists every commit, file and content change a push would send, and pushes
+  the reviewed commit when you type PUBLISH. Started with `--no-push`, it
+  shows all of that but cannot push.
 
 Every save is checked, written safely and followed by a rebuild of the site,
 so the preview shows it at once. If the site would not build with a change,
@@ -37,9 +43,10 @@ yet; the next stage wires them in.
 
 - Change payments, tax, cash on delivery or the checkout: locked, a
   developer changes those in code.
-- Publish. Saving changes the files on this computer and the preview only.
-  Going live is still a commit and a push, which the Publish screen will do
-  with your confirmation in a later stage.
+- Publish on its own. Saving changes the files on this computer and the
+  preview only. Committing and going live are separate clicks on the Publish
+  screen, and a push needs the typed word PUBLISH. It never forces, pulls,
+  merges or rebases, and its commits hold only the files it manages.
 - Run on the internet. There is no login yet, so it only listens on
   127.0.0.1: other machines, even on your Wi-Fi, cannot reach it.
 

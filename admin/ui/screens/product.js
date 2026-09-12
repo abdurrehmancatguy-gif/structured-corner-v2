@@ -30,6 +30,7 @@ export function render(main, { arg: pid, app }) {
     onSaved: (res) => { if (app.state.products) app.state.products[pid] = res.data; },
     actions: () => [
       h("a", { class: "btn", href: store(), target: "_blank", rel: "noopener noreferrer" }, icon("external", 16), "View on store"),
+      h("a", { class: "btn", href: "#/history/products/" + pid }, icon("clock", 16), "History"),
       h("button", { class: "btn", type: "button", onclick: duplicate }, icon("copy", 16), "Duplicate"),
       h("button", { class: "btn danger-text", type: "button", onclick: remove }, icon("trash", 16), "Delete"),
     ],
