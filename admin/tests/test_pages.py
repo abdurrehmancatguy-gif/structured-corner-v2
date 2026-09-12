@@ -463,6 +463,25 @@ class PagesPartTwoTests(_Pages, unittest.TestCase):
             ("too_few", lambda d: d["track"].update(stages=[])),
         ], "cart.html")
 
+    def test_a_brace_in_text_that_takes_no_token_is_refused_on_its_field(self):
+        # the build would either refuse it or print it as typed, so the save
+        # refuses it first, next to the field
+        self.refused([("format", change) for change in (
+            lambda d: d["product"].update(voucher_note="A voucher on any bottle over {free_over}."),
+            lambda d: d["corporate"]["replies"].update(thanks="Thank you {friend}"),
+            lambda d: d["cart"]["line"].update(remove="Remove {x}"),
+            lambda d: d["track"]["replies"].update(missing="Enter {query}"),
+            lambda d: d["gift_box"]["summary"].update(full="Full {n}"),
+            lambda d: d["cart"]["progress"].update(unlocked="Unlocked {free_over}"),
+            lambda d: d["cart"]["summary"].update(free="Free {x}"),
+            lambda d: d["track"]["stages"][0].update(body="Before {cutoff}"),
+            lambda d: d["index"]["discovery_band"].update(body="Over {free_over}"),
+            lambda d: d["shell"]["header"].update(bag="Bag }"),
+        )], "cart.html")
+        st, res = self.put(lambda d: d["corporate"]["replies"].update(thanks="Thank you {friend}"))
+        self.assertIn({"path": "/corporate/replies/thanks", "code": "format",
+                       "message": "This text takes no {tokens}; leave out braces."}, res["error"]["details"])
+
     def test_the_build_stops_on_broken_part_two_text_before_writing(self):
         def change(d):
             del d["gift_box"]["title"]

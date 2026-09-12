@@ -545,3 +545,13 @@ _NOT_FOUND = [
 
 FIELDS = (_SHELL + _HOME + _COLLECTION + _PRODUCT + _GIFT_BOX + _BAG + _TRACK + _CORPORATE + _ACCOUNT
           + _NOT_FOUND)
+
+# A text with no {token} of its own takes no brace at all, rows' parts
+# included: the build refuses one, so the field refuses it first, where the
+# owner can see which text it is.
+PLAIN = r"[^{}]*"
+PLAIN_HELP = "This text takes no {tokens}; leave out braces."
+for _f in FIELDS:
+    for _g in [_f] + _f.get("fields", []):
+        if _g["type"] in ("text", "textarea") and "pattern" not in _g:
+            _g.update(pattern=PLAIN, patternHelp=PLAIN_HELP)
