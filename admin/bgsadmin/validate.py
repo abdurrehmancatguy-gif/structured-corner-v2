@@ -2,11 +2,14 @@
 
 Text goes into pages build.py writes and shop.js fills, some of it without
 escaping today, so text fields refuse < and > (they would be read as page
-code), control characters, the long dash the repo does not use, and '%%' (the
-slip that once shipped 'VAT at 5%%'). Links must be pages of this site in the
-link grammar below; only the social fields take an outside https address.
-Warnings (claim words) are returned but never block a save.
+code), also when written as entities such as &lt; (build.py decodes entities
+when it writes catalogue.js), control characters, the long dash the repo does
+not use, and '%%' (the slip that once shipped 'VAT at 5%%'). Links must be
+pages of this site in the link grammar below; only the social fields take an
+outside https address. Warnings (claim words) are returned but never block a
+save.
 """
+import html
 import re
 
 from .config import PAGES
@@ -44,6 +47,10 @@ def text_problem(s, multiline=False):
             return "control", "Remove the broken character from this field."
         if ch in (chr(0x2014), chr(0x2015)):     # the long dashes the repo does not use
             return "em_dash", "Use a hyphen or a colon instead of a long dash."
+    # build.py decodes entities twice when it writes catalogue.js (unent), so
+    # &lt; or &amp;lt; reach shop.js as a real < and would be read as code
+    if "&" in s and any(c in "<>" for c in html.unescape(html.unescape(s))):
+        return "markup", "Leave out < and >, also written as &lt; and &gt;: the page would read them as code."
     if "%%" in s:
         return "percent", "Write a single % sign."
     return None

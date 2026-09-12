@@ -516,7 +516,7 @@ def _cards(cat, n=None):
 def _cards_from(rows, img_sizes=CARD_SIZES):
     out = []
     for pr in rows:
-        sizes = ["%s &middot; AED %s" % (z["label"], money(z["price"])) for z in pr.get("sizes", [])] or None
+        sizes = ["%s &middot; AED %s" % (esc(z["label"]), money(z["price"])) for z in pr.get("sizes", [])] or None
         stock = pr.get("stock")
         notes = None
         if pr.get("top") or pr.get("heart"):

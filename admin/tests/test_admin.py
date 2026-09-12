@@ -8,9 +8,16 @@ import json
 import os
 import pathlib
 import re
+import shutil
+import subprocess
+import sys
+import tempfile
 import unittest
 
 from box import Box
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "devtools"))
+import dom_diff  # noqa: E402
 
 PORT = int(os.environ.get("ADMIN_TEST_PORT", "4731"))
 
@@ -110,6 +117,50 @@ class AdminTests(unittest.TestCase):
         self.assertEqual(st, 422)
         st, res = b.api("PUT", "products/vibe", {"data": dict(d["data"], name="Vibe " + chr(0x2014) + " new")}, rev=d["rev"])
         self.assertEqual(st, 422)
+
+    def test_markup_written_as_entities_is_refused(self):
+        # build.py decodes entities when it writes catalogue.js, so text that
+        # decodes to < or > is refused like the characters themselves
+        b = self.b
+        d = self._product("be-mine")
+        for bad in ("&lt;img src=x onerror=alert(1)&gt;", "&#60;b&#x3e;x", "&amp;lt;b&amp;gt;", "&ltb&gt"):
+            st, res = b.api("PUT", "products/be-mine", {"data": dict(d["data"], story=[bad])}, rev=d["rev"])
+            self.assertEqual(st, 422, bad)
+            self.assertEqual([(e["path"], e["code"]) for e in res["error"]["details"]], [("/story/0", "markup")], bad)
+        self.assertEqual(self._product("be-mine")["rev"], d["rev"])
+
+    def build(self):
+        p = subprocess.run([sys.executable, "build.py"], cwd=str(self.b.repo / "flow"), capture_output=True, text=True, timeout=100)
+        self.assertEqual(p.returncode, 0, p.stderr)
+
+    @unittest.skipUnless(os.path.exists(dom_diff.CHROME), "headless Chrome is not installed")
+    def test_product_page_puts_content_in_as_text(self):
+        # Whatever reaches products.json (here written outside the admin, past
+        # its checks), the product page shows the story, the declared
+        # ingredients and the size labels as text: nothing in them becomes
+        # an element or an attribute.
+        path = self.b.repo / "flow" / "content" / "products.json"
+        original = path.read_bytes()
+        products = json.loads(original)
+        p = products["imperial-crown"]
+        p["story"] = ["<img src=x onerror=document.body.dataset.pwned=1>", "A second line"]
+        p["ingredients"] = "<b data-ing>Alcohol denat.</b>"
+        p["sizes"][0]["label"] = '3 ml" data-pwn="1'
+        tmp = pathlib.Path(tempfile.mkdtemp(prefix="text-only-"))
+        try:
+            path.write_text(json.dumps(products, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+            self.build()
+            dom = dom_diff.dump("http://localhost:%d/product.html?p=imperial-crown" % PORT, 1280, tmp)
+        finally:
+            path.write_bytes(original)
+            self.build()
+            shutil.rmtree(str(tmp), ignore_errors=True)
+        self.assertIn("<span>&lt;img src=x onerror=document.body.dataset.pwned=1&gt;</span><span>A second line</span>", dom)
+        self.assertIsNone(re.search(r"<img[^>]*onerror", dom))
+        self.assertIn('<p style="margin:8px 0 0">&lt;b data-ing&gt;Alcohol denat.&lt;/b&gt;</p>', dom)
+        self.assertNotIn("<b data-ing", dom)
+        self.assertIn('data-size="3 ml&quot; data-pwn=&quot;1', dom)
+        self.assertIsNone(re.search(r'<button[^>]*\sdata-pwn="', dom))
 
     def test_half_a_character_pair_is_refused(self):
         # A JSON \ud800 escape decodes to half of a UTF-16 pair, which no

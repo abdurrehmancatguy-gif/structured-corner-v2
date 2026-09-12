@@ -199,12 +199,17 @@ bgsRun(function () {
       var crumb = document.querySelector("section .eyebrow");
       if (crumb) crumb.textContent = "Home / " + pr.crumb + " / " + pr.name;
 
-      /* the four-line story */
+      /* the four-line story, each line put in as text: it is content, never markup */
       var d = document.querySelector("[data-desc]");
       if (d) {
         if (pr.story && pr.story.length) {
           d.className = "story";
-          d.innerHTML = pr.story.map(function (l) { return "<span>" + l + "</span>"; }).join("");
+          d.textContent = "";
+          pr.story.forEach(function (l) {
+            var line = document.createElement("span");
+            line.textContent = l;
+            d.appendChild(line);
+          });
         } else {
           d.hidden = true;
         }
@@ -235,9 +240,11 @@ bgsRun(function () {
         if (pr.sizes) {
           var psel = pr.sizes.findIndex(function (x) { return x.replace(/&middot;/g, "\u00b7").trim().endsWith("AED " + pr.price); });
           if (psel < 0) psel = 0;
+          /* a size label is content: escaped, so a quote in it cannot end the attribute */
+          var sz = function (t) { return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;"); };
           sizeWrap.innerHTML = pr.sizes.map(function (x, i) {
             return '<button type="button"' + (i === psel ? ' class="on"' : '') +
-                   ' data-size="' + x + '">' + x + "</button>";
+                   ' data-size="' + sz(x) + '">' + sz(x) + "</button>";
           }).join("");
         } else {
           var sb = sizeWrap.closest(".sizeblock");
@@ -340,8 +347,10 @@ bgsRun(function () {
       /* declared ingredients go inside the Ingredients tab */
       if (pr.ing) {
         var ing = document.querySelector("[data-ingpanel]");
-        if (ing) ing.innerHTML = '<span class="eyebrow">Declared ingredients</span>' +
-          '<p style="margin:8px 0 0">' + pr.ing + "</p>";
+        if (ing) {
+          ing.innerHTML = '<span class="eyebrow">Declared ingredients</span><p style="margin:8px 0 0"></p>';
+          ing.lastChild.textContent = pr.ing;
+        }
       }
     } else {
       /* no id, or one the catalogue does not have (retired, mistyped, or an
@@ -1228,6 +1237,11 @@ bgsRun(function () {
     return "AED " + n.toLocaleString("en-AE", { maximumFractionDigits: 2 });
   }
 
+  /* catalogue text goes into the bag's markup as text, never as code */
+  function escText(t) {
+    return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  }
+
   function lineHtml(l, p) {
     var halo = !!p.halo;
     var img = (p.images && p.images[0])
@@ -1237,8 +1251,8 @@ bgsRun(function () {
     return '<div class="line" data-line data-id="' + l.id + '" data-unit="' + p.pn +
       '" data-halo="' + (halo ? "1" : "0") + '" data-gift="0">' +
       '<a class="im" href="product.html?p=' + l.id + '">' + img + '</a>' +
-      '<div class="linfo"><div class="lname">' + p.name + '</div>' +
-      '<div class="lmeta">' + (p.meta || "") + '</div>' +
+      '<div class="linfo"><div class="lname">' + escText(p.name) + '</div>' +
+      '<div class="lmeta">' + escText(p.meta || "") + '</div>' +
       '<span class="stepper" data-stepper>' +
         '<button type="button" data-step="-1" aria-label="Decrease quantity">&minus;</button>' +
         '<i data-qty>' + l.qty + '</i>' +

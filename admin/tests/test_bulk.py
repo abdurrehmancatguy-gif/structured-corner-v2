@@ -233,6 +233,20 @@ class BulkTests(unittest.TestCase):
             st, out = self.b.api("POST", "products/import", {"csv": bad, "mode": "dry-run"})
             self.assertEqual((st, out["error"]["code"]), (422, "bad_csv"), bad)
 
+    def test_markup_written_as_entities_in_a_file_is_an_error(self):
+        # A supplier's file is outside text: a cell that decodes to < or >
+        # (build.py decodes entities for the storefront) is an error row, as
+        # the characters themselves are, while a plain & is fine
+        header, rows = self.rows_of(["be-mine"])
+        for bad in ("&lt;img src=x onerror=document.body.dataset.pwned=1&gt;", "&amp;lt;b&amp;gt;x"):
+            rows[0]["Story line 1"] = bad
+            res = self.check(to_csv(header, rows))
+            self.assertEqual(res["counts"]["error"], 1, res["rows"])
+            self.assertIn(("markup", "Story line 1"), {(e["code"], e["column"]) for e in res["rows"][0]["errors"]}, bad)
+        rows[0]["Story line 1"] = "Oud & amber, and nothing else"
+        res = self.check(to_csv(header, rows))
+        self.assertEqual((res["counts"]["error"], [r["action"] for r in res["rows"]]), (0, ["update"]), res["rows"])
+
     def test_a_new_row_becomes_a_draft_at_the_end(self):
         before = self.b.content("products")
         header = ["Handle", "Title", "Status", "Category", "Price", "Default size", "Order", "Image 1"]
