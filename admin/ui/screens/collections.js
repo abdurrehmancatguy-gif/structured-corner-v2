@@ -147,6 +147,7 @@ function productsCard(box, key) {
   }
   let data = null;
   let focusAfter = null;
+  let moving = false;
   const msgs = h("div", { class: "msgs" });
   const table = h("div", { class: "table-wrap" });
   clear(box).append(h("h2", {}, "Products"),
@@ -189,6 +190,12 @@ function productsCard(box, key) {
     }
   }
   async function move(i, dir) {
+    // One move at a time: a second click while the reorder is in flight would
+    // send the list as it was before the reload and be refused, showing "not
+    // saved" although the first move saved. The next click acts on the
+    // reloaded list.
+    if (moving) return;
+    moving = true;
     const ids = data.items.map((x) => x.id);
     const [x] = ids.splice(i, 1);
     ids.splice(i + dir, 0, x);
@@ -201,6 +208,7 @@ function productsCard(box, key) {
       msgs.append(banner({ tone: "critical", title: "The order was not saved.", items: [e.message] }));
     }
     try { await load(); } catch (e) { msgs.append(banner({ tone: "critical", title: e.message })); }
+    moving = false;
   }
   load().catch((e) => msgs.append(banner({ tone: "critical", title: "The products did not load.", items: [e.message] })));
 }

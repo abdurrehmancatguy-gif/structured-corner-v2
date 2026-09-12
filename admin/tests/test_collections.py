@@ -18,6 +18,10 @@ import unittest
 
 from box import Box
 
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "devtools"))
+import dom_diff  # noqa: E402
+import cdp_pipe  # noqa: E402
+
 PORT = int(os.environ.get("ADMIN_COLLECTIONS_PORT", "4742"))
 KEYS = ["attars", "bakhoor", "edp", "gift-sets", "all"]
 
@@ -300,6 +304,41 @@ class CollectionsTests(unittest.TestCase):
                 self.assertIn(says, p.stderr)
             finally:
                 shutil.rmtree(str(tmp), ignore_errors=True)
+
+
+@unittest.skipUnless(os.path.exists(dom_diff.CHROME), "headless Chrome is not installed")
+class DrivenReorder(unittest.TestCase):
+    """A collection's Move buttons driven in headless Chrome."""
+
+    def setUp(self):
+        self.b = Box(PORT)
+        self.c = cdp_pipe.Chrome()
+
+    def tearDown(self):
+        self.c.close()
+        self.b.close()
+
+    def order(self, cat):
+        st, lst = self.b.api("GET", "products?category=" + cat)
+        self.assertEqual(st, 200, lst)
+        return [i["id"] for i in lst["items"]]
+
+    def test_a_double_click_on_move_saves_once_without_a_false_error(self):
+        cat = "bakhoor"
+        before = self.order(cat)
+        self.c.go("http://localhost:%d/admin/#/collections/%s" % (self.b.port, cat))
+        self.c.wait("!!document.querySelector('[data-move$=\\':down\\']')", 25)
+        # Two clicks in one turn: the second runs while the first reorder is
+        # still in flight. Without the guard it sends the pre-reload list, is
+        # refused, and shows "The order was not saved".
+        self.c.js("(() => { const b = document.querySelector('[data-move$=\":down\"]'); b.click(); b.click(); })()")
+        self.c.wait("[...document.querySelectorAll('.toast')].some(e => e.textContent.includes('Order saved'))", 25)
+        self.c.js("new Promise(r => setTimeout(r, 400))")
+        self.assertFalse(self.c.js("document.body.textContent.includes('The order was not saved')"),
+                         "a false 'not saved' banner appeared")
+        # the first product moved down exactly one place, no more
+        self.assertEqual(self.order(cat), [before[1], before[0]] + before[2:])
+        self.assertEqual(self.c.errors(), [], "the page threw or logged an error")
 
 
 if __name__ == "__main__":
