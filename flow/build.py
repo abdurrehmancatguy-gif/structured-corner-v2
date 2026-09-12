@@ -1102,7 +1102,7 @@ quiz = """
           <div style="font-weight:600;font-size:16px" data-rname></div>
           <div style="font-size:12.5px;color:var(--mut);margin-top:3px" data-rmeta></div>
         </div>
-        <div style="font-weight:700;font-size:16px">AED 89</div>
+        <div style="font-weight:700;font-size:16px" data-rprice></div>
       </div>
       <div class="kv" style="margin-top:14px">
         <div><span>%(r_notes_label)s</span><span data-rnotes style="text-align:right;max-width:60%%"></span></div>
@@ -1110,7 +1110,7 @@ quiz = """
         <div><span>%(r_score_label)s</span><span data-rscore></span></div>
       </div>
       <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
-        <a class="btn solid" href="collection.html?cat=edp">%(r_see_label)s</a>
+        <a class="btn solid" href="collection.html?cat=edp" data-rsee>%(r_see_label)s</a>
         <button type="button" class="btn" data-qretake>%(r_retake_label)s</button>
       </div>
     </div>

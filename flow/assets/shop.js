@@ -500,6 +500,10 @@ bgsRun(function () {
   var bar = root.querySelector("[data-qbar]"), num = root.querySelector("[data-qnum]");
   var back = root.querySelector("[data-qback]");
   var res = document.querySelector("[data-qresult]");
+  /* "See it" opens the matched product; the page's own link is kept for
+     a match the shop does not sell */
+  var see = res.querySelector("[data-rsee]");
+  var seeAll = see ? see.getAttribute("href") : "";
 
   function show(n) {
     step = n;
@@ -563,6 +567,7 @@ bgsRun(function () {
     q("[data-rmeta]").textContent = item ? item.meta : "";
     q("[data-rnotes]").textContent = best.pr.notes;
     q("[data-rcode]").textContent = (item && item.sku) || "";
+    if (see) see.setAttribute("href", item ? "product.html?p=" + encodeURIComponent(best.pr.product) : seeAll);
     q("[data-rscore]").textContent = (R.score || "")
       .split("{shared}").join(best.shared).split("{total}").join(best.total);
     root.hidden = true; res.hidden = false;
