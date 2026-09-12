@@ -18,7 +18,7 @@ from bgsadmin.errors import ApiError  # noqa: E402
 from bgsadmin.httpd import Handler, Server  # noqa: E402
 from bgsadmin.routes import Raw, Route  # noqa: E402
 
-PORT = 4732
+PORT = int(os.environ.get("ADMIN_PLUMBING_PORT", "4732"))
 
 
 def upload(req):
