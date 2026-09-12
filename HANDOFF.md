@@ -730,8 +730,10 @@ raw background Bash. Use the Browser pane's `preview_start` with the `bgs-flow` 
 21. **Three quiz profiles can never win.** No combination of quiz answers matches Suit Up,
    Amore or Soleil Frais.
 22. **Checkout and order confirmed state the delivery rules in their own words.** Both pages
-   are locked in code and print their own wording of the delivery rules. How to keep them in
-   step when the owner changes the rules is under review.
+   are locked in code and print their own wording of the delivery rules. When the owner
+   changes the rules, a save only warns, but the Publish screen refuses to commit until a
+   developer updates those two pages or the settings go back (`publishing.blockers`, using
+   `lint.locked_pages`). Whether they should read the rules from settings is still open.
 23. **The Collections screen has no upload for the circle picture.** It shows the picture;
    the picture is changed under Navigation or Files.
 
