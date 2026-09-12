@@ -3,11 +3,10 @@ RESOURCE = {"name": "home", "label": "Homepage", "kind": "document",
             "intro": "The homepage banner, the product films and the section headings."}
 
 NOT_SHOWN = "Saved, but the shop does not use this yet: the site still has it written into its code."
-UPLOAD = "New banner images and films arrive with the media stage; duplicate a slide to start from its picture."
-
 FIELDS = [
     {"path": "/hero_slides", "type": "rows", "label": "Banner slides", "min": 1, "max": 8, "itemLabel": "headline",
-     "canAdd": False, "group": "Banner", "help": "The banner turns through these in order. " + UPLOAD, "fields": [
+     "canAdd": False, "group": "Banner",
+     "help": "The banner turns through these in order. To add one, duplicate a slide and upload a new picture on the copy.", "fields": [
          {"path": "/eyebrow", "type": "text", "label": "Small heading", "maxLength": 60},
          {"path": "/headline", "type": "textarea", "label": "Headline", "required": True, "maxLength": 80, "multiline": True,
           "help": "Press Enter where the line should break."},
@@ -16,15 +15,18 @@ FIELDS = [
          {"path": "/primary/href", "type": "href", "label": "First button link"},
          {"path": "/secondary/label", "type": "text", "label": "Second button", "maxLength": 30},
          {"path": "/secondary/href", "type": "href", "label": "Second button link"},
-         {"path": "/image", "type": "image", "label": "Picture", "readonly": UPLOAD},
+         {"path": "/image", "type": "image", "label": "Picture", "upload": "banner",
+          "help": "At least 2400 px wide and 790 px tall. You crop it twice: a wide band for computers and a 1110 x 600 crop for phones."},
          {"path": "/image_alt", "type": "text", "label": "Picture description (alt text)", "maxLength": 120},
      ]},
     {"path": "/reels/title", "type": "text", "label": "Heading", "maxLength": 60, "group": "Product films"},
     {"path": "/reels/items", "type": "rows", "label": "Films", "max": 12, "itemLabel": "product", "canAdd": False,
-     "group": "Product films", "help": "Each film links to its product. " + UPLOAD, "fields": [
+     "group": "Product films",
+     "help": "Each film links to its product. Upload a new film on an entry to replace it; Files adds a film at the end of the row.", "fields": [
          {"path": "/product", "type": "product-ref", "label": "Product", "required": True},
-         {"path": "/video", "type": "video", "label": "Film", "readonly": UPLOAD},
-         {"path": "/still", "type": "image", "label": "Poster", "readonly": UPLOAD},
+         {"path": "/video", "type": "video", "label": "Film", "upload": "reel",
+          "help": "An upright MP4 (9:16), at least 540 x 960 and 1 to 30 seconds long. It is converted for the web before it is saved."},
+         {"path": "/still", "type": "image", "label": "Poster", "upload": "poster", "help": "Cut from the film when the film is uploaded."},
      ]},
     {"path": "/sections/house_ouds", "type": "text", "label": "Attars shelf heading", "maxLength": 60, "group": "Section headings", "rendered": False, "notShown": NOT_SHOWN},
     {"path": "/sections/reserve", "type": "text", "label": "Never discounted heading", "maxLength": 60, "group": "Section headings", "rendered": False, "notShown": NOT_SHOWN},

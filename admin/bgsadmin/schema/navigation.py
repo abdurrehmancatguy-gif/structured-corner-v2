@@ -3,16 +3,16 @@ circles (one list feeds both), the phone tab bar and the footer."""
 RESOURCE = {"name": "navigation", "label": "Navigation", "kind": "document",
             "intro": "The category bar and homepage circles, the phone tab bar and the footer."}
 
-UPLOAD = "New circle pictures arrive with the media stage."
-
 FIELDS = [
     {"path": "/categories", "type": "rows", "label": "Category bar and homepage circles", "min": 1, "max": 10,
      "itemLabel": "label", "canAdd": False, "group": "Categories",
-     "help": "One list feeds the bar under the header and the circles on the homepage. " + UPLOAD, "fields": [
+     "help": "One list feeds the bar under the header and the circles on the homepage.", "fields": [
          {"path": "/label", "type": "text", "label": "Label", "required": True, "maxLength": 30},
          {"path": "/href", "type": "href", "label": "Link", "required": True},
          {"path": "/tint", "type": "tint", "label": "Circle colour"},
-         {"path": "/image", "type": "image", "label": "Picture", "readonly": UPLOAD},
+         {"path": "/image", "type": "image", "label": "Picture", "upload": "category",
+          "help": "Upload a photo, cropped square for the circle, or a cut-out: a PNG with a transparent background that "
+                  "stands in the circle. The picture style below is set to match the upload."},
          {"path": "/cutout", "type": "enum", "label": "Picture style", "enum": [False, True, "wide"],
           "enumLabels": ["Photo inside the circle", "Cut-out rising out of the circle", "Wide cut-out across the circle"],
           "help": "A cut-out needs a picture with a transparent background."},

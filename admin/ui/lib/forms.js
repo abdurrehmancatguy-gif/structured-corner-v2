@@ -2,7 +2,7 @@
 // editors for lists of entries, and a map from JSON pointers to fields so a
 // 422 from the server lands next to the field it is about. The server checks
 // everything again; nothing here is trusted.
-import { h, clear, getPtr, setPtr, copy, nextId, thumb } from "./dom.js";
+import { h, clear, getPtr, setPtr, copy, nextId, thumb, useCss } from "./dom.js";
 import { icon } from "../icons.js";
 import { confirmDialog } from "./ui.js";
 
@@ -72,6 +72,10 @@ export function field(f, target, ptr, ctx) {
   switch (f.type) {
     case "text": case "href": case "image": case "video": {
       const v = get();
+      if (f.upload && (f.type === "image" || f.type === "video")) {
+        control = mediaField(f, v, ptr, target, ctx, id);
+        break;
+      }
       const input = h("input", Object.assign({}, common, {
         class: "input", type: "text", value: v === null || v === undefined ? "" : String(v),
         maxlength: f.maxLength || null, dir: f.dir || null, autocomplete: "off",
@@ -170,7 +174,7 @@ export function field(f, target, ptr, ctx) {
     default: control = h("p", { class: "muted" }, "This field type is not shown yet.");
   }
 
-  const labelEl = ["rows", "images", "lines", "product-refs"].includes(f.type)
+  const labelEl = ["rows", "images", "lines", "product-refs"].includes(f.type) || control.classList.contains("media-field")
     ? h("span", { class: "f-label", id: id + "-label" }, f.label)
     : h("label", { class: "f-label", for: id }, f.label);
   const wrap = h("div", { class: "field t-" + f.type + (disabled ? " is-disabled" : ""), dataset: { ptr } },
@@ -180,6 +184,21 @@ export function field(f, target, ptr, ctx) {
     err);
   ctx.slots.set(ptr, { err, wrap });
   return wrap;
+}
+
+// A picture or film that uploads fill (field.upload): what it shows now and
+// the buttons the screen offers for it through ctx.uploadActions. The path
+// is not typed in; an upload, a reorder or a duplicated entry changes it.
+function mediaField(f, v, ptr, target, ctx, id) {
+  useCss("media");
+  const src = v ? "/" + String(v) : null;
+  const prev = !src ? h("span", { class: "media-prev none" }, "No file")
+    : f.type === "video" ? h("video", { class: "media-prev film", src, preload: "metadata", controls: true, muted: true, playsinline: true,
+      "aria-label": "Play the " + f.label.toLowerCase() })
+    : h("img", { class: "media-prev" + (/\.(png|ico)$/.test(String(v)) ? " alpha" : ""), src, alt: "" });
+  const actions = f.locked || f.readonly || !ctx.uploadActions ? null : ctx.uploadActions(f, ptr, target);
+  return h("div", { class: "media-field", id, role: "group", "aria-labelledby": id + "-label", "aria-describedby": id + "-help " + id + "-err" },
+    prev, h("div", { class: "media-side" }, h("span", { class: "media-path" }, v || "No file yet."), actions));
 }
 
 function linesEditor(f, value, set, disabled, id) {

@@ -45,6 +45,25 @@ def text_problem(s, multiline=False):
     return None
 
 
+MEDIA_PATH = re.compile(r"assets/(?:img|cat|video)/[a-z0-9][a-z0-9._-]*\.(?:jpg|png|mp4)|favicon\.ico")
+
+
+def media_problem(s, t, flow):
+    """A picture or film field that uploads fill may still be moved about by
+    a save (slides and films reordered, a slide duplicated), but it must name
+    one of the site's pictures (or films, for a film field) and, when flow is
+    given, a file that is there. The caller passes flow None for a value the
+    document already holds, so a file removed outside the admin never blocks
+    an unrelated edit."""
+    exts = (".mp4",) if t == "video" else (".jpg", ".png", ".ico")
+    if not MEDIA_PATH.fullmatch(s) or not s.endswith(exts):
+        return "format", "Upload a file here: this is not the name of one of the site's %s." % (
+            "films" if t == "video" else "pictures")
+    if flow is not None and not (flow / s).is_file():
+        return "missing_file", "There is no file at %s. Upload one instead." % s
+    return None
+
+
 def href_problem(s, social=False):
     if s == "":
         return None
@@ -94,6 +113,10 @@ def check(fields, data, prefix, errors, ctx):
                 errors.append(err(ptr, "format", f.get("patternHelp", "This is not in the expected format.")))
             if t == "href":
                 p = href_problem(v, social=f.get("social", False))
+                if p:
+                    errors.append(err(ptr, *p))
+            if t in ("image", "video") and f.get("upload") and v and ctx.get("flow_dir") is not None:
+                p = media_problem(v, t, None if v in ctx.get("known_media", ()) else ctx["flow_dir"])
                 if p:
                     errors.append(err(ptr, *p))
         elif t in ("int", "money"):

@@ -6,10 +6,11 @@ import { api } from "../lib/api.js";
 import { h } from "../lib/dom.js";
 import { mountEditor } from "../lib/editor.js";
 import { field, visible } from "../lib/forms.js";
+import { uploadActions } from "../components/upload-field.js";
 
 export function render(main, { arg: name, app }) {
   const res = app.state.schema.resources[name];
-  mountEditor(main, app, {
+  const ed = mountEditor(main, app, {
     heading: res.resource.label,
     subtitle: res.resource.intro || null,
     load: async () => { const d = await api("GET", "documents/" + name); return { rev: d.rev, data: d.data, meta: d }; },
@@ -18,6 +19,7 @@ export function render(main, { arg: name, app }) {
     actions: () => [h("a", { class: "btn", href: "/", target: "_blank", rel: "noopener noreferrer" }, "View store")],
     form: (ctx, data) => {
       ctx.root = data;
+      ctx.uploadActions = uploadActions(() => ed);
       const groups = new Map();
       for (const f of res.fields) {
         if (!visible(f, data)) continue;

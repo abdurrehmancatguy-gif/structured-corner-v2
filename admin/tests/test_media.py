@@ -379,6 +379,38 @@ class MediaTests(unittest.TestCase):
 
     # ---- films ---------------------------------------------------------------
 
+    def test_upload_fields_move_but_only_onto_real_files(self):
+        """The banner, film, circle, logo and icon fields are no longer read
+        only: a save may reorder or repoint them, but only onto a file the
+        site publishes and that is there."""
+        b = self.b
+        st, home = b.api("GET", "documents/home")
+        self.assertEqual(st, 200, home)
+        data = home["data"]
+        slides, films = data["hero_slides"], data["reels"]["items"]
+        moved = dict(data, hero_slides=[slides[1], slides[0]] + slides[2:],
+                     reels=dict(data["reels"], items=[films[1], films[0]] + films[2:]))
+        st, res = b.api("PUT", "documents/home", {"data": moved}, rev=home["rev"])
+        self.assertEqual(st, 200, res)
+        for bad, code in (("assets/img/nope.jpg", "missing_file"), ("content/home.json", "format"),
+                          ("assets/img/../../content/home.json", "format"), (films[0]["video"], "format")):
+            s = [dict(x) for x in res["data"]["hero_slides"]]
+            s[0]["image"] = bad
+            st, out = b.api("PUT", "documents/home", {"data": dict(res["data"], hero_slides=s)}, rev=res["rev"])
+            self.assertEqual(st, 422, (bad, out))
+            self.assertEqual([d["code"] for d in out["error"]["details"]], [code], bad)
+        s = [dict(x) for x in res["data"]["hero_slides"]]
+        s[0]["image"] = s[1]["image"]
+        st, res = b.api("PUT", "documents/home", {"data": dict(res["data"], hero_slides=s)}, rev=res["rev"])
+        self.assertEqual(st, 200, res)
+        st, res = b.api("PUT", "documents/home", {"data": data}, rev=res["rev"])
+        self.assertEqual(st, 200, res)
+        st, sets = b.api("GET", "documents/settings")
+        brand = dict(sets["data"]["brand"], logo="assets/img/nope.png")
+        st, out = b.api("PUT", "documents/settings", {"data": dict(sets["data"], brand=brand)}, rev=sets["rev"])
+        self.assertEqual(st, 422, out)
+        self.assertEqual([d["code"] for d in out["error"]["details"]], ["missing_file"])
+
     def test_film_upload_transcode_and_attach(self):
         b = self.b
         tmp = tempfile.mkdtemp(prefix="bgsmedia-")
