@@ -6,6 +6,8 @@ Every test that writes does so in the clone, on a spare port, with --no-push.
 """
 import json
 import os
+import pathlib
+import re
 import unittest
 
 from box import Box
@@ -210,6 +212,29 @@ class AdminTests(unittest.TestCase):
         st, res = b.api("PUT", "documents/navigation", {"data": data}, rev=d["rev"])
         self.assertEqual(st, 200, res)
         self.assertIn(">Perfume oils</a>", (b.repo / "flow" / "index.html").read_text())
+
+
+class UiSourceTests(unittest.TestCase):
+    """Rules read from the admin's own source; no server needed."""
+
+    def test_every_badge_variant_has_a_style(self):
+        # A badge variant used in a lib or component file needs its rule in
+        # admin.css; one used by a screen may also have it in that screen's
+        # own sheet (css/<screen>.css).
+        ui = pathlib.Path(__file__).resolve().parent.parent / "ui"
+        rules = lambda p: set(re.findall(r"\.badge\.([a-z-]+)", p.read_text(encoding="utf-8"))) if p.is_file() else set()
+        shared = rules(ui / "admin.css")
+        missing = []
+        used = set()
+        for p in sorted(ui.rglob("*.js")):
+            own = rules(ui / "css" / (p.stem + ".css")) if p.parent.name == "screens" else set()
+            for m in re.finditer(r'class:\s*"badge((?: [a-z-]+)+)"', p.read_text(encoding="utf-8")):
+                for v in m.group(1).split():
+                    used.add(v)
+                    if v not in shared | own:
+                        missing.append("%s: badge %s" % (p.relative_to(ui), v))
+        self.assertIn("muted", used)
+        self.assertEqual(missing, [])
 
 
 if __name__ == "__main__":
