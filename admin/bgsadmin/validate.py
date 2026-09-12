@@ -202,11 +202,52 @@ def product(pid, data, products, fields, ctx):
     return errors, warnings
 
 
+def cutoff_minutes(text):
+    """'2:00 PM' as minutes after midnight, or None when it does not read as a time."""
+    m = re.fullmatch(r"(1[0-2]|[1-9]):([0-5]\d) (AM|PM)", text) if isinstance(text, str) else None
+    if not m:
+        return None
+    return (int(m.group(1)) % 12 + (12 if m.group(3) == "PM" else 0)) * 60 + int(m.group(2))
+
+
+def _whole(v):
+    return isinstance(v, int) and not isinstance(v, bool)
+
+
+def settings_rules(data):
+    """What one field cannot say alone: the same-day cutoff has to fall in
+    shop hours, and the volume ladder has to climb. A rung that needs more
+    items but saves the same or less would tell the bag 'add 3 more to save
+    5%' while it already saves 10%."""
+    errors = []
+    store = data.get("store") if isinstance(data.get("store"), dict) else {}
+    mins = cutoff_minutes(store.get("sameday_cutoff"))
+    if mins is not None and not 6 * 60 <= mins <= 22 * 60:
+        errors.append(err("/store/sameday_cutoff", "range", "Pick a time between 6:00 AM and 10:00 PM."))
+    rungs = store.get("volume_ladder")
+    for i in range(1, len(rungs) if isinstance(rungs, list) else 0):
+        a, b = rungs[i - 1], rungs[i]
+        if not isinstance(a, dict) or not isinstance(b, dict):
+            continue
+        ptr = "/store/volume_ladder/%d" % i
+        if _whole(a.get("units")) and _whole(b.get("units")) and b["units"] <= a["units"]:
+            errors.append(err(ptr + "/units", "order", "Each rung needs more items than the rung before it."))
+        if _whole(a.get("percent")) and _whole(b.get("percent")) and b["percent"] <= a["percent"]:
+            errors.append(err(ptr + "/percent", "order", "Each rung has to save more than the rung before it."))
+    return errors
+
+
+# Document-level checks, run after the field checks: name -> fn(data) -> errors.
+DOCUMENT_CHECKS = {"settings": settings_rules}
+
+
 def document(name, data, fields, ctx):
     errors = []
     if not isinstance(data, dict):
         return [err("", "type", "This document must be a set of fields.")], []
     check(fields, data, "", errors, ctx)
+    if name in DOCUMENT_CHECKS:
+        errors += DOCUMENT_CHECKS[name](data)
     return errors, []
 
 

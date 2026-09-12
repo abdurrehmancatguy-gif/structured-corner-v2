@@ -5,6 +5,7 @@ pointers actually changed and refuses the save if any of them is locked
 (payments, tax, cash on delivery), read-only (changed by uploads later) or not
 in the schema at all, so a hand-made request cannot slip a change past the UI.
 """
+from .. import lint
 from .. import schema as schema_mod
 from .. import validate
 from ..errors import ApiError
@@ -43,6 +44,9 @@ def put_doc(req):
             raise ApiError(422, "validation", "Some fields need attention.", errors)
         new = ordered_like(cur, data)
         txn.put(name, new)
+    # Site text that restates a store rule is checked against the rules on
+    # either side of the change; it warns and never blocks.
+    warnings = warnings + lint.after_save(name, new, store, schemas())
     return saved(req.app, txn, name=name, rev=store.doc(name)[1], data=new, warnings=warnings)
 
 
