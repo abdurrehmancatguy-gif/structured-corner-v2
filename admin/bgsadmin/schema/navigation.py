@@ -13,7 +13,7 @@ FIELDS = [
          {"path": "/image", "type": "image", "label": "Picture", "upload": "category",
           "help": "Upload a photo, cropped square for the circle, or a cut-out: a PNG with a transparent background that "
                   "stands in the circle. The picture style below is set to match the upload."},
-         {"path": "/cutout", "type": "enum", "label": "Picture style", "enum": [False, True, "wide"],
+         {"path": "/cutout", "type": "enum", "label": "Picture style", "enum": [False, True, "wide"], "default": False,
           "enumLabels": ["Photo inside the circle", "Cut-out rising out of the circle", "Wide cut-out across the circle"],
           "help": "A cut-out needs a picture with a transparent background."},
      ]},

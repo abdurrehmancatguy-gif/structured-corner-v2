@@ -137,7 +137,8 @@ export function field(f, target, ptr, ctx) {
       break;
     }
     case "enum": {
-      const v = get();
+      // a missing key shows as field.default, the value the site reads for it
+      const v = get() === undefined && f.default !== undefined ? f.default : get();
       const idx = f.enum.findIndex((x) => x === v);
       control = h("select", Object.assign({}, common, {
         class: "input",
