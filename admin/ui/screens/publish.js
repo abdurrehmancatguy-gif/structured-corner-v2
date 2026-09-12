@@ -4,7 +4,7 @@
 // publish; Published is this computer's log of commits and publishes.
 // topbar() adds the "saved, not committed" chip to the top bar.
 import { api } from "../lib/api.js";
-import { h, clear, useCss } from "../lib/dom.js";
+import { h, clear, append, useCss } from "../lib/dom.js";
 import { icon } from "../icons.js";
 import { banner, toast, guard, announce } from "../lib/ui.js";
 
@@ -242,13 +242,13 @@ function publishDialog(pv) {
     function sync() { go.disabled = word.value.trim() !== "PUBLISH" || (tick !== null && !tick.checked); }
     d.addEventListener("cancel", (e) => { e.preventDefault(); done(null); });
     word.addEventListener("keydown", (e) => { if (e.key === "Enter" && !go.disabled) { e.preventDefault(); go.click(); } });
-    d.append(h("h2", { id: "pub-dlg-title" }, "Publish to the live site?"),
+    append(d, [h("h2", { id: "pub-dlg-title" }, "Publish to the live site?"),
       h("p", {}, "This sends " + plural(pv.commits.length, "commit", "commits") + " to GitHub, ending at " + pv.local_sha.slice(0, 7) + ". "
         + plural(pv.published_count, "file changes", "files change") + " on the site, and " + pv.targets.join(" and ") + " start deploying."),
       tick ? h("label", { class: "check pub-tick", for: "pub-ext" }, tick,
         pv.external === 1 ? "Include the 1 commit made outside the admin. It goes live too." : "Include the " + pv.external + " commits made outside the admin. They go live too.") : null,
       h("div", { class: "field" }, h("label", { class: "f-label", for: "pub-word" }, "Type PUBLISH to confirm"), word),
-      h("div", { class: "dlg-actions" }, h("button", { class: "btn", type: "button", onclick: () => done(null) }, "Cancel"), go));
+      h("div", { class: "dlg-actions" }, h("button", { class: "btn", type: "button", onclick: () => done(null) }, "Cancel"), go)]);
     document.body.append(d);
     d.showModal();
     word.focus();
@@ -292,7 +292,9 @@ async function notLive(body, app) {
     (pv.warnings || []).forEach((w) => out.append(banner({ tone: "warning", title: w.message,
       items: (w.paths || []).concat(w.count > (w.paths || []).length ? ["and " + (w.count - w.paths.length) + " more"] : []),
       actions: [h("a", { class: "btn", href: "#/publish" }, "Review and commit")] })));
-    if (pv.commits.length) out.append(commitsCard(), h("div", { class: "cards two" }, customersCard(), filesCard()), ridingCard());
+    // append() from dom.js skips the null a card returns when it has nothing
+    // to show; the DOM's own append would print it as the word "null".
+    if (pv.commits.length) append(out, [commitsCard(), h("div", { class: "cards two" }, customersCard(), filesCard()), ridingCard()]);
     out.append(publishCard());
   }
 
