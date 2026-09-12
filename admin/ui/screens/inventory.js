@@ -21,6 +21,9 @@ export async function render(main, { app }) {
   let rows = [];
   let low = LOW;
   const note = h("div", { class: "msgs" });
+  // The 412 banner has a box of its own, so it goes once the last stale row
+  // is reloaded instead of staying until the next save.
+  const staleBox = h("div", { class: "msgs" });
   const table = h("div", { class: "table-wrap" });
   const lowText = h("span", {}, LOW + " or fewer");
   const foot = h("p", { class: "inv-foot" });
@@ -30,7 +33,7 @@ export async function render(main, { app }) {
       h("a", { class: "back", href: "#/products" }, "Products"),
       h("h1", { tabindex: "-1" }, "Inventory"),
       h("p", { class: "sub" }, "Products that track their stock. Change any number and save once: every changed row is saved together, or none is."))),
-    note,
+    note, staleBox,
     h("section", { class: "card flush inv-card" },
       h("div", { class: "toolbar" },
         h("label", { class: "search" }, icon("search", 16),
@@ -68,6 +71,7 @@ export async function render(main, { app }) {
 
   function draw() {
     const list = shown();
+    drawStale();
     clear(table);
     foot.textContent = rows.length ? "At " + low + " or fewer the product's card shows how many are left." : "";
     foot.hidden = !rows.length;
@@ -197,7 +201,12 @@ export async function render(main, { app }) {
       if (r) r.stale = true;
     }
     draw();
-    note.append(banner({ tone: "warning", title: "Not saved: " + plural(conflicts.length, "product") + " changed since this screen opened.",
+  }
+
+  function drawStale() {
+    clear(staleBox);
+    const n = rows.filter((r) => r.stale).length;
+    if (n) staleBox.append(banner({ tone: "warning", title: "Not saved: " + plural(n, "product") + " changed since this screen opened.",
       items: ["Reload the rows marked Changed elsewhere, then save again. Your other numbers are still here."] }));
   }
 
