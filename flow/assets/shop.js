@@ -488,7 +488,7 @@ bgsRun(function () {
      here as window.BGS_QUIZ: MAP is answer key -> the facets it favours and
      the label it shows, which the result files under the kind of question it
      answers (family, tone, occasion, sillage, season). A profile names its
-     product, and the product's barcode comes from the catalogue. */
+     product, whose name and barcode come from the catalogue. */
   var PROFILES = QUIZ.profiles || [];
   var MAP = QUIZ.answers || {};
   var KINDS = QUIZ.kinds || [];
@@ -531,8 +531,11 @@ bgsRun(function () {
        The score shown to a customer counts distinct facets, which is what the
        sentence claims. */
     var uniq = want.filter(function (f, i) { return want.indexOf(f) === i; });
+    /* the match is a product the shop sells (published); if none of the
+       profiles' products is, the closest profile still answers, unnamed */
+    var onSale = PROFILES.filter(function (pr) { return CAT[pr.product]; });
     var best = null;
-    PROFILES.forEach(function (pr) {
+    (onSale.length ? onSale : PROFILES).forEach(function (pr) {
       var has = pr.facets || [];
       var weighted = want.filter(function (f) { return has.indexOf(f) !== -1; }).length;
       var shared = uniq.filter(function (f) { return has.indexOf(f) !== -1; }).length;
@@ -554,8 +557,8 @@ bgsRun(function () {
       if (labels[k]) pills.appendChild(span("pill on", labels[k]));
     });
     var name = q("[data-rname]");
-    name.textContent = best.pr.name || (R.unnamed || "") + " ";
-    if (!best.pr.name) name.appendChild(span("slot", R.unnamed_slot || ""));
+    name.textContent = item ? item.name : (R.unnamed || "") + " ";
+    if (!item) name.appendChild(span("slot", R.unnamed_slot || ""));
     q("[data-rmeta]").textContent = "EDP spray · 50 ml · " + best.pr.audience;
     q("[data-rnotes]").textContent = best.pr.notes;
     q("[data-rcode]").textContent = (item && item.sku) || "";

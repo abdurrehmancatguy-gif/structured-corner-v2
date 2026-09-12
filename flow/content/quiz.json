@@ -302,7 +302,6 @@
   "profiles": [
     {
       "product": "be-mine",
-      "name": "Be Mine",
       "audience": "Her",
       "notes": "Citrus, rose, jasmine-like white floral, soft sweet/tonka",
       "facets": [
@@ -314,7 +313,6 @@
     },
     {
       "product": "vibe",
-      "name": null,
       "audience": "Her",
       "notes": "Rose and jasmine-like florals, lemon/citrus, clove spice, soft sweet/tonka",
       "facets": [
@@ -327,7 +325,6 @@
     },
     {
       "product": "pride-of-arabia",
-      "name": null,
       "audience": "Her",
       "notes": "Powdery violet, green violet-leaf, lily-of-the-valley, rose and citrus",
       "facets": [
@@ -339,7 +336,6 @@
     },
     {
       "product": "suit-up",
-      "name": null,
       "audience": "Unisex",
       "notes": "Cinnamon and clove spice, citrus, rosy floral and sweet tonka-like warmth",
       "facets": [
@@ -351,7 +347,6 @@
     },
     {
       "product": "the-writer",
-      "name": null,
       "audience": "Unisex",
       "notes": "Rose/floral, lemon-citrus, clove spice and warm balsamic-amber facets",
       "facets": [
@@ -364,7 +359,6 @@
     },
     {
       "product": "edward-the-black-prince",
-      "name": null,
       "audience": "Him",
       "notes": "Clove-like spice, bright citrus and aromatic floral/lavender facets",
       "facets": [
@@ -375,7 +369,6 @@
     },
     {
       "product": "amore",
-      "name": null,
       "audience": "Unisex",
       "notes": "Lemon-citrus, aromatic floral/lavender and warm clove-like spice",
       "facets": [
@@ -386,7 +379,6 @@
     },
     {
       "product": "soleil-frais",
-      "name": null,
       "audience": "Unisex",
       "notes": "Clean, bright lemon-citrus profile",
       "facets": [
@@ -395,7 +387,6 @@
     },
     {
       "product": "barcelona",
-      "name": null,
       "audience": "Unisex",
       "notes": "Citrus, aromatic floral/lavender, rose and soft sweet tonka-like warmth",
       "facets": [
