@@ -24,6 +24,11 @@ http://localhost:4310/). The preview configuration's `python3 flow/server.py
   the footer.
 - **Site text** and **Settings** (store details, delivery and gift box rules,
   brand text, social links).
+- **Translations:** the Arabic the language switch in the top strip puts in
+  place of the shop's labels, as one English and Arabic table with search, a
+  Missing filter, coverage, add and remove, and a mark on entries whose
+  English the built site no longer shows. It also counts each product's
+  Arabic name and story, which the shop does not show yet.
 
 Every save is checked, written safely and followed by a rebuild of the site,
 so the preview shows it at once. If the site would not build with a change,
