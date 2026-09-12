@@ -71,7 +71,9 @@ async function siteTexts(pages) {
   const texts = new Set();
   const add = (s) => { const t = String(s).trim(); if (t) texts.add(t); };
   for (const src of htmls) {
-    const doc = new DOMParser().parseFromString(src, "text/html");
+    // Only text nodes are read. The pages' style attributes are dropped first:
+    // parsed here, each one would be reported against the admin's CSP.
+    const doc = new DOMParser().parseFromString(src.replace(/\sstyle=("[^"]*"|'[^']*')/g, ""), "text/html");
     doc.querySelectorAll(SWAPPED).forEach((el) => {
       for (const n of el.childNodes) if (n.nodeType === 3) add(n.nodeValue);
     });
