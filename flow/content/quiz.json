@@ -1,0 +1,405 @@
+{
+  "page": {
+    "crumb": "Home / Test your scent",
+    "step_label": "Question {n} of {total} · under a minute",
+    "back": "← Back"
+  },
+  "questions": [
+    {
+      "title": "When will you wear it?",
+      "columns": 1,
+      "kind": "occasion",
+      "options": [
+        {
+          "key": "daily",
+          "label": "Every day",
+          "sub": "Work, errands, the school run"
+        },
+        {
+          "key": "office",
+          "label": "The office",
+          "sub": "Close to the skin, nothing loud"
+        },
+        {
+          "key": "evening",
+          "label": "Evenings out",
+          "sub": "Dinner, weddings, long nights"
+        },
+        {
+          "key": "majlis",
+          "label": "The majlis",
+          "sub": "Guests, oud, the good room"
+        }
+      ]
+    },
+    {
+      "title": "What should it feel like?",
+      "columns": 1,
+      "kind": "tone",
+      "options": [
+        {
+          "key": "bold",
+          "label": "Bold",
+          "sub": "Announces itself"
+        },
+        {
+          "key": "soft",
+          "label": "Soft",
+          "sub": "Quiet, skin-close"
+        },
+        {
+          "key": "warm",
+          "label": "Warm",
+          "sub": "Spiced, resinous"
+        },
+        {
+          "key": "fresh",
+          "label": "Fresh",
+          "sub": "Bright and clean"
+        }
+      ]
+    },
+    {
+      "title": "Which of these draws you first?",
+      "columns": 2,
+      "kind": "family",
+      "options": [
+        {
+          "key": "citrus",
+          "label": "Cut lemon and bergamot",
+          "sub": ""
+        },
+        {
+          "key": "rose",
+          "label": "Rose and jasmine",
+          "sub": ""
+        },
+        {
+          "key": "spice",
+          "label": "Clove, cinnamon, pepper",
+          "sub": ""
+        },
+        {
+          "key": "sweet",
+          "label": "Vanilla and tonka",
+          "sub": ""
+        },
+        {
+          "key": "violet",
+          "label": "Powdery violet and iris",
+          "sub": ""
+        },
+        {
+          "key": "wood",
+          "label": "Agarwood and resin",
+          "sub": ""
+        }
+      ]
+    },
+    {
+      "title": "How much should it carry?",
+      "columns": 1,
+      "kind": "sillage",
+      "options": [
+        {
+          "key": "intimate",
+          "label": "Only up close",
+          "sub": "Intimate"
+        },
+        {
+          "key": "noticeable",
+          "label": "Arm’s length",
+          "sub": "Noticeable"
+        },
+        {
+          "key": "room",
+          "label": "Fills the room",
+          "sub": "Room-filling"
+        }
+      ]
+    },
+    {
+      "title": "Which half of the year?",
+      "columns": 1,
+      "kind": "season",
+      "options": [
+        {
+          "key": "summer",
+          "label": "Gulf summer",
+          "sub": "Has to survive the heat"
+        },
+        {
+          "key": "winter",
+          "label": "Cooler months",
+          "sub": "Room for something heavier"
+        },
+        {
+          "key": "both",
+          "label": "All year",
+          "sub": "One bottle, no thinking"
+        }
+      ]
+    }
+  ],
+  "answers": [
+    {
+      "key": "daily",
+      "facets": [
+        "citrus"
+      ],
+      "label": "Daily"
+    },
+    {
+      "key": "office",
+      "facets": [
+        "citrus",
+        "violet"
+      ],
+      "label": "Office"
+    },
+    {
+      "key": "evening",
+      "facets": [
+        "amber",
+        "spice",
+        "sweet"
+      ],
+      "label": "Evening"
+    },
+    {
+      "key": "majlis",
+      "facets": [
+        "amber",
+        "spice"
+      ],
+      "label": "Majlis"
+    },
+    {
+      "key": "bold",
+      "facets": [
+        "spice",
+        "amber"
+      ],
+      "label": "Bold"
+    },
+    {
+      "key": "soft",
+      "facets": [
+        "violet",
+        "floral"
+      ],
+      "label": "Soft"
+    },
+    {
+      "key": "warm",
+      "facets": [
+        "spice",
+        "amber",
+        "sweet"
+      ],
+      "label": "Warm"
+    },
+    {
+      "key": "fresh",
+      "facets": [
+        "citrus",
+        "lavender"
+      ],
+      "label": "Fresh"
+    },
+    {
+      "key": "citrus",
+      "facets": [
+        "citrus",
+        "citrus"
+      ],
+      "label": "Fresh & Citrus"
+    },
+    {
+      "key": "rose",
+      "facets": [
+        "rose",
+        "floral",
+        "floral"
+      ],
+      "label": "Floral Veil"
+    },
+    {
+      "key": "spice",
+      "facets": [
+        "spice",
+        "spice"
+      ],
+      "label": "Amber & Spice"
+    },
+    {
+      "key": "sweet",
+      "facets": [
+        "sweet",
+        "sweet"
+      ],
+      "label": "Sweet & Gourmand"
+    },
+    {
+      "key": "violet",
+      "facets": [
+        "violet",
+        "violet"
+      ],
+      "label": "Musk & Clean"
+    },
+    {
+      "key": "wood",
+      "facets": [
+        "amber",
+        "amber"
+      ],
+      "label": "Oud & Woods"
+    },
+    {
+      "key": "intimate",
+      "facets": [
+        "violet"
+      ],
+      "label": "Intimate"
+    },
+    {
+      "key": "noticeable",
+      "facets": [],
+      "label": "Noticeable"
+    },
+    {
+      "key": "room",
+      "facets": [
+        "spice",
+        "amber"
+      ],
+      "label": "Room-filling"
+    },
+    {
+      "key": "summer",
+      "facets": [
+        "citrus",
+        "lavender"
+      ],
+      "label": "Summer-safe"
+    },
+    {
+      "key": "winter",
+      "facets": [
+        "amber",
+        "spice",
+        "sweet"
+      ],
+      "label": "Winter"
+    },
+    {
+      "key": "both",
+      "facets": [],
+      "label": "All year"
+    }
+  ],
+  "profiles": [
+    {
+      "product": "be-mine",
+      "notes": "Citrus, rose, jasmine-like white floral, soft sweet/tonka",
+      "facets": [
+        "citrus",
+        "rose",
+        "floral",
+        "sweet"
+      ]
+    },
+    {
+      "product": "vibe",
+      "notes": "Rose and jasmine-like florals, lemon/citrus, clove spice, soft sweet/tonka",
+      "facets": [
+        "rose",
+        "floral",
+        "citrus",
+        "spice",
+        "sweet"
+      ]
+    },
+    {
+      "product": "pride-of-arabia",
+      "notes": "Powdery violet, green violet-leaf, lily-of-the-valley, rose and citrus",
+      "facets": [
+        "violet",
+        "floral",
+        "rose",
+        "citrus"
+      ]
+    },
+    {
+      "product": "suit-up",
+      "notes": "Cinnamon and clove spice, citrus, rosy floral and sweet tonka-like warmth",
+      "facets": [
+        "spice",
+        "citrus",
+        "rose",
+        "sweet"
+      ]
+    },
+    {
+      "product": "the-writer",
+      "notes": "Rose/floral, lemon-citrus, clove spice and warm balsamic-amber facets",
+      "facets": [
+        "rose",
+        "floral",
+        "citrus",
+        "spice",
+        "amber"
+      ]
+    },
+    {
+      "product": "edward-the-black-prince",
+      "notes": "Clove-like spice, bright citrus and aromatic floral/lavender facets",
+      "facets": [
+        "spice",
+        "citrus",
+        "lavender"
+      ]
+    },
+    {
+      "product": "amore",
+      "notes": "Lemon-citrus, aromatic floral/lavender and warm clove-like spice",
+      "facets": [
+        "citrus",
+        "lavender",
+        "spice"
+      ]
+    },
+    {
+      "product": "soleil-frais",
+      "notes": "Clean, bright lemon-citrus profile",
+      "facets": [
+        "citrus"
+      ]
+    },
+    {
+      "product": "barcelona",
+      "notes": "Citrus, aromatic floral/lavender, rose and soft sweet tonka-like warmth",
+      "facets": [
+        "citrus",
+        "lavender",
+        "rose",
+        "sweet"
+      ]
+    }
+  ],
+  "result": {
+    "eyebrow": "Your profile",
+    "title_fallback": "Your scent",
+    "heading": "Closest to what you described",
+    "notes_label": "Declared aroma facets",
+    "barcode_label": "Barcode",
+    "score_label": "Match strength",
+    "score": "{shared} of {total} facets shared",
+    "see_label": "See it",
+    "retake_label": "Retake the quiz",
+    "note": "These facets are estimated from the fragrance-allergen declarations printed on the package, not from an official note pyramid, the method is set out in the ingredients sheet.",
+    "unnamed": "EDP spray",
+    "unnamed_slot": "name not on the packaging"
+  }
+}

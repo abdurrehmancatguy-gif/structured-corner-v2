@@ -199,6 +199,69 @@ def check(fields, data, prefix, errors, ctx):
                     errors.append(err("%s/%d" % (ptr, i), "type", "Each entry must be a set of fields."))
                     continue
                 check(f.get("fields", []), item, "%s/%d" % (ptr, i), errors, ctx)
+        elif t == "dictionary":
+            dictionary(f, v, ptr, errors)
+        elif t == "tags":
+            tags(f, v, ptr, errors)
+
+
+TAG = re.compile(r"^[a-z]+(?:-[a-z]+)*$")
+TIMES = {1: "once", 2: "twice"}
+
+
+def tags(f, v, ptr, errors):
+    """Short lower-case words, such as the facets a quiz answer looks for.
+    A word may appear up to maxRepeat times (once unless the field says
+    more): in the quiz a facet listed twice counts twice."""
+    if not isinstance(v, list) or not all(isinstance(x, str) for x in v):
+        errors.append(err(ptr, "type", "This must be a list of words."))
+        return
+    if f.get("min") is not None and len(v) < f["min"]:
+        errors.append(err(ptr, "too_few", "Pick at least %d." % f["min"]))
+    if f.get("max") is not None and len(v) > f["max"]:
+        errors.append(err(ptr, "too_many", "Keep this to %d." % f["max"]))
+    most = f.get("maxRepeat", 1)
+    for i, x in enumerate(v):
+        if not TAG.match(x) or len(x) > f.get("itemMaxLength", 40):
+            errors.append(err("%s/%d" % (ptr, i), "format",
+                              "Use one lower-case word, or words joined by hyphens, like citrus or white-floral."))
+        elif v.index(x) == i and v.count(x) > most:
+            errors.append(err("%s/%d" % (ptr, i), "repeated",
+                              "List %s %s at most." % (x, TIMES.get(most, "%d times" % most))))
+
+
+def escape(key):
+    """A key as one JSON pointer segment."""
+    return str(key).replace("~", "~0").replace("/", "~1")
+
+
+def dictionary(f, v, ptr, errors):
+    """Text keys mapped to text values, such as English labels to their Arabic.
+    A key must be the exact trimmed text it stands for: the storefront looks
+    labels up by it. An empty value is allowed and means not translated yet.
+    Each error names its entry (key) and which side it is about (part)."""
+    if not isinstance(v, dict):
+        errors.append(err(ptr, "type", "This must be a list of texts with their translations."))
+        return
+    if f.get("max") is not None and len(v) > f["max"]:
+        errors.append(err(ptr, "too_many", "Keep this to %d entries." % f["max"]))
+    kmax, vmax = f.get("keyMaxLength"), f.get("maxLength")
+    for k, val in v.items():
+        at = "%s/%s" % (ptr, escape(k))
+        p = text_problem(k)
+        if not p and not k.strip():
+            p = ("required", "Write the text this entry translates.")
+        elif not p and k != k.strip():
+            p = ("spaces", "Remove the spaces at the start or end: the site matches the text exactly.")
+        elif not p and kmax and len(k) > kmax:
+            p = ("too_long", "Keep this under %d characters." % kmax)
+        if p:
+            errors.append(dict(err(at, *p), key=k, part="key"))
+        p = text_problem(val) if isinstance(val, str) else ("type", "The translation must be text.")
+        if not p and vmax and len(val) > vmax:
+            p = ("too_long", "Keep this under %d characters." % vmax)
+        if p:
+            errors.append(dict(err(at, *p), key=k, part="value"))
 
 
 def claim_warnings(texts, prefix=""):

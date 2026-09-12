@@ -24,6 +24,17 @@ http://localhost:4310/). The preview configuration's `python3 flow/server.py
   the footer.
 - **Site text** and **Settings** (store details, delivery and gift box rules,
   brand text, social links).
+- **Translations:** the Arabic the language switch in the top strip puts in
+  place of the shop's labels, as one English and Arabic table with search, a
+  Missing filter, coverage, add and remove, and a mark on entries whose
+  English the built site no longer shows. It also counts each product's
+  Arabic name and story, which the shop does not show yet.
+- **Scent quiz:** the questions and their answers (reworded, never added or
+  removed: an answer's key joins it to what it looks for), a grid of the
+  facets each answer looks for, where a facet can count twice, the result
+  profiles as products with their notes and facets, and the words on the
+  result and the page. The result takes the matched product's name, price,
+  meta line and barcode from the product itself.
 - **Publish:** what was saved since the last commit, in plain sentences and
   by file, committed once you have read it, after the admin rebuilds the site
   from exactly those files the way both deploys will. Then a check of GitHub

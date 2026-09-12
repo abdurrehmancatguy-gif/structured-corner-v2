@@ -128,22 +128,9 @@ bgsRun(function () {
   recalc();
 
   /* ---------- language toggle: direction is the thing worth seeing ---------- */
-  var AR = {
-    "Oud Oils": "زيوت العود", "Reserve": "المجموعة الخاصة", "Bakhoor": "بخور",
-    "EDP Sprays": "عطور", "Gift Sets": "أطقم الهدايا", "Discovery": "الاكتشاف",
-    "Build Your Gift Box": "جهّز علبة هديتك",
-    "Shop by Occasion": "تسوق حسب المناسبة", "Corporate Gifting": "هدايا الشركات",
-    "Account": "الحساب", "Wishlist": "المفضلة", "Bag": "الحقيبة",
-    "Track order": "تتبع الطلب", "Home": "الرئيسية", "Shop": "المتجر", "Gifts": "الهدايا",
-    "All categories": "كل الفئات", "Checkout": "إتمام الشراء", "Add to bag": "أضف إلى الحقيبة",
-    "Shop ouds": "تسوق العود", "Build a gift box": "جهّز علبة هدية",
-    "Shop by category": "تسوق حسب الفئة", "Shop by scent family": "تسوق حسب العائلة العطرية",
-    "Free UAE delivery over AED 150": "توصيل مجاني داخل الإمارات فوق 150 درهم",
-    "Cash on delivery": "الدفع عند الاستلام", "Your bag": "حقيبتك", "Total": "الإجمالي",
-    "Subtotal": "المجموع الفرعي", "Delivery": "التوصيل", "Free": "مجاني",
-    "Continue shopping": "متابعة التسوق", "Summary": "الملخص", "Filters": "عوامل التصفية",
-    "Clear all": "مسح الكل", "Gift sets": "أطقم الهدايا", "Oud oils": "زيوت العود"
-  };
+  /* The dictionary is content (content/translations.json), written into
+     catalogue.js by build.py: English label text to its Arabic. */
+  var AR = window.BGS_AR || {};
   var arOn = false;
   function toggleLang(e) {
     e.preventDefault();
@@ -493,57 +480,30 @@ bgsRun(function () {
 bgsRun(function () {
   "use strict";
   var root = document.querySelector("[data-quiz]");
-  if (!root) return;
+  var QUIZ = window.BGS_QUIZ;
+  if (!root || !QUIZ) return;
 
-  var PROFILES = [
-    { name: "Be Mine", code: "6297000197739", aud: "Her",
-      notes: "Citrus, rose, jasmine-like white floral, soft sweet/tonka",
-      f: ["citrus","rose","floral","sweet"] },
-    { name: null, code: "6297000197777", aud: "Her",
-      notes: "Rose and jasmine-like florals, lemon/citrus, clove spice, soft sweet/tonka",
-      f: ["rose","floral","citrus","spice","sweet"] },
-    { name: null, code: "6297000197814", aud: "Her",
-      notes: "Powdery violet, green violet-leaf, lily-of-the-valley, rose and citrus",
-      f: ["violet","floral","rose","citrus"] },
-    { name: null, code: "6297000197784", aud: "Unisex",
-      notes: "Cinnamon and clove spice, citrus, rosy floral and sweet tonka-like warmth",
-      f: ["spice","citrus","rose","sweet"] },
-    { name: null, code: "6297000197807", aud: "Unisex",
-      notes: "Rose/floral, lemon-citrus, clove spice and warm balsamic-amber facets",
-      f: ["rose","floral","citrus","spice","amber"] },
-    { name: null, code: "6297000197760", aud: "Him",
-      notes: "Clove-like spice, bright citrus and aromatic floral/lavender facets",
-      f: ["spice","citrus","lavender"] },
-    { name: null, code: "6297000197753", aud: "Unisex",
-      notes: "Lemon-citrus, aromatic floral/lavender and warm clove-like spice",
-      f: ["citrus","lavender","spice"] },
-    { name: null, code: "6297000197746", aud: "Unisex",
-      notes: "Clean, bright lemon-citrus profile", f: ["citrus"] },
-    { name: null, code: "6297000197791", aud: "Unisex",
-      notes: "Citrus, aromatic floral/lavender, rose and soft sweet tonka-like warmth",
-      f: ["citrus","lavender","rose","sweet"] }
-  ];
-
-  /* answer -> facets it favours, and the §4 labels to display */
-  var MAP = {
-    daily:{f:["citrus"],occ:"Daily"}, office:{f:["citrus","violet"],occ:"Office"},
-    evening:{f:["amber","spice","sweet"],occ:"Evening"}, majlis:{f:["amber","spice"],occ:"Majlis"},
-    bold:{f:["spice","amber"],tone:"Bold"}, soft:{f:["violet","floral"],tone:"Soft"},
-    warm:{f:["spice","amber","sweet"],tone:"Warm"}, fresh:{f:["citrus","lavender"],tone:"Fresh"},
-    citrus:{f:["citrus","citrus"],fam:"Fresh & Citrus"}, rose:{f:["rose","floral","floral"],fam:"Floral Veil"},
-    spice:{f:["spice","spice"],fam:"Amber & Spice"}, sweet:{f:["sweet","sweet"],fam:"Sweet & Gourmand"},
-    violet:{f:["violet","violet"],fam:"Musk & Clean"}, wood:{f:["amber","amber"],fam:"Oud & Woods"},
-    intimate:{f:["violet"],sil:"Intimate"}, noticeable:{f:[],sil:"Noticeable"},
-    room:{f:["spice","amber"],sil:"Room-filling"},
-    summer:{f:["citrus","lavender"],sea:"Summer-safe"}, winter:{f:["amber","spice","sweet"],sea:"Winter"},
-    both:{f:[],sea:"All year"}
-  };
+  /* The questions, what each answer looks for and the profiles are content
+     (content/quiz.json). build.py prints the questions and passes the rest
+     here as window.BGS_QUIZ: MAP is answer key -> the facets it favours and
+     the label it shows, which the result files under the kind of question it
+     answers (family, tone, occasion, sillage, season). A profile names its
+     product, whose name, price, meta line and barcode come from the catalogue. */
+  var PROFILES = QUIZ.profiles || [];
+  var MAP = QUIZ.answers || {};
+  var KINDS = QUIZ.kinds || [];
+  var R = QUIZ.result || {};
+  var CAT = window.BGS_CATALOGUE || {};
 
   var answers = [], step = 0;
   var cards = root.querySelectorAll(".qcard");
   var bar = root.querySelector("[data-qbar]"), num = root.querySelector("[data-qnum]");
   var back = root.querySelector("[data-qback]");
   var res = document.querySelector("[data-qresult]");
+  /* "See it" opens the matched product; the page's own link is kept for
+     a match the shop does not sell */
+  var see = res.querySelector("[data-rsee]");
+  var seeAll = see ? see.getAttribute("href") : "";
 
   function show(n) {
     step = n;
@@ -565,36 +525,51 @@ bgsRun(function () {
 
   function finish() {
     var want = [], labels = {};
-    answers.forEach(function (a) {
+    answers.forEach(function (a, i) {
       var m = MAP[a]; if (!m) return;
-      want = want.concat(m.f);
-      ["occ","tone","fam","sil","sea"].forEach(function (k) { if (m[k]) labels[k] = m[k]; });
+      want = want.concat(m.facets || []);
+      if (m.label && KINDS[i]) labels[KINDS[i]] = m.label;
     });
 
     /* `want` carries duplicates on purpose - a facet named twice weighs twice.
        The score shown to a customer counts distinct facets, which is what the
        sentence claims. */
     var uniq = want.filter(function (f, i) { return want.indexOf(f) === i; });
+    /* the match is a product the shop sells (published); if none of the
+       profiles' products is, the closest profile still answers, unnamed */
+    var onSale = PROFILES.filter(function (pr) { return CAT[pr.product]; });
     var best = null;
-    PROFILES.forEach(function (pr) {
-      var weighted = want.filter(function (f) { return pr.f.indexOf(f) !== -1; }).length;
-      var shared = uniq.filter(function (f) { return pr.f.indexOf(f) !== -1; }).length;
+    (onSale.length ? onSale : PROFILES).forEach(function (pr) {
+      var has = pr.facets || [];
+      var weighted = want.filter(function (f) { return has.indexOf(f) !== -1; }).length;
+      var shared = uniq.filter(function (f) { return has.indexOf(f) !== -1; }).length;
       if (!best || weighted > best.weighted) best = { pr: pr, weighted: weighted, shared: shared };
     });
+    if (!best) return;
     best.total = uniq.length;
+    var item = CAT[best.pr.product];
 
+    /* content goes into the result as text, never parsed as markup */
     var q = function (sel) { return res.querySelector(sel); };
-    q("[data-rtitle]").textContent = (labels.fam || "Your scent") + " · " + (labels.tone || "");
-    q("[data-rpills]").innerHTML = ["fam","tone","occ","sil","sea"]
-      .filter(function (k) { return labels[k]; })
-      .map(function (k) { return '<span class="pill on">' + labels[k] + "</span>"; }).join("");
-    q("[data-rname]").innerHTML = best.pr.name
-      ? best.pr.name
-      : 'EDP spray <span class="slot">name not on the packaging</span>';
-    q("[data-rmeta]").textContent = "EDP spray · 50 ml · " + best.pr.aud;
+    var span = function (cls, text) {
+      var s = document.createElement("span"); s.className = cls; s.textContent = text; return s;
+    };
+    q("[data-rtitle]").textContent = (labels.family || R.title_fallback || "") + " · " + (labels.tone || "");
+    var pills = q("[data-rpills]");
+    pills.textContent = "";
+    ["family","tone","occasion","sillage","season"].forEach(function (k) {
+      if (labels[k]) pills.appendChild(span("pill on", labels[k]));
+    });
+    var name = q("[data-rname]");
+    name.textContent = item ? item.name : (R.unnamed || "") + " ";
+    if (!item) name.appendChild(span("slot", R.unnamed_slot || ""));
+    q("[data-rprice]").textContent = item ? "AED " + item.price : "";
+    q("[data-rmeta]").textContent = item ? item.meta : "";
     q("[data-rnotes]").textContent = best.pr.notes;
-    q("[data-rcode]").textContent = best.pr.code;
-    q("[data-rscore]").textContent = best.shared + " of " + best.total + " facets shared";
+    q("[data-rcode]").textContent = (item && item.sku) || "";
+    if (see) see.setAttribute("href", item ? "product.html?p=" + encodeURIComponent(best.pr.product) : seeAll);
+    q("[data-rscore]").textContent = (R.score || "")
+      .split("{shared}").join(best.shared).split("{total}").join(best.total);
     root.hidden = true; res.hidden = false;
     window.scrollTo({ top: 0, behavior: "smooth" });
   }

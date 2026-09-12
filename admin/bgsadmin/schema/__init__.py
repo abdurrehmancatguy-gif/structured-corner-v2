@@ -8,9 +8,12 @@ visibleWhen ({"category": [...]}), rendered (False: saved but not shown on the
 site yet), locked (the reason, for payments and checkout), readonly (the
 reason, for things changed elsewhere), guarded, fields and itemLabel (rows),
 canAdd (rows), upload (an image or video field an upload fills, naming which
-upload: banner, reel, poster, category, logo-dark, logo-light, emblem, icon)
-and default (the value the site reads when the key is missing, which the form
-shows). The UI renders forms from these; the server enforces them.
+upload: banner, reel, poster, category, logo-dark, logo-light, emblem, icon),
+default (the value the site reads when the key is missing, which the form
+shows), keyLabel, valueLabel and keyMaxLength (dictionary: text keys to text
+values, max counting entries) and maxRepeat (tags: short lower-case words,
+each allowed that many times, once by default). The UI renders forms from
+these; the server enforces them.
 
 A module whose kind is "document" is a whole file, flow/content/<name>.json:
 adding a document means adding its module and its file, and the store, the
