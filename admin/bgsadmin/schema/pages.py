@@ -1,17 +1,55 @@
 """Page text (flow/content/pages.json): the words of the header and footer
-every page shares, the homepage's bands, the collection page and the product
-page.
+every page shares, the homepage's bands, and the collection, product, gift
+box, bag, tracking, corporate, account and 404 pages.
 
 Fields are grouped by page ("group") and, inside a long page, by the part of
 it they belong to ("section"), so the Pages screen can show one page at a
-time. The top strip and the search hint are under Site text; the legal name,
-the location and the tab-title suffix are under Settings.
+time. RESOURCE["groups"] lists those pages in the screen's order, each with
+the storefront page it opens; checkout and the order confirmation are listed
+too, locked, because their words stay in code with payments and VAT. The top
+strip and the search hint are under Site text; the legal name, the location
+and the tab-title suffix are under Settings.
 """
+SHELL, HOME, COLLECTION, PRODUCT = "Header and footer", "Homepage bands", "Collection", "Product page"
+GIFT_BOX, BAG, TRACK, CORPORATE, ACCOUNT, NOT_FOUND = "Gift box", "Bag", "Track order", "Corporate", "Account", "404"
+LOCKED = "Changed by a developer in code"
+
+GROUPS = [
+    {"key": "shell", "label": SHELL, "page": "index.html",
+     "about": "The header links, the footer and the no-JavaScript notice every page shares. "
+              "The top strip and the search hint are under Site text."},
+    {"key": "home", "label": HOME, "page": "index.html",
+     "about": "The Discovery band, the promo tiles, the scent family tiles and the link beside the films. "
+              "The banner and the shelves are under Homepage and Collections."},
+    {"key": "collection", "label": COLLECTION, "page": "collection.html",
+     "about": "The collection page's filters, sorting and empty state. Category names and intros are under Collections."},
+    {"key": "product", "label": PRODUCT, "page": "product.html",
+     "about": "The words around every product: the buy box, the detail rows, the tabs and the related row. "
+              "Each product's own text is under Products."},
+    {"key": "gift-box", "label": GIFT_BOX, "page": "gift-box.html",
+     "about": "The gift box builder: its heading, slots, summary and gift options. The box fee and its discount are under Discounts."},
+    {"key": "bag", "label": BAG, "page": "cart.html",
+     "about": "The bag page: its progress bars, lines, empty state and summary. "
+              "The payment chips and the cash on delivery note belong to checkout and stay in code."},
+    {"key": "track-order", "label": TRACK, "page": "track-order.html",
+     "about": "The order tracking page and the replies its button gives."},
+    {"key": "corporate", "label": CORPORATE, "page": "corporate.html",
+     "about": "The corporate gifting page, its enquiry form and the replies the form gives."},
+    {"key": "account", "label": ACCOUNT, "page": "account.html",
+     "about": "The account page's headings and its programme, wallet, referral and consent text. "
+              "A customer's own details stay placeholders until login arrives."},
+    {"key": "404", "label": NOT_FOUND, "page": "404.html",
+     "about": "The page a visitor sees when a link leads nowhere."},
+    {"key": "checkout", "label": "Checkout", "page": "checkout.html", "locked": LOCKED,
+     "about": "Its words sit with payments, VAT and cash on delivery, which are locked."},
+    {"key": "confirmed", "label": "Order confirmed", "page": "confirmed.html", "locked": LOCKED,
+     "about": "Its words sit with payments and VAT, which are locked."},
+]
+
 RESOURCE = {"name": "pages", "label": "Pages", "kind": "document",
             "intro": "The words on the shop's pages: the header and footer every page shares, the homepage's bands, "
-                     "and the collection and product pages."}
-
-SHELL, HOME, COLLECTION, PRODUCT = "Every page", "Homepage", "Collection page", "Product page"
+                     "and the collection, product, gift box, bag, tracking, corporate, account and 404 pages.",
+            "groups": GROUPS}
 
 # Some texts carry a {token} the build fills in; a field's pattern names the
 # ones it may use, so any other brace is refused before it reaches the site.
@@ -27,6 +65,17 @@ COUNT_HELP = "Keep {n} once: it is where the number goes."
 def tokens(*names):
     """A pattern that allows the named {tokens} and no other brace."""
     return r"(?:[^{}]|\{(?:%s)\})*" % "|".join(names)
+
+
+def needs(name, *others):
+    """A pattern that needs {name} at least once and allows it and the other
+    named tokens, as build.py's need= checks it."""
+    return r"(?=[\s\S]*\{%s\})" % name + tokens(name, *others)
+
+
+def only(*names):
+    """The patternHelp that goes with tokens(names) or needs(names)."""
+    return "Use only %s; leave out any other braces." % " and ".join("{%s}" % n for n in names)
 
 
 def text(path, label, group, max_length, section=None, help=None, required=True, kind="text", **more):
@@ -54,7 +103,7 @@ _SHELL = [
     text("/shell/noscript", "No-JavaScript notice", SHELL, 200, kind="textarea",
          help="At the top of every page for a visitor whose browser has JavaScript turned off."),
     text("/shell/crumb_home", "Breadcrumb start", SHELL, 20,
-         help="The first step of the breadcrumbs on the collection and product pages."),
+         help="The first step of every breadcrumb: the collection, product, gift box, tracking and account pages."),
     text("/shell/header/account", "Account link", SHELL, 20, section="Header"),
     text("/shell/header/wishlist", "Wishlist link", SHELL, 20, section="Header",
          help="It opens the account page, which has no wishlist yet."),
@@ -239,4 +288,259 @@ _PRODUCT = [
          help="Followed by the title suffix from Settings."),
 ]
 
-FIELDS = _SHELL + _HOME + _COLLECTION + _PRODUCT
+# ---- gift box ---------------------------------------------------------------------
+
+# The box sizes (3 and 6), the six attars in the picker and the amounts are
+# code and store rules; only the words are content.
+_GIFT_BOX = [
+    text("/gift_box/crumb", "Breadcrumb", GIFT_BOX, 40, section="Top of the page", help="After the breadcrumb start."),
+    text("/gift_box/title", "Heading", GIFT_BOX, 60, section="Top of the page"),
+    text("/gift_box/intro", "Intro", GIFT_BOX, 200, section="Top of the page", kind="textarea",
+         help="It says the box leaves as one bag line, but the box's button only opens the bag for now: "
+              "the box is not added to it yet."),
+    text("/gift_box/size_label", "Size buttons", GIFT_BOX, 20, section="Slots", pattern=COUNT, patternHelp=COUNT_HELP,
+         help="The two buttons that pick a box of 3 or 6 slots. {n} is the number of slots; the sizes are code."),
+    text("/gift_box/slots/filled", "Filled slot", GIFT_BOX, 20, section="Slots", pattern=tokens("n"),
+         patternHelp=only("n"), help="On a slot's picture once a scent is in it. {n} is the slot's number."),
+    text("/gift_box/slots/remove", "Remove hint", GIFT_BOX, 30, section="Slots",
+         help="After the scent's price on a filled slot."),
+    text("/gift_box/slots/empty", "Empty slot", GIFT_BOX, 30, section="Slots", pattern=tokens("n"),
+         patternHelp=only("n"), help="On an empty slot's picture. {n} is the slot's number."),
+    text("/gift_box/slots/choose", "Empty slot heading", GIFT_BOX, 30, section="Slots"),
+    text("/gift_box/slots/pick", "Empty slot hint", GIFT_BOX, 30, section="Slots"),
+    text("/gift_box/picker_heading", "Picker heading", GIFT_BOX, 40, section="Slots",
+         help="Above the scents a visitor can add: the first six attars in the shop's order."),
+    text("/gift_box/summary/scents_one", "Scent count, one", GIFT_BOX, 30, section="Summary",
+         pattern=COUNT, patternHelp=COUNT_HELP),
+    text("/gift_box/summary/scents_many", "Scent count, more", GIFT_BOX, 30, section="Summary",
+         pattern=COUNT, patternHelp=COUNT_HELP, help="Also for the empty box the page opens with, which reads 0."),
+    text("/gift_box/summary/box_label", "Box fee row", GIFT_BOX, 30, section="Summary",
+         help="The fee beside it is the gift box fee under Discounts."),
+    text("/gift_box/summary/discount_label", "Discount row", GIFT_BOX, 60, section="Summary",
+         pattern=tokens("box_at"), patternHelp=only("box_at"),
+         help="{box_at} prints the number of scents the box discount starts at, such as 3 items, from Discounts."),
+    text("/gift_box/summary/total_label", "Total row", GIFT_BOX, 20, section="Summary"),
+    text("/gift_box/summary/fill_one", "Button, one slot left", GIFT_BOX, 40, section="Summary",
+         pattern=COUNT, patternHelp=COUNT_HELP),
+    text("/gift_box/summary/fill_many", "Button, slots left", GIFT_BOX, 40, section="Summary",
+         pattern=COUNT, patternHelp=COUNT_HELP, help="{n} is the number of empty slots. The page opens with 3."),
+    text("/gift_box/summary/add", "Button, box full", GIFT_BOX, 40, section="Summary",
+         pattern=tokens("total"), patternHelp=only("total"),
+         help="{total} prints the box's total. The button opens the bag, but the box is not added to it yet."),
+    text("/gift_box/summary/full", "Button, no room left", GIFT_BOX, 40, section="Summary",
+         help="Shown for a moment when a visitor tries to add a scent to a full box."),
+    text("/gift_box/options_heading", "Heading", GIFT_BOX, 30, section="Gift options"),
+    {"path": "/gift_box/options", "type": "rows", "label": "Options", "min": 1, "max": 6, "itemLabel": "label",
+     "canAdd": True, "group": GIFT_BOX, "section": "Gift options",
+     "help": "Words only: nothing on the page lets a visitor choose or pay for these yet. Keep each line true of "
+             "what the shop does.",
+     "fields": [
+         {"path": "/label", "type": "text", "label": "Option", "required": True, "maxLength": 40},
+         {"path": "/value", "type": "text", "label": "Price or setting", "required": True, "maxLength": 30},
+         {"path": "/highlight", "type": "bool", "label": "Show it in green", "required": True},
+     ]},
+]
+
+# ---- bag ------------------------------------------------------------------------------
+
+# The sums, the rungs and the never-discount rule are the pricing engine's, in
+# code; the bars' thresholds are store rules. Only the words are content.
+_BAG = [
+    text("/cart/title", "Heading", BAG, 30, section="Top of the page"),
+    text("/cart/items/one", "Item count, one", BAG, 20, section="Top of the page", pattern=COUNT, patternHelp=COUNT_HELP,
+         help="After the heading once the bag holds something."),
+    text("/cart/items/many", "Item count, more", BAG, 20, section="Top of the page", pattern=COUNT, patternHelp=COUNT_HELP),
+    text("/cart/continue/label", "Continue link", BAG, 30, section="Top of the page"),
+    href("/cart/continue/href", "Its link", BAG, section="Top of the page"),
+    text("/cart/progress/free_delivery", "Free delivery bar", BAG, 60, section="Progress bars",
+         pattern=tokens(*RULES), patternHelp=RULE_PATTERN_HELP, help=RULE_HELP),
+    text("/cart/progress/gift", "Free gift bar", BAG, 60, section="Progress bars",
+         pattern=tokens("gift", "gift_over"), patternHelp=only("gift", "gift_over"),
+         help="{gift} prints the free gift's name and {gift_over} the amount it needs, both from Discounts."),
+    text("/cart/progress/unlocked", "Bar reached", BAG, 20, section="Progress bars",
+         help="Beside a bar once the bag has reached it."),
+    text("/cart/progress/to_go", "Bar not reached", BAG, 30, section="Progress bars",
+         pattern=needs("amount"), patternHelp="Keep {amount}: it is where the amount still to spend goes."),
+    text("/cart/progress/ladder_next", "Discount bar", BAG, 60, section="Progress bars",
+         pattern=needs("n", "pct"), patternHelp="Keep {n}, the items still to add. {pct} is the next discount. "
+                                                "Leave out any other braces.",
+         help="The discount's rungs are under Discounts. With JavaScript off the bar keeps the rules' own wording."),
+    text("/cart/progress/ladder_top", "Discount bar at the top", BAG, 60, section="Progress bars",
+         pattern=tokens("pct"), patternHelp=only("pct"), help="{pct} is the top rung's discount."),
+    text("/cart/progress/ladder_count", "Discount bar count", BAG, 20, section="Progress bars",
+         pattern=needs("n", "goal"), patternHelp="Keep {n}, the items counted. {goal} is the next rung's. "
+                                                 "Leave out any other braces."),
+    text("/cart/line/no_image", "Line without a photo", BAG, 20, section="Bag lines"),
+    text("/cart/line/remove", "Remove button", BAG, 20, section="Bag lines"),
+    text("/cart/gift_line/placeholder", "Free gift picture", BAG, 20, section="Bag lines",
+         help="The free gift's line has no photo; this word stands in its place."),
+    text("/cart/gift_line/meta", "Free gift line", BAG, 60, section="Bag lines", pattern=tokens("amount"),
+         patternHelp=only("amount"), help="Under the gift's name. {amount} prints the amount the gift needs."),
+    text("/cart/never_discount_note", "Never-discounted note", BAG, 200, section="Bag lines", kind="textarea",
+         help="Shown when the bag holds a never-discounted product. The code leaves those products out of the "
+              "volume discount whatever this says."),
+    text("/cart/empty/text", "Empty bag", BAG, 60, section="Empty bag"),
+    text("/cart/empty/cta_label", "Button", BAG, 30, section="Empty bag"),
+    href("/cart/empty/cta_href", "Its link", BAG, section="Empty bag"),
+    text("/cart/summary/subtotal", "Subtotal row", BAG, 20, section="Summary"),
+    text("/cart/summary/discount", "Volume discount row", BAG, 30, section="Summary",
+         help="The rate after it follows the bag."),
+    text("/cart/summary/delivery", "Delivery row", BAG, 20, section="Summary"),
+    text("/cart/summary/free", "Free", BAG, 20, section="Summary",
+         help="For free delivery, and for a bag line that costs nothing, such as the free gift."),
+    text("/cart/summary/total", "Total row", BAG, 20, section="Summary"),
+    text("/cart/summary/checkout", "Checkout button", BAG, 30, section="Summary"),
+]
+
+# ---- track order ------------------------------------------------------------------
+
+# Nothing looks an order up yet: the replies say so, and the stages describe
+# how orders will move once they are real.
+_TRACK = [
+    text("/track/crumb", "Breadcrumb", TRACK, 30, section="Top of the page", help="After the breadcrumb start."),
+    text("/track/title", "Heading", TRACK, 60, section="Top of the page"),
+    text("/track/intro", "Intro", TRACK, 200, section="Top of the page", kind="textarea"),
+    text("/track/form/number", "Order number box", TRACK, 30, section="Form",
+         help="The first box's hint, which screen readers also read as its name."),
+    text("/track/form/phone", "Phone box", TRACK, 30, section="Form",
+         help="The second box's hint. Screen readers call the box Phone number."),
+    text("/track/form/button", "Button", TRACK, 30, section="Form"),
+    text("/track/replies/missing", "Reply, both boxes empty", TRACK, 160, section="Form", kind="textarea"),
+    text("/track/replies/looking", "Reply", TRACK, 240, section="Form", kind="textarea",
+         pattern=tokens("query"), patternHelp=only("query"),
+         help="{query} is what the visitor typed. Orders cannot be looked up yet, so keep the reply saying so."),
+    text("/track/stages_heading", "Heading", TRACK, 40, section="Stages"),
+    {"path": "/track/stages", "type": "rows", "label": "Stages", "min": 1, "max": 8, "itemLabel": "label",
+     "canAdd": True, "group": TRACK, "section": "Stages",
+     "help": "The steps an order goes through, in order. Nothing tracks an order yet, so these describe how "
+             "orders will run. Check that each line, such as payment taken or picked at the kiosk, is how the "
+             "shop works.",
+     "fields": [
+         {"path": "/label", "type": "text", "label": "Stage", "required": True, "maxLength": 30},
+         {"path": "/body", "type": "text", "label": "What happens", "required": True, "maxLength": 80},
+     ]},
+    text("/track/whatsapp_note", "WhatsApp note", TRACK, 200, section="Stages", kind="textarea",
+         help="Today's text puts the WhatsApp tick box on the confirmation page; it is on the checkout page."),
+]
+
+# ---- corporate ----------------------------------------------------------------------
+
+# The form sends nothing yet. Its reply is built from whole phrases: the
+# thanks, then the quote line, then the last sentence, joined with full stops.
+_CORPORATE = [
+    text("/corporate/title", "Heading", CORPORATE, 40, section="Top of the page"),
+    text("/corporate/intro", "Intro", CORPORATE, 160, section="Top of the page", kind="textarea",
+         help="The bag caps each line at 20; nothing turns a larger order into a quote. The band and a "
+              "homepage promo tile say the same."),
+    {"path": "/corporate/tiers", "type": "rows", "label": "Tier cards", "min": 1, "max": 8, "itemLabel": "units",
+     "canAdd": True, "group": CORPORATE, "section": "Tiers", "help": "The cards above the band. Four fit a row.",
+     "fields": [
+         {"path": "/units", "type": "text", "label": "Size", "required": True, "maxLength": 20},
+         {"path": "/price", "type": "text", "label": "Price", "required": True, "maxLength": 20},
+         {"path": "/note", "type": "text", "label": "Note", "required": True, "maxLength": 60},
+     ]},
+    text("/corporate/band/heading", "Heading", CORPORATE, 60, section="Band"),
+    text("/corporate/band/body", "Text", CORPORATE, 240, section="Band", kind="textarea"),
+    text("/corporate/band/cta_label", "Button", CORPORATE, 30, section="Band", help="It jumps to the form below."),
+    text("/corporate/form/name", "Name box", CORPORATE, 30, section="Form",
+         help="The box's hint, which screen readers also read as its name."),
+    text("/corporate/form/email", "Email box", CORPORATE, 30, section="Form",
+         help="The box's hint, which screen readers also read as its name."),
+    text("/corporate/form/occasion", "Occasion box", CORPORATE, 40, section="Form",
+         help="Screen readers call the box Occasion."),
+    text("/corporate/form/units", "Units box", CORPORATE, 30, section="Form", help="Screen readers call the box Units."),
+    text("/corporate/form/send", "Button", CORPORATE, 30, section="Form"),
+    text("/corporate/replies/invalid_email", "Reply, email not valid", CORPORATE, 100, section="Replies"),
+    text("/corporate/replies/thanks", "Thanks", CORPORATE, 30, section="Replies",
+         help="When the visitor left the name box empty."),
+    text("/corporate/replies/thanks_name", "Thanks with a name", CORPORATE, 40, section="Replies",
+         pattern=needs("name"), patternHelp="Keep {name}: it is where the visitor's name goes."),
+    text("/corporate/replies/quote", "Quote line", CORPORATE, 60, section="Replies",
+         help="When the visitor left the units box empty."),
+    text("/corporate/replies/quote_units", "Quote line with units", CORPORATE, 60, section="Replies",
+         pattern=needs("n"), patternHelp="Keep {n}: it is where the number the visitor typed goes."),
+    text("/corporate/replies/not_sent", "Last sentence", CORPORATE, 200, section="Replies", kind="textarea",
+         help="The form sends nothing yet: keep this saying so until it does."),
+]
+
+# ---- account --------------------------------------------------------------------------
+
+# A customer's own details stay placeholders until login and the database
+# arrive, and the account menu stays in code with them. Nothing runs the
+# programme, the wallet or referrals yet, so these words describe what the
+# shop means to offer.
+PROMISE = "Nothing runs this yet, so it describes what the shop means to offer: keep it true of that."
+_ACCOUNT = [
+    text("/account/crumb", "Breadcrumb", ACCOUNT, 30, section="Top of the page", help="After the breadcrumb start."),
+    text("/account/programme", "Programme name", ACCOUNT, 30, section="Top of the page",
+         help="In the badge beside the customer's name, the heading above the tiers and the account menu."),
+] + [
+    f for key, label in (("drops", "Drops card"), ("credit", "Wallet credit card"), ("orders", "Orders card"))
+    for f in (text("/account/stats/%s/label" % key, label, ACCOUNT, 30, section="Summary cards",
+                   help="The number in the card is a placeholder until customers can sign in."),
+              text("/account/stats/%s/note" % key, label + ", line under it", ACCOUNT, 80, section="Summary cards"))
+] + [
+    text("/account/loyalty/how_label", "Link beside the heading", ACCOUNT, 30, section="Programme",
+         help="It goes nowhere yet."),
+    {"path": "/account/loyalty/tiers", "type": "rows", "label": "Tiers", "min": 1, "max": 3, "itemLabel": "name",
+     "canAdd": True, "group": ACCOUNT, "section": "Programme",
+     "help": "The badge shows the first tier, where every customer starts. Three fit the row. " + PROMISE,
+     "fields": [
+         {"path": "/name", "type": "text", "label": "Tier", "required": True, "maxLength": 20},
+         {"path": "/note", "type": "text", "label": "What it takes", "required": True, "maxLength": 30},
+     ]},
+    text("/account/loyalty/next_tier", "Line under the bar", ACCOUNT, 60, section="Programme",
+         help="Written for a customer at the first tier: keep it in step with the second tier."),
+    {"path": "/account/loyalty/perks", "type": "rows", "label": "Perks", "min": 1, "max": 6, "itemLabel": "label",
+     "canAdd": True, "group": ACCOUNT, "section": "Programme", "help": PROMISE,
+     "fields": [
+         {"path": "/label", "type": "text", "label": "Perk", "required": True, "maxLength": 40},
+         {"path": "/who", "type": "text", "label": "Who gets it", "required": True, "maxLength": 40},
+     ]},
+    text("/account/wallet/heading", "Heading", ACCOUNT, 30, section="Wallet"),
+    text("/account/wallet/voucher_label", "Voucher row", ACCOUNT, 60, section="Wallet",
+         help="The same voucher as the product page's credit-back note and the homepage's Discovery band."),
+    text("/account/wallet/redeem_label", "Redeemable row", ACCOUNT, 30, section="Wallet"),
+    text("/account/wallet/redeem", "Redeemable on", ACCOUNT, 60, section="Wallet"),
+    text("/account/wallet/expires_label", "Expiry row", ACCOUNT, 30, section="Wallet"),
+    text("/account/wallet/expires", "Expires", ACCOUNT, 60, section="Wallet"),
+    text("/account/wallet/note", "Note", ACCOUNT, 200, section="Wallet", kind="textarea", help=PROMISE),
+    text("/account/referral/heading", "Heading", ACCOUNT, 30, section="Referrals"),
+    text("/account/referral/copy_label", "Copy button", ACCOUNT, 20, section="Referrals",
+         help="Beside the customer's code, which is a placeholder. The button does nothing yet."),
+    text("/account/referral/friend_label", "Friend row", ACCOUNT, 30, section="Referrals"),
+    text("/account/referral/friend", "What the friend gets", ACCOUNT, 80, section="Referrals", help=PROMISE),
+    text("/account/referral/you_label", "Customer row", ACCOUNT, 30, section="Referrals"),
+    text("/account/referral/you", "What the customer gets", ACCOUNT, 80, section="Referrals", help=PROMISE),
+    text("/account/referral/referred_label", "Count row", ACCOUNT, 30, section="Referrals"),
+    text("/account/orders/heading", "Heading", ACCOUNT, 30, section="Orders"),
+    text("/account/orders/track_label", "Tracking link", ACCOUNT, 30, section="Orders",
+         help="It opens the order tracking page."),
+    text("/account/orders/empty_title", "No orders", ACCOUNT, 40, section="Orders"),
+    text("/account/orders/empty_body", "No orders, text", ACCOUNT, 200, section="Orders", kind="textarea"),
+    text("/account/orders/cta_label", "Button", ACCOUNT, 30, section="Orders"),
+    href("/account/orders/cta_href", "Its link", ACCOUNT, section="Orders"),
+    text("/account/consent/heading", "Heading", ACCOUNT, 40, section="Details and consent"),
+    text("/account/consent/phone_label", "Phone row", ACCOUNT, 20, section="Details and consent"),
+    text("/account/consent/email_label", "Email row", ACCOUNT, 20, section="Details and consent"),
+    text("/account/consent/language_label", "Language row", ACCOUNT, 20, section="Details and consent"),
+    text("/account/consent/language", "Languages", ACCOUNT, 40, section="Details and consent"),
+    text("/account/consent/order_updates", "First tick box", ACCOUNT, 60, section="Details and consent"),
+    text("/account/consent/offers", "Second tick box", ACCOUNT, 60, section="Details and consent"),
+    text("/account/consent/note", "Note", ACCOUNT, 240, section="Details and consent", kind="textarea",
+         help="It describes consent records and a CRM the shop does not have yet."),
+]
+
+# ---- 404 ------------------------------------------------------------------------------
+
+# The page carries its own style, so it looks the same at any address.
+_NOT_FOUND = [
+    text("/not_found/title", "Tab title", NOT_FOUND, 60,
+         help="The browser tab's title, followed by the title suffix from Settings."),
+    text("/not_found/heading", "Heading", NOT_FOUND, 60),
+    text("/not_found/body", "Text", NOT_FOUND, 160, kind="textarea"),
+    text("/not_found/button", "Button", NOT_FOUND, 40, help="It opens the homepage."),
+]
+
+FIELDS = (_SHELL + _HOME + _COLLECTION + _PRODUCT + _GIFT_BOX + _BAG + _TRACK + _CORPORATE + _ACCOUNT
+          + _NOT_FOUND)

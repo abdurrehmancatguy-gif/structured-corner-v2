@@ -18,7 +18,8 @@ import unittest
 from box import Box
 
 PORT = int(os.environ.get("ADMIN_PAGES_PORT", "4743"))
-GROUPS = {"Every page", "Homepage", "Collection page", "Product page"}
+GROUPS = {"Header and footer", "Homepage bands", "Collection", "Product page", "Gift box", "Bag", "Track order",
+          "Corporate", "Account", "404"}
 
 
 def global_in(flow, name):
@@ -70,7 +71,7 @@ class PagesTests(unittest.TestCase):
                 self.assertTrue(f.get("maxLength"), f["path"])
         for f in [f for f in fields if f["type"] == "rows"]:
             for g in f["fields"]:
-                self.assertTrue(g.get("label") and (g["type"] == "href" or g.get("maxLength")), g["path"])
+                self.assertTrue(g.get("label") and (g["type"] in ("href", "bool") or g.get("maxLength")), g["path"])
 
         # every value in the file has a field, and every field a value
         def leaves(o, p=""):
