@@ -236,7 +236,10 @@ def normalize(im):
     the profile conversion their colours would come out dull."""
     icc = im.info.get("icc_profile")
     im = ImageOps.exif_transpose(im)
-    if im.mode in ("P", "PA") or (im.mode in ("L", "RGB", "I;16") and "transparency" in im.info):
+    if im.mode in ("I", "I;16", "I;16B", "I;16L"):
+        # 16-bit greyscale: scaled down to 8 bits, not clipped to white
+        im = im.convert("I").point(lambda v: v * (1 / 256)).convert("L")
+    if im.mode in ("P", "PA") or (im.mode in ("L", "RGB") and "transparency" in im.info):
         im = im.convert("RGBA")
     alpha = None
     if im.mode in ("RGBA", "LA", "RGBa", "La"):
