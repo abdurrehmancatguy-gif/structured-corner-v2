@@ -30,11 +30,13 @@ def _problems(stderr):
     return lines[-5:] or ["The tool stopped without saying why."]
 
 
-def run(cfg, name):
+def run(cfg, name, cwd=None):
+    """Run a tool in flow/, or in another copy of it (cwd): the publish check
+    builds an exported commit in a folder of its own."""
     args, timeout = TOOLS[name]
     t0 = time.monotonic()
     try:
-        p = subprocess.run([cfg.python] + args, cwd=str(cfg.flow), env=_env(),
+        p = subprocess.run([cfg.python] + args, cwd=str(cwd or cfg.flow), env=_env(),
                            capture_output=True, text=True, timeout=timeout)
     except subprocess.TimeoutExpired:
         return {"ok": False, "ms": timeout * 1000, "problems": ["%s took longer than %d s and was stopped." % (name, timeout)]}
