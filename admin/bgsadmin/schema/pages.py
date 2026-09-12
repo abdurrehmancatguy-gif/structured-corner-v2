@@ -427,6 +427,7 @@ _TRACK = [
 
 # The form sends nothing yet. Its reply is built from whole phrases: the
 # thanks, then the quote line, then the last sentence, joined with full stops.
+STOP = "The reply puts a full stop and a space after it, so end it without one."
 _CORPORATE = [
     text("/corporate/title", "Heading", CORPORATE, 40, section="Top of the page"),
     text("/corporate/intro", "Intro", CORPORATE, 160, section="Top of the page", kind="textarea",
@@ -452,13 +453,13 @@ _CORPORATE = [
     text("/corporate/form/send", "Button", CORPORATE, 30, section="Form"),
     text("/corporate/replies/invalid_email", "Reply, email not valid", CORPORATE, 100, section="Replies"),
     text("/corporate/replies/thanks", "Thanks", CORPORATE, 30, section="Replies",
-         help="When the visitor left the name box empty."),
+         help="When the visitor left the name box empty. " + STOP),
     text("/corporate/replies/thanks_name", "Thanks with a name", CORPORATE, 40, section="Replies",
-         pattern=needs("name"), patternHelp="Keep {name}: it is where the visitor's name goes."),
+         pattern=needs("name"), patternHelp="Keep {name}: it is where the visitor's name goes.", help=STOP),
     text("/corporate/replies/quote", "Quote line", CORPORATE, 60, section="Replies",
-         help="When the visitor left the units box empty."),
+         help="When the visitor left the units box empty. " + STOP),
     text("/corporate/replies/quote_units", "Quote line with units", CORPORATE, 60, section="Replies",
-         pattern=needs("n"), patternHelp="Keep {n}: it is where the number the visitor typed goes."),
+         pattern=needs("n"), patternHelp="Keep {n}: it is where the number the visitor typed goes.", help=STOP),
     text("/corporate/replies/not_sent", "Last sentence", CORPORATE, 200, section="Replies", kind="textarea",
          help="The form sends nothing yet: keep this saying so until it does."),
 ]

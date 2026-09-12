@@ -380,12 +380,29 @@ class PagesPartTwoTests(_Pages, unittest.TestCase):
             js = global_in(self.flow, "BGS_COPY")
             self.assertEqual(js["cart"]["summary"]["free"], "No charge")
             self.assertEqual(js["cart"]["items"]["many"], "{n} things")
-            self.assertEqual(js["corporate"]["thanks_name"], "Thanks, {name}")
+            self.assertEqual(js["corporate"]["replies"]["thanks_name"], "Thanks, {name}")
             self.assertEqual(js["gift_box"]["summary"]["fill_many"], "{n} to fill")
         finally:
             self.restore(before)
         for n in names:
             self.assertEqual(self.page(n), pages[n], n)
+
+    def test_every_text_the_shop_script_reads_is_in_its_data(self):
+        # shop.js keeps its own copy of each text for a page with an older
+        # catalogue.js, so a path the data does not have would leave a Pages
+        # field saving without ever reaching the shop.
+        shop = (self.flow / "assets" / "shop.js").read_text(encoding="utf-8")
+        js = global_in(self.flow, "BGS_COPY")
+        calls = re.findall(r'bgsCopy(?:Html)?\(\s*"([^"]+)"\s*([,+])', shop)
+        self.assertGreater(len(calls), 40)
+        for path, joined in calls:
+            node = js
+            for part in path.rstrip(".").split("."):
+                self.assertIsInstance(node, dict, path)
+                self.assertIn(part, node, path)
+                node = node[part]
+            # a path shop.js finishes with a variable names a group of texts
+            self.assertIsInstance(node, dict if joined == "+" else str, path)
 
     def test_the_404_title_ends_with_the_settings_suffix(self):
         self.assertIn("<title>Page not found | BGS Corner</title>", self.page("404.html"))

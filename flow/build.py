@@ -1372,7 +1372,7 @@ confirmed = """
 # button jumps to the form below it, so its target stays here. The name and
 # email boxes' hints are also their names for screen readers; the other two
 # keep a shorter name. The form sends nothing yet, and its replies (shop.js,
-# BGS_COPY["corporate"]) say so.
+# BGS_COPY["corporate"]["replies"]) say so.
 _CORP_TIER = ('<div class="sum" style="background:#fff"><span class="eyebrow">%s</span><div class="tier">%s</div>'
               '<p style="font-size:12.5px;color:var(--mut);margin:0">%s</p></div>')
 CORPORATE_TEXT = {
@@ -1383,14 +1383,14 @@ CORPORATE_TEXT = {
 }
 for _k in ("name", "email", "occasion", "units", "send"):
     CORPORATE_TEXT["k_" + _k] = page_text("corporate.form." + _k)
-COPY_JS["corporate"] = {
+COPY_JS["corporate"] = {"replies": {
     "invalid_email": js_text("corporate.replies.invalid_email"),
     "thanks": js_text("corporate.replies.thanks"),
     "thanks_name": js_text("corporate.replies.thanks_name", need=("name",)),
     "quote": js_text("corporate.replies.quote"),
     "quote_units": js_text("corporate.replies.quote_units", need=("n",)),
     "not_sent": js_text("corporate.replies.not_sent"),
-}
+}}
 
 corporate = """
 <section><div class="wrap">
@@ -1411,7 +1411,8 @@ corporate = """
 
 # The tracking page's words are content, pages.json "track". The order
 # number box's hint is also its name for screen readers, so both print the
-# one value. The replies its button gives reach shop.js as BGS_COPY["track"].
+# one value. The replies its button gives reach shop.js as
+# BGS_COPY["track"]["replies"].
 TRACK_TEXT = {
     "t_crumb": CRUMB_HOME + " / " + page_text("track.crumb"),
     "t_title": page_text("track.title"), "t_intro": page_text("track.intro"),
@@ -1421,8 +1422,8 @@ TRACK_TEXT = {
     "t_stages": kv_rows(page_rows("track.stages", ("label", "body")), "\n    "),
     "t_note": page_text("track.whatsapp_note"),
 }
-COPY_JS["track"] = {"missing": js_text("track.replies.missing"),
-                    "looking": js_text("track.replies.looking", allow=("query",))}
+COPY_JS["track"] = {"replies": {"missing": js_text("track.replies.missing"),
+                                "looking": js_text("track.replies.looking", allow=("query",))}}
 
 track = """
 <section><div class="wrap" style="max-width:720px">
