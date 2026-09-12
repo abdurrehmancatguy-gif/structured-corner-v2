@@ -27,7 +27,11 @@ ADMIN_GROUPS = ("content", "media", "generated")
 CODE = {"flow/build.py", "flow/assets/shop.js", "flow/assets/flow.css", "flow/edp_data.json"}
 GENERATED = ({"flow/" + p for p in PAGES}
              | {"flow/404.html", "flow/robots.txt", "flow/favicon.ico", "flow/assets/catalogue.js",
-                "flow/assets/flow.min.css", "flow/tools/derivatives.json"})
+                "flow/assets/flow.min.css", "flow/tools/derivatives.json"}
+             # make_favicon.py writes these beside the photos, from the emblem,
+             # so they are listed with what the tools make, not as new photos
+             | {"flow/assets/img/favicon-32.png", "flow/assets/img/favicon-16.png",
+                "flow/assets/img/apple-touch-icon.png"})
 CONTENT = re.compile(r"^flow/content/[a-z0-9_-]+\.json$")
 MEDIA = re.compile(r"^flow/assets/(?:img|cat|video)/(?:[^/]+/)*[^/]+\.(?:jpg|jpeg|png|mp4)$")
 MEDIA_KIND = {"jpg": "image", "jpeg": "image", "png": "image", "mp4": "video"}
@@ -455,13 +459,16 @@ def scan_secrets(cfg, remote, local, names):
 
 
 def room_for(cfg, sha):
+    """The clean room of one commit, remembered by sha. A build that could not
+    finish (a timeout, say) is not remembered, so the next check runs it again."""
     key = (str(cfg.repo), sha)
     hit = _ROOMS.get(key)
     if hit is None:
         hit = gitops.clean_room(cfg, sha, inspect=inspect_published)
-        if len(_ROOMS) > 50:
-            _ROOMS.clear()
-        _ROOMS[key] = hit
+        if hit["ok"] or hit["changed"]:
+            if len(_ROOMS) > 50:
+                _ROOMS.clear()
+            _ROOMS[key] = hit
     return hit
 
 

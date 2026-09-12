@@ -235,7 +235,10 @@ function publishDialog(pv) {
     const word = h("input", { id: "pub-word", class: "input", autocomplete: "off", spellcheck: "false", oninput: () => sync() });
     const tick = pv.external ? h("input", { id: "pub-ext", type: "checkbox", onchange: () => sync() }) : null;
     const go = h("button", { class: "btn primary", type: "button", disabled: true, onclick: () => done({ include: !!(tick && tick.checked) }) }, "Publish");
-    const done = (v) => { d.close(); d.remove(); resolve(v); };
+    // Focus goes back to the button that opened the dialog, so a keyboard
+    // user is not left at the top of the page.
+    const back = document.activeElement;
+    const done = (v) => { d.close(); d.remove(); if (back && back.isConnected) back.focus(); resolve(v); };
     function sync() { go.disabled = word.value.trim() !== "PUBLISH" || (tick !== null && !tick.checked); }
     d.addEventListener("cancel", (e) => { e.preventDefault(); done(null); });
     word.addEventListener("keydown", (e) => { if (e.key === "Enter" && !go.disabled) { e.preventDefault(); go.click(); } });

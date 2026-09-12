@@ -259,6 +259,20 @@ class PublishServerTests(unittest.TestCase):
         self.assertEqual(git(b.remote, "rev-parse", "main"), remote)
 
 
+class PartitionTests(unittest.TestCase):
+    """The group a changed path falls in decides whether a commit takes it."""
+
+    def test_groups(self):
+        cases = {"flow/content/products.json": "content", "flow/assets/img/example.jpg": "media",
+                 "flow/assets/video/example.mp4": "media", "flow/index.html": "generated",
+                 "flow/assets/catalogue.js": "generated", "flow/favicon.ico": "generated",
+                 "flow/assets/img/apple-touch-icon.png": "generated", "flow/assets/shop.js": "code",
+                 "flow/build.py": "code", "flow/edp_data.json": "code", "flow/tools/make_favicon.py": "other",
+                 "flow/assets/img/notes.txt": "other", "admin/README.md": "other"}
+        for path, group in cases.items():
+            self.assertEqual(publishing.group_of(path), group, path)
+
+
 class PushTests(unittest.TestCase):
     """gitops.push and publishing.go_live, called directly (no server), on a
     tiny repository whose origin is a throwaway bare repository. The tests
