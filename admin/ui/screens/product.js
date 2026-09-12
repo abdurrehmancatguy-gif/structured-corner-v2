@@ -6,6 +6,7 @@ import { icon } from "../icons.js";
 import { mountEditor } from "../lib/editor.js";
 import { field, visible } from "../lib/forms.js";
 import { banner, confirmDialog, formDialog, toast, guard } from "../lib/ui.js";
+import { mediaGrid } from "../components/media-grid.js";
 
 export function render(main, { arg: pid, app }) {
   const F = Object.fromEntries(app.state.schema.resources.products.fields.map((f) => [f.path, f]));
@@ -42,11 +43,11 @@ export function render(main, { arg: pid, app }) {
       return h("div", { class: "two-col" },
         h("div", { class: "col-main" },
           card("Title and story", f("/name"), f("/story")),
+          card("Photos", visible(F["/images"], d) ? mediaGrid({ f: F["/images"], draft: d, ctx, pid, ed, app }) : null),
           card("Pricing", f("/price"), f("/sizes"), f("/size"), f("/contents"), f("/gender")),
           card("Inventory", f("/stock")),
           card("Scent notes", f("/top"), f("/heart"), f("/base")),
           card("Details", f("/ingredients"), f("/barcode")),
-          card("Photos", f("/images")),
           h("section", { class: "card later" }, h("h2", {}, "Saved for later"),
             h("p", { class: "sub" }, "Kept with the product, but the shop does not show these yet."), later)),
         h("div", { class: "col-side" },
