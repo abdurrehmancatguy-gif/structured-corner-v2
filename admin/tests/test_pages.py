@@ -482,6 +482,25 @@ class PagesPartTwoTests(_Pages, unittest.TestCase):
         self.assertIn({"path": "/corporate/replies/thanks", "code": "format",
                        "message": "This text takes no {tokens}; leave out braces."}, res["error"]["details"])
 
+    def test_the_build_stops_on_a_brace_in_text_that_takes_no_token(self):
+        # pages.json edited by hand, as a terminal or a Claude session can
+        def change(d):
+            d["product"]["voucher_note"] = "A voucher on any bottle over {free_over}."
+            d["track"]["stages"][0]["body"] = "Before {cutoff}"
+            d["product"]["share"]["copied"] = "Copied {x}"
+            d["product"]["specs"]["in_stock"] = "{n} in stock"
+            d["cart"]["summary"]["free"] = "Free {x}"
+            d["collection"]["genders"]["Him"] = "Him }"
+        err, changed = self.broken_build(change)
+        for msg in ("pages.json product.voucher_note has {free_over}, which it cannot use",
+                    "pages.json track.stages.0.body has {cutoff}, which it cannot use",
+                    "pages.json product.share.copied has {x}, which it cannot use",
+                    "pages.json product.specs.in_stock has {n}, which it cannot use",
+                    "pages.json cart.summary.free has {x}, which it cannot use",
+                    "pages.json collection.genders.Him has a brace that is not part of a {token}"):
+            self.assertIn(msg, err)
+        self.assertEqual(changed, [])
+
     def test_the_build_stops_on_broken_part_two_text_before_writing(self):
         def change(d):
             del d["gift_box"]["title"]

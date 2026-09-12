@@ -295,10 +295,14 @@ def page_text(path, tokens=None, doc="pages", need=(), empty_ok=False):
     """Text for a template, escaped. Where the place takes tokens (tokens is a
     dict), each {token} is then replaced by its value, which is already
     markup-safe (plain text escaped, or a tag the build made, like the count
-    shop.js updates); elsewhere a brace is only a character."""
+    shop.js updates). A pages.json text whose place takes none takes no brace
+    either, as its field says; in copy.json and settings.json it is only a
+    character."""
     v = raw_text(path, doc, empty_ok)
     if tokens is None:
-        return esc(v)
+        if doc != "pages":
+            return esc(v)
+        tokens = {}
     where = "%s.json %s" % (doc, path)
     for t in need:
         if "{%s}" % t not in v:
@@ -329,9 +333,10 @@ def page_href(path):
     return esc(raw_text(path))
 
 def js_text(path, need=(), allow=()):
-    """Text shop.js fills in and sets with textContent. Its {tokens} are
-    checked the way page_text checks a template's, but it stays as the
-    document holds it: shop.js fills the tokens itself."""
+    """Text as the document holds it: for shop.js, which fills its {tokens}
+    and sets it with textContent, or for markup that escapes it later. Its
+    tokens are checked the way page_text checks a template's, so a text whose
+    place takes none has no brace."""
     page_text(path, {t: "" for t in tuple(need) + tuple(allow)}, need=need)
     return raw_text(path)
 
@@ -370,7 +375,7 @@ SHELL_TEXT = {
 }
 CRUMB_HOME = page_text("shell.crumb_home")
 COPY_JS["title_suffix"] = raw_text("seo.default_title_suffix", doc="settings")
-COPY_JS["crumb_home"] = raw_text("shell.crumb_home")
+COPY_JS["crumb_home"] = js_text("shell.crumb_home")
 
 def tab_link(label, href, icon, on):
     """One tab-bar entry, drawn as its icon. The label stays as the accessible
@@ -944,13 +949,13 @@ PRICE_BANDS = ("0-49", "50-100", "100-200", "200-999999")
 GENDERS = ("Him", "Her", "Unisex")
 FACETS_LIVE = [
     (page_text("collection.filters.category"), "cat", [(CAT_TEXT[k]["label"], k) for k in CAT_KEYS]),
-    (page_text("collection.filters.price"), "price", [(raw_text("collection.price_bands." + b), b) for b in PRICE_BANDS]),
-    (page_text("collection.filters.gender"), "gender", [(raw_text("collection.genders." + g), g) for g in GENDERS]),
+    (page_text("collection.filters.price"), "price", [(js_text("collection.price_bands." + b), b) for b in PRICE_BANDS]),
+    (page_text("collection.filters.gender"), "gender", [(js_text("collection.genders." + g), g) for g in GENDERS]),
 ]
 # the count shop.js replaces on load; 34 is what the page has always shipped
 _COUNT = {"n": '<span data-count>34</span>'}
-COPY_JS["collection"] = {"crumb_categories": raw_text("collection.crumb_categories"),
-                         "genders": {g: raw_text("collection.genders." + g) for g in GENDERS}}
+COPY_JS["collection"] = {"crumb_categories": js_text("collection.crumb_categories"),
+                         "genders": {g: js_text("collection.genders." + g) for g in GENDERS}}
 
 def facet_live(title, key, rows):
     return '<div class="fbox"><h4>%s</h4>%s</div>' % (title, "".join(
@@ -1043,13 +1048,12 @@ for _k in ("longevity", "sillage", "batch", "availability"):
 for _k in ("pyramid", "apply", "ing", "delivery", "reviews"):
     PRODUCT_TEXT["p_tab_" + _k] = page_text("product.tabs." + _k)
 COPY_JS["product"] = {
-    "share": {k: raw_text("product.share." + k) for k in ("label", "copied", "failed")},
-    "specs": {k: raw_text("product.specs." + k) for k in ("availability", "in_stock", "only_left", "batch", "barcode")},
-    "ingredients": {"heading": raw_text("product.ingredients.heading")},
-    "not_found": {k: raw_text("product.not_found." + k) for k in ("title", "cta", "crumb", "page_title")},
+    "share": {k: js_text("product.share." + k) for k in ("label", "copied", "failed")},
+    "specs": {k: js_text("product.specs." + k, need=("n",) if k == "only_left" else ())
+              for k in ("availability", "in_stock", "only_left", "batch", "barcode")},
+    "ingredients": {"heading": js_text("product.ingredients.heading")},
+    "not_found": {k: js_text("product.not_found." + k) for k in ("title", "cta", "crumb", "page_title")},
 }
-if "{n}" not in COPY_JS["product"]["specs"]["only_left"]:
-    _BAD_PAGES.append("pages.json product.specs.only_left must contain {n}")
 
 product = """
 <section><div class="wrap">
@@ -1277,7 +1281,7 @@ CART_TEXT = {
 for _k in ("subtotal", "discount", "delivery", "free", "total", "checkout"):
     CART_TEXT["c_" + _k] = page_text("cart.summary." + _k)
 COPY_JS["cart"] = {
-    "progress": {"unlocked": raw_text("cart.progress.unlocked"),
+    "progress": {"unlocked": js_text("cart.progress.unlocked"),
                  "to_go": js_text("cart.progress.to_go", need=("amount",)),
                  "ladder_next": js_text("cart.progress.ladder_next", need=("n",), allow=("pct",)),
                  "ladder_top": js_text("cart.progress.ladder_top", allow=("pct",)),
@@ -1286,7 +1290,7 @@ COPY_JS["cart"] = {
     "line": {k: js_text("cart.line." + k) for k in ("no_image", "remove")},
     "gift_line": {"placeholder": js_text("cart.gift_line.placeholder"),
                   "meta": js_text("cart.gift_line.meta", allow=("amount",))},
-    "summary": {"free": raw_text("cart.summary.free")},
+    "summary": {"free": js_text("cart.summary.free")},
 }
 
 cart = """
