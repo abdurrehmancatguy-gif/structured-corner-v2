@@ -1,5 +1,7 @@
 """Helpers the API modules share: which JSON pointers a change touches, whether
 each one may be changed, and the precondition on the document's rev."""
+import copy
+
 from .errors import ApiError
 
 _MISSING = object()
@@ -63,6 +65,35 @@ def enforce(fields, old, new, confirmed=()):
                 raise ApiError(403, "not_editable", g["readonly"], {"path": ptr, "field": g["path"]})
         if f.get("guarded") and f["path"].strip("/") not in confirmed:
             raise ApiError(428, "guarded_field", "Confirm the change to %s." % f["label"], {"path": ptr, "field": f["path"]})
+
+
+def refusals(fields, old, new, confirmed=()):
+    """Everything enforce() would refuse in one change, not only the first
+    thing, for saves that answer per product (bulk edit, CSV import). Each
+    refused top-level field is put back as it was and the check runs again.
+    Returns (the guarded fields still to confirm, the refusals as errors)."""
+    need, errors = [], []
+    trial = copy.deepcopy(new)
+    while True:
+        try:
+            enforce(fields, old, trial, list(confirmed) + need)
+            return need, errors
+        except ApiError as e:
+            d = e.details or {}
+            if e.code == "guarded_field" and d.get("field", "").strip("/") not in need:
+                need.append(d["field"].strip("/"))
+                continue
+            errors.append({"path": d.get("path", ""), "code": e.code, "message": e.message})
+            parts = (d.get("path") or "").split("/")
+            if len(parts) < 2 or not isinstance(trial, dict) or not isinstance(old, dict):
+                return need, errors
+            key = parts[1].replace("~1", "/").replace("~0", "~")
+            if trial.get(key, _MISSING) == old.get(key, _MISSING):
+                return need, errors
+            if key in old:
+                trial[key] = copy.deepcopy(old[key])
+            else:
+                del trial[key]
 
 
 def precondition(req, current_rev, current):
