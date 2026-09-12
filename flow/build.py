@@ -84,9 +84,109 @@ SETTINGS = C["settings"]["store"]
 SEO = C["settings"].get("seo", {})
 SITE_URL = (C["settings"].get("site_url") or "").rstrip("/")
 
+# ---------------------------------------------------------------- store rules
+# The delivery, gift box, bag discount and low-stock numbers live in
+# settings.store. The pages below print them from here, and catalogue.js
+# carries the same values to shop.js as window.BGS_RULES, so one edit changes
+# the page text and the bag together. A key an older settings.json lacks gets
+# the value the shop had before the rules moved into content; a key that is
+# there but unreadable stops the build rather than print a guess. Cash on
+# delivery and VAT are not here: checkout keeps its own constants for them.
+_BAD_RULES = []
+
+def _whole(where, v, default, lo=0):
+    if v is None:
+        return default
+    if isinstance(v, int) and not isinstance(v, bool) and v >= lo:
+        return v
+    _BAD_RULES.append("%s must be a whole number of at least %d" % (where, lo))
+    return default
+
+def _cutoff_minutes(text):
+    """'2:00 PM' as minutes after midnight, Dubai time, or None."""
+    m = re.fullmatch(r"(1[0-2]|[1-9]):([0-5]\d) (AM|PM)", text if isinstance(text, str) else "")
+    if not m:
+        return None
+    return (int(m.group(1)) % 12 + (12 if m.group(3) == "PM" else 0)) * 60 + int(m.group(2))
+
+def _ladder(rungs):
+    """The bag's volume discount, lowest rung first."""
+    if rungs is None:
+        return [{"units": 3, "percent": 10}, {"units": 6, "percent": 15}]
+    ok = isinstance(rungs, list) and rungs and all(isinstance(r, dict) for r in rungs)
+    out = [{"units": _whole("volume_ladder units", r.get("units"), 0, 1),
+            "percent": _whole("volume_ladder percent", r.get("percent"), 0)} for r in (rungs if ok else [])]
+    if not ok or any(a["units"] >= b["units"] for a, b in zip(out, out[1:])):
+        _BAD_RULES.append("volume_ladder must be rungs with units rising from one to the next")
+    return out
+
+_CUTOFF = SETTINGS.get("sameday_cutoff", "2:00 PM")
+if _cutoff_minutes(_CUTOFF) is None:
+    _BAD_RULES.append("sameday_cutoff must read like 2:00 PM")
+_GIFT = SETTINGS.get("gift_with_purchase") or {}
+if not isinstance(_GIFT, dict):
+    _BAD_RULES.append("gift_with_purchase must be a threshold and a label")
+    _GIFT = {}
+_GIFT_LABEL = _GIFT.get("label", "Mystery oud, 3 ml")
+if not isinstance(_GIFT_LABEL, str) or not _GIFT_LABEL.strip():
+    _BAD_RULES.append("gift_with_purchase label must be text")
+RULES = {
+    "free_delivery_over": _whole("free_delivery_over", SETTINGS.get("free_delivery_over"), 150),
+    "delivery_fee": _whole("delivery_fee", SETTINGS.get("delivery_fee"), 12),
+    "sameday_fee": _whole("sameday_fee", SETTINGS.get("sameday_fee"), 25),
+    "sameday_cutoff": _CUTOFF,
+    "sameday_cutoff_minutes": _cutoff_minutes(_CUTOFF),
+    "giftbox_fee": _whole("giftbox_fee", SETTINGS.get("giftbox_fee"), 25),
+    "giftbox_volume_discount_at": _whole("giftbox_volume_discount_at", SETTINGS.get("giftbox_volume_discount_at"), 3, 1),
+    "giftbox_volume_discount_percent": _whole("giftbox_volume_discount_percent", SETTINGS.get("giftbox_volume_discount_percent"), 10),
+    "volume_ladder": _ladder(SETTINGS.get("volume_ladder")),
+    "gift_with_purchase": {"threshold": _whole("gift_with_purchase threshold", _GIFT.get("threshold"), 300, 1),
+                           "label": _GIFT_LABEL},
+    "low_stock_at": _whole("low_stock_at", SETTINGS.get("low_stock_at"), 5),
+}
+if _BAD_RULES:
+    sys.exit("build failed:\n  " + "\n  ".join("settings.store: " + p for p in _BAD_RULES))
+
+def _aed(n):
+    return "AED {:,}".format(n)
+
+def _gift_name(label):
+    """'Mystery oud, 3 ml' reads 'mystery oud' inside a sentence: the part
+    before the size, its capital dropped unless the word is in capitals."""
+    name = label.split(",")[0].strip()
+    return name[:1].lower() + name[1:] if name[1:2].islower() else name
+
+def _ladder_bar(n):
+    """The bag's third progress bar with n items counted, as the page shows it
+    before shop.js has counted the real bag."""
+    rungs = RULES["volume_ladder"]
+    nxt = next((r for r in rungs if n < r["units"]), None)
+    goal = nxt["units"] if nxt else rungs[-1]["units"]
+    text = ("Add %d more items to save %d%%" % (nxt["units"] - n, nxt["percent"]) if nxt
+            else "Saving %d%%, the top rung" % rungs[-1]["percent"])
+    return text, "%d of %d" % (n, goal), "%d" % round(min(100, n * 100 / goal))
+
+# The rules as the pages word them, for the %-templates below.
+_P3 = _ladder_bar(RULES["volume_ladder"][0]["units"])
+_AT = RULES["giftbox_volume_discount_at"]
+RULE_TEXT = {
+    "rule_free_over": _aed(RULES["free_delivery_over"]),
+    "rule_delivery_fee": _aed(RULES["delivery_fee"]),
+    "rule_sameday_fee": _aed(RULES["sameday_fee"]),
+    "rule_cutoff": _CUTOFF,
+    "rule_cutoff_short": _CUTOFF.replace(":00 ", " "),
+    "rule_box_fee": _aed(RULES["giftbox_fee"]),
+    "rule_box_at": "%d item%s" % (_AT, "" if _AT == 1 else "s"),
+    "rule_box_pct": "%d" % RULES["giftbox_volume_discount_percent"],
+    "rule_gift_bar": "Free %s over %s" % (html.escape(_gift_name(_GIFT_LABEL)),
+                                          _aed(RULES["gift_with_purchase"]["threshold"])),
+    "rule_tier_pct": "%d" % RULES["volume_ladder"][0]["percent"],
+    "rule_p3_text": _P3[0], "rule_p3_label": _P3[1], "rule_p3_width": _P3[2],
+}
+
 # One-line description per page for <meta name=description> and OG.
 PAGE_DESC = {
-    "index.html": "Alcohol-free oud oils, bakhoor and EDP sprays, blended in Dubai. Same-day delivery in Dubai, free over AED 150.",
+    "index.html": "Alcohol-free oud oils, bakhoor and EDP sprays, blended in Dubai. Same-day delivery in Dubai, free over %s." % RULE_TEXT["rule_free_over"],
     "collection.html": "Shop BGS Corner: attars and perfume oils, bakhoor, EDP sprays and gift sets. Filter by category, price and gender.",
     "product.html": "House-blended, alcohol-free fragrance from BGS Corner, Dubai. Attars and perfume oils, bakhoor and EDP sprays.",
     "gift-box.html": "Build a gift box of three or six house scents, wrapped, with a handwritten card. BGS Corner, Dubai.",
@@ -115,6 +215,39 @@ def published(cat=None):
     if cat:
         rows = [r for r in rows if r.get("category") == cat]
     return sorted(rows, key=lambda r: r.get("order") or 0)
+
+# ---------------------------------------------------------------- categories
+# The four category keys are code: _meta, the facets, the shelves, data-cats
+# on the product page and shop.js all switch on them. What a visitor reads for
+# each is content: its label (headings, filters, pills), the name breadcrumbs
+# use, and its collection intro, from copy.json "categories" and
+# "collection_intros". "all" is the unfiltered collection page. The pages
+# below print this text and catalogue.js carries the same text to shop.js as
+# window.BGS_CATS, so a filter, a heading and a breadcrumb never disagree. A
+# key an older copy.json lacks gets the text the shop had before it moved into
+# content; one that is there but empty stops the build rather than print a
+# blank heading.
+CAT_KEYS = ("attars", "bakhoor", "edp", "gift-sets")
+_CAT_LABELS = {"attars": "Attars", "bakhoor": "Bakhoor", "edp": "EDP sprays",
+               "gift-sets": "Gift sets", "all": "All products"}
+_BAD_CATS = []
+
+def _cat_text(key):
+    c = (COPY.get("categories") or {}).get(key) or {}
+    out = {"label": c.get("label", _CAT_LABELS[key])}
+    out["crumb"] = c.get("crumb", out["label"])
+    out["intro"] = (COPY.get("collection_intros") or {}).get(key, "")
+    for part, where in (("label", "categories.%s.label"), ("crumb", "categories.%s.crumb"),
+                        ("intro", "collection_intros.%s")):
+        v = out[part]
+        if not isinstance(v, str) or (part != "intro" and not v.strip()):
+            _BAD_CATS.append((where % key) + " must be text")
+    return out
+
+CAT_TEXT = {k: _cat_text(k) for k in CAT_KEYS + ("all",)}
+if _BAD_CATS:
+    sys.exit("build failed:\n  " + "\n  ".join("copy.json " + p for p in _BAD_CATS))
+EXTRA_GLOBALS.append(("BGS_CATS", lambda: CAT_TEXT))
 
 def tab_link(label, href, icon, on):
     """One tab-bar entry, drawn as its icon. The label stays as the accessible
@@ -259,8 +392,8 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
 %(preload)s<link rel="stylesheet" href="%(css)s"></head><body class="%(page)s">
 <noscript><div class="nojs">This shop needs JavaScript for products, the bag and checkout. Please turn it on in your browser.</div></noscript>
 <div class="strip"><div class="wrap">
-  <span>%(clock)s Order by 2:00 PM for delivery today in Dubai<span data-cutoff hidden> &middot; <b></b></span></span>
-  <span class="r"><span>Free UAE delivery over AED 150</span><span>Cash on delivery</span><a href="track-order.html">Track order</a><a href="#" data-langtoggle>العربية</a></span>
+  <span>%(clock)s Order by %(rule_cutoff)s for delivery today in Dubai<span data-cutoff hidden> &middot; <b></b></span></span>
+  <span class="r"><span>Free UAE delivery over %(rule_free_over)s</span><span>Cash on delivery</span><a href="track-order.html">Track order</a><a href="#" data-langtoggle>العربية</a></span>
 </div></div>
 <div class="mast"><div class="wrap">
   %(brandlogo)s
@@ -293,6 +426,7 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
    ogimg=esc(((SITE_URL + "/") if SITE_URL else "") + (V(SEO["og_image"]) if SEO.get("og_image") else "")),
    catnav=catnav(), tabs="".join(tab_link(l, h, ic, tab) for l, h, ic in TABS),
    clock=sv("clock",13,2), menu=sv("menu",22), chev=sv("chev",14,2), search=sv("search",17),
+   rule_cutoff=RULE_TEXT["rule_cutoff"], rule_free_over=RULE_TEXT["rule_free_over"],
    user=sv("user"), heart=sv("heart"), bag=sv("bag"),
    brandlogo=header_logo(), footlogo=footer_logo(), footcols=footer_cols(), icons=favicon_links(),
    addr=slot("address, hours, phone"))
@@ -391,7 +525,7 @@ def _cards_from(rows, img_sizes=CARD_SIZES):
                         images=pr.get("images"), img_sizes=img_sizes,
                         halo=pr.get("never_discount", False), notes=notes,
                         barcode=pr.get("barcode") or None,
-                        low=(stock if isinstance(stock, int) and stock <= 5 else None)))
+                        low=(stock if isinstance(stock, int) and stock <= RULES["low_stock_at"] else None)))
     return "".join(out)
 
 def attar_cards(n=None):   return _cards("attars", n)
@@ -404,6 +538,53 @@ def halo_cards(n=None):
 def bakhoor_cards(n=None): return _cards("bakhoor", n)
 def edp_cards(n=None):     return _cards("edp", n)
 def set_cards(n=None):     return _cards("gift-sets", n)
+
+# ---------------------------------------------------------------- shelves
+# The homepage's product rows. Which products a shelf draws from, where its
+# see-all link goes and its card image sizes are code; its heading (home.json
+# "sections"), how many cards it shows and the link's words (home.json
+# "shelves") are content. {n} in the link's words is the number of published
+# products the shelf draws from, counted here, so "All 13" stays true as
+# products come and go; a limit of null shows every one. A key an older
+# home.json lacks gets the shelf as it was before it moved into content; one
+# that is there but unreadable stops the build.
+SHELVES = {
+    "house_ouds": (lambda: published("attars"), "collection.html?cat=attars", CARD_SIZES),
+    # the never-discounted pieces, as halo_cards() picks them
+    "reserve": (lambda: [r for r in published() if r.get("never_discount")], "collection.html?cat=attars", FEAT_SIZES),
+    "gift_sets": (lambda: published("gift-sets"), "collection.html?cat=gift-sets", CARD_SIZES),
+    "bakhoor": (lambda: published("bakhoor"), "collection.html?cat=bakhoor", CARD_SIZES),
+    "edp": (lambda: published("edp"), "collection.html?cat=edp", CARD_SIZES),
+}
+_SHELF_WAS = {"house_ouds": (5, "All {n}"), "reserve": (None, "All attars"), "gift_sets": (5, "All sets"),
+              "bakhoor": (None, "Shop bakhoor"), "edp": (5, "All {n}")}
+_HEADING_WAS = {"house_ouds": "Attars and perfume oils", "reserve": "Never discounted", "gift_sets": "Gift sets",
+                "scent_family": "Shop by scent family", "bakhoor": "Bakhoor & home", "edp": "EDP sprays"}
+_BAD_HOME = []
+
+def heading(key):
+    """A homepage section heading from home.json "sections", escaped."""
+    t = (HOME.get("sections") or {}).get(key, _HEADING_WAS[key])
+    if not isinstance(t, str) or not t.strip():
+        _BAD_HOME.append("sections.%s must be text" % key)
+    return esc(t)
+
+def shelf(key):
+    """One shelf's heading row and its cards, as the home template prints them."""
+    pick, href, sizes = SHELVES[key]
+    rows = pick()
+    s = (HOME.get("shelves") or {}).get(key) or {}
+    limit = s.get("limit", _SHELF_WAS[key][0])
+    label = s.get("link_label", _SHELF_WAS[key][1])
+    if limit is not None and (isinstance(limit, bool) or not isinstance(limit, int) or limit < 1):
+        _BAD_HOME.append("shelves.%s.limit must be a whole number of at least 1, or null" % key)
+        limit = None
+    if not isinstance(label, str) or not label.strip():
+        _BAD_HOME.append("shelves.%s.link_label must be text" % key)
+        label = ""
+    head = '<div class="sec-h"><h2>%s</h2><a href="%s">%s &rarr;</a></div>' % (
+        heading(key), href, esc(label.replace("{n}", str(len(rows)))))
+    return head, _cards_from(rows[:limit], sizes)
 
 
 def usp_strip():
@@ -507,6 +688,7 @@ def hero_dots():
                    for i in range(len(HOME["hero_slides"])))
 
 # ---------------------------------------------------------------- HOME
+_SH = {k: shelf(k) for k in SHELVES}
 home = """
 <div class="hero" data-carousel>
   <div class="heroimg">%(hero_img)s<span class="none corner"><b data-slideno>1</b>/%(hero_n)s</span></div>
@@ -533,7 +715,7 @@ home = """
 </div></section>
 
 <section class="alt"><div class="wrap">
-  <div class="sec-h"><h2>Attars and perfume oils</h2><a href="collection.html?cat=attars">All 13 &rarr;</a></div>
+  %(attars_h)s
   <div class="grid g5">%(attars)s</div>
 </div></section>
 
@@ -545,17 +727,17 @@ home = """
 </div></div></section>
 
 <section><div class="wrap">
-  <div class="sec-h"><h2>Never discounted</h2><a href="collection.html?cat=attars">All attars &rarr;</a></div>
+  %(oud_h)s
   <div class="grid feat">%(oud)s</div>
 </div></section>
 
 <section class="alt"><div class="wrap">
-  <div class="sec-h"><h2>Gift sets</h2><a href="collection.html?cat=gift-sets">All sets &rarr;</a></div>
+  %(sets_h)s
   <div class="grid g5">%(sets)s</div>
 </div></section>
 
 <section><div class="wrap">
-  <div class="sec-h"><h2>Shop by scent family</h2></div>
+  <div class="sec-h"><h2>%(fam_h)s</h2></div>
   <div class="fam">
     <a href="collection.html?family=oud-and-woods" style="background:var(--f-oud)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20c4-2 6-6 6-10M8 20c3-2 5-5 6-9M13 20c2-2 4-5 5-8"/><circle cx="17" cy="6" r="2.5"/></svg><b>Oud &amp; Woods</b><span>%(ct)s</span></a>
     <a href="collection.html?family=amber-and-spice" style="background:var(--f-amber)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.2 4.6L19 8.3l-3.5 3.4.9 4.9-4.4-2.4-4.4 2.4.9-4.9L5 8.3l4.8-.7z"/></svg><b>Amber &amp; Spice</b><span>%(ct)s</span></a>
@@ -577,12 +759,12 @@ home = """
 </div></section>
 
 <section class="alt"><div class="wrap">
-  <div class="sec-h"><h2>Bakhoor &amp; home</h2><a href="collection.html?cat=bakhoor">Shop bakhoor &rarr;</a></div>
+  %(bakhoor_h)s
   <div class="grid g5">%(bakhoor)s</div>
 </div></section>
 
 <section><div class="wrap">
-  <div class="sec-h"><h2>EDP sprays</h2><a href="collection.html?cat=edp">All 9 &rarr;</a></div>
+  %(edp_h)s
   <div class="grid g5">%(edp)s</div>
 </div></section>
 %(reels)s""" % dict(reels=reels(), catstrip=catstrip(), usp=usp_strip(),
@@ -592,8 +774,12 @@ home = """
            qb_body=COPY["quiz_banner"]["body"], qb_cta=COPY["quiz_banner"]["cta_label"],
            qb_href=COPY["quiz_banner"]["cta_href"],
            prev=sv("left",22,2), next=sv("right",22,2),
-           attars=attar_cards(5), oud=halo_cards(), sets=set_cards(5),
-           bakhoor=bakhoor_cards(), edp=edp_cards(5), ct=slot("count"))
+           attars_h=_SH["house_ouds"][0], attars=_SH["house_ouds"][1], oud_h=_SH["reserve"][0], oud=_SH["reserve"][1],
+           sets_h=_SH["gift_sets"][0], sets=_SH["gift_sets"][1], fam_h=heading("scent_family"),
+           bakhoor_h=_SH["bakhoor"][0], bakhoor=_SH["bakhoor"][1], edp_h=_SH["edp"][0], edp=_SH["edp"][1],
+           ct=slot("count"))
+if _BAD_HOME:
+    sys.exit("build failed:\n  " + "\n  ".join("home.json " + p for p in _BAD_HOME))
 
 # ---------------------------------------------------------------- COLLECTION
 # Only facets the content layer actually carries: category and price for all
@@ -601,9 +787,7 @@ home = """
 # brief taxonomy but have no per-product value in any source, so they are not
 # offered as controls that would do nothing.
 FACETS_LIVE = [
-    ("Category", "cat", [("Attars", "attars"),
-                         ("Bakhoor", "bakhoor"), ("EDP sprays", "edp"),
-                         ("Gift sets", "gift-sets")]),
+    ("Category", "cat", [(CAT_TEXT[k]["label"], k) for k in CAT_KEYS]),
     ("Price", "price", [("Under AED 50", "0-49"), ("AED 50-100", "50-100"),
                         ("AED 100-200", "100-200"), ("AED 200+", "200-999999")]),
     ("Gender", "gender", [("Him", "Him"), ("Her", "Her"), ("Unisex", "Unisex")]),
@@ -611,15 +795,15 @@ FACETS_LIVE = [
 
 def facet_live(title, key, rows):
     return '<div class="fbox"><h4>%s</h4>%s</div>' % (title, "".join(
-        '<label><input type="checkbox" data-facet="%s" value="%s">%s</label>' % (key, val, lbl)
+        '<label><input type="checkbox" data-facet="%s" value="%s">%s</label>' % (key, val, esc(lbl))
         for lbl, val in rows))
 
 collection = """
 <section><div class="wrap">
-  <span class="eyebrow" data-crumb>Home / All products</span>
+  <span class="eyebrow" data-crumb>Home / %(all_crumb)s</span>
   <div class="sec-h" style="margin-top:10px"><div>
-    <h2 style="font-size:26px" data-title>All products</h2>
-    <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0;max-width:70ch" data-intro>Every blend in the shop: attars and perfume oils, bakhoor, EDP sprays and gift sets.</p></div></div>
+    <h2 style="font-size:26px" data-title>%(all_title)s</h2>
+    <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0;max-width:70ch" data-intro>%(all_intro)s</p></div></div>
   <div class="plp">
     <div class="side" data-filters>
       <div class="drawerhead"><b>Filters</b><button type="button" class="closex" data-closefilters aria-label="Close filters">&times;</button></div>
@@ -652,7 +836,9 @@ collection = """
   </div>
 </div></section>
 """ % dict(facets="".join(facet_live(t, k, r) for t, k, r in FACETS_LIVE),
-           chev=sv("chev", 13, 2), filt=sv("filter", 15, 1.9))
+           chev=sv("chev", 13, 2), filt=sv("filter", 15, 1.9),
+           all_crumb=esc(CAT_TEXT["all"]["crumb"]), all_title=esc(CAT_TEXT["all"]["label"]),
+           all_intro=esc(CAT_TEXT["all"]["intro"]))
 
 # ---------------------------------------------------------------- PDP
 # One template serves every product and shop.js fills it in. What the template
@@ -715,7 +901,7 @@ product = """
           <div hidden><span>Availability</span><span>%(av)s</span></div>
         </div>
         <div class="kv facts" style="margin-top:16px">
-          <div><span>%(truck)s Delivery</span><span>Free over AED 150 &middot; same-day before 2 PM</span></div>
+          <div><span>%(truck)s Delivery</span><span>Free over %(rule_free_over)s &middot; same-day before %(rule_cutoff_short)s</span></div>
           <div><span>%(cash)s Payment</span><span>Card &middot; Apple Pay &middot; Tabby &middot; Tamara &middot; COD</span></div>
         </div>
       </div>
@@ -755,8 +941,8 @@ product = """
   </div>
   <div data-panel="delivery" hidden>
     <div class="grid g3">
-      <div><span class="eyebrow">UAE delivery</span><p style="margin:8px 0 0">Free over AED 150. AED 12 below that. UAE only.</p></div>
-      <div><span class="eyebrow">Same-day Dubai</span><p style="margin:8px 0 0">AED 25, for orders placed before the 2:00 PM cutoff.</p></div>
+      <div><span class="eyebrow">UAE delivery</span><p style="margin:8px 0 0">Free over %(rule_free_over)s. %(rule_delivery_fee)s below that. UAE only.</p></div>
+      <div><span class="eyebrow">Same-day Dubai</span><p style="margin:8px 0 0">%(rule_sameday_fee)s, for orders placed before the %(rule_cutoff)s cutoff.</p></div>
       <div><span class="eyebrow">Returns</span><p style="margin:8px 0 0">Exchange on sealed items. Opened fragrance cannot be returned.</p></div>
     </div>
   </div>
@@ -771,7 +957,7 @@ product = """
   <div class="sec-h"><h2>Complete the ritual</h2><a href="collection.html">More &rarr;</a></div>
   <div class="grid g4">%(rel)s</div>
 </div></section>
-""" % dict(gprev=sv("left",20,2), gnext=sv("right",20,2), fam=slot("family"), tone=slot("tone"), gen=slot("gender"), rev=slot("no reviews yet"),
+""" % dict(RULE_TEXT, gprev=sv("left",20,2), gnext=sv("right",20,2), fam=slot("family"), tone=slot("tone"), gen=slot("gender"), rev=slot("no reviews yet"),
    desc="", lon="", sil="",
    bat="", av="",
    truck=sv("truck",16), cash=sv("cash",16),
@@ -796,9 +982,9 @@ giftbox = """
     <div>
       <div class="sum">
         <div class="r"><span data-boxn>0 scents</span><span data-boxscents>AED 0</span></div>
-        <div class="r"><span>Premium box</span><span>AED 25</span></div>
-        <div class="r" data-boxdisc style="color:var(--faint)"><span>Volume discount at 3 items</span><span>&minus;10%%</span></div>
-        <div class="r t"><span>Total</span><span data-boxtotal>AED 25</span></div>
+        <div class="r"><span>Premium box</span><span>%(rule_box_fee)s</span></div>
+        <div class="r" data-boxdisc style="color:var(--faint)"><span>Volume discount at %(rule_box_at)s</span><span>&minus;%(rule_box_pct)s%%</span></div>
+        <div class="r t"><span>Total</span><span data-boxtotal>%(rule_box_fee)s</span></div>
         <button type="button" class="btn ghost block" data-boxcta style="margin-top:12px">Fill 3 more slots</button>
       </div>
       <div class="sum" style="margin-top:16px;background:#fff">
@@ -813,7 +999,7 @@ giftbox = """
     </div>
   </div>
 </div></section>
-""" % dict(pick=attar_cards(6))
+""" % dict(RULE_TEXT, pick=attar_cards(6))
 
 def stepper(qty, fixed=False):
     if fixed:
@@ -839,9 +1025,9 @@ cart = """
   <div class="two">
     <div>
       <div class="sum" data-cartprogress style="background:#fff;margin-bottom:18px">
-        <div class="prog"><div class="lb"><span>Free UAE delivery over AED 150</span><b data-p1lb style="color:var(--green)">Unlocked</b></div><div class="tr"><i data-p1 style="width:100%%"></i></div></div>
-        <div class="prog" style="margin-top:14px"><div class="lb"><span>Free mystery oud over AED 300</span><b data-p2lb style="color:var(--green)">Unlocked</b></div><div class="tr"><i data-p2 style="width:100%%"></i></div></div>
-        <div class="prog" style="margin-top:14px"><div class="lb"><span data-p3txt>Add 3 more items to save 15%%</span><b data-p3lb style="color:var(--gold-d)">3 of 6</b></div><div class="tr"><i class="part" data-p3 style="width:50%%"></i></div></div>
+        <div class="prog"><div class="lb"><span>Free UAE delivery over %(rule_free_over)s</span><b data-p1lb style="color:var(--green)">Unlocked</b></div><div class="tr"><i data-p1 style="width:100%%"></i></div></div>
+        <div class="prog" style="margin-top:14px"><div class="lb"><span>%(rule_gift_bar)s</span><b data-p2lb style="color:var(--green)">Unlocked</b></div><div class="tr"><i data-p2 style="width:100%%"></i></div></div>
+        <div class="prog" style="margin-top:14px"><div class="lb"><span data-p3txt>%(rule_p3_text)s</span><b data-p3lb style="color:var(--gold-d)">%(rule_p3_label)s</b></div><div class="tr"><i class="part" data-p3 style="width:%(rule_p3_width)s%%"></i></div></div>
       </div>
       <div data-cartlines></div>
       <div data-cartempty class="empty" hidden>
@@ -852,7 +1038,7 @@ cart = """
     </div>
     <div data-cartsummary><div class="sum">
       <div class="r"><span>Subtotal</span><span data-subtotal>AED 0</span></div>
-      <div class="r" style="color:var(--green)" data-tierrow><span>Volume discount &middot; <b data-tierpct>10</b>%%</span><span data-tieramt>&minus; AED 19.50</span></div>
+      <div class="r" style="color:var(--green)" data-tierrow><span>Volume discount &middot; <b data-tierpct>%(rule_tier_pct)s</b>%%</span><span data-tieramt>&minus; AED 19.50</span></div>
       <div class="r"><span>Delivery</span><span data-delivery style="color:var(--green)">Free</span></div>
       <div class="r t"><span>Total</span><span data-total>AED 825.50</span></div>
       <a class="btn solid block" href="checkout.html" style="margin-top:12px">Checkout</a>
@@ -861,7 +1047,10 @@ cart = """
     </div></div>
   </div>
 </div></section>
-""" % dict(vat=slot("VAT registration expected ~month 9"))
+""" % dict(RULE_TEXT, vat=slot("VAT registration expected ~month 9"))
+
+# The bag and the gift box above print these rules; shop.js prices with them.
+EXTRA_GLOBALS.append(("BGS_RULES", lambda: RULES))
 
 checkout = """
 <section><div class="wrap">
@@ -1153,15 +1342,13 @@ def emit_catalogue():
     """The client-side catalogue is a projection of the same content documents
        the pages are built from, so a price edited in the admin moves the card,
        the PDP and the cart together."""
-    CRUMB = {"attars": "Attars", "bakhoor": "Bakhoor",
-             "edp": "EDP sprays", "gift-sets": "Gift sets"}
     cat = {}
     for pr in published():
         doc = {
             "name": pr["name"], "meta": _meta(pr), "price": money(pr["price"]),
             "pn": (int(str(pr["price"]).replace(",", "")) if str(pr.get("price", "")).strip().replace(",", "").isdigit() else 0),
             "cat": pr["category"],
-            "crumb": CRUMB.get(pr["category"], ""),
+            "crumb": CAT_TEXT[pr["category"]]["crumb"] if pr["category"] in CAT_KEYS else "",
         }
         if pr.get("sizes"):
             doc["sizes"] = ["%s &middot; AED %s" % (z["label"], money(z["price"]))

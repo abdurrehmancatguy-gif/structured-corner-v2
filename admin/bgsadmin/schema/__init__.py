@@ -2,7 +2,8 @@
 
 Each module exports RESOURCE ({name, label, kind, intro}) and FIELDS: dicts
 with path (a JSON pointer inside the resource; inside rows, inside one item),
-type, label and, as needed, help, required, nullable, min, max, maxLength,
+type, label and, as needed, help, required, nullable (with nullableLabel, the
+words beside the tick that sets a value; "Track" when absent), min, max, maxLength,
 itemMaxLength, pattern, patternHelp, enum, enumLabels, multiline, dir, social,
 visibleWhen ({"category": [...]}), rendered (False: saved but not shown on the
 site yet), locked (the reason, for payments and checkout), readonly (the

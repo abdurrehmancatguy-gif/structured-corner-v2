@@ -6,6 +6,7 @@ pointers actually changed and refuses the save if any of them is locked
 a hand-made request cannot slip a change past the UI. A picture or film field
 that uploads fill may be moved about, but only onto a file that is there.
 """
+from .. import lint
 from .. import schema as schema_mod
 from .. import validate
 from ..errors import ApiError
@@ -48,6 +49,9 @@ def put_doc(req):
             raise ApiError(422, "validation", "Some fields need attention.", errors)
         new = ordered_like(cur, data)
         txn.put(name, new)
+    # Site text that restates a store rule is checked against the rules on
+    # either side of the change; it warns and never blocks.
+    warnings = warnings + lint.after_save(name, new, store, schemas())
     return saved(req.app, txn, name=name, rev=store.doc(name)[1], data=new, warnings=warnings)
 
 

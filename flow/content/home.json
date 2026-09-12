@@ -85,6 +85,28 @@
     "edp": "EDP sprays",
     "delivered_today": "Delivered today"
   },
+  "shelves": {
+    "house_ouds": {
+      "limit": 5,
+      "link_label": "All {n}"
+    },
+    "reserve": {
+      "limit": null,
+      "link_label": "All attars"
+    },
+    "gift_sets": {
+      "limit": 5,
+      "link_label": "All sets"
+    },
+    "bakhoor": {
+      "limit": null,
+      "link_label": "Shop bakhoor"
+    },
+    "edp": {
+      "limit": 5,
+      "link_label": "All {n}"
+    }
+  },
   "reels": {
     "title": "EDP sprays in motion",
     "items": [

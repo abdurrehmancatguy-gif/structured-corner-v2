@@ -12,6 +12,17 @@ function bgsProduct(id) {
   var c = window.BGS_CATALOGUE;
   return c && typeof id === "string" && Object.prototype.hasOwnProperty.call(c, id) ? c[id] : null;
 }
+/* A store rule from settings.json, which build.py writes into catalogue.js as
+   BGS_RULES: bgsRule("gift_with_purchase.threshold", 300). Each fallback is
+   the value the shop had before the rules moved into content, so a page with
+   an older catalogue.js still prices the bag the way its text says. */
+function bgsRule(path, fallback) {
+  var v = window.BGS_RULES;
+  path.split(".").forEach(function (k) {
+    v = v && typeof v === "object" && Object.prototype.hasOwnProperty.call(v, k) ? v[k] : undefined;
+  });
+  return v !== null && typeof v === typeof fallback && Array.isArray(v) === Array.isArray(fallback) ? v : fallback;
+}
 /* Each feature below runs on its own: an error in one (bad data in storage, a
    missing element) is logged and the rest still work. As one plain script, the
    first throw stopped every feature after it, the bag included. */
@@ -53,6 +64,9 @@ bgsRun(function () {
   });
 
   /* ---------- cart totals ---------- */
+  var FREE_AT = bgsRule("free_delivery_over", 150), FEE = bgsRule("delivery_fee", 12);
+  var GIFT_AT = bgsRule("gift_with_purchase.threshold", 300);
+  var LADDER = bgsRule("volume_ladder", [{ units: 3, percent: 10 }, { units: 6, percent: 15 }]);
   function recalc() {
     var lines = document.querySelectorAll("[data-line]");
     if (!lines.length) return;
@@ -71,10 +85,12 @@ bgsRun(function () {
       }
     });
 
-    var pct = eligibleUnits >= 6 ? 15 : eligibleUnits >= 3 ? 10 : 0;
+    /* the ladder's rungs rise in units: the bag earns the last one it reaches */
+    var pct = 0, next = null;
+    LADDER.forEach(function (r) { if (eligibleUnits >= r.units) pct = r.percent; else if (!next) next = r; });
     var disc = eligibleSub * pct / 100;
-    var freeShip = subtotal >= 150;
-    var ship = freeShip ? 0 : 12;
+    var freeShip = subtotal >= FREE_AT;
+    var ship = freeShip ? 0 : FEE;
     var total = subtotal - disc + ship;
 
     var q = function (s) { return document.querySelector(s); };
@@ -88,7 +104,7 @@ bgsRun(function () {
       }
     }
     if (q("[data-delivery]")) {
-      q("[data-delivery]").textContent = freeShip ? "Free" : aed(12);
+      q("[data-delivery]").textContent = freeShip ? "Free" : aed(FEE);
       q("[data-delivery]").style.color = freeShip ? "var(--green)" : "";
     }
     if (q("[data-total]")) q("[data-total]").textContent = aed(total);
@@ -105,16 +121,16 @@ bgsRun(function () {
       if (q(bar)) q(bar).style.width = Math.min(100, pctWidth) + "%";
       if (q(lb)) q(lb).textContent = text;
     };
-    set("[data-p1]", "[data-p1lb]", subtotal / 150 * 100,
-        freeShip ? "Unlocked" : aed(150 - subtotal) + " to go");
-    set("[data-p2]", "[data-p2lb]", subtotal / 300 * 100,
-        subtotal >= 300 ? "Unlocked" : aed(300 - subtotal) + " to go");
-    var nextRung = eligibleUnits >= 6 ? 6 : eligibleUnits >= 3 ? 6 : 3;
+    set("[data-p1]", "[data-p1lb]", subtotal / FREE_AT * 100,
+        freeShip ? "Unlocked" : aed(FREE_AT - subtotal) + " to go");
+    set("[data-p2]", "[data-p2lb]", subtotal / GIFT_AT * 100,
+        subtotal >= GIFT_AT ? "Unlocked" : aed(GIFT_AT - subtotal) + " to go");
+    var top = LADDER[LADDER.length - 1], nextRung = next ? next.units : top.units;
     set("[data-p3]", "[data-p3lb]", eligibleUnits / nextRung * 100, eligibleUnits + " of " + nextRung);
     if (q("[data-p3txt]")) {
-      q("[data-p3txt]").textContent = eligibleUnits >= 6
-        ? "Saving 15%, the top rung"
-        : "Add " + (nextRung - eligibleUnits) + " more to save " + (nextRung === 6 ? 15 : 10) + "%";
+      q("[data-p3txt]").textContent = next
+        ? "Add " + (nextRung - eligibleUnits) + " more to save " + next.percent + "%"
+        : "Saving " + top.percent + "%, the top rung";
     }
 
     /* §10.3 - COD withheld over AED 300 */
@@ -282,7 +298,7 @@ bgsRun(function () {
         var v = r.lastElementChild;
         if (/Availability/.test(k)) {
           if (typeof pr.stock === "number") {
-            v.innerHTML = pr.stock <= 5
+            v.innerHTML = pr.stock <= bgsRule("low_stock_at", 5)
               ? '<b style="color:var(--red)">Only ' + pr.stock + " left</b>"
               : '<span style="color:var(--green);font-weight:600">In stock</span>';
           }
@@ -738,13 +754,12 @@ bgsRun(function () {
   if (!grid) return;
   var CAT = window.BGS_CATALOGUE || {};
 
-  var CAT_LABEL = { "attars": "Attars", "bakhoor": "Bakhoor",
-                    "edp": "EDP sprays", "gift-sets": "Gift sets" };
-  var CAT_INTRO = {
-    "attars": "Alcohol-free attars and perfume oils in 3 ml and 6 ml.",
-    "bakhoor":  "Bakhoor for the home, in 20 g to 50 g tins.",
-    "edp":      "Eau de parfum sprays, 50 ml, with declared note profiles.",
-    "gift-sets": "Wrapped sets, built from the house blends." };
+  /* Each category's label, breadcrumb name and intro, and the same for "all"
+     (the unfiltered page), come from content: build.py writes them into
+     catalogue.js as BGS_CATS and prints the same text in the page. The keys
+     are fixed in code; an unknown one reads as undefined, as it always has. */
+  var CATS = window.BGS_CATS || {};
+  function catText(key, part) { return (CATS[key] || {})[part]; }
 
   function params() {
     var q = new URLSearchParams(location.search),
@@ -811,7 +826,7 @@ bgsRun(function () {
   }
   function cardHTML(key, pr) {
     var badge = pr.halo ? '<span class="badge res">Reserve</span>'
-              : (pr.stock > 0 && pr.stock <= 5) ? '<span class="badge low">' + pr.stock + ' left</span>' : '';
+              : (pr.stock > 0 && pr.stock <= bgsRule("low_stock_at", 5)) ? '<span class="badge low">' + pr.stock + ' left</span>' : '';
     var ssel = 0;
     if (pr.sizes && pr.sizes.length) {
       ssel = pr.sizes.findIndex(function (x) { return x.replace(/&middot;/g, "\u00b7").trim().endsWith("AED " + pr.price); });
@@ -832,7 +847,7 @@ bgsRun(function () {
   }
   function pillsFor(st) {
     var out = [];
-    st.cat.forEach(function (c) { out.push(["cat", c, CAT_LABEL[c] || c]); });
+    st.cat.forEach(function (c) { out.push(["cat", c, catText(c, "label") || c]); });
     st.gender.forEach(function (g) { out.push(["gender", g, g]); });
     st.price.forEach(function (b) { var p = b.split("-");
       out.push(["price", b, +p[1] > 99998 ? "AED " + p[0] + "+" : "AED " + p[0] + " to " + p[1]]); });
@@ -857,13 +872,12 @@ bgsRun(function () {
     document.querySelectorAll("[data-count]").forEach(function (n) { n.textContent = keys.length; });
 
     var one = st.cat.length === 1 ? st.cat[0] : null;
-    var title = one ? CAT_LABEL[one] : "All products";
+    var title = catText(one || "all", "label");
     var t = document.querySelector("[data-title]"), intro = document.querySelector("[data-intro]"),
         cr = document.querySelector("[data-crumb]");
     if (t) t.textContent = title;
-    if (intro) intro.textContent = one ? CAT_INTRO[one]
-      : "Every blend in the shop: oud oils, Reserve, bakhoor, EDP sprays and gift sets.";
-    if (cr) cr.textContent = one ? "Home / Categories / " + title : "Home / All products";
+    if (intro) intro.textContent = catText(one || "all", "intro");
+    if (cr) cr.textContent = "Home / " + (one ? "Categories / " : "") + catText(one || "all", "crumb");
     document.title = title + " | BGS Corner";
 
     document.querySelectorAll("[data-facet]").forEach(function (cb) {
@@ -1049,7 +1063,8 @@ bgsRun(function () {
   var slotsHost = document.querySelector("[data-slots]");
   if (!slotsHost) return;
   var CAT = window.BGS_CATALOGUE || {};
-  var BOX_FEE = 25;
+  var BOX_FEE = bgsRule("giftbox_fee", 25);
+  var BOX_AT = bgsRule("giftbox_volume_discount_at", 3), BOX_PCT = bgsRule("giftbox_volume_discount_percent", 10);
   var size = 3, picked = [];
 
   function priceOf(k) { var p = bgsProduct(k); return (p && p.pn) || 0; }
@@ -1077,15 +1092,15 @@ bgsRun(function () {
   function renderSummary() {
     var n = picked.length;
     var scents = picked.reduce(function (t, k) { return t + priceOf(k); }, 0);
-    var disc = n >= 3 ? Math.round(scents * 0.10) : 0;
+    var disc = n >= BOX_AT ? Math.round(scents * (BOX_PCT / 100)) : 0;
     var total = scents + BOX_FEE - disc;
 
     var q = function (s) { return document.querySelector(s); };
     q("[data-boxn]").textContent = n + (n === 1 ? " scent" : " scents");
     q("[data-boxscents]").textContent = "AED " + scents;
     var dr = q("[data-boxdisc]");
-    dr.style.color = n >= 3 ? "var(--green)" : "var(--faint)";
-    dr.querySelector("span:last-child").innerHTML = n >= 3 ? "&minus;AED " + disc : "&minus;10%";
+    dr.style.color = n >= BOX_AT ? "var(--green)" : "var(--faint)";
+    dr.querySelector("span:last-child").innerHTML = n >= BOX_AT ? "&minus;AED " + disc : "&minus;" + BOX_PCT + "%";
     q("[data-boxtotal]").textContent = "AED " + total;
 
     var cta = q("[data-boxcta]"), left = size - n;
@@ -1155,7 +1170,8 @@ bgsRun(function () {
   "use strict";
 
   var KEY = "bgs_cart";
-  var GIFT_AT = 300;
+  var GIFT_AT = bgsRule("gift_with_purchase.threshold", 300);
+  var GIFT_LABEL = bgsRule("gift_with_purchase.label", "Mystery oud, 3 ml");
 
   function read() {
     try {
@@ -1236,8 +1252,8 @@ bgsRun(function () {
   function giftHtml() {
     return '<div class="line" data-line data-unit="0" data-halo="0" data-gift="1">' +
       '<div class="im"><span class="none">Gift</span></div>' +
-      '<div class="linfo"><div class="lname">Mystery oud, 3 ml</div>' +
-      '<div class="lmeta">Gift with purchase over AED ' + GIFT_AT + '</div></div>' +
+      '<div class="linfo"><div class="lname">' + GIFT_LABEL.replace(/&/g, "&amp;").replace(/</g, "&lt;") + '</div>' +
+      '<div class="lmeta">Gift with purchase over ' + money(GIFT_AT) + '</div></div>' +
       '<div class="lprice"><span data-lineprice>Free</span></div></div>';
   }
 
@@ -1531,14 +1547,15 @@ bgsRun(function () {
 /* ---------- same-day cutoff in the header strip ----------------------------
    The strip used to say "3h 47m" on every page at every hour. The time left is
    now worked out in Dubai time (UTC+4, no daylight saving) and shown only
-   before the 2:00 PM cutoff; after it the rule stands alone.
+   before the same-day cutoff in settings; after it the rule stands alone.
 --------------------------------------------------------------------------- */
 bgsRun(function () {
   "use strict";
   var box = document.querySelector("[data-cutoff]");
   if (!box) return;
+  var CUTOFF = bgsRule("sameday_cutoff_minutes", 14 * 60);
   function tick() {
-    var d = new Date(), mins = ((d.getUTCHours() + 4) % 24) * 60 + d.getUTCMinutes(), left = 14 * 60 - mins;
+    var d = new Date(), mins = ((d.getUTCHours() + 4) % 24) * 60 + d.getUTCMinutes(), left = CUTOFF - mins;
     box.hidden = left <= 0;
     if (left > 0) box.querySelector("b").textContent = Math.floor(left / 60) + "h " + (left % 60) + "m";
   }

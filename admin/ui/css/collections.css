@@ -1,0 +1,27 @@
+/* Collections: the category cards, and one collection's screen. The circle
+   pictures are content, drawn on a plain disc because the storefront's tint
+   colours live in flow.css, which the admin does not load. */
+.coll-add{align-items:center}
+.coll-add .help{max-width:34ch;margin:0}
+.coll-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.coll-grid .card{margin-bottom:0}
+.coll-card{display:flex;gap:16px;align-items:flex-start}
+.coll-pic{flex-shrink:0;width:72px;height:72px;border-radius:50%;background:#f3eee6;border:1px solid var(--hair);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--faint)}
+.coll-pic img{width:100%;height:100%;object-fit:cover}
+.coll-pic.cut img{object-fit:contain;padding:6px}
+.coll-body{min-width:0}
+.coll-body h2{margin:0 0 4px}
+.coll-body h2 a{text-decoration:none}
+.coll-body h2 a:hover{text-decoration:underline}
+.coll-kind{margin:0 0 4px;font-size:12px;color:var(--faint)}
+.coll-intro{margin:0 0 8px}
+.coll-meta{margin:0;font-size:12.5px;color:var(--mut)}
+.coll-sub{margin:-8px 0 14px}
+.coll-preview{margin:6px 0 0;padding:10px 14px;border-radius:var(--r-sm);background:#fcfaf6;border:1px solid var(--hair);color:var(--mut)}
+.coll-note{margin:0;color:var(--mut)}
+@media (max-width:560px){
+  .coll-grid{grid-template-columns:1fr}
+  .coll-card{gap:12px}
+  .coll-pic{width:56px;height:56px}
+}

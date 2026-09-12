@@ -116,7 +116,7 @@ export function field(f, target, ptr, ctx) {
         num.disabled = disabled || v === null || v === undefined;
         const track = h("input", { type: "checkbox", id: id + "-t", checked: v !== null && v !== undefined, disabled,
           onchange: (e) => { num.disabled = !e.target.checked; set(e.target.checked ? (toNum(num.value) || 0) : null); } });
-        control = h("div", { class: "inline" }, h("label", { class: "check", for: id + "-t" }, track, "Track"), num);
+        control = h("div", { class: "inline" }, h("label", { class: "check", for: id + "-t" }, track, f.nullableLabel || "Track"), num);
       } else control = num;
       break;
     }
