@@ -16,7 +16,7 @@ import re
 import threading
 import time
 
-from . import diff, gitops
+from . import diff, gitops, lint
 from . import schema as schema_mod
 from .config import PAGES, UNPUBLISHED_ASSETS
 from .errors import ApiError
@@ -304,6 +304,21 @@ def blockers(app, groups):
     if app.build.get("ok") is False:
         out.append({"id": "build", "message": "The last build failed. Fix what it reported and save again before "
                     "committing.", "problems": app.build.get("problems") or []})
+    # Checkout and the order-confirmed page state the delivery rules in text a
+    # developer sets in code (lint.LOCKED_PAGES). If a settings change has left
+    # that text saying something the rest of the site no longer does, a commit
+    # would put contradictory delivery promises live, so it is blocked until a
+    # developer updates those pages or the settings go back.
+    try:
+        mism = lint.locked_pages(app.store.doc("settings")[0])
+    except Exception:
+        mism = []
+    if mism:
+        pages = " and ".join(w["message"].split(" is locked")[0] for w in mism)
+        out.append({"id": "locked_pages", "message": "%s state delivery rules that a developer sets in code, and the "
+                    "current settings no longer match them. A developer must update those pages, or the settings "
+                    "must go back, before this can go live." % pages,
+                    "detail": " ".join(w["message"] for w in mism)})
     return out
 
 
