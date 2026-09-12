@@ -102,7 +102,8 @@ export function cropDialog({ file, width: W, height: H, frames, title }) {
         e.preventDefault();
         const step = e.shiftKey ? 0.1 : 0.01;
         if (e.target === handle) {
-          grow(s.w + (k[0] + k[1]) * step * W);
+          // the corner is a slider, so up and right make the frame larger
+          grow(s.w + (k[0] - k[1]) * step * W);
         } else {
           s.x += k[0] * step * W;
           s.y += k[1] * step * H;

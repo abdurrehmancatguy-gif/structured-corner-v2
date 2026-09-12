@@ -10,27 +10,35 @@ import { dropZone, progressList, progressRow, problems, saveFirst, sendOne } fro
 
 const TITLES = ["Card image", "Hover image (box shot)"];
 
+// What outlives a redraw of the form (saving first, the reload after an
+// upload): the list of files on their way and whether one is being sent.
+// Kept per editor, which is one visit to the product.
+const visits = new WeakMap();
+
 export function mediaGrid({ f, draft, ctx, pid, ed, app }) {
   useCss("media");
+  if (!visits.has(ed)) visits.set(ed, { uploads: progressList(), busy: false });
+  const st = visits.get(ed);
   const tiles = h("ol", { class: "mgrid", "aria-label": "Photos, in the order the shop shows them" });
   const extra = h("div", {});
-  const uploads = progressList();
+  const uploads = st.uploads;
   const err = h("p", { class: "error", hidden: true });
   const wrap = h("div", { class: "field t-images", dataset: { ptr: f.path } }, tiles, extra,
     dropZone({ kind: "product-image", multiple: true, label: "Add photos", onFiles }),
     uploads, f.help ? h("p", { class: "help" }, f.help) : null, err);
   ctx.slots.set(f.path, { err, wrap });
   let spare = [];          // this product's frames in the library that nothing uses
-  let busy = false;
+  let dragFrom = null;     // the tile a pointer is dragging, by position
 
   const list = () => (Array.isArray(getPtr(draft, f.path)) ? getPtr(draft, f.path) : []);
   const set = (next, focus) => { setPtr(draft, f.path, next); ctx.onChange(f); draw(focus); };
 
+  // act names the button that moved it, which keeps the focus; a drag has none
   function move(i, j, act) {
     const a = list().slice();
     const [name] = a.splice(i, 1);
     a.splice(j, 0, name);
-    set(a, { index: j, act });
+    set(a, act ? { index: j, act } : null);
     announce(name + " is now photo " + (j + 1) + " of " + a.length + (j < 2 ? ", the " + TITLES[j].toLowerCase() : "") + ". Save to apply.");
   }
 
@@ -68,30 +76,33 @@ export function mediaGrid({ f, draft, ctx, pid, ed, app }) {
   }
 
   async function onFiles(files) {
-    if (busy) { toast("The photos already chosen are still uploading."); return; }
+    if (st.busy) { toast("The photos already chosen are still uploading."); return; }
     if (!(await saveFirst(ed, () => guard.dirty()))) return;
-    busy = true;
+    st.busy = true;
     clear(uploads);
     let rev = ed.rev();
     let added = 0;
     const failed = [];
-    for (const file of files) {
-      const row = progressRow(uploads, file.name);
-      try {
-        const res = await sendOne({ kind: "product-image", file, row, rev: () => rev,
-          target: async () => ({ kind: "product-image", product: pid }) });
-        if (res) {
-          rev = res.rev;
-          added++;
-          if (app.state.products) app.state.products[pid] = res.data;
+    try {
+      for (const file of files) {
+        const row = progressRow(uploads, file.name);
+        try {
+          const res = await sendOne({ kind: "product-image", file, row, rev: () => rev,
+            target: async () => ({ kind: "product-image", product: pid }) });
+          if (res) {
+            rev = res.rev;
+            added++;
+            if (app.state.products) app.state.products[pid] = res.data;
+          }
+        } catch (e) {
+          const why = problems(e).join(" ");
+          row.fail(why);
+          failed.push(file.name + ": " + why);
         }
-      } catch (e) {
-        const why = problems(e).join(" ");
-        row.fail(why);
-        failed.push(file.name + ": " + why);
       }
+    } finally {
+      st.busy = false;
     }
-    busy = false;
     if (!added) return;
     await ed.reload();
     toast(added === 1 ? "Photo added and saved." : added + " photos added and saved.");
@@ -104,20 +115,49 @@ export function mediaGrid({ f, draft, ctx, pid, ed, app }) {
     return b;
   }
 
+  // A pointer can also drag a tile to its new place; the buttons do the same
+  // from the keyboard. Only a tile of this grid is taken here: a file dragged
+  // in from the computer goes to the drop zone.
+  function dragTile(el, i) {
+    el.addEventListener("dragstart", (e) => {
+      dragFrom = i;
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("application/x-bgs-frame", list()[i]);
+      el.classList.add("dragging");
+    });
+    el.addEventListener("dragend", () => { dragFrom = null; el.classList.remove("dragging"); });
+    el.addEventListener("dragover", (e) => {
+      if (dragFrom === null) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      el.classList.add("over");
+    });
+    el.addEventListener("dragleave", (e) => { if (!el.contains(e.relatedTarget)) el.classList.remove("over"); });
+    el.addEventListener("drop", (e) => {
+      if (dragFrom === null) return;
+      e.preventDefault();
+      const from = dragFrom;
+      dragFrom = null;
+      el.classList.remove("over");
+      if (from !== i) move(from, i, null);
+    });
+    return el;
+  }
+
   function tile(name, i, n) {
     const title = TITLES[i] || "Photo " + (i + 1);
     const make = i > 0 ? h("button", { class: "btn small m-make", type: "button", "aria-label": "Make " + name + " the card image",
       onclick: () => move(i, 0, "make") }, "Make card image") : null;
     if (make) make.dataset.act = "make";
-    return h("li", { class: "mtile" + (i === 0 ? " first" : "") },
-      h("img", { src: thumb(name), alt: "", loading: "lazy", width: "156", height: "156" }),
+    return dragTile(h("li", { class: "mtile" + (i === 0 ? " first" : ""), draggable: "true" },
+      h("img", { src: thumb(name), alt: "", loading: "lazy", width: "156", height: "156", draggable: "false" }),
       h("span", { class: "m-label" }, title),
       h("span", { class: "m-name" }, name),
       h("div", { class: "m-actions" }, make,
         act("left", "Move " + name + " left", i === 0, () => move(i, i - 1, "left"), "left"),
         act("right", "Move " + name + " right", i === n - 1, () => move(i, i + 1, "right"), "right"),
         act("close", "Take " + name + " off this product", false, () => takeOff(i), "off"),
-        act("trash", "Take " + name + " off and move the file to the trash", false, () => trash(i), "trash")));
+        act("trash", "Take " + name + " off and move the file to the trash", false, () => trash(i), "trash"))), i);
   }
 
   // Redrawn after every change; focus goes back to the same button on the

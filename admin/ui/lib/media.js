@@ -129,9 +129,17 @@ export function dropZone({ kind, multiple = false, label, hint, onFiles }) {
       if (files.length) onFiles(files);
     } }, icon("upload", 16), label),
     h("span", { class: "drop-hint" }, hint || "or drop " + (multiple ? "files" : "a file") + " here: " + KINDS[kind].rule + "."));
-  zone.addEventListener("dragover", (e) => { e.preventDefault(); zone.classList.add("over"); });
+  // only a drag that carries files counts here, not a photo tile being
+  // dragged to a new place in the grid above
+  const carriesFiles = (e) => !!e.dataTransfer && [...e.dataTransfer.types].includes("Files");
+  zone.addEventListener("dragover", (e) => {
+    if (!carriesFiles(e)) return;
+    e.preventDefault();
+    zone.classList.add("over");
+  });
   zone.addEventListener("dragleave", () => zone.classList.remove("over"));
   zone.addEventListener("drop", (e) => {
+    if (!carriesFiles(e)) return;
     e.preventDefault();
     zone.classList.remove("over");
     const files = [...((e.dataTransfer && e.dataTransfer.files) || [])];

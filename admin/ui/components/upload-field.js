@@ -48,20 +48,28 @@ const BUTTONS = {
 };
 
 // getEd returns the screen's editor (lib/editor.js), for its rev, save and
-// reload. The result is the ctx.uploadActions hook lib/forms.js calls.
+// reload. The result is the ctx.uploadActions hook lib/forms.js calls; a
+// screen makes it once per visit. Saving first or reloading draws the form
+// again, and each field's progress list then moves into the new field with
+// its rows, so a file on its way stays in view. One file at a time.
 export function uploadActions(getEd) {
+  const lists = new Map();
+  let busy = false;
   return (f, ptr, item) => {
     const buttons = (BUTTONS[f.upload] || (() => []))(ptr, item || {});
     if (!buttons.length) return null;
-    const list = progressList();
-    let busy = false;
+    const key = ptr + " " + f.upload;
+    if (!lists.has(key)) lists.set(key, progressList());
+    const list = lists.get(key);
 
     async function run(b) {
       if (busy) { toast("The file already chosen is still on its way."); return; }
       const ed = getEd();
-      if (!(await saveFirst(ed, () => guard.dirty()))) return;
+      // the file is chosen first: a browser opens its file chooser only
+      // straight after a click, and saving other changes takes a moment
       const files = await pickFiles({ types: accept(b.kind) });
       if (!files.length) return;
+      if (!(await saveFirst(ed, () => guard.dirty()))) return;
       busy = true;
       const row = progressRow(list, files[0].name);
       try {

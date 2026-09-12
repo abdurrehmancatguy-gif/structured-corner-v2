@@ -52,6 +52,9 @@
 .mtile img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px;background:#fff;border:1px solid var(--hair)}
 .m-label{font-weight:650;font-size:12.5px}
 .mtile.first .m-label{color:var(--gold-d)}
+.mtile[draggable="true"]{cursor:grab}
+.mtile.dragging{opacity:.45}
+.mtile.over{outline:2px solid var(--gold);outline-offset:2px}
 .m-name{font-size:11.5px;color:var(--faint);word-break:break-all}
 .m-actions{display:flex;flex-wrap:wrap;gap:2px;align-items:center}
 .m-actions .m-make{min-height:28px;padding:0 10px;font-size:12px;margin-right:auto}

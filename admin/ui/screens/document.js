@@ -10,6 +10,9 @@ import { uploadActions } from "../components/upload-field.js";
 
 export function render(main, { arg: name, app }) {
   const res = app.state.schema.resources[name];
+  // made once per visit, so an upload on its way stays in view when a save
+  // or a reload draws the form again
+  const uploads = uploadActions(() => ed);
   const ed = mountEditor(main, app, {
     heading: res.resource.label,
     subtitle: res.resource.intro || null,
@@ -19,7 +22,7 @@ export function render(main, { arg: name, app }) {
     actions: () => [h("a", { class: "btn", href: "/", target: "_blank", rel: "noopener noreferrer" }, "View store")],
     form: (ctx, data) => {
       ctx.root = data;
-      ctx.uploadActions = uploadActions(() => ed);
+      ctx.uploadActions = uploads;
       const groups = new Map();
       for (const f of res.fields) {
         if (!visible(f, data)) continue;
