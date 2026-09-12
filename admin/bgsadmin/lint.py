@@ -8,6 +8,10 @@ the text in copy.json is typed by hand, so a rule change leaves it saying the
 old number. Each AED amount and time of day is read with the words around it,
 and with the other text of the same entry (a promise's detail is read with its
 headline), to tell which rule it states.
+
+Checkout and the order-confirmed page state the delivery rules too, in text
+that is locked with payments; a rule change that leaves them behind is named
+as well, so the owner knows those pages need a code change.
 """
 import re
 
@@ -134,13 +138,47 @@ def stale_rules(copy_data, settings_data, copy_schema):
     return out
 
 
+# Checkout and the order-confirmed page are locked with payments, and build.py
+# prints them as fixed text that states the delivery rules as they stood when
+# the rules moved into settings. test_rules.py holds these against the built
+# pages, so a code change to either page has to change them here as well.
+LOCKED_PAGES = (
+    ("Checkout", {"free_delivery_over": 150, "delivery_fee": 12, "sameday_fee": 25, "sameday_cutoff": "2:00 PM"}),
+    ("The order-confirmed page", {"sameday_cutoff": "2:00 PM"}),
+)
+
+
+def _differs(rule, now, said):
+    if rule == "sameday_cutoff":
+        return cutoff_minutes(now) != cutoff_minutes(said)
+    return now != said
+
+
+def locked_pages(settings_data):
+    """One warning per locked page whose fixed text no longer matches the
+    rules. It cannot be edited here, so the warning says where the change has
+    to happen instead of naming a field."""
+    rules = _rules(settings_data)
+    out = []
+    for page, says in LOCKED_PAGES:
+        off = [k for k, v in says.items() if k in rules and _differs(k, rules[k], v)]
+        if not off:
+            continue
+        parts = [SAYS[k] % ("{:,}".format(says[k]) if _whole(says[k]) else says[k]) for k in off]
+        said = parts[0] if len(parts) == 1 else ", ".join(parts[:-1]) + " and " + parts[-1]
+        out.append({"path": "/store/" + off[0], "document": "settings", "code": "locked_page", "rules": off,
+                    "message": "%s is locked and still says %s. Its text changes in code, not here." % (page, said)})
+    return out
+
+
 def after_save(name, data, store, schemas):
-    """Warnings for a document just saved: new settings against the site text,
-    or new site text against the settings."""
-    if "copy" not in schemas:
-        return []
+    """Warnings for a document just saved: new settings against the site text
+    and the locked pages, or new site text against the settings."""
+    out = []
     if name == "settings":
-        return stale_rules(store.doc("copy")[0], data, schemas["copy"])
-    if name == "copy":
-        return stale_rules(data, store.doc("settings")[0], schemas["copy"])
-    return []
+        if "copy" in schemas:
+            out += stale_rules(store.doc("copy")[0], data, schemas["copy"])
+        out += locked_pages(data)
+    elif name == "copy" and "copy" in schemas:
+        out += stale_rules(data, store.doc("settings")[0], schemas["copy"])
+    return out

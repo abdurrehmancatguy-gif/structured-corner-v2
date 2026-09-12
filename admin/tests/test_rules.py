@@ -71,6 +71,10 @@ class RulesTests(unittest.TestCase):
             # the promises under the banner still say 150: named, not blocking
             paths = {w["path"] for w in res["warnings"] if w["code"] == "stale_rule"}
             self.assertEqual(paths, {"/usp/0/title", "/strip/right_links/0/label"})
+            # and checkout says so in text nobody can edit here
+            locked = [w for w in res["warnings"] if w["code"] == "locked_page"]
+            self.assertEqual([w["rules"] for w in locked], [["free_delivery_over"]])
+            self.assertIn("Checkout is locked and still says free delivery starts over AED 150.", locked[0]["message"])
         finally:
             self.restore(before)
         self.assertEqual(rules_in(self.flow)["free_delivery_over"], 150)
@@ -109,8 +113,28 @@ class RulesTests(unittest.TestCase):
             # the delivery fee, same-day fee and cutoff now differ from the promises under the banner
             rules = {w["rule"] for w in res["warnings"] if w["code"] == "stale_rule"}
             self.assertTrue({"delivery_fee", "sameday_fee", "sameday_cutoff"} <= rules, rules)
+            locked = {w["message"].split(" is locked")[0]: w["rules"] for w in res["warnings"] if w["code"] == "locked_page"}
+            self.assertEqual(locked, {"Checkout": ["delivery_fee", "sameday_fee", "sameday_cutoff"],
+                                      "The order-confirmed page": ["sameday_cutoff"]})
         finally:
             self.restore(before)
+
+    def test_locked_pages_still_say_what_lint_expects(self):
+        # lint.LOCKED_PAGES holds what these two locked pages say; the built
+        # pages are the check that it is still true
+        checkout = self.page("checkout.html")
+        for s in ("free over AED 150</span><span>AED 12 below", "before 2:00 PM</span><span>+AED 25"):
+            self.assertIn(s, checkout)
+        self.assertIn("same-day if placed before 2 PM", self.page("confirmed.html"))
+        data, rev = self.settings()
+        data["store"]["name"] = data["store"]["name"] + " "
+        st, res = self.b.api("PUT", "documents/settings", {"data": data}, rev=rev)
+        try:
+            self.assertEqual(st, 200, res)
+            self.assertEqual([w for w in res["warnings"] if w["code"] == "locked_page"], [])
+        finally:
+            data["store"]["name"] = data["store"]["name"][:-1]
+            self.restore(data)
 
     def test_ladder_and_cutoff_are_checked(self):
         cases = (([{"units": 3, "percent": 10}, {"units": 3, "percent": 15}], "/store/volume_ladder/1/units"),
