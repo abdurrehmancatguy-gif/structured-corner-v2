@@ -507,12 +507,14 @@ def preview(app):
           "Check GitHub first." if fetched is None else "This computer does not know GitHub's main branch.")
     ancestor = bool(local and remote and gitops.is_ancestor(cfg, remote, local))
     behind = len(gitops.commits_between(cfg, local, remote)) if local and remote and not ancestor else 0
+    unknown = "Not known until GitHub has been checked." if remote is None else ""
     check("ancestor", "Everything on GitHub is already on this computer", ancestor,
           ("GitHub has %d commit%s this computer does not have. Nothing will be pushed. A developer must bring "
-           "them in from the terminal." % (behind, "" if behind == 1 else "s")) if behind else "")
+           "them in from the terminal." % (behind, "" if behind == 1 else "s")) if behind else unknown)
     commits = gitops.commits_between(cfg, remote, local) if ancestor else []
     check("ahead", "At least one commit waiting to go live", commits,
-          "GitHub already has every commit on this computer." if ancestor else "")
+          "GitHub already has every commit on this computer." if ancestor else unknown)
+    working = working_changes(cfg)
     pub, files, riding, semantic, rows = [], {k: [] for k in KINDS}, [], [], []
     if commits:
         names = gitops.diff_names(cfg, remote, local)
@@ -529,8 +531,11 @@ def preview(app):
               "; ".join(f["message"] for f in leaks[:5]))
         sizes = gitops.tree(cfg, local)
         old_sizes = gitops.tree(cfg, remote) if any(s == "D" for s, _ in pub) else {}
+        # dirty: the working tree's copy differs from the commit, so the local
+        # preview would show something other than what goes live
+        dirty = {it["path"] for g in GROUPS for it in working[g]}
         for s, p in pub:
-            files[_kind_of(p)].append({"path": p, "change": CHANGE.get(s, "modified"),
+            files[_kind_of(p)].append({"path": p, "change": CHANGE.get(s, "modified"), "dirty": p in dirty,
                                        "bytes": sizes.get(p, old_sizes.get(p))})
         riding = [{"path": p, "change": CHANGE.get(s, "modified"), "kind": _riding(p)}
                   for s, p in names if not published(p) and not CONTENT.match(p)]
@@ -540,7 +545,7 @@ def preview(app):
         for i, c in enumerate(commits):
             listed = [{"change": CHANGE.get(s, "modified"), "path": p} for s, p in gitops.commit_files(cfg, c["sha"])] if i < 50 else None
             rows.append(dict(c, short=c["sha"][:7], made_in_admin=c["sha"] in mine, files=listed))
-    pending = admin_items(working_changes(cfg))
+    pending = admin_items(working)
     warnings = []
     if pending:
         warnings.append({"id": "uncommitted", "message": "These saved changes are not in a commit and will not go live.",
