@@ -4,6 +4,7 @@
 // intro for that document.
 import { api } from "../lib/api.js";
 import { h } from "../lib/dom.js";
+import { icon } from "../icons.js";
 import { mountEditor } from "../lib/editor.js";
 import { field, visible } from "../lib/forms.js";
 
@@ -15,7 +16,10 @@ export function render(main, { arg: name, app }) {
     load: async () => { const d = await api("GET", "documents/" + name); return { rev: d.rev, data: d.data, meta: d }; },
     put: (data, rev) => api("PUT", "documents/" + name, { body: { data }, rev }),
     view: () => "/",
-    actions: () => [h("a", { class: "btn", href: "/", target: "_blank", rel: "noopener noreferrer" }, "View store")],
+    actions: () => [
+      h("a", { class: "btn", href: "#/history/documents/" + name }, icon("clock", 16), "History"),
+      h("a", { class: "btn", href: "/", target: "_blank", rel: "noopener noreferrer" }, "View store"),
+    ],
     form: (ctx, data) => {
       ctx.root = data;
       const groups = new Map();
