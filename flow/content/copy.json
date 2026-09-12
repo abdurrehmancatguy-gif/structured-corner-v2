@@ -46,6 +46,28 @@
     "cta_label": "Test your scent",
     "cta_href": "quiz.html"
   },
+  "categories": {
+    "attars": {
+      "label": "Attars",
+      "crumb": "Attars"
+    },
+    "bakhoor": {
+      "label": "Bakhoor",
+      "crumb": "Bakhoor"
+    },
+    "edp": {
+      "label": "EDP sprays",
+      "crumb": "EDP sprays"
+    },
+    "gift-sets": {
+      "label": "Gift sets",
+      "crumb": "Gift sets"
+    },
+    "all": {
+      "label": "All products",
+      "crumb": "All products"
+    }
+  },
   "collection_intros": {
     "all": "Every blend in the shop: attars and perfume oils, bakhoor, EDP sprays and gift sets.",
     "attars": "Alcohol-free attars and perfume oils in 3 ml and 6 ml.",

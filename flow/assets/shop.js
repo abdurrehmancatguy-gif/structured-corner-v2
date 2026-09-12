@@ -779,13 +779,12 @@ bgsRun(function () {
   if (!grid) return;
   var CAT = window.BGS_CATALOGUE || {};
 
-  var CAT_LABEL = { "attars": "Attars", "bakhoor": "Bakhoor",
-                    "edp": "EDP sprays", "gift-sets": "Gift sets" };
-  var CAT_INTRO = {
-    "attars": "Alcohol-free attars and perfume oils in 3 ml and 6 ml.",
-    "bakhoor":  "Bakhoor for the home, in 20 g to 50 g tins.",
-    "edp":      "Eau de parfum sprays, 50 ml, with declared note profiles.",
-    "gift-sets": "Wrapped sets, built from the house blends." };
+  /* Each category's label, breadcrumb name and intro, and the same for "all"
+     (the unfiltered page), come from content: build.py writes them into
+     catalogue.js as BGS_CATS and prints the same text in the page. The keys
+     are fixed in code; an unknown one reads as undefined, as it always has. */
+  var CATS = window.BGS_CATS || {};
+  function catText(key, part) { return (CATS[key] || {})[part]; }
 
   function params() {
     var q = new URLSearchParams(location.search),
@@ -873,7 +872,7 @@ bgsRun(function () {
   }
   function pillsFor(st) {
     var out = [];
-    st.cat.forEach(function (c) { out.push(["cat", c, CAT_LABEL[c] || c]); });
+    st.cat.forEach(function (c) { out.push(["cat", c, catText(c, "label") || c]); });
     st.gender.forEach(function (g) { out.push(["gender", g, g]); });
     st.price.forEach(function (b) { var p = b.split("-");
       out.push(["price", b, +p[1] > 99998 ? "AED " + p[0] + "+" : "AED " + p[0] + " to " + p[1]]); });
@@ -898,13 +897,13 @@ bgsRun(function () {
     document.querySelectorAll("[data-count]").forEach(function (n) { n.textContent = keys.length; });
 
     var one = st.cat.length === 1 ? st.cat[0] : null;
-    var title = one ? CAT_LABEL[one] : "All products";
+    var title = catText(one || "all", "label");
     var t = document.querySelector("[data-title]"), intro = document.querySelector("[data-intro]"),
         cr = document.querySelector("[data-crumb]");
     if (t) t.textContent = title;
-    if (intro) intro.textContent = one ? CAT_INTRO[one]
+    if (intro) intro.textContent = one ? catText(one, "intro")
       : "Every blend in the shop: oud oils, Reserve, bakhoor, EDP sprays and gift sets.";
-    if (cr) cr.textContent = one ? "Home / Categories / " + title : "Home / All products";
+    if (cr) cr.textContent = "Home / " + (one ? "Categories / " : "") + catText(one || "all", "crumb");
     document.title = title + " | BGS Corner";
 
     document.querySelectorAll("[data-facet]").forEach(function (cb) {

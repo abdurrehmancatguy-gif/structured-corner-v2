@@ -216,6 +216,39 @@ def published(cat=None):
         rows = [r for r in rows if r.get("category") == cat]
     return sorted(rows, key=lambda r: r.get("order") or 0)
 
+# ---------------------------------------------------------------- categories
+# The four category keys are code: _meta, the facets, the shelves, data-cats
+# on the product page and shop.js all switch on them. What a visitor reads for
+# each is content: its label (headings, filters, pills), the name breadcrumbs
+# use, and its collection intro, from copy.json "categories" and
+# "collection_intros". "all" is the unfiltered collection page. The pages
+# below print this text and catalogue.js carries the same text to shop.js as
+# window.BGS_CATS, so a filter, a heading and a breadcrumb never disagree. A
+# key an older copy.json lacks gets the text the shop had before it moved into
+# content; one that is there but empty stops the build rather than print a
+# blank heading.
+CAT_KEYS = ("attars", "bakhoor", "edp", "gift-sets")
+_CAT_LABELS = {"attars": "Attars", "bakhoor": "Bakhoor", "edp": "EDP sprays",
+               "gift-sets": "Gift sets", "all": "All products"}
+_BAD_CATS = []
+
+def _cat_text(key):
+    c = (COPY.get("categories") or {}).get(key) or {}
+    out = {"label": c.get("label", _CAT_LABELS[key])}
+    out["crumb"] = c.get("crumb", out["label"])
+    out["intro"] = (COPY.get("collection_intros") or {}).get(key, "")
+    for part, where in (("label", "categories.%s.label"), ("crumb", "categories.%s.crumb"),
+                        ("intro", "collection_intros.%s")):
+        v = out[part]
+        if not isinstance(v, str) or (part != "intro" and not v.strip()):
+            _BAD_CATS.append((where % key) + " must be text")
+    return out
+
+CAT_TEXT = {k: _cat_text(k) for k in CAT_KEYS + ("all",)}
+if _BAD_CATS:
+    sys.exit("build failed:\n  " + "\n  ".join("copy.json " + p for p in _BAD_CATS))
+EXTRA_GLOBALS.append(("BGS_CATS", lambda: CAT_TEXT))
+
 def tab_link(label, href, icon, on):
     """One tab-bar entry, drawn as its icon. The label stays as the accessible
        name - aria-label for screen readers, title for a pointer - because an
@@ -695,9 +728,7 @@ home = """
 # brief taxonomy but have no per-product value in any source, so they are not
 # offered as controls that would do nothing.
 FACETS_LIVE = [
-    ("Category", "cat", [("Attars", "attars"),
-                         ("Bakhoor", "bakhoor"), ("EDP sprays", "edp"),
-                         ("Gift sets", "gift-sets")]),
+    ("Category", "cat", [(CAT_TEXT[k]["label"], k) for k in CAT_KEYS]),
     ("Price", "price", [("Under AED 50", "0-49"), ("AED 50-100", "50-100"),
                         ("AED 100-200", "100-200"), ("AED 200+", "200-999999")]),
     ("Gender", "gender", [("Him", "Him"), ("Her", "Her"), ("Unisex", "Unisex")]),
@@ -705,15 +736,15 @@ FACETS_LIVE = [
 
 def facet_live(title, key, rows):
     return '<div class="fbox"><h4>%s</h4>%s</div>' % (title, "".join(
-        '<label><input type="checkbox" data-facet="%s" value="%s">%s</label>' % (key, val, lbl)
+        '<label><input type="checkbox" data-facet="%s" value="%s">%s</label>' % (key, val, esc(lbl))
         for lbl, val in rows))
 
 collection = """
 <section><div class="wrap">
-  <span class="eyebrow" data-crumb>Home / All products</span>
+  <span class="eyebrow" data-crumb>Home / %(all_crumb)s</span>
   <div class="sec-h" style="margin-top:10px"><div>
-    <h2 style="font-size:26px" data-title>All products</h2>
-    <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0;max-width:70ch" data-intro>Every blend in the shop: attars and perfume oils, bakhoor, EDP sprays and gift sets.</p></div></div>
+    <h2 style="font-size:26px" data-title>%(all_title)s</h2>
+    <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0;max-width:70ch" data-intro>%(all_intro)s</p></div></div>
   <div class="plp">
     <div class="side" data-filters>
       <div class="drawerhead"><b>Filters</b><button type="button" class="closex" data-closefilters aria-label="Close filters">&times;</button></div>
@@ -746,7 +777,9 @@ collection = """
   </div>
 </div></section>
 """ % dict(facets="".join(facet_live(t, k, r) for t, k, r in FACETS_LIVE),
-           chev=sv("chev", 13, 2), filt=sv("filter", 15, 1.9))
+           chev=sv("chev", 13, 2), filt=sv("filter", 15, 1.9),
+           all_crumb=esc(CAT_TEXT["all"]["crumb"]), all_title=esc(CAT_TEXT["all"]["label"]),
+           all_intro=esc(CAT_TEXT["all"]["intro"]))
 
 # ---------------------------------------------------------------- PDP
 # One template serves every product and shop.js fills it in. What the template
@@ -1262,15 +1295,13 @@ def emit_catalogue():
     """The client-side catalogue is a projection of the same content documents
        the pages are built from, so a price edited in the admin moves the card,
        the PDP and the cart together."""
-    CRUMB = {"attars": "Attars", "bakhoor": "Bakhoor",
-             "edp": "EDP sprays", "gift-sets": "Gift sets"}
     cat = {}
     for pr in published():
         doc = {
             "name": pr["name"], "meta": _meta(pr), "price": money(pr["price"]),
             "pn": (int(str(pr["price"]).replace(",", "")) if str(pr.get("price", "")).strip().replace(",", "").isdigit() else 0),
             "cat": pr["category"],
-            "crumb": CRUMB.get(pr["category"], ""),
+            "crumb": CAT_TEXT[pr["category"]]["crumb"] if pr["category"] in CAT_KEYS else "",
         }
         if pr.get("sizes"):
             doc["sizes"] = ["%s &middot; AED %s" % (z["label"], money(z["price"]))
