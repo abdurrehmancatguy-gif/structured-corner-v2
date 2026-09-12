@@ -465,6 +465,24 @@ class PagesPartTwoTests(_Pages, unittest.TestCase):
             c.close()
             self.restore(before)
 
+    @unittest.skipUnless(os.path.exists(cdp_pipe.CHROME), "headless Chrome is not installed")
+    def test_every_page_fits_a_phone(self):
+        st, s = self.b.api("GET", "schema")
+        groups = [g for g in s["resources"]["pages"]["resource"]["groups"] if not g.get("locked")]
+        c = cdp_pipe.Chrome(width=390)
+        try:
+            c.go("http://localhost:%d/admin/#/content/pages" % self.PORT)
+            c.wait("!!document.querySelector('.pg-list')", 30)
+            self.assertEqual(c.js("document.documentElement.scrollWidth"), 390)
+            for g in groups:
+                c.go("http://localhost:%d/admin/#/content/pages/%s" % (self.PORT, g["key"]))
+                c.wait("!!document.querySelector('.pg-form') && document.querySelector('main h1').textContent === %s"
+                       % json.dumps(g["label"]), 25)
+                self.assertEqual(c.js("document.documentElement.scrollWidth"), 390, g["key"])
+            self.assertEqual(c.errors(), [])
+        finally:
+            c.close()
+
     def test_the_404_title_ends_with_the_settings_suffix(self):
         self.assertIn("<title>Page not found | BGS Corner</title>", self.page("404.html"))
         st, d = self.b.api("GET", "documents/settings")
