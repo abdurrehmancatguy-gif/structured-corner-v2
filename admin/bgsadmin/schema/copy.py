@@ -1,5 +1,6 @@
 """Site copy (flow/content/copy.json)."""
-RESOURCE = {"name": "copy", "label": "Site text", "kind": "document"}
+RESOURCE = {"name": "copy", "label": "Site text", "kind": "document",
+            "intro": "Text around the shop: the promises under the banner, the quiz banner, the top strip and the collection intros."}
 
 NOT_SHOWN = "Saved, but the shop does not use this yet: the site still has it written into its code."
 

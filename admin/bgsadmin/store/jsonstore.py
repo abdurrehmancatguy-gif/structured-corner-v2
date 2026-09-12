@@ -27,8 +27,7 @@ import shutil
 import tempfile
 import threading
 
-from .. import tools
-from ..config import DOCUMENTS
+from .. import schema, tools
 from ..errors import ApiError
 from ..jsonutil import canonical
 from .base import ContentStore
@@ -79,9 +78,8 @@ class _Failed(Exception):
 
 
 class JSONStore(ContentStore):
-    NAMES = ("products",) + DOCUMENTS
-
     def __init__(self, cfg):
+        self.NAMES = ("products",) + tuple(schema.document_names())
         self.cfg = cfg
         self._lock = threading.Lock()
         self._busy = None

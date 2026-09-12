@@ -1,0 +1,13 @@
+/* Inventory: a narrow stock field per row, the row tinted while its number
+   differs from the saved one (the bulk editor's changed-cell tint), and a
+   problem written under the field it is about. */
+/* The table scrolls inside its card on a phone instead of widening the page. */
+.inv-card .table-wrap{contain:inline-size}
+.inv-cell{display:flex;align-items:center;gap:10px}
+.inv-stock{width:110px;min-height:36px;text-align:right;font-variant-numeric:tabular-nums}
+.inv-row.changed td{background:var(--gold-l)}
+.inv-row.invalid .inv-stock{border-color:var(--red)}
+.inv-row.stale td{background:var(--amber-l)}
+.inv-msg{display:block;margin:4px 0 0;color:var(--red);font-weight:650;font-size:12px;max-width:280px}
+.inv-stale{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:6px}
+.inv-foot{padding:10px 14px;margin:0;color:var(--faint);font-size:12.5px;border-top:1px solid var(--hair)}

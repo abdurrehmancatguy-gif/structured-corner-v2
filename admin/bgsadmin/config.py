@@ -1,7 +1,9 @@
 """Paths, limits and the fixed lists everything else checks against.
 
 Every path the admin touches is derived here from the repository it serves,
-so a test can point the whole thing at a temporary clone with --repo.
+so a test can point the whole thing at a temporary clone with --repo. The
+documents the admin edits are not listed here: each is a schema module
+(schema.document_names()).
 """
 import pathlib
 import sys
@@ -9,10 +11,8 @@ import sys
 ADMIN = pathlib.Path(__file__).resolve().parent.parent
 UI = ADMIN / "ui"
 
-# The storefront documents the admin edits as whole files, beside products.json.
-DOCUMENTS = ("settings", "copy", "home", "navigation")
-
 # Request body caps, checked against Content-Length before anything is read.
+# A route can set its own (Route(limit=...)); uploads always do.
 LIMITS = {
     "json": 2 * 1024 * 1024,
 }

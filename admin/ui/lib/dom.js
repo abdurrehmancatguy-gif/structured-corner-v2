@@ -59,3 +59,12 @@ let uid = 0;
 export const nextId = (p = "f") => p + (++uid);
 
 export const thumb = (name) => "/assets/img/" + String(name).replace(/\.jpg$/, "-thumb.jpg");
+
+// A screen's own stylesheet, admin/ui/css/<name>.css, added to the page once.
+// Kept apart from admin.css so screens built side by side never edit one file.
+const sheets = new Set();
+export function useCss(name) {
+  if (sheets.has(name)) return;
+  sheets.add(name);
+  document.head.append(h("link", { rel: "stylesheet", href: "/admin/ui/css/" + name + ".css" }));
+}

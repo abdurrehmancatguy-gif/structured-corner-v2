@@ -8,20 +8,43 @@ import pkgutil
 import re
 
 from . import api as api_pkg
+from . import schema
 from .errors import ApiError
 
 # Ids are checked in the pattern itself, so a handler never sees a path
-# fragment it did not expect.
+# fragment it did not expect. The document names come from the schema
+# modules, so a new document needs no edit here.
 ID = r"(?P<id>[a-z0-9]+(?:-[a-z0-9]+)*)"
-DOC = r"(?P<name>settings|copy|home|navigation)"
+DOC = r"(?P<name>%s)" % "|".join(re.escape(n) for n in schema.document_names())
 
 
 class Route:
-    def __init__(self, method, pattern, handler, body=None):
+    """One endpoint. body is None, "json" (parsed before the handler runs,
+    capped at `limit` bytes or LIMITS["json"]) or "raw": a file sent as the
+    body itself, whose Content-Type must be one of `types` and whose length
+    must be at most `limit`. A raw body is not read before the handler runs;
+    the handler takes it with req.save_body(path) or req.read_body()."""
+
+    def __init__(self, method, pattern, handler, body=None, limit=None, types=None):
+        if body == "raw" and not (limit and types):
+            raise ValueError("a raw-body route needs its accepted types and a size limit")
         self.method = method
         self.regex = re.compile("^" + pattern + "$")
         self.handler = handler
-        self.body = body          # None, or "json"
+        self.body = body
+        self.limit = limit
+        self.types = frozenset(t.lower() for t in (types or ()))
+
+
+class Raw:
+    """A response that is not JSON, such as a spreadsheet download. It goes
+    out with the admin's usual security headers plus the ones given here."""
+
+    def __init__(self, data, ctype, headers=None, status=200):
+        self.data = data
+        self.ctype = ctype
+        self.headers = dict(headers or {})
+        self.status = status
 
 
 def load():

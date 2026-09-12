@@ -1,0 +1,32 @@
+/* Import and export: the export filters above the export buttons, the three
+   import steps, and the check's table with each row's before and after. */
+.imp-head{padding:20px 20px 0}
+.imp-head .sub{margin-bottom:14px}
+.imp-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:14px}
+.imp-count{margin:0 auto 0 0;color:var(--mut)}
+.imp-steps{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0 0 18px;padding:0;counter-reset:step}
+.imp-steps li{counter-increment:step;display:flex;align-items:center;gap:8px;padding:4px 14px 4px 4px;border-radius:var(--pill);
+  background:var(--hair);color:var(--mut);font-weight:600}
+.imp-steps li::before{content:counter(step);display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;
+  border-radius:50%;background:#fff;color:var(--mut);font-size:12px}
+.imp-steps li.on{background:var(--ink);color:#fff}
+.imp-steps li.on::before{background:var(--gold);color:#fff}
+.imp-steps li.done::before{background:var(--green-l);color:var(--green)}
+.imp-file{display:block;font:inherit;padding:8px 0}
+.imp-checked{margin:0 0 12px}
+.imp-filters{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.imp-filters .btn[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+/* The check's table scrolls inside its card on a phone instead of widening the page. */
+.imp-body .table-wrap{contain:inline-size}
+.imp-table td{vertical-align:top}
+.imp-changes{border-collapse:collapse;font-size:12.5px;margin:0 0 4px}
+.imp-changes th,.imp-changes td{padding:3px 14px 3px 0;border:0;background:none;text-align:left;vertical-align:top;
+  max-width:300px;overflow-wrap:anywhere}
+.imp-changes thead th{color:var(--faint);font-weight:600;font-size:11.5px}
+.imp-changes tbody th{font-weight:650;white-space:nowrap;color:var(--ink);font-size:12.5px}
+.imp-errors,.imp-warnings{margin:0 0 6px;padding-left:18px}
+.imp-errors{color:var(--red)}
+.imp-warnings{color:var(--amber)}
+.imp-apply{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;
+  padding-top:16px;border-top:1px solid var(--hair)}
+.imp-apply .help{margin:0;max-width:62ch}

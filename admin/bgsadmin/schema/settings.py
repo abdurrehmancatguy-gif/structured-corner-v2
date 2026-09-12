@@ -3,7 +3,8 @@
 Payments, tax and cash on delivery belong to checkout, which stays locked in
 code: the server refuses any change to them, however it is sent.
 """
-RESOURCE = {"name": "settings", "label": "Settings", "kind": "document"}
+RESOURCE = {"name": "settings", "label": "Settings", "kind": "document",
+            "intro": "Store details, delivery rules and brand. Payments, tax and cash on delivery are locked: a developer changes those in code."}
 
 NOT_SHOWN = "Saved, but the shop does not use this yet: the site still has it written into its code."
 CHECKOUT = "Part of checkout and payments, which a developer changes in code."

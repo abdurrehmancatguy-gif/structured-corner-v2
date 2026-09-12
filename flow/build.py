@@ -103,6 +103,12 @@ COPY     = C["copy"]
 HOME     = C["home"]
 PRODUCTS = C["products"]
 
+# Data shop.js reads besides the catalogue: one window global each, written
+# into catalogue.js after the catalogue in the order registered. An entry is
+# (global name, function returning JSON data); the part of the build that
+# owns the data registers it beside its own code.
+EXTRA_GLOBALS = []
+
 def published(cat=None):
     """Documents in display order, optionally one category."""
     rows = [dict(p, id=k) for k, p in PRODUCTS.items() if p.get("published", True)]
@@ -1186,9 +1192,12 @@ def emit_catalogue():
     # versions for the photos shop.js builds URLs for at runtime (see PV)
     imgv = {n: _md5("assets/img/" + n, DERIVATIVES)
             for pr in published() for n in (pr.get("images") or [])}
+    extra = "".join("window.%s = %s;\n" % (name, json.dumps(fn(), ensure_ascii=False, separators=(",", ":")))
+                    for name, fn in EXTRA_GLOBALS)
     pathlib.Path("assets/catalogue.js").write_text(
         "window.BGS_CATALOGUE = " + json.dumps(_clean(cat), ensure_ascii=False) + ";\n"
-        "window.BGS_IMGV = " + json.dumps({k: v for k, v in imgv.items() if v}, separators=(",", ":")) + ";\n")
+        "window.BGS_IMGV = " + json.dumps({k: v for k, v in imgv.items() if v}, separators=(",", ":")) + ";\n"
+        + extra)
     return len(cat)
 
 

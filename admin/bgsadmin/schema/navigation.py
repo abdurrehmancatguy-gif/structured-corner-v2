@@ -1,6 +1,7 @@
 """Navigation (flow/content/navigation.json): the category bar and homepage
 circles (one list feeds both), the phone tab bar and the footer."""
-RESOURCE = {"name": "navigation", "label": "Navigation", "kind": "document"}
+RESOURCE = {"name": "navigation", "label": "Navigation", "kind": "document",
+            "intro": "The category bar and homepage circles, the phone tab bar and the footer."}
 
 UPLOAD = "New circle pictures arrive with the media stage."
 

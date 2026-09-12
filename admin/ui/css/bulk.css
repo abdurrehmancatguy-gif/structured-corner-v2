@@ -1,0 +1,39 @@
+/* Bulk editor: a spreadsheet grid inside the card, scrolling on its own so
+   the header row and the name column stay in view. A changed cell takes the
+   gold wash, a cell with a problem a red outline and its message. */
+.bulk-keys{margin:0;padding:10px 14px;color:var(--mut);font-size:12.5px;border-bottom:1px solid var(--hair)}
+.bulk-status{margin:0;padding:8px 14px;font-size:12.5px;font-weight:600;border-bottom:1px solid var(--hair)}
+.bulk-status:empty{display:none}
+.bulk-stale .b-actions{display:flex;flex-wrap:wrap;gap:8px}
+/* contain:inline-size keeps the grid's width out of the page's: on a phone
+   the one-column layout would otherwise widen to fit the grid. position
+   makes this box the one the cells' screen-reader text is placed in, so that
+   text scrolls with the grid instead of widening the page. */
+.bulk-wrap{position:relative;overflow:auto;max-height:calc(100vh - 300px);min-height:220px;scroll-padding:44px 0 0 240px;
+  contain:inline-size}
+.grid{border-collapse:separate;border-spacing:0;min-width:100%}
+.grid th,.grid td{border-bottom:1px solid var(--hair);border-right:1px solid var(--hair);text-align:left;vertical-align:top}
+.g-h{position:sticky;top:0;z-index:2;padding:10px 12px;background:#fcfaf6;border-bottom:1px solid var(--line);
+  font-size:12px;color:var(--mut);font-weight:650;white-space:nowrap}
+.g-first{position:sticky;left:0;z-index:1;min-width:210px;max-width:260px}
+.g-h.g-first{z-index:3}
+.g-cell{padding:8px 12px;height:44px;cursor:default;font-weight:400;white-space:nowrap;background:#fff}
+.g-cell.g-first{font-weight:650;white-space:normal}
+.g-money,.g-stock,.g-int{text-align:right;font-variant-numeric:tabular-nums}
+.grid .g-h.g-money,.grid .g-h.g-stock,.grid .g-h.g-int{text-align:right}
+.g-cell:focus{outline:2px solid var(--gold);outline-offset:-2px}
+.g-cell.ro{background:#fcfaf6;color:var(--mut)}
+.g-cell.changed{background:var(--gold-l)}
+.g-cell.invalid{box-shadow:inset 0 0 0 2px var(--red)}
+.grid tr.stale .g-first{background:var(--amber-l)}
+.g-cell.editing{padding:5px 6px}
+.g-val{display:block}
+.g-val.muted{color:var(--faint)}
+.g-note,.g-id{display:block;font-size:11.5px;color:var(--faint);font-weight:400}
+.g-err{display:block;margin-top:2px;color:var(--red);font-size:11.5px;font-weight:650;white-space:normal;
+  min-width:150px;max-width:230px;text-align:left}
+.g-stale{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;align-items:center}
+.g-input{width:100%;min-width:96px;min-height:32px;padding:4px 10px;border:1px solid var(--ink);border-radius:var(--pill);
+  font:inherit;background:#fff;color:var(--ink)}
+.g-input:focus{outline:2px solid var(--gold);outline-offset:1px}
+@media (max-width:900px){ .bulk-wrap{max-height:none} .g-first{min-width:160px} }
