@@ -210,6 +210,16 @@ class PagesTests(_Pages, unittest.TestCase):
         self.assertEqual(st, 422, res)
         self.assertIn("unknown_product", [e["code"] for e in res["error"]["details"]])
 
+    def test_the_discovery_band_product_cannot_be_deleted(self):
+        st, p = self.b.api("GET", "products/discovery-trio")
+        self.assertEqual(st, 200, p)
+        self.assertIn({"where": "Pages, Homepage bands, Discovery band", "link": "#/content/pages/home"}, p["refs"])
+        stored = (self.flow / "content" / "pages.json").read_bytes()
+        st, res = self.b.api("DELETE", "products/discovery-trio", rev=p["rev"])
+        self.assertEqual((st, res["error"]["code"]), (409, "referenced"), res)
+        self.assertIn("discovery-trio", self.b.content("products"))
+        self.assertEqual((self.flow / "content" / "pages.json").read_bytes(), stored)
+
     def test_rules_legal_name_and_title_suffix_come_from_settings(self):
         st, d = self.b.api("GET", "documents/settings")
         before = copy.deepcopy(d["data"])
