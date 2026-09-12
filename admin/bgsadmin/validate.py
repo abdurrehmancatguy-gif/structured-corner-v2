@@ -155,6 +155,42 @@ def check(fields, data, prefix, errors, ctx):
                     errors.append(err("%s/%d" % (ptr, i), "type", "Each entry must be a set of fields."))
                     continue
                 check(f.get("fields", []), item, "%s/%d" % (ptr, i), errors, ctx)
+        elif t == "dictionary":
+            dictionary(f, v, ptr, errors)
+
+
+def escape(key):
+    """A key as one JSON pointer segment."""
+    return str(key).replace("~", "~0").replace("/", "~1")
+
+
+def dictionary(f, v, ptr, errors):
+    """Text keys mapped to text values, such as English labels to their Arabic.
+    A key must be the exact trimmed text it stands for: the storefront looks
+    labels up by it. An empty value is allowed and means not translated yet.
+    Each error names its entry (key) and which side it is about (part)."""
+    if not isinstance(v, dict):
+        errors.append(err(ptr, "type", "This must be a list of texts with their translations."))
+        return
+    if f.get("max") is not None and len(v) > f["max"]:
+        errors.append(err(ptr, "too_many", "Keep this to %d entries." % f["max"]))
+    kmax, vmax = f.get("keyMaxLength"), f.get("maxLength")
+    for k, val in v.items():
+        at = "%s/%s" % (ptr, escape(k))
+        p = text_problem(k)
+        if not p and not k.strip():
+            p = ("required", "Write the text this entry translates.")
+        elif not p and k != k.strip():
+            p = ("spaces", "Remove the spaces at the start or end: the site matches the text exactly.")
+        elif not p and kmax and len(k) > kmax:
+            p = ("too_long", "Keep this under %d characters." % kmax)
+        if p:
+            errors.append(dict(err(at, *p), key=k, part="key"))
+        p = text_problem(val) if isinstance(val, str) else ("type", "The translation must be text.")
+        if not p and vmax and len(val) > vmax:
+            p = ("too_long", "Keep this under %d characters." % vmax)
+        if p:
+            errors.append(dict(err(at, *p), key=k, part="value"))
 
 
 def claim_warnings(texts, prefix=""):

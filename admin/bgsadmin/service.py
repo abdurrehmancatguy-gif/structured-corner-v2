@@ -29,7 +29,8 @@ def changed(old, new):
 
 def field_for(fields, ptr):
     """The schema field that owns ptr (the most specific one), or None.
-    Inside a rows field, the item's own field owns it."""
+    Inside a rows field, the item's own field owns it; inside a dictionary,
+    every entry is the dictionary's own, whatever its key."""
     best = None
     for f in fields:
         p = f["path"]
@@ -37,6 +38,8 @@ def field_for(fields, ptr):
             best = f
     if best is None:
         return None, []
+    if best["type"] == "dictionary":
+        return best, []
     rest = ptr[len(best["path"]):]
     if best["type"] == "rows" and rest:
         parts = rest.split("/", 2)
