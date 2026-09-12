@@ -13,8 +13,10 @@ LOGIN = "Arrives with login: a tracking ID adds a third-party script to every pa
 
 FIELDS = [
     {"path": "/store/name", "type": "text", "label": "Store name", "required": True, "maxLength": 60, "group": "Store details"},
-    {"path": "/store/legal_name", "type": "text", "label": "Legal name", "maxLength": 80, "group": "Store details", "rendered": False, "notShown": NOT_SHOWN},
-    {"path": "/store/location", "type": "text", "label": "Location", "maxLength": 60, "group": "Store details", "rendered": False, "notShown": NOT_SHOWN},
+    {"path": "/store/legal_name", "type": "text", "label": "Legal name", "maxLength": 80, "group": "Store details",
+     "help": "In every page's footer, before the location, and in its copyright line. Left empty, the footer uses the store name."},
+    {"path": "/store/location", "type": "text", "label": "Location", "maxLength": 60, "group": "Store details",
+     "help": "In every page's footer, after the legal name."},
     {"path": "/store/currency", "type": "text", "label": "Currency", "group": "Store details", "locked": "The shop sells in one currency, AED."},
     # The rules below are printed on the pages and applied by shop.js, which
     # reads them from catalogue.js (window.BGS_RULES). Cross-field checks (the
@@ -60,7 +62,9 @@ FIELDS = [
     {"path": "/brand/icons/png16", "type": "image", "label": "Favicon 16 px", "group": "Brand", "readonly": UPLOAD},
     {"path": "/brand/icons/apple", "type": "image", "label": "Home screen icon", "group": "Brand", "readonly": UPLOAD},
     {"path": "/seo/og_image", "type": "image", "label": "Link preview image", "group": "Search and sharing", "readonly": UPLOAD},
-    {"path": "/seo/default_title_suffix", "type": "text", "label": "Title suffix", "maxLength": 40, "group": "Search and sharing", "rendered": False, "notShown": NOT_SHOWN},
+    {"path": "/seo/default_title_suffix", "type": "text", "label": "Title suffix", "required": True, "maxLength": 40, "group": "Search and sharing",
+     "help": "Follows each page's name in the browser tab and in link previews, after a bar, as in Your Bag | BGS Corner. "
+             "The page-not-found page keeps its own title for now."},
     {"path": "/seo/default_description", "type": "textarea", "label": "Default description", "maxLength": 160, "group": "Search and sharing", "rendered": False, "notShown": NOT_SHOWN},
     {"path": "/social/instagram", "type": "href", "social": True, "label": "Instagram", "group": "Social", "rendered": False, "notShown": NOT_SHOWN},
     {"path": "/social/whatsapp", "type": "href", "social": True, "label": "WhatsApp", "group": "Social", "rendered": False, "notShown": NOT_SHOWN},

@@ -63,14 +63,16 @@ class RulesTests(unittest.TestCase):
             self.assertIn("Free UAE delivery over AED 200", home)
             self.assertIn("free over AED 200.", home)
             product = self.page("product.html")
-            self.assertIn("Free over AED 200 &middot; same-day before 2 PM", product)
+            # the line is page text now (pages.json), with the middle dot as a character
+            self.assertIn("Free over AED 200 %s same-day before 2 PM" % chr(0xb7), product)
             self.assertIn("Free over AED 200. AED 12 below that.", product)
             self.assertIn("<span>Free UAE delivery over AED 200</span><b data-p1lb", self.page("cart.html"))
             # checkout is locked and keeps its own copy of the numbers
             self.assertIn("free over AED 150", self.page("checkout.html"))
-            # the promises under the banner still say 150: named, not blocking
+            # the promises under the banner still say 150: named, not blocking. The
+            # top strip writes the rule as {free_over}, so it follows and is not named.
             paths = {w["path"] for w in res["warnings"] if w["code"] == "stale_rule"}
-            self.assertEqual(paths, {"/usp/0/title", "/strip/right_links/0/label"})
+            self.assertEqual(paths, {"/usp/0/title"})
             # and checkout says so in text nobody can edit here
             locked = [w for w in res["warnings"] if w["code"] == "locked_page"]
             self.assertEqual([w["rules"] for w in locked], [["free_delivery_over"]])

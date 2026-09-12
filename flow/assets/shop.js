@@ -23,6 +23,20 @@ function bgsRule(path, fallback) {
   });
   return v !== null && typeof v === typeof fallback && Array.isArray(v) === Array.isArray(fallback) ? v : fallback;
 }
+/* Page text shop.js writes after load, from pages.json and settings.json,
+   which build.py writes into catalogue.js as BGS_COPY:
+   bgsCopy("product.share.copied", "Link copied"). Each fallback is the text
+   the page had before it moved into content, so a page with an older
+   catalogue.js reads as it did. It goes in with textContent, never as markup. */
+function bgsCopy(path, fallback) {
+  var v = window.BGS_COPY;
+  path.split(".").forEach(function (k) {
+    v = v && typeof v === "object" && Object.prototype.hasOwnProperty.call(v, k) ? v[k] : undefined;
+  });
+  return typeof v === "string" && v !== "" ? v : fallback;
+}
+/* the end of every tab title: " | BGS Corner" */
+function bgsTitleSuffix() { return " | " + bgsCopy("title_suffix", "BGS Corner"); }
 /* Each feature below runs on its own: an error in one (bad data in storage, a
    missing element) is logged and the rest still work. As one plain script, the
    first throw stopped every feature after it, the bag included. */
@@ -207,10 +221,10 @@ bgsRun(function () {
          page; point it at this product's own address */
       var canon = document.querySelector('link[rel="canonical"]');
       if (canon) canon.href = new URL("product.html?p=" + encodeURIComponent(key), canon.href).href;
-      document.title = pr.name + ": " + pr.meta + " | BGS Corner";
+      document.title = pr.name + ": " + pr.meta + bgsTitleSuffix();
       T(".buy h1", pr.name);
       var crumb = document.querySelector("section .eyebrow");
-      if (crumb) crumb.textContent = "Home / " + pr.crumb + " / " + pr.name;
+      if (crumb) crumb.textContent = bgsCopy("crumb_home", "Home") + " / " + pr.crumb + " / " + pr.name;
 
       /* the four-line story */
       var d = document.querySelector("[data-desc]");
@@ -304,19 +318,28 @@ bgsRun(function () {
         }
       }
 
-      /* availability + batch rows */
+      /* availability + batch rows, found by the labels build.py printed from
+         the same content */
+      var AVAIL = bgsCopy("product.specs.availability", "Availability"),
+          BATCH = bgsCopy("product.specs.batch", "Batch number");
       var rows = document.querySelectorAll(".buy .kv div");
       rows.forEach(function (r) {
-        var k = r.firstElementChild ? r.firstElementChild.textContent : "";
+        var k = r.firstElementChild ? r.firstElementChild.textContent.trim() : "";
         var v = r.lastElementChild;
-        if (/Availability/.test(k)) {
+        if (k === AVAIL) {
           if (typeof pr.stock === "number") {
-            v.innerHTML = pr.stock <= bgsRule("low_stock_at", 5)
-              ? '<b style="color:var(--red)">Only ' + pr.stock + " left</b>"
-              : '<span style="color:var(--green);font-weight:600">In stock</span>';
+            var low = pr.stock <= bgsRule("low_stock_at", 5), st = document.createElement(low ? "b" : "span");
+            st.setAttribute("style", low ? "color:var(--red)" : "color:var(--green);font-weight:600");
+            st.textContent = low ? bgsCopy("product.specs.only_left", "Only {n} left").replace("{n}", pr.stock)
+                                 : bgsCopy("product.specs.in_stock", "In stock");
+            v.textContent = "";
+            v.appendChild(st);
           }
         }
-        if (/Batch number/.test(k) && pr.sku) { r.firstElementChild.textContent = "Barcode"; v.textContent = pr.sku; }
+        if (k === BATCH && pr.sku) {
+          r.firstElementChild.textContent = bgsCopy("product.specs.barcode", "Barcode");
+          v.textContent = pr.sku;
+        }
       });
 
       /* blocks for other kinds of product (data-cats), and the 3 ml
@@ -353,8 +376,16 @@ bgsRun(function () {
       /* declared ingredients go inside the Ingredients tab */
       if (pr.ing) {
         var ing = document.querySelector("[data-ingpanel]");
-        if (ing) ing.innerHTML = '<span class="eyebrow">Declared ingredients</span>' +
-          '<p style="margin:8px 0 0">' + pr.ing + "</p>";
+        if (ing) {
+          var ih = document.createElement("span"), ip = document.createElement("p");
+          ih.className = "eyebrow";
+          ih.textContent = bgsCopy("product.ingredients.heading", "Declared ingredients");
+          ip.setAttribute("style", "margin:8px 0 0");
+          ip.textContent = pr.ing;
+          ing.textContent = "";
+          ing.appendChild(ih);
+          ing.appendChild(ip);
+        }
       }
     } else {
       /* no id, or one the catalogue does not have (retired, mistyped, or an
@@ -363,8 +394,18 @@ bgsRun(function () {
          after the product section (the sticky bar, the tabs, the related
          row) describes that placeholder too, so it goes with it. */
       var pdp = document.querySelector(".pdp");
-      pdp.innerHTML = '<div class="notfound"><h1>We couldn&rsquo;t find that product</h1>' +
-        '<p><a class="btn solid" href="collection.html">See all products</a></p></div>';
+      var nf = document.createElement("div"), nh = document.createElement("h1"),
+          np = document.createElement("p"), na = document.createElement("a");
+      nf.className = "notfound";
+      nh.textContent = bgsCopy("product.not_found.title", "We couldn’t find that product");
+      na.className = "btn solid";
+      na.setAttribute("href", "collection.html");
+      na.textContent = bgsCopy("product.not_found.cta", "See all products");
+      np.appendChild(na);
+      nf.appendChild(nh);
+      nf.appendChild(np);
+      pdp.textContent = "";
+      pdp.appendChild(nf);
       var sec = pdp.closest("section"), next = sec && sec.nextElementSibling;
       while (next) {
         var gone = next;
@@ -373,8 +414,8 @@ bgsRun(function () {
       }
       document.body.classList.remove("has-sticky");
       var nfc = document.querySelector("section .eyebrow");
-      if (nfc) nfc.textContent = "Home / Products";
-      document.title = "Product not found | BGS Corner";
+      if (nfc) nfc.textContent = bgsCopy("crumb_home", "Home") + " / " + bgsCopy("product.not_found.crumb", "Products");
+      document.title = bgsCopy("product.not_found.page_title", "Product not found") + bgsTitleSuffix();
       var nr = document.createElement("meta"); nr.name = "robots"; nr.content = "noindex";
       document.head.appendChild(nr);
     }
@@ -873,7 +914,7 @@ bgsRun(function () {
   function pillsFor(st) {
     var out = [];
     st.cat.forEach(function (c) { out.push(["cat", c, catText(c, "label") || c]); });
-    st.gender.forEach(function (g) { out.push(["gender", g, g]); });
+    st.gender.forEach(function (g) { out.push(["gender", g, bgsCopy("collection.genders." + g, g)]); });
     st.price.forEach(function (b) { var p = b.split("-");
       out.push(["price", b, +p[1] > 99998 ? "AED " + p[0] + "+" : "AED " + p[0] + " to " + p[1]]); });
     if (st.q) out.push(["q", st.q, '"' + st.q + '"']);
@@ -902,8 +943,9 @@ bgsRun(function () {
         cr = document.querySelector("[data-crumb]");
     if (t) t.textContent = title;
     if (intro) intro.textContent = catText(one || "all", "intro");
-    if (cr) cr.textContent = "Home / " + (one ? "Categories / " : "") + catText(one || "all", "crumb");
-    document.title = title + " | BGS Corner";
+    if (cr) cr.textContent = bgsCopy("crumb_home", "Home") + " / " +
+      (one ? bgsCopy("collection.crumb_categories", "Categories") + " / " : "") + catText(one || "all", "crumb");
+    document.title = title + bgsTitleSuffix();
 
     document.querySelectorAll("[data-facet]").forEach(function (cb) {
       cb.checked = st[cb.getAttribute("data-facet")].indexOf(cb.value) > -1; });
@@ -1373,13 +1415,15 @@ bgsRun(function () {
 
   var label = btn.querySelector("[data-sharelabel]");
   var reset = null;
+  var SHARE = bgsCopy("product.share.label", "Share"), COPIED = bgsCopy("product.share.copied", "Link copied"),
+      FAILED = bgsCopy("product.share.failed", "Could not copy");
 
   function say(text, ok) {
     label.textContent = text;
     btn.classList.toggle("done", ok);
     clearTimeout(reset);
     reset = setTimeout(function () {
-      label.textContent = "Share";
+      label.textContent = SHARE;
       btn.classList.remove("done");
     }, 2200);
   }
@@ -1391,7 +1435,7 @@ bgsRun(function () {
     var h1 = document.querySelector(".buy h1");
     var name = (pr && pr.name) || (h1 && h1.textContent.trim()) || "BGS Corner";
     return {
-      title: name + " | BGS Corner",
+      title: name + bgsTitleSuffix(),
       text: pr ? name + ", AED " + pr.price : name,
       url: location.origin + location.pathname +
            (key ? "?p=" + encodeURIComponent(key) : "")
@@ -1400,10 +1444,10 @@ bgsRun(function () {
 
   /* Only reports a copy the clipboard actually accepted. */
   function copy(url) {
-    if (!navigator.clipboard) return say("Could not copy", false);
+    if (!navigator.clipboard) return say(FAILED, false);
     navigator.clipboard.writeText(url).then(
-      function () { say("Link copied", true); },
-      function () { say("Could not copy", false); }
+      function () { say(COPIED, true); },
+      function () { say(FAILED, false); }
     );
   }
 

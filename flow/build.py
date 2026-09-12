@@ -75,7 +75,7 @@ CONTENT_DIR = pathlib.Path("content")
 
 def load_content():
     out = {}
-    for f in ("settings", "navigation", "copy", "home", "products"):
+    for f in ("settings", "navigation", "copy", "home", "products", "pages"):
         out[f] = json.loads((CONTENT_DIR / (f + ".json")).read_text())
     return out
 
@@ -249,6 +249,116 @@ if _BAD_CATS:
     sys.exit("build failed:\n  " + "\n  ".join("copy.json " + p for p in _BAD_CATS))
 EXTRA_GLOBALS.append(("BGS_CATS", lambda: CAT_TEXT))
 
+# ---------------------------------------------------------------- page text
+# The words of every page's shell, the homepage bands, the collection page and
+# the product page are content: pages.json, with the top strip and the search
+# hint in copy.json and the legal name, location and title suffix in
+# settings.json. The templates below print them through page_text(), which
+# escapes them and fills in the {tokens} a text may carry: a store rule, so
+# the words follow Settings; {n}, a count shop.js keeps up to date; or the
+# Discovery band's {price}, read from its product. What shop.js writes into
+# these pages after they load reaches it as window.BGS_COPY: each page's part
+# of the build adds its own strings to COPY_JS. A value that is missing, empty
+# or has a token its place does not fill stops the build, listed with the
+# others, rather than print a blank or a brace.
+_BAD_PAGES = []
+_TOKEN = re.compile(r"\{([a-z_]*)\}")
+RULE_TOKENS = {"free_over": RULE_TEXT["rule_free_over"], "delivery_fee": RULE_TEXT["rule_delivery_fee"],
+               "sameday_fee": RULE_TEXT["rule_sameday_fee"], "cutoff": RULE_TEXT["rule_cutoff"],
+               "cutoff_short": RULE_TEXT["rule_cutoff_short"]}
+RULE_TOKENS = {k: esc(v) for k, v in RULE_TOKENS.items()}
+
+def _value(path, doc="pages"):
+    """The value at a dotted path in a content document, or None."""
+    cur = C[doc]
+    for part in path.split("."):
+        if isinstance(cur, dict):
+            cur = cur.get(part)
+        elif isinstance(cur, list) and part.isdigit() and int(part) < len(cur):
+            cur = cur[int(part)]
+        else:
+            return None
+    return cur
+
+def raw_text(path, doc="pages", empty_ok=False):
+    """Text as the document holds it: for shop.js, which sets it with
+    textContent and fills its own {n}."""
+    v = _value(path, doc)
+    if not isinstance(v, str) or not (empty_ok or v.strip()):
+        _BAD_PAGES.append("%s.json %s must be text" % (doc, path))
+        return ""
+    return v
+
+def page_text(path, tokens=None, doc="pages", need=(), empty_ok=False):
+    """Text for a template, escaped. Where the place takes tokens (tokens is a
+    dict), each {token} is then replaced by its value, which is already
+    markup-safe (plain text escaped, or a tag the build made, like the count
+    shop.js updates); elsewhere a brace is only a character."""
+    v = raw_text(path, doc, empty_ok)
+    if tokens is None:
+        return esc(v)
+    where = "%s.json %s" % (doc, path)
+    for t in need:
+        if "{%s}" % t not in v:
+            _BAD_PAGES.append("%s must contain {%s}" % (where, t))
+    if re.search(r"[{}]", _TOKEN.sub("", v)):
+        _BAD_PAGES.append("%s has a brace that is not part of a {token}" % where)
+    def fill(m):
+        if m.group(1) in tokens:
+            return tokens[m.group(1)]
+        _BAD_PAGES.append("%s has {%s}, which it cannot use" % (where, m.group(1)))
+        return ""
+    return _TOKEN.sub(fill, esc(v))
+
+def page_rows(path, parts, tokens=None):
+    """A list of entries in pages.json, each as a tuple of its parts' text."""
+    rows = _value(path)
+    if not isinstance(rows, list) or not rows or not all(isinstance(r, dict) for r in rows):
+        _BAD_PAGES.append("pages.json %s must be a list of entries" % path)
+        return []
+    return [tuple(page_text("%s.%d.%s" % (path, i, p), tokens) for p in parts) for i in range(len(rows))]
+
+def grid_rows(rows):
+    """Heading-and-sentence cells, as the product page's tabs lay them out."""
+    return "\n      ".join('<div><span class="eyebrow">%s</span><p style="margin:8px 0 0">%s</p></div>' % r
+                           for r in rows)
+
+def page_href(path):
+    return esc(raw_text(path))
+
+COPY_JS = {}
+EXTRA_GLOBALS.append(("BGS_COPY", lambda: COPY_JS))
+
+# The shell every page shares. The legal name, when cleared, falls back to the
+# store's name, so the footer never says a bare copyright sign.
+_LEGAL = SETTINGS.get("legal_name") or SETTINGS.get("name") or ""
+_YEAR = _value("shell.footer.copyright_year")
+if isinstance(_YEAR, bool) or not isinstance(_YEAR, int) or not 2000 <= _YEAR <= 2100:
+    _BAD_PAGES.append("pages.json shell.footer.copyright_year must be a year")
+    _YEAR = 0
+_CONTACT = [page_text("shell.footer.contact." + k, empty_ok=True) for k in ("address", "hours", "phone")]
+SHELL_TEXT = {
+    "title_suffix": page_text("seo.default_title_suffix", doc="settings"),
+    "noscript": page_text("shell.noscript"),
+    "countdown": page_text("strip.countdown_line", RULE_TOKENS, doc="copy"),
+    "strip_links": "".join(
+        ('<a href="%s">%s</a>' % (esc(l.get("href")), page_text("strip.right_links.%d.label" % i, RULE_TOKENS, doc="copy"))
+         if isinstance(l, dict) and l.get("href") else
+         "<span>%s</span>" % page_text("strip.right_links.%d.label" % i, RULE_TOKENS, doc="copy"))
+        for i, l in enumerate(_value("strip.right_links", "copy") or [])),
+    "search_ph": page_text("search_placeholder", doc="copy"),
+    "act_account": page_text("shell.header.account"),
+    "act_wishlist": page_text("shell.header.wishlist"),
+    "act_bag": page_text("shell.header.bag"),
+    "nl_placeholder": page_text("shell.footer.newsletter.placeholder"),
+    "nl_button": page_text("shell.footer.newsletter.button"),
+    "legal_line": " &middot; ".join(esc(x) for x in (_LEGAL, SETTINGS.get("location") or "") if x),
+    "copyright": "&copy; %d %s" % (_YEAR, esc(_LEGAL)),
+}
+CRUMB_HOME = page_text("shell.crumb_home")
+COPY_JS["title_suffix"] = raw_text("seo.default_title_suffix", doc="settings")
+COPY_JS["crumb_home"] = raw_text("shell.crumb_home")
+
 def tab_link(label, href, icon, on):
     """One tab-bar entry, drawn as its icon. The label stays as the accessible
        name - aria-label for screen readers, title for a pointer - because an
@@ -373,45 +483,45 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
     return """<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>%(title)s | BGS Corner</title>
+<title>%(title)s | %(title_suffix)s</title>
 <meta name="description" content="%(desc)s">
 %(robots)s<link rel="canonical" href="%(canon)s">
 <meta property="og:type" content="website">
-<meta property="og:title" content="%(title)s | BGS Corner">
+<meta property="og:title" content="%(title)s | %(title_suffix)s">
 <meta property="og:description" content="%(desc)s">
 <meta property="og:image" content="%(ogimg)s">
 <meta name="twitter:card" content="summary_large_image">
 %(icons)s
 %(preload)s<link rel="stylesheet" href="%(css)s"></head><body class="%(page)s">
-<noscript><div class="nojs">This shop needs JavaScript for products, the bag and checkout. Please turn it on in your browser.</div></noscript>
+<noscript><div class="nojs">%(noscript)s</div></noscript>
 <div class="strip"><div class="wrap">
-  <span>%(clock)s Order by %(rule_cutoff)s for delivery today in Dubai<span data-cutoff hidden> &middot; <b></b></span></span>
-  <span class="r"><span>Free UAE delivery over %(rule_free_over)s</span><span>Cash on delivery</span><a href="track-order.html">Track order</a><a href="#" data-langtoggle>العربية</a></span>
+  <span>%(clock)s %(countdown)s<span data-cutoff hidden> &middot; <b></b></span></span>
+  <span class="r">%(strip_links)s<a href="#" data-langtoggle>العربية</a></span>
 </div></div>
 <div class="mast"><div class="wrap">
   %(brandlogo)s
   <form class="search" action="collection.html" method="get" role="search">
-    <input name="q" aria-label="Search products" placeholder="Search ouds, oud, bakhoor&hellip;"><button type="submit" class="go" aria-label="Search">%(search)s</button></form>
+    <input name="q" aria-label="Search products" placeholder="%(search_ph)s"><button type="submit" class="go" aria-label="Search">%(search)s</button></form>
   <div class="acts">
-    <a class="act" href="account.html">%(user)s<span>Account</span></a>
-    <a class="act" href="account.html">%(heart)s<span>Wishlist</span></a>
-    <a class="act" href="cart.html">%(bag)s<span>Bag</span><i class="n" data-bagcount hidden>0</i></a>
+    <a class="act" href="account.html">%(user)s<span>%(act_account)s</span></a>
+    <a class="act" href="account.html">%(heart)s<span>%(act_wishlist)s</span></a>
+    <a class="act" href="cart.html">%(bag)s<span>%(act_bag)s</span><i class="n" data-bagcount hidden>0</i></a>
   </div>
 </div>
-<div class="msearch"><form class="search" action="collection.html" method="get" role="search"><input name="q" aria-label="Search products" placeholder="Search ouds, oud, bakhoor&hellip;"><button type="submit" class="go" aria-label="Search">%(search)s</button></form></div></div>
+<div class="msearch"><form class="search" action="collection.html" method="get" role="search"><input name="q" aria-label="Search products" placeholder="%(search_ph)s"><button type="submit" class="go" aria-label="Search">%(search)s</button></form></div></div>
 %(catnav)s
 %(body)s
 <footer><div class="wrap"><div class="cols">
   <div>%(footlogo)s
-    <p>BGS Corner General Trading LLC &middot; Dubai, UAE</p>
-    <p>%(addr)s</p><div class="nl"><span class="field">Your email</span><span class="btn">Join</span></div></div>
+    <p>%(legal_line)s</p>
+    <p>%(addr)s</p><div class="nl"><span class="field">%(nl_placeholder)s</span><span class="btn">%(nl_button)s</span></div></div>
 %(footcols)s
-</div><div class="bot"><span>&copy; 2026 BGS Corner General Trading LLC</span>
+</div><div class="bot"><span>%(copyright)s</span>
 <span>Cards &middot; Apple Pay &middot; Tabby &middot; Tamara &middot; Cash on delivery</span></div></div></footer>
 <div class="tabbar">%(tabs)s</div>
 <script src="%(catjs)s"></script>
 <script src="%(shopjs)s"></script></body></html>
-""" % dict(title=title, body=body, page=page, css=V("assets/flow.min.css"),
+""" % dict(SHELL_TEXT, title=title, body=body, page=page, css=V("assets/flow.min.css"),
    catjs=V("assets/catalogue.js"), shopjs=V("assets/shop.js"),
    preload=PRELOAD if page == "page-product" else "",
    robots='<meta name="robots" content="noindex,follow">\n' if page in NOINDEX else "",
@@ -419,10 +529,10 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
    ogimg=esc(((SITE_URL + "/") if SITE_URL else "") + (V(SEO["og_image"]) if SEO.get("og_image") else "")),
    catnav=catnav(), tabs="".join(tab_link(l, h, ic, tab) for l, h, ic in TABS),
    clock=sv("clock",13,2), menu=sv("menu",22), chev=sv("chev",14,2), search=sv("search",17),
-   rule_cutoff=RULE_TEXT["rule_cutoff"], rule_free_over=RULE_TEXT["rule_free_over"],
    user=sv("user"), heart=sv("heart"), bag=sv("bag"),
    brandlogo=header_logo(), footlogo=footer_logo(), footcols=footer_cols(), icons=favicon_links(),
-   addr=slot("address, hours, phone"))
+   # while no contact detail is filled in, the footer keeps the placeholder it has always shown
+   addr=" &middot; ".join(x for x in _CONTACT if x) or slot("address, hours, phone"))
 
 # ---------------------------------------------------------------- DATA
 # names + sizes: BGS Corner Sheet.xlsx "OUD & Bakhoor Stock"; prices: brief §3
@@ -633,8 +743,37 @@ def reels():
                      'aria-hidden="true"></video><span>%s</span></a>'
                      % (esc(href), esc(V(it["still"])), esc(V(it["video"])), esc(it.get("label") or pr.get("name", ""))))
     return ('<section class="alt reels"><div class="wrap">\n'
-            '  <div class="sec-h"><h2>%s</h2><a href="collection.html?cat=edp">All EDP sprays &rarr;</a></div>\n'
-            '  <div class="reelrow">%s</div>\n</div></section>\n' % (esc(r.get("title", "")), "".join(cards)))
+            '  <div class="sec-h"><h2>%s</h2><a href="%s">%s &rarr;</a></div>\n'
+            '  <div class="reelrow">%s</div>\n</div></section>\n'
+            % (esc(r.get("title", "")), page_href("index.reels_link.href"), page_text("index.reels_link.label"),
+               "".join(cards)))
+
+def discovery_band():
+    """The band under the attars shelf, from pages.json. Its heading's {price}
+    is its product's price, so the band follows the product."""
+    pid = _value("index.discovery_band.product")
+    pr = PRODUCTS.get(pid) if isinstance(pid, str) else None
+    if not isinstance(pr, dict):
+        _BAD_PAGES.append("pages.json index.discovery_band.product names no product")
+        pr = {}
+    price = esc("AED " + money(pr.get("price")))
+    return {"db_eyebrow": page_text("index.discovery_band.eyebrow"),
+            "db_heading": page_text("index.discovery_band.heading", {"price": price}),
+            "db_body": page_text("index.discovery_band.body"),
+            "db_cta": page_text("index.discovery_band.cta_label"),
+            "db_href": page_href("index.discovery_band.cta_href")}
+
+def promos():
+    """The promo tiles. Their pictures are still the Banner placeholder."""
+    return "\n    ".join(
+        '<a class="promo" href="%s"><span class="none">Banner</span><div><b>%s</b><span>%s</span></div></a>' % (href, t, s)
+        for t, s, href in page_rows("index.promos", ("title", "sub", "href")))
+
+# The scent family tiles' links, colours and drawings stay in the template;
+# their words come from pages.json "index.families", keyed by the same slug.
+FAMILY_SLUGS = ("oud-and-woods", "amber-and-spice", "musk-and-clean", "floral-veil", "fresh-and-citrus",
+                "sweet-and-gourmand", "reserve", "bakhoor-and-home")
+FAMILY_TEXT = {"fam_" + s.replace("-", "_"): page_text("index.families." + s) for s in FAMILY_SLUGS}
 
 def hero_images():
     """One photograph per slide, so the carousel changes picture and not only
@@ -713,10 +852,10 @@ home = """
 </div></section>
 
 <section><div class="wrap"><div class="band">
-  <div><span class="eyebrow gold-d">Start here</span>
-    <h3>Discovery Trio, AED 129</h3>
-    <p>Three 3 ml ouds. Whatever you spend comes back as a single-use voucher on any bottle over AED 75, valid 60 days.</p></div>
-  <a class="btn gold" href="gift-box.html">Choose three</a>
+  <div><span class="eyebrow gold-d">%(db_eyebrow)s</span>
+    <h3>%(db_heading)s</h3>
+    <p>%(db_body)s</p></div>
+  <a class="btn gold" href="%(db_href)s">%(db_cta)s</a>
 </div></div></section>
 
 <section><div class="wrap">
@@ -732,22 +871,20 @@ home = """
 <section><div class="wrap">
   <div class="sec-h"><h2>%(fam_h)s</h2></div>
   <div class="fam">
-    <a href="collection.html?family=oud-and-woods" style="background:var(--f-oud)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20c4-2 6-6 6-10M8 20c3-2 5-5 6-9M13 20c2-2 4-5 5-8"/><circle cx="17" cy="6" r="2.5"/></svg><b>Oud &amp; Woods</b><span>%(ct)s</span></a>
-    <a href="collection.html?family=amber-and-spice" style="background:var(--f-amber)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.2 4.6L19 8.3l-3.5 3.4.9 4.9-4.4-2.4-4.4 2.4.9-4.9L5 8.3l4.8-.7z"/></svg><b>Amber &amp; Spice</b><span>%(ct)s</span></a>
-    <a href="collection.html?family=musk-and-clean" style="background:var(--f-musk)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.5 6 10.5A6 6 0 0 1 6 13.5C6 9.5 12 3 12 3z"/></svg><b>Musk &amp; Clean</b><span>%(ct)s</span></a>
-    <a href="collection.html?family=floral-veil" style="background:var(--f-floral)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.5"/><path d="M12 3a3.2 3.2 0 0 1 0 6.4M12 21a3.2 3.2 0 0 0 0-6.4M3 12a3.2 3.2 0 0 1 6.4 0M21 12a3.2 3.2 0 0 0-6.4 0"/></svg><b>Floral Veil</b><span>%(ct)s</span></a>
-    <a href="collection.html?family=fresh-and-citrus" style="background:var(--f-fresh)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17M3.5 12h17M6 6l12 12M18 6L6 18"/></svg><b>Fresh &amp; Citrus</b><span>%(ct)s</span></a>
-    <a href="collection.html?family=sweet-and-gourmand" style="background:var(--f-sweet)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 21V10a5 5 0 0 1 10 0v11z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg><b>Sweet &amp; Gourmand</b><span>%(ct)s</span></a>
-    <a href="collection.html?family=reserve" style="background:var(--f-res)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8l4 3 4-6 4 6 4-3-2 11H6z"/></svg><b>Reserve</b><span>%(ct)s</span></a>
-    <a href="collection.html?family=bakhoor-and-home" style="background:var(--f-bak)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14h12l-1.5 6h-9z"/><path d="M4 14h16"/><path d="M11 10c0-2 2-3 2-5 2 2 2 3.5 1.5 5"/></svg><b>Bakhoor &amp; Home</b><span>%(ct)s</span></a>
+    <a href="collection.html?family=oud-and-woods" style="background:var(--f-oud)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20c4-2 6-6 6-10M8 20c3-2 5-5 6-9M13 20c2-2 4-5 5-8"/><circle cx="17" cy="6" r="2.5"/></svg><b>%(fam_oud_and_woods)s</b><span>%(ct)s</span></a>
+    <a href="collection.html?family=amber-and-spice" style="background:var(--f-amber)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.2 4.6L19 8.3l-3.5 3.4.9 4.9-4.4-2.4-4.4 2.4.9-4.9L5 8.3l4.8-.7z"/></svg><b>%(fam_amber_and_spice)s</b><span>%(ct)s</span></a>
+    <a href="collection.html?family=musk-and-clean" style="background:var(--f-musk)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.5 6 10.5A6 6 0 0 1 6 13.5C6 9.5 12 3 12 3z"/></svg><b>%(fam_musk_and_clean)s</b><span>%(ct)s</span></a>
+    <a href="collection.html?family=floral-veil" style="background:var(--f-floral)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.5"/><path d="M12 3a3.2 3.2 0 0 1 0 6.4M12 21a3.2 3.2 0 0 0 0-6.4M3 12a3.2 3.2 0 0 1 6.4 0M21 12a3.2 3.2 0 0 0-6.4 0"/></svg><b>%(fam_floral_veil)s</b><span>%(ct)s</span></a>
+    <a href="collection.html?family=fresh-and-citrus" style="background:var(--f-fresh)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17M3.5 12h17M6 6l12 12M18 6L6 18"/></svg><b>%(fam_fresh_and_citrus)s</b><span>%(ct)s</span></a>
+    <a href="collection.html?family=sweet-and-gourmand" style="background:var(--f-sweet)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 21V10a5 5 0 0 1 10 0v11z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg><b>%(fam_sweet_and_gourmand)s</b><span>%(ct)s</span></a>
+    <a href="collection.html?family=reserve" style="background:var(--f-res)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8l4 3 4-6 4 6 4-3-2 11H6z"/></svg><b>%(fam_reserve)s</b><span>%(ct)s</span></a>
+    <a href="collection.html?family=bakhoor-and-home" style="background:var(--f-bak)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14h12l-1.5 6h-9z"/><path d="M4 14h16"/><path d="M11 10c0-2 2-3 2-5 2 2 2 3.5 1.5 5"/></svg><b>%(fam_bakhoor_and_home)s</b><span>%(ct)s</span></a>
   </div>
 </div></section>
 
 <section style="padding-top:26px"><div class="wrap">
   <div class="grid g3 promos">
-    <a class="promo" href="gift-box.html"><span class="none">Banner</span><div><b>Build a gift box</b><span>Three or six scents, wrapped</span></div></a>
-    <a class="promo" href="collection.html?cat=gift-sets"><span class="none">Banner</span><div><b>Discovery 3 ml</b><span>Credit back on your first bottle</span></div></a>
-    <a class="promo" href="corporate.html"><span class="none">Banner</span><div><b>Corporate gifting</b><span>Quote above 20 units</span></div></a>
+    %(promos)s
   </div>
 </div></section>
 
@@ -760,7 +897,7 @@ home = """
   %(edp_h)s
   <div class="grid g5">%(edp)s</div>
 </div></section>
-%(reels)s""" % dict(reels=reels(), catstrip=catstrip(), usp=usp_strip(),
+%(reels)s""" % dict(discovery_band(), promos=promos(), reels=reels(), catstrip=catstrip(), usp=usp_strip(),
            hero=hero_slides(), hero_img=hero_images(), hero_dots=hero_dots(),
            hero_n=len(HOME["hero_slides"]),
            qb_eyebrow=COPY["quiz_banner"]["eyebrow"], qb_heading=COPY["quiz_banner"]["heading"],
@@ -770,7 +907,7 @@ home = """
            attars_h=_SH["house_ouds"][0], attars=_SH["house_ouds"][1], oud_h=_SH["reserve"][0], oud=_SH["reserve"][1],
            sets_h=_SH["gift_sets"][0], sets=_SH["gift_sets"][1], fam_h=heading("scent_family"),
            bakhoor_h=_SH["bakhoor"][0], bakhoor=_SH["bakhoor"][1], edp_h=_SH["edp"][0], edp=_SH["edp"][1],
-           ct=slot("count"))
+           ct=slot("count"), **FAMILY_TEXT)
 if _BAD_HOME:
     sys.exit("build failed:\n  " + "\n  ".join("home.json " + p for p in _BAD_HOME))
 
@@ -779,12 +916,21 @@ if _BAD_HOME:
 # products, gender for the EDP sprays. Family/tone/occasion/season are in the
 # brief taxonomy but have no per-product value in any source, so they are not
 # offered as controls that would do nothing.
+#
+# The values are code: shop.js reads a price band as its range (999999 is
+# open-ended) and compares a gender with the products' own. The headings and
+# the words beside each box are content, pages.json "collection".
+PRICE_BANDS = ("0-49", "50-100", "100-200", "200-999999")
+GENDERS = ("Him", "Her", "Unisex")
 FACETS_LIVE = [
-    ("Category", "cat", [(CAT_TEXT[k]["label"], k) for k in CAT_KEYS]),
-    ("Price", "price", [("Under AED 50", "0-49"), ("AED 50-100", "50-100"),
-                        ("AED 100-200", "100-200"), ("AED 200+", "200-999999")]),
-    ("Gender", "gender", [("Him", "Him"), ("Her", "Her"), ("Unisex", "Unisex")]),
+    (page_text("collection.filters.category"), "cat", [(CAT_TEXT[k]["label"], k) for k in CAT_KEYS]),
+    (page_text("collection.filters.price"), "price", [(raw_text("collection.price_bands." + b), b) for b in PRICE_BANDS]),
+    (page_text("collection.filters.gender"), "gender", [(raw_text("collection.genders." + g), g) for g in GENDERS]),
 ]
+# the count shop.js replaces on load; 34 is what the page has always shipped
+_COUNT = {"n": '<span data-count>34</span>'}
+COPY_JS["collection"] = {"crumb_categories": raw_text("collection.crumb_categories"),
+                         "genders": {g: raw_text("collection.genders." + g) for g in GENDERS}}
 
 def facet_live(title, key, rows):
     return '<div class="fbox"><h4>%s</h4>%s</div>' % (title, "".join(
@@ -793,37 +939,37 @@ def facet_live(title, key, rows):
 
 collection = """
 <section><div class="wrap">
-  <span class="eyebrow" data-crumb>Home / %(all_crumb)s</span>
+  <span class="eyebrow" data-crumb>%(crumb_home)s / %(all_crumb)s</span>
   <div class="sec-h" style="margin-top:10px"><div>
     <h2 style="font-size:26px" data-title>%(all_title)s</h2>
     <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0;max-width:70ch" data-intro>%(all_intro)s</p></div></div>
   <div class="plp">
     <div class="side" data-filters>
-      <div class="drawerhead"><b>Filters</b><button type="button" class="closex" data-closefilters aria-label="Close filters">&times;</button></div>
-      <div class="toolbar" style="border:0;padding:0;margin-bottom:6px"><b style="font-size:13px">Filters</b><button type="button" class="linkbtn" data-clearall>Clear all</button></div>
+      <div class="drawerhead"><b>%(f_heading)s</b><button type="button" class="closex" data-closefilters aria-label="Close filters">&times;</button></div>
+      <div class="toolbar" style="border:0;padding:0;margin-bottom:6px"><b style="font-size:13px">%(f_heading)s</b><button type="button" class="linkbtn" data-clearall>%(f_clear)s</button></div>
       %(facets)s
-      <div class="draweractions"><button type="button" class="btn solid block" data-closefilters>Show <span data-count>34</span> products</button></div>
+      <div class="draweractions"><button type="button" class="btn solid block" data-closefilters>%(f_show)s</button></div>
     </div>
     <div class="scrim" data-closefilters></div>
     <div>
       <div class="toolbar">
-        <button type="button" class="filterbtn" data-openfilters>%(filt)s Filters <i class="fcount" data-fcount hidden>0</i></button>
+        <button type="button" class="filterbtn" data-openfilters>%(filt)s %(f_heading)s <i class="fcount" data-fcount hidden>0</i></button>
         <div class="pills" data-pills></div>
         <div style="display:flex;gap:12px;align-items:center">
-          <span style="font-size:13px;color:var(--mut)"><span data-count>34</span> products</span>
+          <span style="font-size:13px;color:var(--mut)">%(count)s</span>
           <label class="sel"><span class="none-visual">Sort</span>
             <select data-sort aria-label="Sort products">
-              <option value="featured">Sort: Featured</option>
-              <option value="price-asc">Price: low to high</option>
-              <option value="price-desc">Price: high to low</option>
-              <option value="name">Name: A to Z</option>
+              <option value="featured">%(sort_featured)s</option>
+              <option value="price-asc">%(sort_price_asc)s</option>
+              <option value="price-desc">%(sort_price_desc)s</option>
+              <option value="name">%(sort_name)s</option>
             </select>%(chev)s</label></div>
       </div>
       <div class="grid g4" data-grid></div>
       <div class="emptystate" data-empty hidden>
-        <b>Nothing matches those filters.</b>
-        <p style="color:var(--mut);font-size:13.5px;margin:6px 0 14px">Try removing one, or clear them all.</p>
-        <button type="button" class="btn ghost" data-clearall>Clear all filters</button>
+        <b>%(empty_title)s</b>
+        <p style="color:var(--mut);font-size:13.5px;margin:6px 0 14px">%(empty_body)s</p>
+        <button type="button" class="btn ghost" data-clearall>%(empty_clear)s</button>
       </div>
     </div>
   </div>
@@ -831,7 +977,14 @@ collection = """
 """ % dict(facets="".join(facet_live(t, k, r) for t, k, r in FACETS_LIVE),
            chev=sv("chev", 13, 2), filt=sv("filter", 15, 1.9),
            all_crumb=esc(CAT_TEXT["all"]["crumb"]), all_title=esc(CAT_TEXT["all"]["label"]),
-           all_intro=esc(CAT_TEXT["all"]["intro"]))
+           all_intro=esc(CAT_TEXT["all"]["intro"]), crumb_home=CRUMB_HOME,
+           f_heading=page_text("collection.filters.heading"), f_clear=page_text("collection.filters.clear"),
+           f_show=page_text("collection.filters.show", _COUNT, need=("n",)),
+           count=page_text("collection.count", _COUNT, need=("n",)),
+           sort_featured=page_text("collection.sort.featured"), sort_price_asc=page_text("collection.sort.price-asc"),
+           sort_price_desc=page_text("collection.sort.price-desc"), sort_name=page_text("collection.sort.name"),
+           empty_title=page_text("collection.empty.title"), empty_body=page_text("collection.empty.body"),
+           empty_clear=page_text("collection.empty.clear"))
 
 # ---------------------------------------------------------------- PDP
 # One template serves every product and shop.js fills it in. What the template
@@ -841,9 +994,46 @@ collection = """
 # the perfumes, how to apply is for the oils. The credit-back note is about
 # buying the 3 ml, so it names that size in data-with-size. shop.js takes these
 # out of any other product's page.
+#
+# The words are content, pages.json "product"; the tab ids, data-cats and the
+# payment line (checkout) stay here. The delivery lines carry the store rules
+# as {tokens}, and what shop.js writes once it knows the product (the barcode
+# and stock rows, the share button's replies, the page for an unknown product)
+# reaches it as BGS_COPY["product"].
+PRODUCT_TEXT = {
+    "crumb_home": CRUMB_HOME, "p_share": page_text("product.share.label"), "p_size": page_text("product.size_label"),
+    "p_gift": page_text("product.gift_cta.label"), "p_gift_href": page_href("product.gift_cta.href"),
+    "p_voucher": page_text("product.voucher_note"),
+    "p_fact_label": page_text("product.facts.delivery_label"),
+    "p_fact": page_text("product.facts.delivery", RULE_TOKENS),
+    "p_pyr_missing": page_text("product.pyramid.missing"),
+    "p_apply": grid_rows(page_rows("product.apply_steps", ("title", "body"))),
+    "p_apply_note": page_text("product.apply_note"),
+    "p_ing_missing": page_text("product.ingredients.missing"),
+    "p_delivery": grid_rows(page_rows("product.delivery_rows", ("title", "body"), RULE_TOKENS)),
+    "p_rev_title": page_text("product.reviews_empty.title"), "p_rev_body": page_text("product.reviews_empty.body"),
+    "p_rel_h": page_text("product.related.heading"), "p_rel_link": page_text("product.related.link_label"),
+    "p_rel_href": page_href("product.related.link_href"),
+}
+for _k in ("top", "heart", "base"):
+    PRODUCT_TEXT["p_note_" + _k] = page_text("product.notes." + _k)
+    PRODUCT_TEXT["p_pyr_" + _k] = page_text("product.pyramid." + _k)
+for _k in ("longevity", "sillage", "batch", "availability"):
+    PRODUCT_TEXT["p_spec_" + _k] = page_text("product.specs." + _k)
+for _k in ("pyramid", "apply", "ing", "delivery", "reviews"):
+    PRODUCT_TEXT["p_tab_" + _k] = page_text("product.tabs." + _k)
+COPY_JS["product"] = {
+    "share": {k: raw_text("product.share." + k) for k in ("label", "copied", "failed")},
+    "specs": {k: raw_text("product.specs." + k) for k in ("availability", "in_stock", "only_left", "batch", "barcode")},
+    "ingredients": {"heading": raw_text("product.ingredients.heading")},
+    "not_found": {k: raw_text("product.not_found." + k) for k in ("title", "cta", "crumb", "page_title")},
+}
+if "{n}" not in COPY_JS["product"]["specs"]["only_left"]:
+    _BAD_PAGES.append("pages.json product.specs.only_left must contain {n}")
+
 product = """
 <section><div class="wrap">
-  <span class="eyebrow">Home / Attars / Royal Amber</span>
+  <span class="eyebrow">%(crumb_home)s / Attars / Royal Amber</span>
   <div class="pdp">
     <div class="gal" data-gallery>
       <div class="galmain">
@@ -871,30 +1061,30 @@ product = """
              decision was measured to fit a 900px screen with 2px to spare, so
              anything that adds height here pushes it off. -->
         <button type="button" class="sharebtn" data-share
-                aria-label="Share this product">%(share)s<span data-sharelabel>Share</span></button></div>
-      <div class="sizeblock" data-sizeblock><span class="eyebrow">Size</span>
+                aria-label="Share this product">%(share)s<span data-sharelabel>%(p_share)s</span></button></div>
+      <div class="sizeblock" data-sizeblock><span class="eyebrow">%(p_size)s</span>
         <div class="sizes" style="gap:8px"><button type="button" data-size="3 ml &middot; AED 45">3 ml &middot; AED 45</button><button type="button" class="on" data-size="6 ml &middot; AED 75">6 ml &middot; AED 75</button></div></div>
       <div class="atcrow">
         <span class="stepper" data-stepper><button type="button" data-step="-1" aria-label="Decrease quantity">&minus;</button><i data-qty>1</i><button type="button" data-step="1" aria-label="Increase quantity">+</button></span>
         <button type="button" class="btn solid" style="flex-grow:1" data-add data-addqty>Add to bag: AED 75</button></div>
-      <a class="btn block" href="gift-box.html" style="margin-bottom:12px">Send as a gift</a>
+      <a class="btn block" href="%(p_gift_href)s" style="margin-bottom:12px">%(p_gift)s</a>
       <div class="notestop" data-notestop data-cats="edp attars" hidden>
-        <div><span class="ni">%(leaf)s</span><b>Top</b><p data-note="top"></p></div>
-        <div><span class="ni">%(hrt)s</span><b>Heart</b><p data-note="heart"></p></div>
-        <div><span class="ni">%(drop)s</span><b>Base</b><p data-note="base"></p></div>
+        <div><span class="ni">%(leaf)s</span><b>%(p_note_top)s</b><p data-note="top"></p></div>
+        <div><span class="ni">%(hrt)s</span><b>%(p_note_heart)s</b><p data-note="heart"></p></div>
+        <div><span class="ni">%(drop)s</span><b>%(p_note_base)s</b><p data-note="base"></p></div>
       </div>
 
       <div class="belowbuy">
         <p class="story-slot" data-desc>%(desc)s</p>
-        <div class="note" data-with-size="3 ml">Try the 3 ml first, the AED 45 comes back as a voucher on any bottle over AED 75, issued the day it is delivered.</div>
+        <div class="note" data-with-size="3 ml">%(p_voucher)s</div>
         <div class="kv" data-specs style="margin-top:16px" hidden>
-          <div hidden><span>Longevity</span><span>%(lon)s</span></div>
-          <div hidden><span>Sillage</span><span>%(sil)s</span></div>
-          <div hidden><span>Batch number</span><span>%(bat)s</span></div>
-          <div hidden><span>Availability</span><span>%(av)s</span></div>
+          <div hidden><span>%(p_spec_longevity)s</span><span>%(lon)s</span></div>
+          <div hidden><span>%(p_spec_sillage)s</span><span>%(sil)s</span></div>
+          <div hidden><span>%(p_spec_batch)s</span><span>%(bat)s</span></div>
+          <div hidden><span>%(p_spec_availability)s</span><span>%(av)s</span></div>
         </div>
         <div class="kv facts" style="margin-top:16px">
-          <div><span>%(truck)s Delivery</span><span>Free over %(rule_free_over)s &middot; same-day before %(rule_cutoff_short)s</span></div>
+          <div><span>%(truck)s %(p_fact_label)s</span><span>%(p_fact)s</span></div>
           <div><span>%(cash)s Payment</span><span>Card &middot; Apple Pay &middot; Tabby &middot; Tamara &middot; COD</span></div>
         </div>
       </div>
@@ -907,55 +1097,53 @@ product = """
 </div>
 <section class="alt"><div class="wrap">
   <div class="tabs2" role="tablist">
-    <button type="button" class="on" data-tab="pyramid" data-cats="edp attars" role="tab" aria-selected="true">Scent pyramid</button>
-    <button type="button" data-tab="apply" data-cats="attars" role="tab" aria-selected="false">How to apply oud</button>
-    <button type="button" data-tab="ing" role="tab" aria-selected="false">Ingredients &amp; allergens</button>
-    <button type="button" data-tab="delivery" role="tab" aria-selected="false">Delivery &amp; returns</button>
-    <button type="button" data-tab="reviews" role="tab" aria-selected="false">Reviews</button>
+    <button type="button" class="on" data-tab="pyramid" data-cats="edp attars" role="tab" aria-selected="true">%(p_tab_pyramid)s</button>
+    <button type="button" data-tab="apply" data-cats="attars" role="tab" aria-selected="false">%(p_tab_apply)s</button>
+    <button type="button" data-tab="ing" role="tab" aria-selected="false">%(p_tab_ing)s</button>
+    <button type="button" data-tab="delivery" role="tab" aria-selected="false">%(p_tab_delivery)s</button>
+    <button type="button" data-tab="reviews" role="tab" aria-selected="false">%(p_tab_reviews)s</button>
   </div>
   <div data-panel="pyramid" data-cats="edp attars">
     <div class="grid g3">
-      <div><span class="eyebrow">Top</span><p style="margin:8px 0 0" data-note="top"></p></div>
-      <div><span class="eyebrow">Heart</span><p style="margin:8px 0 0" data-note="heart"></p></div>
-      <div><span class="eyebrow">Base</span><p style="margin:8px 0 0" data-note="base"></p></div>
+      <div><span class="eyebrow">%(p_pyr_top)s</span><p style="margin:8px 0 0" data-note="top"></p></div>
+      <div><span class="eyebrow">%(p_pyr_heart)s</span><p style="margin:8px 0 0" data-note="heart"></p></div>
+      <div><span class="eyebrow">%(p_pyr_base)s</span><p style="margin:8px 0 0" data-note="base"></p></div>
     </div>
-    <div class="note" data-pyrnote style="margin-top:20px" hidden>The scent pyramid is published for our EDP sprays. For the attars it is coming soon.</div>
+    <div class="note" data-pyrnote style="margin-top:20px" hidden>%(p_pyr_missing)s</div>
   </div>
   <div data-panel="apply" data-cats="attars" hidden>
     <div class="grid g3">
-      <div><span class="eyebrow">Where</span><p style="margin:8px 0 0">Wrists, the base of the throat, behind the ears. Warm points carry the oil.</p></div>
-      <div><span class="eyebrow">How much</span><p style="margin:8px 0 0">These are oils, not sprays. One dab on each point is the dose; a 3 ml bottle lasts accordingly.</p></div>
-      <div><span class="eyebrow">Do not rub</span><p style="margin:8px 0 0">Press the points together rather than rubbing, which breaks the top notes.</p></div>
+      %(p_apply)s
     </div>
-    <div class="note" style="margin-top:20px">Every blend in the shop is alcohol-free and oil based.</div>
+    <div class="note" style="margin-top:20px">%(p_apply_note)s</div>
   </div>
   <div data-panel="ing" hidden>
-    <div data-ingpanel><p style="margin:0;color:var(--mut)">Full ingredient and allergen lists are published for our EDP sprays. This one is coming soon.</p></div>
+    <div data-ingpanel><p style="margin:0;color:var(--mut)">%(p_ing_missing)s</p></div>
   </div>
   <div data-panel="delivery" hidden>
     <div class="grid g3">
-      <div><span class="eyebrow">UAE delivery</span><p style="margin:8px 0 0">Free over %(rule_free_over)s. %(rule_delivery_fee)s below that. UAE only.</p></div>
-      <div><span class="eyebrow">Same-day Dubai</span><p style="margin:8px 0 0">%(rule_sameday_fee)s, for orders placed before the %(rule_cutoff)s cutoff.</p></div>
-      <div><span class="eyebrow">Returns</span><p style="margin:8px 0 0">Exchange on sealed items. Opened fragrance cannot be returned.</p></div>
+      %(p_delivery)s
     </div>
   </div>
   <div data-panel="reviews" hidden>
     <div class="emptystate" style="text-align:left;padding:20px 0">
-      <b>No reviews yet.</b>
-      <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">Reviews open after the first orders are delivered. Nothing appears here that a buyer has not left.</p>
+      <b>%(p_rev_title)s</b>
+      <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">%(p_rev_body)s</p>
     </div>
   </div>
 </div></section>
 <section><div class="wrap">
-  <div class="sec-h"><h2>Complete the ritual</h2><a href="collection.html">More &rarr;</a></div>
+  <div class="sec-h"><h2>%(p_rel_h)s</h2><a href="%(p_rel_href)s">%(p_rel_link)s &rarr;</a></div>
   <div class="grid g4">%(rel)s</div>
 </div></section>
-""" % dict(RULE_TEXT, gprev=sv("left",20,2), gnext=sv("right",20,2), fam=slot("family"), tone=slot("tone"), gen=slot("gender"), rev=slot("no reviews yet"),
+""" % dict(PRODUCT_TEXT, gprev=sv("left",20,2), gnext=sv("right",20,2), fam=slot("family"), tone=slot("tone"), gen=slot("gender"), rev=slot("no reviews yet"),
    desc="", lon="", sil="",
    bat="", av="",
    truck=sv("truck",16), cash=sv("cash",16),
    leaf=sv("leaf",15), hrt=sv("heart",15), drop=sv("drop",15),
    share=sv("share",15), rel=attar_cards(4))
+if _BAD_PAGES:
+    sys.exit("build failed:\n  " + "\n  ".join(_BAD_PAGES))
 
 # ---------------------------------------------------------------- GIFT BOX
 giftbox = """
