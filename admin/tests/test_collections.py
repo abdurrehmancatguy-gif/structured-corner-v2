@@ -248,13 +248,19 @@ class CollectionsTests(unittest.TestCase):
 
     def test_refuses_what_the_view_does_not_own(self):
         for key, change, path in (
-                ("attars", lambda d: d["circle"].update(image="assets/cat/edp.png"), "/circle/image"),
                 ("attars", lambda d: d.update(key="reserve"), "/key"),
                 ("all", lambda d: d.update(circle={"label": "Everything"}), "/circle"),
                 ("all", lambda d: d.update(shelf={"heading": "All"}), "/shelf")):
             st, res = self.put(key, change)
             self.assertEqual((st, res["error"]["code"]), (403, "not_editable"), (key, path, res))
             self.assertEqual(res["error"]["details"]["path"], path)
+        # The circle's picture is filled by uploads (Navigation and Files), so
+        # a save through the view may only point it at a picture that is there.
+        for image, code in (("assets/cat/no-such-circle.png", "missing_file"), ("circle.txt", "format")):
+            st, res = self.put("attars", lambda d: d["circle"].update(image=image))
+            self.assertEqual((st, res["error"]["code"]), (422, "validation"), res)
+            self.assertEqual([(e["path"], e["code"], e["document"]) for e in res["error"]["details"]],
+                             [("/circle/image", code, "navigation")])
         self.assertEqual(self.b.content("navigation")["categories"][0]["image"], "assets/cat/attars.png")
 
     def test_bad_values_land_on_the_view(self):

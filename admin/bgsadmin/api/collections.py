@@ -19,7 +19,7 @@ from ..errors import ApiError
 from ..routes import Route
 from ..schema.copy import COLLECTIONS
 from ..schema.home import SHELVES
-from ..service import changed, enforce, field_for, precondition, saved
+from ..service import changed, enforce, field_for, flatten, precondition, saved
 from ..store.jsonstore import rev_of
 from .meta import schemas
 
@@ -180,19 +180,23 @@ def put_collection(req):
         back = {v: k for k, v in where.items()}
         new_docs = apply(docs, where, cur, data)
         products, _ = store.products()
-        ctx = {"icons": schema_mod.icons(cfg), "tints": schema_mod.tints(cfg), "products": products}
+        ctx = {"icons": schema_mod.icons(cfg), "tints": schema_mod.tints(cfg), "products": products,
+               "flow_dir": cfg.flow}
         errors = []
         for doc, new in new_docs.items():
             # Each document's own schema still decides what may change, so a
-            # locked or read-only field (the circle's picture) refuses here
-            # exactly as it does in the document's own editor.
+            # locked or read-only field refuses here exactly as it does in the
+            # document's own editor. The circle's picture, which uploads fill,
+            # may only be moved onto a file that is there (flow_dir); values
+            # the document already holds are not checked again (known_media).
             try:
                 enforce(sch[doc]["fields"], docs[doc], new)
             except ApiError as e:
                 if isinstance(e.details, dict) and (doc, e.details.get("path")) in back:
                     e.details["path"] = back[(doc, e.details["path"])]
                 raise
-            errs, _ = validate.document(doc, new, sch[doc]["fields"], ctx)
+            known = {v for v in flatten(docs[doc]).values() if isinstance(v, str)}
+            errs, _ = validate.document(doc, new, sch[doc]["fields"], dict(ctx, known_media=known))
             errors += [dict(x, path=back.get((doc, x["path"]), x["path"]), document=doc) for x in errs]
         if errors:
             raise ApiError(422, "validation", "Some fields need attention.", errors)
