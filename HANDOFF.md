@@ -1,6 +1,6 @@
 # BGS Corner - Project Handoff
 
-**Last updated:** 2026-09-08
+**Last updated:** 2026-09-12
 **Purpose:** Hand this file to any new Claude Code session (or read it yourself) and pick the
 project up cold. It records where everything lives, how it is built, what has been decided,
 what is still open, and every trap that has already cost time.
@@ -51,9 +51,12 @@ structured-corner-v2/
 ├── .claude/launch.json     dev-server config, port 4310
 ├── design/                 Claude Design canvas artboards (.dc.html) + reference photos
 │                           NOT part of the shipped site
+├── admin/                  THE ADMIN (local only, never published): server.py serves the
+│                           store at / and the admin at /admin/ on 127.0.0.1:4310.
+│                           README.md (use), DESIGN.md (decisions), docs/ (plan and maps)
 └── flow/                   ←←← THE SITE. Its HTML, favicon.ico, robots.txt and assets/ are published.
-    ├── build.py            1041 lines - the generator. Run it to rebuild every page.
-    ├── server.py           24 lines - local no-cache static server (harmless)
+    ├── build.py            the generator. Run it to rebuild every page.
+    ├── server.py           a two-line launcher for admin/server.py (kept for the preview config)
     ├── content/            ←←← THE DATA. Edit here, not in the HTML.
     │   ├── products.json   1189 lines, 34 products
     │   ├── settings.json   brand, store rules, SEO, payments
@@ -124,13 +127,17 @@ The preview server is configured in `.claude/launch.json` as **`bgs-flow`** on *
 In Claude Code, start it with the Browser pane (`preview_start` with `{name: "bgs-flow"}`),
 never with a raw Bash background process.
 
-Manual equivalent, no-cache:
+Manual equivalent:
 
 ```bash
-cd /Users/ajoomama/github/structured-corner-v2/flow && python3 server.py 4310
+cd /Users/ajoomama/github/structured-corner-v2 && python3 admin/server.py
 ```
 
-Then open `http://localhost:4310`.
+Then open `http://localhost:4310` for the store and `http://localhost:4310/admin/` for the
+admin. It is one server (`flow/server.py` only launches `admin/server.py`), bound to
+127.0.0.1, serving exactly the files the deploys publish, with no-store headers and the
+site's own 404 page. The admin has no login yet, which is why it must never listen on
+another address. See `admin/README.md`.
 
 ### Cache-busting
 
@@ -429,6 +436,28 @@ domain on 2026-09-10.
   the tin carrying that number, closed tin on white first. The set had no closed shot of tin
   4; the owner sent it separately (a WhatsApp image). For a re-import, put it in the folder
   as `Bakhoor 4.1.jpeg`, or tin 4 loses its first frame.
+- **2026-09-11, cards and gift navigation.** Card photos lost their frame; "Gift Sets"
+  opens the gift sets collection; "Discovery" became "Build Your Gift Box"; the footer is
+  built from navigation.json (`78dc22b`).
+- **2026-09-11 and 12, rounder everywhere.** One corner scale in flow.css's :root: 20px for
+  cards, panels, the gallery and the banner; 14px for small boxes inside them and size chips;
+  pills for every button and control and for one-line tags. The banner is an inset card at
+  every width. Bars that run edge to edge stay square.
+- **2026-09-11 and 12, homepage circles.** Gift Sets shows the owner's black gift boxes as a
+  wide cut-out (`"cutout": "wide"`, drawn across its circle; the file carries transparent
+  space so the picture's weight sits in the middle). Shop by Occasion was removed, from the
+  circles and the category bar (one list feeds both); the six left sit in one row on a
+  desktop and two rows of three below 1080px (build.py writes the count as `data-n`).
+- **2026-09-12, metadata stripped** from every published image and film with
+  `tools/strip_metadata.py` (no re-compression): EXIF, IPTC and XMP from the stock category
+  photos, encoder comments from the video posters, encoder and settings tags from the films.
+  A second Amore film (`amore-2.mp4`, 540x960, silent) joined the homepage row.
+- **2026-09-12, the admin, first stage.** `admin/`: a local server, a JSON store that saves
+  atomically, rebuilds and rolls every file back when the build fails, a security gate for a
+  login-less local tool, and screens for products, the homepage, navigation, site text and
+  settings (payments locked). 14 tests in `admin/tests`. Next stages: media uploads, history,
+  publishing, bulk and CSV, then moving the text still hardcoded in build.py and shop.js
+  into content (`admin/docs/HARDCODED.md`).
 
 ---
 
@@ -480,6 +509,12 @@ raw background Bash. Use the Browser pane's `preview_start` with the `bgs-flow` 
   inside an iframe of a wrapper page, or the screenshot is a cropped wider layout.
 - **A generated copy must never be taken for an original.** `vibe-1-600.jpg` and
   `banner-1-1320.jpg` both look like frame numbers; `make_derivatives.py` skips them now.
+- **`\u` escapes typed into a file-writing tool arrive as the characters.** A validator
+  written with an em dash escape in its source ended up holding a literal em dash, which the
+  repo rule forbids. Write such characters as `chr(0x2014)` in Python.
+- **Workflow agents are dropped after three minutes without progress.** A long browser
+  sweep or one very large file write counts as none; tell agents to keep every command under
+  two minutes and write files in pieces.
 
 ---
 
@@ -487,12 +522,8 @@ raw background Bash. Use the Browser pane's `preview_start` with the `bgs-flow` 
 
 1. **Pushing.** Every push to `origin/main` needs the owner's consent at the time; check
    `git log --oneline origin/main..HEAD` for what is waiting.
-2. **"Shop by Occasion" and "Build Your Gift Box" both point at `gift-box.html`** - in
-   `nav.categories`, which builds the category bar and the homepage circles (`nav.main` is
-   read by nothing). Two labels, one destination. Give Occasion its own
-   page, point it somewhere real, or remove it. (On 2026-09-11 the owner had "Gift Sets" go
-   to the gift sets page, `collection.html?cat=gift-sets`, and "Discovery" renamed "Build
-   Your Gift Box", for the builder.)
+2. ~~"Shop by Occasion" and "Build Your Gift Box" both point at `gift-box.html`~~ -
+   resolved 2026-09-12: the owner removed Shop by Occasion.
 3. **The voucher note shares `--gold-l` with the scent-notes panel**, so two unrelated things
    read as the same UI element. Options offered: neutralise the voucher note, drop the notes
    fill, or leave it.

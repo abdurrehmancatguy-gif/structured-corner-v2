@@ -41,3 +41,7 @@ coverage/
 .netlify
 _site/
 flow/content/.backups/
+
+# admin
+admin/**/__pycache__/
+flow/content/.*.tmp
