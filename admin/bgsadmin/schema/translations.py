@@ -13,6 +13,6 @@ RESOURCE = {"name": "translations", "label": "Translations", "kind": "document",
 
 FIELDS = [
     {"path": "/ar", "type": "dictionary", "label": "Arabic", "keyLabel": "English", "valueLabel": "Arabic",
-     "dir": "rtl", "keyMaxLength": 120, "maxLength": 300, "max": 400,
+     "required": True, "dir": "rtl", "keyMaxLength": 120, "maxLength": 300, "max": 400,
      "help": "An entry with no Arabic leaves that label in English."},
 ]

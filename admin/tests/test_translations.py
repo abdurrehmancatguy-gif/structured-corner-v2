@@ -49,6 +49,8 @@ class RuleTests(unittest.TestCase):
                                        ("/ar/F", "control", "value")])
 
     def test_shape_and_size(self):
+        self.assertEqual(problems({}), [("/ar", "required", None)])
+        self.assertEqual(problems({"ar": {}}), [])
         self.assertEqual(problems({"ar": ["Bag"]}), [("/ar", "type", None)])
         self.assertEqual(problems({"ar": {"k%d" % i: "" for i in range(401)}}), [("/ar", "too_many", None)])
         self.assertEqual(problems({"ar": {"k%d" % i: "" for i in range(400)}}), [])
