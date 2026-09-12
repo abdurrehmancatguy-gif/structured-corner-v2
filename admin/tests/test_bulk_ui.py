@@ -353,7 +353,9 @@ class Driven(unittest.TestCase):
         self.open("#/inventory", "document.querySelectorAll('.inv-stock').length > 0")
         for width in (390, 1280):
             self.c.size(width, 844)
-            for address, ready in (("#/inventory", ".inv-stock"), ("#/bulk", "[role=gridcell]"), ("#/import", "#imp-file")):
+            for address, ready in (("#/inventory", ".inv-stock"), ("#/bulk", "[role=gridcell]"), ("#/import", "#imp-file"),
+                                   ("#/content/quiz", ".qz-grid"), ("#/content/translations", ".tr-table"),
+                                   ("#/collections/attars", ".t-name")):
                 self.js("location.hash = %s" % J(address))
                 self.c.wait("location.hash === %s && !!document.querySelector(%s)" % (J(address), J(ready)), 20)
                 self.js("new Promise(r => setTimeout(r, 200))")
