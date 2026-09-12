@@ -245,6 +245,27 @@ class PagesTests(_Pages, unittest.TestCase):
             self.restore(before)
         self.assertIn(slot, self.page("index.html"))
 
+    @unittest.skipUnless(os.path.exists(cdp_pipe.CHROME), "headless Chrome is not installed")
+    def test_spaces_around_the_stock_and_batch_labels_keep_their_rows(self):
+        # shop.js finds these rows by their label, which the page prints as typed
+        pr = self.b.content("products")["be-mine"]
+        self.assertTrue(pr["barcode"] and pr["stock"] > 5, pr)
+        before = self.doc()["data"]
+        st, res = self.put(lambda d: d["product"]["specs"].update(availability="Availability ", batch=" Batch number"))
+        self.assertEqual(st, 200, res)
+        c = cdp_pipe.Chrome()
+        try:
+            c.go("http://localhost:%d/product.html?p=be-mine" % self.PORT)
+            c.wait("document.readyState === 'complete' && !!window.BGS_COPY", 30)
+            rows = c.js("[...document.querySelectorAll('[data-specs] > div')].filter((r) => !r.hidden)"
+                        ".map((r) => [r.firstElementChild.textContent.trim(), r.lastElementChild.textContent.trim()])")
+            self.assertIn(["Availability", "In stock"], rows)
+            self.assertIn(["Barcode", pr["barcode"]], rows)
+            self.assertEqual(c.errors(), [])
+        finally:
+            c.close()
+            self.restore(before)
+
     # ---- what is refused ------------------------------------------------------------
 
     def test_markup_long_dashes_and_stray_tokens_are_refused(self):

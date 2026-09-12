@@ -327,9 +327,9 @@ bgsRun(function () {
       }
 
       /* availability + batch rows, found by the labels build.py printed from
-         the same content */
-      var AVAIL = bgsCopy("product.specs.availability", "Availability"),
-          BATCH = bgsCopy("product.specs.batch", "Batch number");
+         the same content, trimmed on both sides as the printed label is */
+      var AVAIL = bgsCopy("product.specs.availability", "Availability").trim(),
+          BATCH = bgsCopy("product.specs.batch", "Batch number").trim();
       var rows = document.querySelectorAll(".buy .kv div");
       rows.forEach(function (r) {
         var k = r.firstElementChild ? r.firstElementChild.textContent.trim() : "";
