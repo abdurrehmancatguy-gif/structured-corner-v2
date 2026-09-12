@@ -52,6 +52,11 @@ class DiffTests(unittest.TestCase):
         got = self.texts(diff.product("be-mine", pf, a, dict(a, images=list(reversed(a["images"])), never_discount=True)))
         self.assertIn("Be Mine: photos reordered", got)
         self.assertIn("Be Mine: never discounted turned on", got)
+        # A key only one version has reads as set, removed or cleared.
+        bare = {k: v for k, v in a.items() if k != "badge"}
+        self.assertEqual(self.texts(diff.product("be-mine", pf, bare, dict(a, badge=""))), ["Be Mine: badge set to empty"])
+        self.assertEqual(self.texts(diff.product("be-mine", pf, dict(a, badge="New"), bare)), ['Be Mine: badge removed (was "New")'])
+        self.assertEqual(self.texts(diff.product("be-mine", pf, dict(a, stock=4), dict(a, stock=None))), ["Be Mine: stock cleared (was 4)"])
 
     def test_rows_are_lined_up_by_content(self):
         hf = self.S["home"]["fields"]

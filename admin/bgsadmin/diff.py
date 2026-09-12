@@ -166,11 +166,37 @@ def _describe(f, item, ctx):
     return "\n".join(lines)
 
 
+def _absent(v):
+    return v is MISSING or v is None
+
+
+def _presence(head, f, a, b, ctx):
+    """A value only one side has. "Heading not set to empty" would read as a
+    negation, so it is "set to", "removed" (the key is gone) or "cleared"
+    (the key holds null), with the value when it is short enough to show."""
+    t = f["type"]
+    v = b if _absent(a) else a
+    if v == "" or v == []:
+        shown = "empty"
+    elif t in ("text", "textarea", "href"):
+        shown = _quote(v) if _short(v) else None
+    elif t in ("int", "money", "enum", "icon", "tint", "product-ref", "bool"):
+        shown = fmt(f, v, ctx)
+    else:
+        shown = None
+    if _absent(a):
+        return "%s set to %s" % (head, shown) if shown else "%s added" % head
+    gone = "%s %s" % (head, "removed" if b is MISSING else "cleared")
+    return "%s (was %s)" % (gone, shown) if shown and shown != "empty" else gone
+
+
 def _sentence(where, f, a, b, ctx):
     head = _head(where, _unit(f)[0])
     t = f["type"]
     if t == "bool" and isinstance(b, bool):
         return "%s turned %s" % (head, "on" if b else "off")
+    if _absent(a) or _absent(b):
+        return _presence(head, f, a, b, ctx)
     if t in ("int", "money", "enum", "icon", "tint", "product-ref", "bool"):
         return "%s %s to %s" % (head, fmt(f, a, ctx), fmt(f, b, ctx))
     if t in ("text", "textarea", "href") and _short(a) and _short(b):
