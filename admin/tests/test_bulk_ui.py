@@ -349,6 +349,24 @@ class Driven(unittest.TestCase):
         self.no_page_errors()
 
     # ---- phone width -------------------------------------------------------
+    def test_the_top_bar_status_stays_visible_on_a_narrow_window(self):
+        # A save leaves the Publish chip showing. On a narrow window it must
+        # step aside so the build-status chip (where "Server not answering" and
+        # the like appear) is not pushed past the edge of the fixed header.
+        self.open("#/inventory", "document.querySelectorAll('.inv-stock').length > 0")
+        self.setval(".inv-stock", "7")
+        self.wait_text(".savebar", "unsaved change")
+        self.c.size(390, 844)
+        self.js("new Promise(r => setTimeout(r, 150))")
+        pub = self.js("(() => { const c = document.querySelector('.pub-chip'); "
+                      "return c ? getComputedStyle(c).display : 'absent'; })()")
+        self.assertEqual(pub, "none", "the publish chip should step aside on a narrow window")
+        right = self.js("(() => { const c = [...document.querySelectorAll('.top .chip')]"
+                        ".find(e => !e.classList.contains('pub-chip')); "
+                        "return c ? c.getBoundingClientRect().right : 0; })()")
+        self.assertLessEqual(right, self.js("window.innerWidth"), "the status chip is within the window")
+        self.no_page_errors()
+
     def test_no_screen_scrolls_sideways_on_a_phone(self):
         self.open("#/inventory", "document.querySelectorAll('.inv-stock').length > 0")
         for width in (390, 1280):

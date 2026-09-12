@@ -47,6 +47,9 @@
 .top .pub-chip{text-decoration:none}
 .top .pub-chip:hover{background:rgba(255,255,255,.16)}
 .top .pub-chip[hidden]{display:none}
+/* On a narrow window it would push the build-status chip and View store off
+   the fixed header, where nothing can scroll to them, so it steps aside. */
+@media (max-width:560px){ .top .pub-chip{display:none} }
 
 @media (prefers-reduced-motion:reduce){ .pub-spin{animation:none} }
 @media (max-width:900px){
