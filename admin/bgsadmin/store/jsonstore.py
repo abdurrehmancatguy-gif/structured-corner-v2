@@ -22,6 +22,7 @@ import getpass
 import hashlib
 import json
 import os
+import pathlib
 import secrets
 import shutil
 import tempfile
@@ -198,6 +199,9 @@ class Txn:
         self.media = False
         self.force = False        # rebuild even with nothing to write ("Rebuild now")
         self.extra = []           # more files to snapshot (media stages add theirs)
+        self.files = []           # (destination, finished file) placed once the snapshot is taken
+        self.removed = []         # published files taken away (to the trash) after the snapshot
+        self.tools = []           # tools that run after make_derivatives, such as the favicon
         self.result = None
 
     def load(self, name):
@@ -209,6 +213,38 @@ class Txn:
     def put(self, name, data):
         self.docs[name] = data
         self.dirty.add(name)
+
+    def snapshot(self, path):
+        path = pathlib.Path(path)
+        if path not in self.extra:
+            self.extra.append(path)
+
+    def add_file(self, path, src):
+        """Media made by this transaction. src is a finished file outside
+        flow/assets; it is put at path only after the snapshot is taken, so a
+        failed build removes it again, or puts back the file it replaced. The
+        sized copies make_derivatives will write for it are snapshotted too,
+        so a failed build leaves none of them behind."""
+        from .. import media
+        self.media = True
+        self.snapshot(path)
+        for c in media.sized_copies(self.cfg, path):
+            self.snapshot(c)
+        self.files.append((pathlib.Path(path), pathlib.Path(src)))
+
+    def remove_file(self, path):
+        """A published file taken away (its copy already sits in the trash).
+        Snapshotted first, so a failed build puts it back."""
+        self.media = True
+        self.snapshot(path)
+        self.removed.append(pathlib.Path(path))
+
+    def run_tool(self, name):
+        """Run one more tool from tools.TOOLS after make_derivatives, before the
+        build. Its outputs must be snapshotted by the caller (with
+        snapshot()) so a failed build puts them back."""
+        if name not in self.tools:
+            self.tools.append(name)
 
     def commit(self):
         cfg = self.cfg
@@ -238,12 +274,18 @@ class Txn:
         try:
             for name, (new, _) in writes.items():
                 atomic_write(cfg.content_file(name), new)
+            for dst, src in self.files:
+                atomic_write(dst, src.read_bytes())
+            for p in self.removed:
+                with contextlib.suppress(FileNotFoundError):
+                    os.unlink(p)
             man["state"] = "applied"
             _write_manifest(tdir, man)
             if self.media:
-                d = tools.run(cfg, "derivatives")
-                if not d["ok"]:
-                    raise _Failed(d["problems"])
+                for name in ["derivatives"] + self.tools:
+                    d = tools.run(cfg, name)
+                    if not d["ok"]:
+                        raise _Failed(d["problems"])
             build = tools.run(cfg, "build")
             if not build["ok"]:
                 raise _Failed(build["problems"])
@@ -276,7 +318,20 @@ class Txn:
         self.result = {"changed": sorted(writes), "build": {"ok": True, "ms": build["ms"] if build else None, "problems": []}}
 
     def _media_allowed(self):
-        return set()
+        """What a media transaction may change besides its snapshotted files:
+        exactly the files it placed or removed, the sized copies
+        make_derivatives writes or deletes for them, derivatives.json, and the
+        favicon set when the emblem was replaced. Anything else changing (a
+        stale copy of some other photo rewritten, say) still fails the save."""
+        from .. import media
+        cfg = self.cfg
+        out = {"tools/derivatives.json"}
+        for p in [d for d, _ in self.files] + self.removed:
+            out.add(os.path.relpath(str(p), str(cfg.flow)))
+            out.update(os.path.relpath(str(c), str(cfg.flow)) for c in media.sized_copies(cfg, p))
+        if "favicon" in self.tools:
+            out.update(media.FAVICON_OUTPUTS)
+        return out
 
 
 def _write_manifest(tdir, man):

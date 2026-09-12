@@ -45,6 +45,25 @@ def text_problem(s, multiline=False):
     return None
 
 
+MEDIA_PATH = re.compile(r"assets/(?:img|cat|video)/[a-z0-9][a-z0-9._-]*\.(?:jpg|png|mp4)|favicon\.ico")
+
+
+def media_problem(s, t, flow):
+    """A picture or film field that uploads fill may still be moved about by
+    a save (slides and films reordered, a slide duplicated), but it must name
+    one of the site's pictures (or films, for a film field) and, when flow is
+    given, a file that is there. The caller passes flow None for a value the
+    document already holds, so a file removed outside the admin never blocks
+    an unrelated edit."""
+    exts = (".mp4",) if t == "video" else (".jpg", ".png", ".ico")
+    if not MEDIA_PATH.fullmatch(s) or not s.endswith(exts):
+        return "format", "Upload a file here: this is not the name of one of the site's %s." % (
+            "films" if t == "video" else "pictures")
+    if flow is not None and not (flow / s).is_file():
+        return "missing_file", "There is no file at %s. Upload one instead." % s
+    return None
+
+
 def href_problem(s, social=False):
     if s == "":
         return None
@@ -96,6 +115,10 @@ def check(fields, data, prefix, errors, ctx):
                 p = href_problem(v, social=f.get("social", False))
                 if p:
                     errors.append(err(ptr, *p))
+            if t in ("image", "video") and f.get("upload") and v and ctx.get("flow_dir") is not None:
+                p = media_problem(v, t, None if v in ctx.get("known_media", ()) else ctx["flow_dir"])
+                if p:
+                    errors.append(err(ptr, *p))
         elif t in ("int", "money"):
             if isinstance(v, bool) or not isinstance(v, int):
                 errors.append(err(ptr, "type", "This must be a whole number."))
@@ -142,6 +165,27 @@ def check(fields, data, prefix, errors, ctx):
         elif t == "images":
             if not isinstance(v, list) or not all(isinstance(x, str) for x in v):
                 errors.append(err(ptr, "type", "This must be a list of image names."))
+                continue
+            if len(set(v)) != len(v):
+                errors.append(err(ptr, "duplicate", "The same photo is in the list twice."))
+            # A name the save adds must be a file already in the library with
+            # every size the pages ask for (build.py fails on a missing one).
+            # Names the product already has were checked when they were added:
+            # a copy gone missing since is the build's to report, and must not
+            # block an unrelated edit. A photo being attached in this same save
+            # is placed after this check.
+            folder = ctx.get("img_dir")
+            skip = set(ctx.get("pending_images", ())) | set(ctx.get("known_images", ()))
+            for i, name in enumerate(v):
+                if f.get("itemPattern") and not re.fullmatch(f["itemPattern"], name):
+                    errors.append(err("%s/%d" % (ptr, i), "format", f.get("patternHelp", "This is not a photo name.")))
+                elif folder is not None and f.get("copies") and name not in skip:
+                    gone = [name.replace(".jpg", c + ".jpg") for c in f["copies"]
+                            if not (folder / name.replace(".jpg", c + ".jpg")).is_file()]
+                    if gone:
+                        errors.append(err("%s/%d" % (ptr, i), "missing_file",
+                                          "%s is not in the photo library with all its sizes (missing %s). Upload it again."
+                                          % (name, ", ".join(gone))))
         elif t == "rows":
             if not isinstance(v, list):
                 errors.append(err(ptr, "type", "This must be a list."))
@@ -172,7 +216,9 @@ def product(pid, data, products, fields, ctx):
     errors, warnings = [], []
     if not isinstance(data, dict):
         return [err("", "type", "A product is a set of fields.")], []
-    check(fields, data, "", errors, dict(ctx, products=products))
+    cur = products.get(pid)
+    known = [n for n in (cur.get("images") or []) if isinstance(n, str)] if isinstance(cur, dict) else []
+    check(fields, data, "", errors, dict(ctx, products=products, known_images=known))
     cat = data.get("category")
     if cat == "attars":
         sizes = data.get("sizes")
