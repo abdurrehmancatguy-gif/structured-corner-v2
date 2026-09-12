@@ -109,7 +109,7 @@ export async function render(main, { app }) {
         r.stale ? h("span", { class: "inv-stale" }, h("span", { class: "badge red" }, "Changed elsewhere"),
           h("button", { class: "btn small", type: "button", "aria-label": "Reload " + name(r), onclick: () => reload(r) }, "Reload row")) : null),
       h("td", {}, cats[r.data.category] || r.data.category),
-      h("td", {}, r.data.published === false ? h("span", { class: "badge" }, "Draft") : h("span", { class: "badge green" }, "Active")),
+      h("td", {}, r.data.published === false ? h("span", { class: "badge muted" }, "Draft") : h("span", { class: "badge green" }, "Active")),
       h("td", {},
         h("div", { class: "inv-cell" }, h("label", { class: "sr-only", for: id }, "Stock for " + name(r)), input,
           r.data.stock <= low ? h("span", { class: "badge red" }, "Low stock") : null),

@@ -67,7 +67,7 @@ async function landing(main, app) {
     if (!list.length) { products.append(h("li", { class: "muted" }, "No products match.")); return; }
     list.forEach((it) => products.append(h("li", {}, h("a", { href: "#/history/products/" + it.id },
       icon("clock", 16), h("span", {}, it.data.name || it.id), h("small", {}, it.id),
-      it.data.published === false ? h("span", { class: "badge" }, "Draft") : null))));
+      it.data.published === false ? h("span", { class: "badge muted" }, "Draft") : null))));
   }
 
   async function drawBackups() {

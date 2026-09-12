@@ -217,7 +217,7 @@ export async function render(main, { app }) {
       return;
     }
     const v = value(row, col);
-    if (col.kind === "status" && !editError(row, col)) el.append(h("span", { class: "badge" + (v ? " green" : "") }, v ? "Active" : "Draft"));
+    if (col.kind === "status" && !editError(row, col)) el.append(h("span", { class: "badge" + (v ? " green" : " muted") }, v ? "Active" : "Draft"));
     else if (col.kind === "stock" && v === null && !editError(row, col)) el.append(h("span", { class: "g-val muted" }, "Not tracked"));
     else el.append(h("span", { class: "g-val" }, rawText(row, col)));
     if (col.note) el.append(h("span", { class: "g-note" }, col.note(row.data)));
