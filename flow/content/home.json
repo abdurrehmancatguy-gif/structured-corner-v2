@@ -94,7 +94,8 @@
       {"product": "barcelona", "video": "assets/video/barcelona.mp4", "still": "assets/video/barcelona.jpg"},
       {"product": "edward-the-black-prince", "video": "assets/video/edward.mp4", "still": "assets/video/edward.jpg"},
       {"product": "soleil-frais", "video": "assets/video/soleil-frais-2.mp4", "still": "assets/video/soleil-frais-2.jpg"},
-      {"product": "barcelona", "video": "assets/video/barcelona-ad.mp4", "still": "assets/video/barcelona-ad.jpg"}
+      {"product": "barcelona", "video": "assets/video/barcelona-ad.mp4", "still": "assets/video/barcelona-ad.jpg"},
+      {"product": "amore", "video": "assets/video/amore-2.mp4", "still": "assets/video/amore-2.jpg"}
     ]
   }
 }

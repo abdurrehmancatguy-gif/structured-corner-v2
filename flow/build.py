@@ -205,16 +205,21 @@ def footer_cols():
         for col in NAVC["footer"])
 
 def catstrip():
-    return ('<div class="catstrip"><div class="wrap"><div class="cs">' + "".join(
+    # data-n: how many circles there are, so narrow screens can split them
+    # into even rows (six as three and three, not four and two).
+    return ('<div class="catstrip"><div class="wrap"><div class="cs" data-n="%d">' % len(CATS) + "".join(
         # The photograph is an <img> whose path comes from navigation.json, not
         # a url() in flow.css, which used to name every file. A cut-out on
         # transparency ("cutout": true) gets class pop and stands in front of its
         # circle instead of being clipped by it. The label is text, with a break
         # opportunity after "/": "Attars/Perfume" has no space, so without one it
-        # overflowed its cell at 375px - 78px of text in 76px.
+        # overflowed its cell at 375px - 78px of text in 76px. A cut-out marked
+        # "wide" is a group wider than it is tall (the gift boxes): it sits
+        # across the circle instead of rising out of it.
         '<a class="c-{2}{4}" href="{0}"><span class="circle"><img src="{3}" alt="" '
         'width="108" height="108"></span><span>{1}</span></a>'.format(
-            esc(h), esc(n).replace("/", "/<wbr>"), k, esc(V(img)), " pop" if cut else "")
+            esc(h), esc(n).replace("/", "/<wbr>"), k, esc(V(img)),
+            " pop wide" if cut == "wide" else " pop" if cut else "")
         for n, h, k, img, cut in CATS) + '</div></div></div>')
 
 # The bag, checkout, confirmation, account and tracking pages are for someone
@@ -1249,7 +1254,7 @@ pathlib.Path("404.html").write_text("""<!doctype html>
 <style>body{margin:0;min-height:100vh;display:grid;place-items:center;text-align:center;
 background:#faf8f4;color:#171310;font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 main{padding:24px}h1{font:600 28px/1.2 Georgia,"Times New Roman",serif;margin:0 0 10px}
-a{display:inline-block;margin-top:18px;background:#171310;color:#fff;padding:12px 22px;text-decoration:none}</style>
+a{display:inline-block;margin-top:18px;background:#171310;color:#fff;padding:12px 22px;text-decoration:none;border-radius:999px}</style>
 </head><body><main><h1>We couldn&rsquo;t find that page</h1><p>The link may be old or mistyped.</p>
 <a id="home" href="/">Go to the BGS Corner homepage</a></main>
 <script>document.getElementById("home").href=location.pathname.indexOf("/structured-corner-v2/")===0?"/structured-corner-v2/":"/";</script>

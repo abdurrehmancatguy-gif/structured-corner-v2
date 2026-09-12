@@ -4,7 +4,8 @@ content/navigation.json ("image"), not in the stylesheet.
   attars.png  BGS Corner product, supplied in chat   Attars/Perfume Oils  (Royal Amber and BGS bottles)
   bak.png     BGS Corner product photography   Bakhoor  (BGS BAKHOOR 4 tin)
   edp.png     BGS Corner product, supplied in chat   EDP Sprays  (Pride of Arabia)
-  floral.jpg  Pexels photos/1303087            Gift Sets
+  gift-sets.png  gift box pair, supplied in chat   Gift Sets
+  floral.jpg  Pexels photos/1303087            (was Gift Sets, no longer shown)
   fresh.jpg   Pexels photos/7269476            Build Your Gift Box (was Discovery)
   amber.jpg   Pexels photos/9127154            Shop by Occasion
   corporate.png  skyscraper cut-out, supplied in chat   Corporate Gifting
@@ -17,7 +18,7 @@ navigation.json). 204x240, 256 colours.
 
 Pexels License: free for commercial use, no attribution required.
 https://www.pexels.com/license/
-The three Pexels images are placeholders for BGS Corner's own photography.
+The Pexels images are placeholders for BGS Corner's own photography.
 
 corporate.png arrived the same way, a painted checkerboard in an RGB image. The
 building's edges are straight, so the key is a polygon fitted to them (flat roof
@@ -33,3 +34,11 @@ was keyed by texture: the checkerboard flips light and dark every few pixels,
 chrome is smooth, and the bottles are outlined in dark. The EDP bottle is
 the whole Pride of Arabia bottle, cap and base included. Both are normalised to 204x240 like the tin, so all
 the breakouts rise and stand alike. 256 colours.
+
+gift-sets.png (2026-09-11) arrived the same way, a painted checkerboard with soft
+white wisps over it, and the white ribbon bows meet the white squares. Keyed by
+texture like the attars (the checkerboard flips every 8.5px, satin is smooth),
+with enclosed pockets of checkerboard removed and the edges closed and opened
+by a few pixels. The two boxes are a wide group, so it is not normalised to
+204x240: it is cropped tight (300x154) and marked "cutout": "wide", which draws
+it across its circle instead of rising out of it. 256 colours.

@@ -21,10 +21,6 @@
       "href": "gift-box.html"
     },
     {
-      "label": "Shop by Occasion",
-      "href": "collection.html"
-    },
-    {
       "label": "Corporate Gifting",
       "href": "corporate.html"
     }
@@ -82,19 +78,14 @@
       "label": "Gift Sets",
       "href": "collection.html?cat=gift-sets",
       "tint": "floral",
-      "image": "assets/cat/floral-216.jpg"
+      "image": "assets/cat/gift-sets.png",
+      "cutout": "wide"
     },
     {
       "label": "Build Your Gift Box",
       "href": "gift-box.html",
       "tint": "fresh",
       "image": "assets/cat/fresh-216.jpg"
-    },
-    {
-      "label": "Shop by Occasion",
-      "href": "gift-box.html",
-      "tint": "amber",
-      "image": "assets/cat/amber-216.jpg"
     },
     {
       "label": "Corporate Gifting",

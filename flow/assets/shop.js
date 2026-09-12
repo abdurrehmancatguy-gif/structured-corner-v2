@@ -1472,9 +1472,9 @@ bgsRun(function () {
   var cat = new URLSearchParams(location.search).get("cat") || "";
   var page = location.pathname.split("/").pop() || "index.html";
 
-  /* First match only. Build Your Gift Box and Shop by Occasion both point at
-     gift-box.html in navigation.json, so a plain match lit two entries at once
-     on that page. Two labels sharing one destination is a content question that
+  /* First match only. Two entries once pointed at gift-box.html in
+     navigation.json (Build Your Gift Box and Shop by Occasion), and a plain
+     match lit both at once on that page. Two labels sharing one destination is a content question that
      is still open; until it is answered the bar should at least claim one
      place. */
   var claimed = false;

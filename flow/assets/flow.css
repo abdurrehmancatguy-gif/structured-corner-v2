@@ -13,7 +13,7 @@
   --red:#b3261e; --green:#2e6b3e; --blue:#2b5b7a;
   --f-oud:#3E4A33; --f-amber:#94480F; --f-musk:#44555F; --f-floral:#9B3A5B;
   --f-fresh:#4B6B1C; --f-sweet:#6D2F5C; --f-res:#171310;
-  --r:3px; --shadow:0 1px 2px rgba(23,19,16,.05);
+  --r:20px; --r-sm:14px; --r-ctl:999px; --r-pill:999px; --shadow:0 1px 2px rgba(23,19,16,.05);
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
@@ -40,7 +40,7 @@ section.alt{background:var(--alt)}
 .logo{display:flex;align-items:center;gap:9px;flex-shrink:0}
 .logo .mark{width:30px;height:30px;flex-shrink:0}
 .logo .wm{font:400 23px/1 "Times New Roman",Times,serif;letter-spacing:.16em}
-.search{flex-grow:1;display:flex;border:1.5px solid var(--ink);border-radius:var(--r);overflow:hidden;min-height:44px}
+.search{flex-grow:1;display:flex;border:1.5px solid var(--ink);border-radius:var(--r-ctl);overflow:hidden;min-height:44px}
 .search .cat{display:flex;align-items:center;gap:7px;padding:0 14px;background:var(--alt);
  border-right:1px solid var(--line);font-size:13px;color:var(--body);white-space:nowrap}
 .search input{flex-grow:1;border:0;padding:0 14px;font:inherit;outline:none;background:#fff}
@@ -70,7 +70,7 @@ section.alt{background:var(--alt)}
 
 /* ---------- buttons ---------- */
 .btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:12px 26px;
- border-radius:var(--r);font-size:13.5px;font-weight:600;border:1.5px solid var(--ink);background:#fff;color:var(--ink)}
+ border-radius:var(--r-ctl);font-size:13.5px;font-weight:600;border:1.5px solid var(--ink);background:#fff;color:var(--ink)}
 .btn.solid{background:var(--ink);color:#fff}
 .btn.gold{background:var(--gold);border-color:var(--gold);color:#fff}
 .btn.ghost{border-color:rgba(255,255,255,.5);background:transparent;color:#fff}
@@ -109,7 +109,7 @@ section.alt{background:var(--alt)}
 .p .ph img{width:100%;height:100%;object-fit:cover}
 .p .ph .none{color:#6a6055;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase}
 .badge{position:absolute;top:9px;left:9px;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
- font-weight:700;padding:4px 7px;border-radius:2px;color:#fff;background:var(--ink)}
+ font-weight:700;padding:4px 7px;border-radius:var(--r-pill);color:#fff;background:var(--ink)}
 .badge.low{background:var(--red)}
 .badge.today{background:var(--green)}
 .badge.best{background:var(--gold)}
@@ -126,7 +126,7 @@ section.alt{background:var(--alt)}
 .p .pr s{color:var(--faint);font-size:12.5px}
 .p .pr .off{color:var(--red);font-size:11.5px;font-weight:700}
 .sizes{display:flex;gap:5px}
-.sizes span{border:1px solid var(--line);border-radius:2px;padding:4px 8px;font-size:11px;color:var(--body)}
+.sizes span{border:1px solid var(--line);border-radius:var(--r-sm);padding:4px 8px;font-size:11px;color:var(--body)}
 .sizes span.on{border-color:var(--ink);background:var(--ink);color:#fff}
 .norm{font-size:11px;color:var(--faint)}
 
@@ -154,9 +154,9 @@ section.alt{background:var(--alt)}
 .pill{border:1px solid var(--line);border-radius:20px;padding:6px 12px;font-size:12px;color:var(--body);
  display:inline-flex;align-items:center;gap:6px}
 .pill.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-.sel{border:1px solid var(--line);border-radius:var(--r);padding:9px 12px;font-size:13px;min-height:40px}
+.sel{border:1px solid var(--line);border-radius:var(--r-ctl);padding:9px 12px;font-size:13px;min-height:40px}
 .pager{display:flex;gap:6px;justify-content:center;padding-top:26px}
-.pager span{min-width:38px;height:38px;border:1px solid var(--line);border-radius:var(--r);
+.pager span{min-width:38px;height:38px;border:1px solid var(--line);border-radius:var(--r-ctl);
  display:flex;align-items:center;justify-content:center;font-size:13px}
 .pager span.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 
@@ -164,7 +164,7 @@ section.alt{background:var(--alt)}
 .pdp{display:grid;grid-template-columns:1.05fr 1fr;gap:44px}
 .gal{display:grid;grid-template-columns:78px minmax(0,1fr);gap:12px}
 .gal .th{display:flex;flex-direction:column;gap:10px}
-.gal .th div{aspect-ratio:1/1;background:#0e0c0a;border:1px solid var(--line);border-radius:2px;overflow:hidden}
+.gal .th div{aspect-ratio:1/1;background:#0e0c0a;border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden}
 .gal .th div.on{border-color:var(--gold);border-width:2px}
 .gal .main{background:#0e0c0a;border-radius:var(--r);overflow:hidden;aspect-ratio:1/1.05}
 .gal .main img{width:100%;height:100%;object-fit:cover}
@@ -180,13 +180,13 @@ section.alt{background:var(--alt)}
 .tabs2 button:hover{color:var(--ink)}
 .tabs2 button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .tabs2 span.on,.tabs2 button.on{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
-.note{padding:12px 15px;font-size:12.5px;border-radius:0 var(--r) var(--r) 0}
+.note{padding:12px 15px;font-size:12.5px;border-radius:var(--r-sm)}
 
 /* ---------- cart / checkout ---------- */
 .two{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:34px}
 .line{display:grid;grid-template-columns:88px minmax(0,1fr) auto;gap:16px;padding:16px 0;
  border-bottom:1px solid var(--hair);align-items:center}
-.line .im{background:#0e0c0a;aspect-ratio:1/1;border-radius:2px;overflow:hidden}
+.line .im{background:#0e0c0a;aspect-ratio:1/1;border-radius:var(--r-sm);overflow:hidden}
 .sum{border:1px solid var(--line);border-radius:var(--r);padding:20px;background:var(--alt)}
 .sum .r{display:flex;justify-content:space-between;padding:8px 0;font-size:13.5px}
 .sum .r.t{border-top:1px solid var(--line);margin-top:8px;padding-top:14px;font-size:17px;font-weight:700}
@@ -195,13 +195,13 @@ section.alt{background:var(--alt)}
 .prog .tr{height:5px;background:var(--hair);border-radius:3px;overflow:hidden}
 .prog .tr i{display:block;height:5px;background:var(--green)}
 .prog .tr i.part{background:var(--gold)}
-.stepper{display:inline-flex;border:1px solid var(--line);border-radius:var(--r);align-items:center}
+.stepper{display:inline-flex;border:1px solid var(--line);border-radius:var(--r-ctl);align-items:center}
 .stepper b{width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-weight:400;color:var(--mut)}
 .stepper i{width:36px;text-align:center;font-style:normal;font-size:13px}
-.field{border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;font-size:13.5px;
+.field{border:1px solid var(--line);border-radius:var(--r-ctl);padding:12px 14px;font-size:13.5px;
  color:var(--faint);min-height:46px;display:flex;align-items:center}
 .pay{display:flex;gap:9px;flex-wrap:wrap}
-.pay span{border:1px solid var(--line);border-radius:var(--r);padding:9px 14px;font-size:12px;min-height:40px;display:flex;align-items:center}
+.pay span{border:1px solid var(--line);border-radius:var(--r-ctl);padding:9px 14px;font-size:12px;min-height:40px;display:flex;align-items:center}
 .pay span.on{border-color:var(--ink);border-width:1.5px;font-weight:600}
 .pay span.off{opacity:.4}
 
@@ -211,8 +211,8 @@ footer .cols{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:34px}
 footer h5{color:#fff;font:600 12px/1 inherit;letter-spacing:.12em;text-transform:uppercase;margin:0 0 14px}
 footer a,footer p{display:block;font-size:13px;margin:0 0 9px;color:#b9b0a4;line-height:1.6}
 .nl{display:flex;gap:0;margin-top:12px;max-width:340px}
-.nl .field{flex-grow:1;border-radius:var(--r) 0 0 var(--r);background:#fff;border-color:#fff}
-.nl .btn{border-radius:0 var(--r) var(--r) 0;border-color:var(--gold);background:var(--gold);color:#fff}
+.nl .field{flex-grow:1;border-radius:var(--r-ctl) 0 0 var(--r-ctl);background:#fff;border-color:#fff}
+.nl .btn{border-radius:0 var(--r-ctl) var(--r-ctl) 0;border-color:var(--gold);background:var(--gold);color:#fff}
 .bot{border-top:1px solid #2c2622;margin-top:34px;padding-top:20px;display:flex;
  justify-content:space-between;gap:16px;font-size:12px;flex-wrap:wrap}
 .tabbar{display:none}
@@ -251,7 +251,7 @@ footer a,footer p{display:block;font-size:13px;margin:0 0 9px;color:#b9b0a4;line
 /* ---------- placeholders: every value with no source file behind it ---------- */
 .slot{display:inline-block;font-size:11px;letter-spacing:.02em;color:#9a8f7e;
  background:repeating-linear-gradient(135deg,#f6f2ea,#f6f2ea 5px,#f1ece2 5px,#f1ece2 10px);
- border:1px dashed #ded5c6;border-radius:2px;padding:2px 7px;font-style:normal}
+ border:1px dashed #ded5c6;border-radius:var(--r-pill);padding:2px 7px;font-style:normal}
 .slot::before{content:"[ "}.slot::after{content:" ]"}
 .p .tax,.p .rev{font-size:11px;color:var(--faint)}
 .p .notes .slot{font-size:10.5px}
@@ -259,11 +259,11 @@ footer a,footer p{display:block;font-size:13px;margin:0 0 9px;color:#b9b0a4;line
 /* image placeholders */
 .p .ph{background:#f7f4ee}
 .p .ph .none{color:#a89d8d;font-size:10px;letter-spacing:.14em;text-transform:uppercase;
- border:1px dashed #dcd3c4;padding:8px 12px;border-radius:2px;background:#fffdf9}
+ border:1px dashed #dcd3c4;padding:8px 12px;border-radius:var(--r-pill);background:#fffdf9}
 .heroimg{height:420px;background:repeating-linear-gradient(135deg,#232019,#232019 9px,#2a2620 9px,#2a2620 18px);
  display:flex;align-items:center;justify-content:center}
 .heroimg .none{color:#8d8375;font-size:11px;letter-spacing:.14em;text-transform:uppercase;
- border:1px dashed #4d463c;padding:10px 16px;border-radius:2px}
+ border:1px dashed #4d463c;padding:10px 16px;border-radius:var(--r-pill)}
 .hero .over{background:linear-gradient(90deg,rgba(14,12,10,.86) 0%,rgba(14,12,10,.45) 60%,transparent 100%)}
 .cats .c{background:#f7f4ee;border:1px dashed #ded5c6;color:#a89d8d}
 .cats .c .none{font-size:10px;letter-spacing:.12em;text-transform:uppercase}
@@ -284,7 +284,7 @@ footer a,footer p{display:block;font-size:13px;margin:0 0 9px;color:#b9b0a4;line
 .tick{width:56px;height:56px;border-radius:50%;background:var(--green);color:#fff;
  display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
 .tier{font-size:15px;font-weight:600;margin:8px 0}
-code{background:var(--gold-l);padding:1px 5px;border-radius:2px;font-size:12px}
+code{background:var(--gold-l);padding:1px 5px;border-radius:var(--r-sm);font-size:12px}
 footer .wm{color:#fff}
 @media (max-width:900px){ .heroimg{height:300px} }
 
@@ -420,7 +420,7 @@ footer .wm{color:#fff}
 /* ---------- interactive controls ---------- */
 .stepper button{width:36px;height:36px;border:0;background:transparent;font-size:16px;
  color:var(--body);cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;
- padding:0;border-radius:2px}
+ padding:0;border-radius:var(--r-ctl)}
 .stepper button:hover{background:var(--alt);color:var(--ink)}
 .stepper button:disabled{opacity:.3;cursor:default}
 .stepper button:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
@@ -437,7 +437,7 @@ footer .wm{color:#fff}
 /* rtl */
 [dir="rtl"] .strip .wrap,[dir="rtl"] .mast .wrap,[dir="rtl"] .navbar .wrap{direction:rtl}
 [dir="rtl"] .hero .box{text-align:right}
-[dir="rtl"] .note{border-left:0;border-right:3px solid var(--gold);border-radius:var(--r) 0 0 var(--r)}
+[dir="rtl"] .note{border-left:0;border-right:3px solid var(--gold);border-radius:var(--r-sm)}
 [dir="rtl"] .fbox .ct{margin-left:0;margin-right:auto}
 [dir="rtl"] .hero .arrow.prev{left:auto;right:14px}
 [dir="rtl"] .hero .arrow.next{right:auto;left:14px}
@@ -491,7 +491,7 @@ footer .wm{color:#fff}
 
 /* ================= mobile shopping pass ================= */
 .filterbtn{display:none;align-items:center;gap:8px;border:1px solid var(--ink);background:#fff;
- border-radius:var(--r);padding:0 14px;min-height:42px;font:600 13px/1 inherit;color:var(--ink);cursor:pointer}
+ border-radius:var(--r-ctl);padding:0 14px;min-height:42px;font:600 13px/1 inherit;color:var(--ink);cursor:pointer}
 .filterbtn .fcount{background:var(--ink);color:#fff;border-radius:9px;min-width:18px;height:18px;
  font-size:10.5px;font-style:normal;display:flex;align-items:center;justify-content:center;padding:0 5px}
 .drawerhead,.draweractions,.scrim{display:none}
@@ -586,7 +586,7 @@ footer .wm{color:#fff}
  display:flex;align-items:center;gap:14px;padding:14px;min-height:88px;transition:border-color .15s}
 .promo:hover{border-color:var(--ink)}
 .promo .none{flex-shrink:0;width:74px;height:60px;border:1px dashed var(--line);background:#fff;
- border-radius:2px;display:flex;align-items:center;justify-content:center;color:var(--faint);
+ border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;color:var(--faint);
  font-size:9px;letter-spacing:.12em;text-transform:uppercase}
 .promo b{display:block;font-size:14px;margin-bottom:3px}
 .promo span:not(.none){font-size:11.5px;color:var(--mut);line-height:1.4}
@@ -618,7 +618,7 @@ footer .wm{color:#fff}
 }
 
 /* ================= banner inset + category strip ================= */
-.hero{max-width:1320px;margin:22px auto 0;border-radius:var(--r);
+.hero{max-width:1320px;width:calc(100% - 56px);margin:22px auto 0;border-radius:var(--r);
  border:1px solid var(--line)}
 .hero .over .wrap{padding:0 44px}
 .hero .box{max-width:560px}
@@ -627,7 +627,7 @@ footer .wm{color:#fff}
 .cs{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;padding:16px 0}
 .cs a{display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px 6px;
  border-radius:var(--r);color:var(--body);text-align:center;transition:background .15s,color .15s}
-.cs a span{font-size:11.5px;line-height:1.25;font-weight:500}
+.cs a span{font-size:11.5px;line-height:1.25;font-weight:500;text-wrap:balance}
 
 @media (max-width:1080px){ .cs{grid-template-columns:repeat(4,1fr)} }
 @media (max-width:900px){
@@ -667,7 +667,7 @@ footer .wm{color:#fff}
 
 /* ---------- scent quiz ---------- */
 .quiz{margin-top:16px}
-.qprog{height:4px;background:var(--hair);border-radius:2px;overflow:hidden;margin-bottom:12px}
+.qprog{height:4px;background:var(--hair);border-radius:var(--r-pill);overflow:hidden;margin-bottom:12px}
 .qprog i{display:block;height:4px;background:var(--gold);transition:width .3s ease}
 .qstep{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);font-weight:600}
 .qcard h2{font:400 30px/1.2 "Times New Roman",Times,serif;margin:16px 0 20px}
@@ -870,11 +870,11 @@ footer .wm{color:#fff}
 .galcount{position:absolute;top:12px;right:12px;z-index:2;
   font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
   font-size:11px;letter-spacing:.08em;background:var(--ink);color:var(--bg);
-  padding:5px 9px;border-radius:var(--r)}
+  padding:5px 9px;border-radius:var(--r-pill)}
 .galcount b{color:var(--gold);font-weight:600}
 .galthumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .galthumb{aspect-ratio:1/1;border:1px solid var(--hair);background:var(--alt);
-  cursor:pointer;border-radius:var(--r);
+  cursor:pointer;border-radius:var(--r-sm);
   display:flex;align-items:center;justify-content:center;padding:0;
   font-size:11px;color:var(--mut);letter-spacing:.08em;
   transition:border-color .14s ease,color .14s ease}
@@ -1065,7 +1065,7 @@ footer .wm{color:#fff}
 
 /* checkout picker chips are buttons; the cart .pay stays informational spans */
 .pay button{appearance:none;-webkit-appearance:none;font-family:inherit;cursor:pointer;
-  border:1px solid var(--line);border-radius:var(--r);padding:9px 14px;font-size:12px;
+  border:1px solid var(--line);border-radius:var(--r-ctl);padding:9px 14px;font-size:12px;
   min-height:44px;display:flex;align-items:center;background:#fff;color:var(--ink)}
 .pay button:hover{border-color:var(--ink)}
 .pay button.on{border-color:var(--ink);border-width:1.5px;font-weight:600}
@@ -1076,7 +1076,7 @@ footer .wm{color:#fff}
    -------------------------------------------------------------------------- */
 /* size chips are buttons now (keyboard + focus), styled like the old spans */
 .sizes button{appearance:none;-webkit-appearance:none;font-family:inherit;cursor:pointer;
-  border:1px solid var(--line);border-radius:2px;padding:4px 8px;font-size:11px;
+  border:1px solid var(--line);border-radius:var(--r-sm);padding:4px 8px;font-size:11px;
   color:var(--body);background:#fff}
 .sizes button.on{border-color:var(--ink);border-width:1.5px;color:var(--ink);font-weight:600}
 .sizes button:hover{border-color:var(--ink)}
@@ -1271,7 +1271,7 @@ footer .slot,footer .soon{color:#b9b0a4}
    absolutely positioned, so it costs no layout at all. */
 .sharebtn{position:relative;display:inline-flex;align-items:center;gap:6px;
   margin-left:auto;align-self:center;background:none;
-  border:1px solid var(--line);border-radius:var(--r);padding:0 12px;
+  border:1px solid var(--line);border-radius:var(--r-ctl);padding:0 12px;
   min-height:30px;font:inherit;font-size:12px;color:var(--body);
   cursor:pointer;white-space:nowrap;transition:border-color .12s,color .12s}
 .sharebtn::after{content:"";position:absolute;inset:-8px;border-radius:8px}
@@ -1422,8 +1422,8 @@ footer .slot,footer .soon{color:#b9b0a4}
   /* max-width so a tablet does not stretch the band into a slab; the ratio
      has to stay 1.85:1 at every width here, because that is the phone
      asset's own ratio and matching them is what removes the crop. */
-  .hero{min-height:0;margin:0 auto;border:0;border-radius:0;
-    max-width:560px;background:var(--alt)}
+  .hero{min-height:0;margin:12px auto 0;border:0;border-radius:var(--r);
+    width:calc(100% - 32px);max-width:560px;background:var(--alt)}
   /* max-height:none is not decoration. An earlier block in this append-only
      file still sets .heroimg{max-height:min(38vh,220px)}, same specificity and
      higher up, and dropping the property here left that one in force - which
@@ -1637,6 +1637,21 @@ footer .slot,footer .soon{color:#b9b0a4}
   .cs{gap:8px}
   .cs a{flex:0 0 calc(25% - 6px)}
 }
+/* Rows even, from the count build.py writes on the strip (data-n): five or
+   six circles go three to a row (3+2, 3+3) instead of four and a remainder
+   (4+1, 4+2), which read as lopsided. Seven and eight stay four to a row. */
+@media (max-width:1080px){
+  .cs[data-n="5"] a,.cs[data-n="6"] a{flex:0 0 calc((100% - 2 * 12px) / 3)}
+}
+@media (max-width:700px){
+  .cs[data-n="5"] a,.cs[data-n="6"] a{flex:0 0 calc((100% - 2 * 8px) / 3)}
+}
+/* A cut-out stands about a fifth of its circle above it (12px on a phone,
+   15px on a tablet), so on a second row it rose into the label of the circle
+   above: the Corporate tower sat on "EDP Sprays". The rows are spaced by
+   more than that rise. */
+@media (max-width:1080px){ .catstrip .cs{row-gap:22px} }
+@media (max-width:700px){ .catstrip .cs{row-gap:18px} }
 
 /* ---- satin, for the panels that were dressed as warnings ------------------
    Both .notestop and .note were --gold-l with a gold edge, which is the shape
@@ -1826,6 +1841,15 @@ footer .slot,footer .soon{color:#b9b0a4}
   object-fit:fill;z-index:1;transform-origin:50% 100%;
   filter:drop-shadow(0 4px 3px rgba(23,19,16,.28))}
 .cs a.pop:hover .circle img{transform:translateY(-3px)}
+/* A wide group (the gift boxes) cannot rise out of the circle without being
+   drawn tiny: at 82% of the circle it came out at 42% of its height. It is
+   drawn across the circle instead, wider than it, so it overhangs the edges a
+   little the way the others overhang the top, with its shadow widened to
+   match. The file carries transparent space on its lighter side, so the
+   centre of the picture is the centre of its weight: the tall box on the left
+   made a plain crop look pushed left. */
+.cs a.pop.wide .circle img{left:-15%;width:130%;bottom:20%}
+.cs a.pop.wide .circle::before{left:4%;right:4%;bottom:16%}
 
 /* The strip's top padding is what holds the rise. 16px held the 12px of the
    58px phone circle; the 74px and 108px circles rise 15 and 22px and met the
@@ -1878,3 +1902,34 @@ footer .slot,footer .soon{color:#b9b0a4}
   background:linear-gradient(rgba(23,19,16,0),rgba(23,19,16,.72))}
 @media (max-width:700px){ .reelrow{grid-auto-columns:42%;gap:10px} }
 @media (prefers-reduced-motion:reduce){ .reel video{transition:none} }
+
+/* ---- rounded corners -------------------------------------------------------
+   The owner wants no sharp corners anywhere, and then rounder still, for a
+   softer, more premium feel. One scale, set in :root:
+     --r      20px  cards, panels, the gallery, reels, the banner, quiz options
+     --r-sm   14px  small boxes that sit inside bigger ones: thumbnails, bag
+                    photos, size chips (their label wraps to two lines on a
+                    phone card, which a pill would turn into an oval) and the
+                    short satin notes
+     --r-ctl        pills: every button and control - buttons, the search box,
+                    fields, selects, steppers, pagination, pay options, share
+                    and filter buttons. All the fields are one line.
+     --r-pill       one-line tags: badges, slot tags, placeholders, counters
+   The banner is a card at every width: it sits in from the screen edges by
+   the page's own gutters (28px on a desktop, 16px on a phone) so its corners
+   have somewhere to show.
+   Bars that always run edge to edge (strip, category bar, footer, tab bar,
+   section grounds) stay square for the same reason. */
+.p .ph{border-radius:var(--r)}          /* the photo is a rounded tile, card or no card */
+/* A pill only holds one line: the footer's email field wrapped "Your email" to
+   two on a phone and swelled into an oval. It stays on one line, and the Join
+   button gives up some padding on narrow screens to make the room. */
+.nl .field{white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:560px){ .nl .btn{padding-left:16px;padding-right:16px} }
+/* a bag line with a photo is a photo, not an empty slot: the dashed
+   placeholder outline is only for lines without one */
+.line .im:has(img){border:1px solid var(--hair);background:#fff}
+@media (max-width:900px){
+  .stickybuy{border-radius:var(--r) var(--r) 0 0}   /* a sheet over the tab bar */
+  .plp .side{border-radius:0 var(--r) var(--r) 0}  /* the filters drawer's open edge */
+}
