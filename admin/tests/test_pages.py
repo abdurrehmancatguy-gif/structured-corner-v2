@@ -21,6 +21,7 @@ import tempfile
 import unittest
 
 from box import Box
+import cdp_pipe
 
 PORT = int(os.environ.get("ADMIN_PAGES_PORT", "4743"))
 PORT2 = int(os.environ.get("ADMIN_PAGES2_PORT", "4744"))
@@ -403,6 +404,35 @@ class PagesPartTwoTests(_Pages, unittest.TestCase):
                 node = node[part]
             # a path shop.js finishes with a variable names a group of texts
             self.assertIsInstance(node, dict if joined == "+" else str, path)
+
+    @unittest.skipUnless(os.path.exists(cdp_pipe.CHROME), "headless Chrome is not installed")
+    def test_saving_one_page_over_a_newer_copy_keeps_the_other_pages(self):
+        before = self.doc()["data"]
+        c = cdp_pipe.Chrome()
+        try:
+            c.go("http://localhost:%d/admin/#/content/pages/bag" % self.PORT)
+            c.wait("!!document.querySelector('.pg-form')", 30)
+            # the homepage bands are saved somewhere else while the bag is open
+            st, res = self.put(lambda d: d["index"]["discovery_band"].update(eyebrow="Begin here"))
+            self.assertEqual(st, 200, res)
+            c.js("""(() => { const l = [...document.querySelectorAll('label.f-label')]
+                       .find((x) => x.textContent.trim().startsWith('Checkout button'));
+                     const i = document.getElementById(l.htmlFor); i.value = 'Go to checkout';
+                     i.dispatchEvent(new Event('input', { bubbles: true })); })()""")
+            c.wait("[...document.querySelectorAll('button')].some((b) => b.textContent.trim() === 'Save')", 10)
+            c.js("[...document.querySelectorAll('button')].filter((b) => b.textContent.trim() === 'Save').pop().click()")
+            mine = "[...document.querySelectorAll('.dlg-actions button')].find((b) => b.textContent.trim() === 'Save mine over it')"
+            c.wait("!!" + mine, 40)
+            c.js(mine + ".click()")
+            c.wait("[...document.querySelectorAll('.toast')].some((t) => /Saved/.test(t.textContent))", 60)
+            data = self.b.content("pages")
+            self.assertEqual(data["cart"]["summary"]["checkout"], "Go to checkout")
+            self.assertEqual(data["index"]["discovery_band"]["eyebrow"], "Begin here")
+            self.assertIn("Begin here", self.page("index.html"))
+            self.assertEqual(c.errors(), [])
+        finally:
+            c.close()
+            self.restore(before)
 
     def test_the_404_title_ends_with_the_settings_suffix(self):
         self.assertIn("<title>Page not found | BGS Corner</title>", self.page("404.html"))
