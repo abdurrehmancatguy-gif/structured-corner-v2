@@ -4,6 +4,56 @@ The architecture the admin is built to. Written from a read of the repo on
 2026-09-11; numbers and file states in it describe that day. `../DESIGN.md`
 records the decisions that refine or override it.
 
+## Status (2026-09-12)
+
+Done:
+- The first stage: the server, the JSON store, the security gate, and the
+  Home, Products, product, Homepage, Navigation, Site text and Settings
+  screens.
+- Phase 0 wiring, with today's values: the store rules (settings.store,
+  passed to shop.js as window.BGS_RULES), the category text and collection
+  intros (copy.json, BGS_CATS), the homepage shelves (home.json), the text of
+  the fixed pages (pages.json, BGS_COPY), the Arabic dictionary
+  (translations.json, BGS_AR) and the scent quiz (quiz.json, BGS_QUIZ).
+  Checkout and order confirmed stay in code. `HARDCODED.md` marks each row
+  that moved.
+- The screens stage: Inventory, Bulk editor, Import and export, Collections,
+  Pages, Scent quiz, Translations, Files, Discounts, Publish and History, with
+  uploads, the crop tool, film conversion as a background job, the media
+  library and the trash. Orders, Customers and Analytics are shown switched
+  off until the database.
+
+Where the build differs from this plan:
+- products/bulk takes changes as {id, rev, data}, not {id, rev, ops}.
+- POST history/{id}/restore takes the rev in If-Match, like every other save,
+  not expect_rev in the body.
+- Backup pruning is on the History screen, not in Settings > Admin.
+- GET publish/summary was added. It feeds the top-bar chip and never contacts
+  GitHub.
+- The second fetch before a push runs inside the background job, so a change
+  after the review ends the job with the code review_stale, not an HTTP 412.
+- pages.json holds the text of the fixed pages. Custom pages (Our story, FAQ)
+  are not built and would need a key or a document of their own.
+- The Arabic dictionary reaches shop.js as window.BGS_AR, not inside
+  BGS_COPY, and the cutoff as BGS_RULES.sameday_cutoff_minutes, not
+  sameday_cutoff_24h.
+- Each rung of the volume ladder must save more than the rung before it, as
+  well as need more items.
+- The module names in server_design 1 and ui_design are the plan's.
+  `../DESIGN.md` lists the modules that exist.
+
+Not built from this plan: PATCH routes for products and documents, GET checks,
+POST tools/derivatives, global search and the keyboard shortcuts, the SEO and
+preferences screen, custom pages, the Settings > Admin panel, the sandboxed
+device preview, draft autosave, the BroadcastChannel notices, before
+thumbnails for changed media on the Publish screen, the "Check the live site"
+button, and the check that the last build is not stale. A failed last build
+does block a commit, and the clean-room rebuild catches stale generated files
+at commit time.
+
+Next: the owner's own PostgreSQL database for the admin (storage_layer
+below), then Auth0 sign-in, then commerce.
+
 ## information_architecture
 
 CURRENT STATE THAT SHAPES THE IA (read from the repo on 2026-09-11)
