@@ -20,6 +20,7 @@ export async function render(main, { app }) {
   const f = { q: "", low: false };
   let rows = [];
   let low = LOW;
+  let saving = false;
   const note = h("div", { class: "msgs" });
   // The 412 banner has a box of its own, so it goes once the last stale row
   // is reloaded instead of staying until the next save.
@@ -163,6 +164,10 @@ export async function render(main, { app }) {
   }
 
   async function save() {
+    // One save at a time: a Cmd+S while a save is in flight would send a
+    // second request the server refuses (423), showing a false "still saving"
+    // toast and bringing the save bar back over the running save.
+    if (saving) return;
     const edited = rows.filter(changed);
     if (!edited.length) return;
     clear(note);
@@ -173,6 +178,7 @@ export async function render(main, { app }) {
       if (bad[0].el && bad[0].el.input.isConnected) bad[0].el.input.focus();
       return;
     }
+    saving = true;
     savebar.busy("Saving and rebuilding the site");
     const changes = edited.map((r) => ({ id: r.id, rev: r.rev, data: Object.assign(copy(r.data), { stock: r.edit.value }) }));
     try {
@@ -192,6 +198,8 @@ export async function render(main, { app }) {
       if (e.code === "stale_rev" && e.details && e.details.conflicts) stale(e.details.conflicts);
       else if (e.code === "validation" && e.details && e.details.errors) problems(e.details.errors);
       else if (e.code !== "cancelled") { const b = failure(e); if (b) note.append(b); }
+    } finally {
+      saving = false;
     }
   }
 

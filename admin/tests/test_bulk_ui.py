@@ -348,6 +348,22 @@ class Driven(unittest.TestCase):
         self.assertEqual((self.product("amore")["price"], self.product("suit-up")["stock"]), (86, 4))
         self.no_page_errors()
 
+    def test_a_second_save_key_during_a_save_is_ignored(self):
+        # Cmd/Ctrl+S while a save is in flight must not send a second request:
+        # it was refused (423) and showed a false "still saving" toast with the
+        # save bar back over the running save.
+        self.open("#/inventory", "document.querySelectorAll('.inv-stock').length > 0")
+        self.js("(() => { const e = document.querySelector('.inv-stock'); e.value = String(Number(e.value) + 1);"
+                " e.dispatchEvent(new Event('input', { bubbles: true })); })()")
+        self.c.wait("!document.querySelector('.savebar').hidden", 10)
+        self.js("(() => { for (let i = 0; i < 2; i++) document.dispatchEvent("
+                "new KeyboardEvent('keydown', { key: 's', ctrlKey: true, bubbles: true })); })()")
+        self.wait_text(".toast", "Saved the stock")
+        self.js("new Promise(r => setTimeout(r, 300))")
+        self.assertFalse(any("still saving" in t for t in self.texts(".toast")), self.texts(".toast"))
+        self.assertTrue(self.js("document.querySelector('.savebar').hidden"), "the save bar stayed up")
+        self.no_page_errors()
+
     # ---- phone width -------------------------------------------------------
     def test_the_top_bar_status_stays_visible_on_a_narrow_window(self):
         # A save leaves the Publish chip showing. On a narrow window it must

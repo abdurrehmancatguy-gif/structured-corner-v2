@@ -42,6 +42,7 @@ export async function render(main, { app }) {
   let cells = [];       // cells[r][c]: the grid's cell elements, for the rows shown
   let at = { r: 0, c: 0 };
   let editing = null;   // {row, col, el, input} while a cell's editor is open
+  let saving = false;   // a save is in flight; ignore a second Cmd+S until it ends
   const undo = [], redo = [];
   const f = { q: "", category: "" };
 
@@ -482,6 +483,10 @@ export async function render(main, { app }) {
   }
 
   async function save() {
+    // One save at a time: a Cmd+S while a save is in flight would send a
+    // second request the server refuses (423), showing a false "still saving"
+    // toast and re-enabling the Save button over the running save.
+    if (saving) return;
     if (editing) commit();
     const dirty = rows.filter((r) => Object.keys(r.edits).length);
     if (!dirty.length) return;
@@ -502,6 +507,7 @@ export async function render(main, { app }) {
     }
     const n = count();
     const changes = dirty.map((r) => ({ id: r.id, rev: r.rev, data: build(r) }));
+    saving = true;
     saveBtn.disabled = true;
     savebar.busy("Saving " + plural(n, "change") + " and rebuilding the site");
     try {
@@ -536,6 +542,8 @@ export async function render(main, { app }) {
         const b = failure(e);
         if (b) note.append(b);
       }
+    } finally {
+      saving = false;
     }
   }
 
