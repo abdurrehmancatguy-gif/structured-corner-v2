@@ -79,7 +79,7 @@ section.alt{background:var(--alt)}
 
 /* ---------- usp ---------- */
 .usp{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border-bottom:1px solid var(--line)}
-.usp > div{background:#fff;padding:16px 20px;display:flex;gap:12px;align-items:center}
+.usp > div{background:#fff;padding:16px 20px;display:flex;gap:12px;align-items:center;justify-content:center}
 .usp > div > div{min-width:0}
 .usp svg{flex-shrink:0}
 .usp b{display:block;font-size:13px}
@@ -1845,10 +1845,12 @@ footer .slot,footer .soon{color:#b9b0a4}
    drawn tiny: at 82% of the circle it came out at 42% of its height. It is
    drawn across the circle instead, wider than it, so it overhangs the edges a
    little the way the others overhang the top, with its shadow widened to
-   match. The file carries transparent space on its lighter side, so the
-   centre of the picture is the centre of its weight: the tall box on the left
-   made a plain crop look pushed left. */
-.cs a.pop.wide .circle img{left:-15%;width:130%;bottom:20%}
+   match. max-width:none because the global img{max-width:100%} capped it at
+   the circle's width, which drew it smaller than meant and left it hanging
+   to the left. The file carries transparent space on its left, but the eye
+   centres the two boxes by their outer edges, whose midpoint is 57.6% across
+   the file: at 130% wide that lands on the circle's centre from left -25%. */
+.cs a.pop.wide .circle img{left:-25%;width:130%;max-width:none;bottom:20%}
 .cs a.pop.wide .circle::before{left:4%;right:4%;bottom:16%}
 
 /* The strip's top padding is what holds the rise. 16px held the 12px of the
