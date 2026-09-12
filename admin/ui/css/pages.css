@@ -1,0 +1,18 @@
+/* Pages: the list of the shop's fixed pages, and one page's text. */
+.pg-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.pg-list .card{margin-bottom:0}
+.pg-item{display:flex;flex-direction:column;justify-content:space-between;gap:14px}
+.pg-body{min-width:0}
+.pg-body h2{margin:0 0 6px}
+.pg-body h2 a{text-decoration:none}
+.pg-body h2 a:hover{text-decoration:underline}
+.pg-about{margin:0 0 8px}
+.pg-meta{margin:0;font-size:12.5px;color:var(--mut)}
+.pg-lockline{margin:0 0 8px;color:var(--mut)}
+.pg-lockline .badge{vertical-align:middle}
+.pg-actions{display:flex}
+.pg-note{margin:0;color:var(--mut)}
+.pg-form .card h2{margin-top:0}
+@media (max-width:560px){
+  .pg-list{grid-template-columns:1fr}
+}
