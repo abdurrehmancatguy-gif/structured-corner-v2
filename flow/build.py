@@ -152,9 +152,13 @@ def _aed(n):
 
 def _gift_name(label):
     """'Mystery oud, 3 ml' reads 'mystery oud' inside a sentence: the part
-    before the size, its capital dropped unless the word is in capitals."""
+    before the size, its capital dropped only when the rest of the phrase is
+    lower case too, so a proper name like 'Royal Amber sample' keeps its
+    capitals."""
     name = label.split(",")[0].strip()
-    return name[:1].lower() + name[1:] if name[1:2].islower() else name
+    words = name.split()
+    lower_rest = all(w[:1].islower() for w in words[1:])
+    return name[:1].lower() + name[1:] if name[1:2].islower() and lower_rest else name
 
 def _ladder_bar(n):
     """The bag's third progress bar with n items counted, as the page shows it
