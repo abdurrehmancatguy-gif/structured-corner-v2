@@ -901,8 +901,7 @@ bgsRun(function () {
     var t = document.querySelector("[data-title]"), intro = document.querySelector("[data-intro]"),
         cr = document.querySelector("[data-crumb]");
     if (t) t.textContent = title;
-    if (intro) intro.textContent = one ? catText(one, "intro")
-      : "Every blend in the shop: oud oils, Reserve, bakhoor, EDP sprays and gift sets.";
+    if (intro) intro.textContent = catText(one || "all", "intro");
     if (cr) cr.textContent = "Home / " + (one ? "Categories / " : "") + catText(one || "all", "crumb");
     document.title = title + " | BGS Corner";
 
