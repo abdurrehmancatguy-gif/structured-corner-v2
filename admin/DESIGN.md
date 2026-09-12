@@ -129,9 +129,9 @@ admin/
   with dynamic `import()`. Every entry now has its screen. Entries that need
   the database or login are shown switched off with the reason; today those
   are Orders, Customers and Analytics, which read "Arrives with the
-  database". `screens/todo.js` stays as the "Not built yet" page for an entry
-  whose module is missing. Adding an area means adding a screen module and an
-  API module.
+  database". A screen module that fails to load (usually because the admin
+  has stopped) shows a banner asking for a restart and a reload. Adding an
+  area means adding a screen module and an API module.
 - **Sub-routes**: `#/products/<id>` opens one product. Any other address
   deeper than a navigation entry belongs to that entry, and the rest reaches
   its screen as `sub`: `#/history/products/be-mine` gives History the sub

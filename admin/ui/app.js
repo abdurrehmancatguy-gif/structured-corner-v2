@@ -5,9 +5,8 @@ import { icon } from "./icons.js";
 import { mountChrome, guard, savebar, confirmDialog, banner } from "./lib/ui.js";
 
 // The whole navigation from the plan, in Shopify's order. Each entry names
-// its screen module (ui/screens/<screen>.js); one not written yet shows the
-// plain "Not built yet" page. The entries that need the database or login
-// are shown but switched off, with the reason.
+// its screen module (ui/screens/<screen>.js). The entries that need the
+// database or login are shown but switched off, with the reason.
 const NAV = [
   { hash: "#/", label: "Home", icon: "home", screen: "home" },
   { label: "Orders", icon: "orders", off: "Arrives with the database" },
@@ -71,15 +70,16 @@ function drawNav(active) {
   }))));
 }
 
-// A screen module that is not there yet fails to load as a failed fetch (a
-// TypeError naming the module); one that exists but breaks shows its error.
+// Every screen in NAV exists, so a module that fails to arrive (a TypeError
+// naming the fetch or the module) almost always means the admin stopped. The
+// browser keeps that failure until the page is reloaded, so the banner says
+// so. A screen that loads but breaks shows its own error.
 async function loadScreen(r) {
   try {
     return await import("./screens/" + r.screen + ".js");
   } catch (e) {
     if (!(e instanceof TypeError) || !/fetch|import|module/i.test(e.message || "")) throw e;
-    r.arg = r.screen;
-    return import("./screens/todo.js");
+    throw new Error("This screen did not load. If the admin has stopped, start it again, then reload this page.");
   }
 }
 
