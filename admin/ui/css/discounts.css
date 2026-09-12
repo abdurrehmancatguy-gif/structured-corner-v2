@@ -1,6 +1,6 @@
 /* Discounts: three rule cards side by side, the ladder as a small table, and
    the plain lists of what stays in code. */
-.disc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;align-items:start;margin-bottom:16px}
+.disc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));gap:16px;align-items:start;margin-bottom:16px}
 .disc-grid .card{margin-bottom:0}
 .disc-grid .card>.sub{margin:-6px 0 16px}
 .ladder-t{margin-bottom:10px}
