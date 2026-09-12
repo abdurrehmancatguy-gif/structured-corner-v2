@@ -31,7 +31,7 @@ def _fields():
 
 def _ctx(req):
     cfg = req.app.cfg
-    return {"icons": schema_mod.icons(cfg), "tints": schema_mod.tints(cfg)}
+    return {"icons": schema_mod.icons(cfg), "tints": schema_mod.tints(cfg), "img_dir": cfg.assets / "img"}
 
 
 def _mentions(href, pid):

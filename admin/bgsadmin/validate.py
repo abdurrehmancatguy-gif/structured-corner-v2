@@ -142,6 +142,27 @@ def check(fields, data, prefix, errors, ctx):
         elif t == "images":
             if not isinstance(v, list) or not all(isinstance(x, str) for x in v):
                 errors.append(err(ptr, "type", "This must be a list of image names."))
+                continue
+            if len(set(v)) != len(v):
+                errors.append(err(ptr, "duplicate", "The same photo is in the list twice."))
+            # A name the save adds must be a file already in the library with
+            # every size the pages ask for (build.py fails on a missing one).
+            # Names the product already has were checked when they were added:
+            # a copy gone missing since is the build's to report, and must not
+            # block an unrelated edit. A photo being attached in this same save
+            # is placed after this check.
+            folder = ctx.get("img_dir")
+            skip = set(ctx.get("pending_images", ())) | set(ctx.get("known_images", ()))
+            for i, name in enumerate(v):
+                if f.get("itemPattern") and not re.fullmatch(f["itemPattern"], name):
+                    errors.append(err("%s/%d" % (ptr, i), "format", f.get("patternHelp", "This is not a photo name.")))
+                elif folder is not None and f.get("copies") and name not in skip:
+                    gone = [name.replace(".jpg", c + ".jpg") for c in f["copies"]
+                            if not (folder / name.replace(".jpg", c + ".jpg")).is_file()]
+                    if gone:
+                        errors.append(err("%s/%d" % (ptr, i), "missing_file",
+                                          "%s is not in the photo library with all its sizes (missing %s). Upload it again."
+                                          % (name, ", ".join(gone))))
         elif t == "rows":
             if not isinstance(v, list):
                 errors.append(err(ptr, "type", "This must be a list."))
@@ -172,7 +193,9 @@ def product(pid, data, products, fields, ctx):
     errors, warnings = [], []
     if not isinstance(data, dict):
         return [err("", "type", "A product is a set of fields.")], []
-    check(fields, data, "", errors, dict(ctx, products=products))
+    cur = products.get(pid)
+    known = [n for n in (cur.get("images") or []) if isinstance(n, str)] if isinstance(cur, dict) else []
+    check(fields, data, "", errors, dict(ctx, products=products, known_images=known))
     cat = data.get("category")
     if cat == "attars":
         sizes = data.get("sizes")

@@ -22,6 +22,8 @@ class App:
         if not self.admin_enabled:
             return
         self.recovered = self.store.open()
+        from . import media
+        media.sweep(self.cfg)          # uploads left for more than a day
         try:
             import PIL
             pillow = PIL.__version__

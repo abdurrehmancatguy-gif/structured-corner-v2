@@ -112,7 +112,7 @@ class AdminTests(unittest.TestCase):
     def test_readonly_unknown_and_guarded_fields(self):
         b = self.b
         d = self._product("vibe")
-        self.assertEqual(b.api("PUT", "products/vibe", {"data": dict(d["data"], images=[])}, rev=d["rev"])[0], 403)
+        self.assertEqual(b.api("PUT", "products/vibe", {"data": dict(d["data"], order=999)}, rev=d["rev"])[0], 403)
         self.assertEqual(b.api("PUT", "products/vibe", {"data": dict(d["data"], evil="x")}, rev=d["rev"])[0], 403)
         st, res = b.api("PUT", "products/vibe", {"data": dict(d["data"], never_discount=True)}, rev=d["rev"])
         self.assertEqual(st, 428)
