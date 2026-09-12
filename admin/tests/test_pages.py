@@ -2,7 +2,12 @@
 tokens are filled from the store rules and the products, and text the
 storefront cannot print safely is refused before anything is written.
 
-    ADMIN_PAGES_PORT=4743 /usr/bin/python3 -m unittest discover -s admin/tests -p 'test_pages.py'
+    ADMIN_PAGES_PORT=4743 ADMIN_PAGES2_PORT=4744 /usr/bin/python3 -m unittest discover -s admin/tests -p 'test_pages.py'
+
+The first class covers the shared shell, the homepage bands and the
+collection and product pages; the second the gift box, bag, tracking,
+corporate, account and 404 pages and the page groups the Pages screen lists.
+Each runs its own server, so neither sees the other's edits.
 """
 import copy
 import json
@@ -18,6 +23,7 @@ import unittest
 from box import Box
 
 PORT = int(os.environ.get("ADMIN_PAGES_PORT", "4743"))
+PORT2 = int(os.environ.get("ADMIN_PAGES2_PORT", "4744"))
 GROUPS = {"Header and footer", "Homepage bands", "Collection", "Product page", "Gift box", "Bag", "Track order",
           "Corporate", "Account", "404"}
 
@@ -27,10 +33,13 @@ def global_in(flow, name):
     return json.loads(re.search(r"^window\.%s = (.*);$" % name, js, re.M).group(1))
 
 
-class PagesTests(unittest.TestCase):
+class _Pages:
+    """A server on a clone of its own, and the helpers both classes use."""
+    PORT = None
+
     @classmethod
     def setUpClass(cls):
-        cls.b = Box(PORT)
+        cls.b = Box(cls.PORT)
         cls.flow = cls.b.repo / "flow"
 
     @classmethod
@@ -54,6 +63,40 @@ class PagesTests(unittest.TestCase):
     def restore(self, data):
         st, res = self.b.api("PUT", "documents/pages", {"data": data}, rev=self.doc()["rev"])
         self.assertEqual(st, 200, res)
+
+    def refused(self, cases, page):
+        """Each change is refused with its code, and nothing is written."""
+        stored = (self.flow / "content" / "pages.json").read_bytes()
+        built = self.page(page)
+        for code, change in cases:
+            st, res = self.put(change)
+            self.assertEqual(st, 422, (code, res))
+            self.assertIn(code, [e["code"] for e in res["error"]["details"]], res)
+        self.assertEqual((self.flow / "content" / "pages.json").read_bytes(), stored)
+        self.assertEqual(self.page(page), built)
+
+    def broken_build(self, change):
+        """Build a copy of the site with pages.json changed; return the
+        failed build's messages and whether any output file changed."""
+        tmp = pathlib.Path(tempfile.mkdtemp(prefix="bgspages-"))
+        try:
+            flow = tmp / "flow"
+            shutil.copytree(str(self.flow), str(flow), ignore=shutil.ignore_patterns(".backups", "*.tmp"))
+            path = flow / "content" / "pages.json"
+            d = json.loads(path.read_text(encoding="utf-8"))
+            change(d)
+            path.write_text(json.dumps(d, indent=2), encoding="utf-8")
+            outs = ("index.html", "cart.html", "account.html", "404.html", "assets/catalogue.js")
+            before = {n: (flow / n).read_bytes() for n in outs}
+            p = subprocess.run([sys.executable, "build.py"], cwd=str(flow), capture_output=True, text=True, timeout=100)
+            self.assertNotEqual(p.returncode, 0)
+            return p.stderr, [n for n in outs if (flow / n).read_bytes() != before[n]]
+        finally:
+            shutil.rmtree(str(tmp), ignore_errors=True)
+
+
+class PagesTests(_Pages, unittest.TestCase):
+    PORT = PORT
 
     # ---- the schema --------------------------------------------------------------
 
@@ -254,6 +297,143 @@ class PagesTests(unittest.TestCase):
             self.assertEqual((flow / "index.html").read_bytes(), before)
         finally:
             shutil.rmtree(str(tmp), ignore_errors=True)
+
+
+KEYS = ["shell", "home", "collection", "product", "gift-box", "bag", "track-order", "corporate", "account", "404",
+        "checkout", "confirmed"]
+
+
+class PagesPartTwoTests(_Pages, unittest.TestCase):
+    PORT = PORT2
+
+    def test_the_groups_list_every_page_in_order(self):
+        st, s = self.b.api("GET", "schema")
+        self.assertEqual(st, 200)
+        res = s["resources"]["pages"]
+        groups = res["resource"]["groups"]
+        self.assertEqual([g["key"] for g in groups], KEYS)
+        used = {f["group"] for f in res["fields"]}
+        for g in groups:
+            self.assertTrue(g["label"] and g["about"], g)
+            self.assertTrue((self.flow / g["page"]).is_file(), g)
+            if g["key"] in ("checkout", "confirmed"):
+                self.assertEqual(g["locked"], "Changed by a developer in code")
+                self.assertNotIn(g["label"], used)
+            else:
+                self.assertNotIn("locked", g)
+        self.assertEqual(used, {g["label"] for g in groups if not g.get("locked")})
+        self.assertEqual(used, GROUPS)
+
+    def test_an_edit_reaches_the_part_two_pages_and_the_shop_script(self):
+        names = ("gift-box.html", "cart.html", "track-order.html", "corporate.html", "account.html", "404.html")
+        before, pages = self.doc()["data"], {n: self.page(n) for n in names}
+
+        def change(d):
+            d["gift_box"]["title"] = "Fill a box"
+            d["gift_box"]["size_label"] = "{n} scents"
+            d["gift_box"]["summary"]["fill_many"] = "{n} to fill"
+            d["gift_box"]["options"][1]["highlight"] = False
+            d["gift_box"]["options"].append({"label": "Test option", "value": "Off", "highlight": True})
+            d["cart"]["title"] = "Your basket"
+            d["cart"]["progress"]["gift"] = "{gift} free from {gift_over}"
+            d["cart"]["summary"]["free"] = "No charge"
+            d["cart"]["items"]["many"] = "{n} things"
+            d["track"]["form"]["number"] = "Order no."
+            d["track"]["stages"][0]["body"] = "Order received"
+            d["track"]["stages"].append({"label": "Test stage", "body": "Test text"})
+            d["corporate"]["tiers"].pop()
+            d["corporate"]["form"]["email"] = "Email"
+            d["corporate"]["replies"]["thanks_name"] = "Thanks, {name}"
+            d["account"]["programme"] = "BGS Club"
+            d["account"]["loyalty"]["tiers"][0]["name"] = "First"
+            d["account"]["consent"]["language"] = "English"
+            d["not_found"]["heading"] = "Nothing here"
+            d["not_found"]["button"] = "Home"
+        st, res = self.put(change)
+        try:
+            self.assertEqual(st, 200, res)
+            box = self.page("gift-box.html")
+            self.assertIn('<h2 style="font-size:26px">Fill a box</h2>', box)
+            self.assertIn('data-boxsize="6">6 scents</button>', box)
+            self.assertIn('data-boxcta style="margin-top:12px">3 to fill</button>', box)
+            self.assertIn("<div><span>QR video message %s 60s</span><span>Free</span></div>" % chr(0xB7), box)
+            self.assertIn('<div><span>Test option</span><span style="color:var(--green);font-weight:600">Off</span></div>', box)
+            cart = self.page("cart.html")
+            self.assertIn('<h2 style="font-size:26px">Your basket<span data-bagitems></span></h2>', cart)
+            self.assertIn("<span>mystery oud free from AED 300</span>", cart)
+            self.assertIn('<span data-delivery style="color:var(--green)">No charge</span>', cart)
+            track = self.page("track-order.html")
+            self.assertIn('aria-label="Order no." placeholder="Order no."', track)
+            self.assertIn("<div><span>Placed</span><span>Order received</span></div>", track)
+            self.assertIn("<div><span>Test stage</span><span>Test text</span></div>", track)
+            corp = self.page("corporate.html")
+            self.assertEqual(corp.count('<div class="tier">'), 3)
+            self.assertIn('aria-label="Email" placeholder="Email"', corp)
+            acct = self.page("account.html")
+            self.assertIn('<span class="eyebrow gold-d">BGS Club</span><b>First</b>', acct)
+            self.assertIn('<a href="account.html">BGS Club &amp; wallet</a>', acct)
+            self.assertIn('<div class="t on"><b>First</b>', acct)
+            self.assertIn("<span>Language</span><span>English</span>", acct)
+            nf = self.page("404.html")
+            self.assertIn("<h1>Nothing here</h1>", nf)
+            self.assertIn('<a id="home" href="/">Home</a>', nf)
+            js = global_in(self.flow, "BGS_COPY")
+            self.assertEqual(js["cart"]["summary"]["free"], "No charge")
+            self.assertEqual(js["cart"]["items"]["many"], "{n} things")
+            self.assertEqual(js["corporate"]["thanks_name"], "Thanks, {name}")
+            self.assertEqual(js["gift_box"]["summary"]["fill_many"], "{n} to fill")
+        finally:
+            self.restore(before)
+        for n in names:
+            self.assertEqual(self.page(n), pages[n], n)
+
+    def test_the_404_title_ends_with_the_settings_suffix(self):
+        self.assertIn("<title>Page not found | BGS Corner</title>", self.page("404.html"))
+        st, d = self.b.api("GET", "documents/settings")
+        before = copy.deepcopy(d["data"])
+        d["data"]["seo"]["default_title_suffix"] = "BGS"
+        st, res = self.b.api("PUT", "documents/settings", {"data": d["data"]}, rev=d["rev"])
+        try:
+            self.assertEqual(st, 200, res)
+            self.assertIn("<title>Page not found | BGS</title>", self.page("404.html"))
+        finally:
+            st, d2 = self.b.api("GET", "documents/settings")
+            self.assertEqual(self.b.api("PUT", "documents/settings", {"data": before}, rev=d2["rev"])[0], 200)
+        self.assertIn("<title>Page not found | BGS Corner</title>", self.page("404.html"))
+
+    def test_part_two_text_the_pages_cannot_print_is_refused(self):
+        self.refused([
+            ("format", lambda d: d["gift_box"].update(size_label="slots")),
+            ("format", lambda d: d["cart"]["progress"].update(to_go="to go")),
+            ("format", lambda d: d["cart"]["progress"].update(gift="Free {gift} before {cutoff}")),
+            ("format", lambda d: d["corporate"]["replies"].update(thanks_name="Thanks")),
+            ("format", lambda d: d["track"]["replies"].update(looking="Looking for {order}")),
+            ("markup", lambda d: d["not_found"].update(heading="<b>Gone</b>")),
+            ("too_long", lambda d: d["account"].update(programme="B" * 31)),
+            ("required", lambda d: d["cart"]["summary"].update(total=" ")),
+            ("href", lambda d: d["account"]["orders"].update(cta_href="https://example.com/")),
+            ("too_many", lambda d: d["account"]["loyalty"]["tiers"].append({"name": "Test", "note": "Test"})),
+            ("too_few", lambda d: d["track"].update(stages=[])),
+        ], "cart.html")
+
+    def test_the_build_stops_on_broken_part_two_text_before_writing(self):
+        def change(d):
+            del d["gift_box"]["title"]
+            del d["cart"]["line"]["remove"]
+            d["cart"]["items"]["one"] = "One item"
+            d["corporate"]["replies"]["quote_units"] = "A quote for {units}"
+            d["gift_box"]["options"][0]["highlight"] = "yes"
+            del d["not_found"]["heading"]
+        err, changed = self.broken_build(change)
+        for msg in ("pages.json gift_box.title must be text", "pages.json cart.line.remove must be text",
+                    "pages.json cart.items.one must contain {n}",
+                    "pages.json corporate.replies.quote_units has {units}, which it cannot use",
+                    "pages.json gift_box.options.0.highlight must be true or false",
+                    "pages.json not_found.heading must be text"):
+            self.assertIn(msg, err)
+        # read twice (its tokens checked, then its text kept), named once
+        self.assertEqual(err.count("pages.json cart.line.remove must be text"), 1)
+        self.assertEqual(changed, [])
 
 
 if __name__ == "__main__":
