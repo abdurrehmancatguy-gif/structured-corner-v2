@@ -128,22 +128,9 @@ bgsRun(function () {
   recalc();
 
   /* ---------- language toggle: direction is the thing worth seeing ---------- */
-  var AR = {
-    "Oud Oils": "زيوت العود", "Reserve": "المجموعة الخاصة", "Bakhoor": "بخور",
-    "EDP Sprays": "عطور", "Gift Sets": "أطقم الهدايا", "Discovery": "الاكتشاف",
-    "Build Your Gift Box": "جهّز علبة هديتك",
-    "Shop by Occasion": "تسوق حسب المناسبة", "Corporate Gifting": "هدايا الشركات",
-    "Account": "الحساب", "Wishlist": "المفضلة", "Bag": "الحقيبة",
-    "Track order": "تتبع الطلب", "Home": "الرئيسية", "Shop": "المتجر", "Gifts": "الهدايا",
-    "All categories": "كل الفئات", "Checkout": "إتمام الشراء", "Add to bag": "أضف إلى الحقيبة",
-    "Shop ouds": "تسوق العود", "Build a gift box": "جهّز علبة هدية",
-    "Shop by category": "تسوق حسب الفئة", "Shop by scent family": "تسوق حسب العائلة العطرية",
-    "Free UAE delivery over AED 150": "توصيل مجاني داخل الإمارات فوق 150 درهم",
-    "Cash on delivery": "الدفع عند الاستلام", "Your bag": "حقيبتك", "Total": "الإجمالي",
-    "Subtotal": "المجموع الفرعي", "Delivery": "التوصيل", "Free": "مجاني",
-    "Continue shopping": "متابعة التسوق", "Summary": "الملخص", "Filters": "عوامل التصفية",
-    "Clear all": "مسح الكل", "Gift sets": "أطقم الهدايا", "Oud oils": "زيوت العود"
-  };
+  /* The dictionary is content (content/translations.json), written into
+     catalogue.js by build.py: English label text to its Arabic. */
+  var AR = window.BGS_AR || {};
   var arOn = false;
   function toggleLang(e) {
     e.preventDefault();

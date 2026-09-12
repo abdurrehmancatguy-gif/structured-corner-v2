@@ -228,6 +228,13 @@ def catstrip():
             " pop wide" if cut == "wide" else " pop" if cut else "")
         for n, h, k, img, cut in CATS) + '</div></div></div>')
 
+# The strip's language toggle swaps interface labels for their Arabic in the
+# browser: shop.js looks each label's exact English text up in this
+# dictionary, which reaches it as window.BGS_AR in catalogue.js. Keeping it in
+# content lets the admin edit it; build.py itself prints no Arabic.
+TRANSLATIONS = json.loads((CONTENT_DIR / "translations.json").read_text(encoding="utf-8"))
+EXTRA_GLOBALS.append(("BGS_AR", lambda: TRANSLATIONS.get("ar", {})))
+
 # The bag, checkout, confirmation, account and tracking pages are for someone
 # mid-purchase, not for search results.
 NOINDEX = {"page-cart", "page-checkout", "page-confirmed", "page-account", "page-track-order"}
