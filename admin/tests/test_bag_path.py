@@ -293,6 +293,27 @@ class BagPath(unittest.TestCase):
     def test_the_bag_bar_hands_off_to_the_summary_on_a_landscape_phone(self):
         self.bar_hands_off(844, 390)
 
+    def test_the_bag_bar_keeps_keyboard_focus_until_it_leaves(self):
+        self.view(390, 844)
+        self.open("cart.html", bag=FIVE)
+        self.c.wait("document.querySelector('[data-bagbar]').classList.contains('on')", 5, what="the bar on load")
+        self.js("document.querySelector('[data-bagbar] a').focus()")
+        # the summary's Checkout comes into sight while the bar's has focus
+        self.js("document.querySelector('[data-cartsummary] [data-checkout]').scrollIntoView({block: 'center'})")
+        time.sleep(0.6)
+        s = self.js(BAR)
+        self.assertEqual((s["on"], s["hidden"], s["visible"]), (True, "false", "visible"), "the bar stays while it holds focus")
+        self.assertTrue(self.js("document.activeElement === document.querySelector('[data-bagbar] a')"), "focus stays on its Checkout")
+        # Tab goes on to the next control, not back to the top of the page
+        self.c.key("Tab")
+        time.sleep(0.3)
+        self.assertFalse(self.js("document.querySelector('[data-bagbar]').contains(document.activeElement)"))
+        self.assertTrue(self.js("document.activeElement !== document.body && !!document.activeElement.closest('footer')"),
+                        "focus went on to the footer")
+        s = self.js(BAR)
+        self.assertEqual(s["hidden"], "false" if s["on"] else "true")
+        self.no_page_errors()
+
     def test_a_desktop_bag_has_no_bar(self):
         self.view(1440, 900, phone=False)
         self.open("cart.html", bag=FIVE)

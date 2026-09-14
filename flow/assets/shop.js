@@ -1789,12 +1789,19 @@ bgsRun(function () {
   function sync() {
     var src = document.querySelector("[data-total]");
     if (src) total.textContent = src.textContent;
-    var on = mq.matches && !summary.hidden && !seen;
+    /* A bar that holds keyboard focus stays until focus leaves it: hidden
+       with its link focused, it dropped that focus to the page, and the
+       next Tab started again at the top. Its own focusin and focusout ask
+       again, the second once focus has landed. */
+    var held = bar.contains(document.activeElement);
+    var on = mq.matches && !summary.hidden && (!seen || held);
     if (bar.classList.contains("on") !== on) {
       bar.classList.toggle("on", on);
       bar.setAttribute("aria-hidden", on ? "false" : "true");
     }
   }
+  bar.addEventListener("focusin", sync);
+  bar.addEventListener("focusout", function () { setTimeout(sync, 0); });
 
   function watch() {
     if (io) io.disconnect();
