@@ -2297,3 +2297,45 @@ h2.pagetitle,.sec-h h2.pagetitle{font-size:26px}
   .line .lrem{margin-top:13px}
   .line .lrem::after{inset:-13px -8px}
 }
+
+/* ---- short landscape screens: a header that leaves room for the page ------
+   On a landscape phone the strip, the masthead and the category bar's two
+   rows took 159 of 320px before the tab bar, so a product page showed its
+   breadcrumb and nothing else, and once scrolled the sticky category bar,
+   the buy bar and the tab bar held half the screen. Where the screen is
+   500px tall or less and touched, not moused, the strip keeps one line, the
+   masthead loses most of its padding, and the category bar becomes one row
+   that scrolls sideways (its first link at the start, not cut by centring)
+   and stays in the page instead of sticking. The buy bar and the bag's
+   checkout bar lose some padding. */
+@media (max-height:500px) and (orientation:landscape) and (pointer:coarse){
+  .strip .wrap > span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .catnav{position:static}
+}
+@media (max-width:900px) and (max-height:500px) and (orientation:landscape) and (pointer:coarse){
+  .strip .wrap{padding-top:5px;padding-bottom:5px}
+  .mast .wrap{padding-top:3px;padding-bottom:3px}
+  .catnav .wrap{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;justify-content:safe center;padding-top:3px;padding-bottom:3px}
+  .catnav a{flex:none}
+  .stickybuy{padding-top:6px;padding-bottom:6px}
+  .bagbar{padding-top:6px;padding-bottom:6px}
+  .bagbar .btn{min-height:44px}
+}
+/* The big landscape phones (915 and 932 wide) get the desktop layout, where
+   the product page had no buy bar: Add to bag started at the bottom edge of
+   a 412px screen. They get the phone's bar, resting on the bottom edge, and
+   a slimmer strip and masthead. */
+@media (min-width:901px) and (max-height:500px) and (orientation:landscape) and (pointer:coarse){
+  .strip .wrap{height:30px}
+  .mast .wrap{padding-top:6px;padding-bottom:6px}
+  .stickybuy{display:flex;position:fixed;left:0;right:0;bottom:env(safe-area-inset-bottom,0px);z-index:30;
+    gap:12px;align-items:center;justify-content:space-between;background:#fff;border-top:1px solid var(--line);
+    border-radius:var(--r) var(--r) 0 0;box-shadow:0 -2px 10px rgba(23,19,16,.06);
+    padding:6px max(28px,env(safe-area-inset-right,0px)) 6px max(28px,env(safe-area-inset-left,0px))}
+  .stickybuy > div{min-width:0}
+  .stickybuy b{display:block;font-size:16px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .stickybuy span{font-size:14px;color:var(--mut)}
+  .stickybuy .btn{flex-shrink:0;min-height:44px;padding:10px 24px;font-size:15px}
+  .stickybuy.hidden{transform:translateY(calc(100% + 1px + env(safe-area-inset-bottom,0px)))}
+  body.has-sticky{padding-bottom:calc(70px + env(safe-area-inset-bottom,0px))}
+}
