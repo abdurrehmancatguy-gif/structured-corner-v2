@@ -2041,8 +2041,9 @@ footer .slot,footer .soon{color:#b9b0a4}
    their own blocks above. In landscape the rows that run edge to edge keep
    their content out from under the notch, each with the side padding it
    already had as the least it gets: 16px for the page's wrap, 14px for the
-   strip, masthead and search row, 8px for the category bar, none for the
-   tab bar. */
+   strip, masthead, search row and the product page's buy bar, 8px for the
+   category bar, none for the tab bar; the bag's checkout bar and the
+   added-to-bag sheet keep their centring, or the inset where it is larger. */
 @media (max-width:900px){
   .tabbar{padding-bottom:env(safe-area-inset-bottom,0px)}
   .stickybuy{bottom:calc(39px + env(safe-area-inset-bottom,0px))}
@@ -2055,6 +2056,9 @@ footer .slot,footer .soon{color:#b9b0a4}
   .strip .wrap,.mast .wrap,.msearch{padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px))}
   .catnav .wrap{padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px))}
   .tabbar{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+  .stickybuy{padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px))}
+  .bagbar,.added{padding-left:max(16px,calc((100% - 560px) / 2),env(safe-area-inset-left,0px));
+    padding-right:max(16px,calc((100% - 560px) / 2),env(safe-area-inset-right,0px))}
 }
 /* ---- sizes that were inline styles in build.py ------------------------------
    An inline style outranks every rule in this file, so the phone type scale
@@ -2364,3 +2368,22 @@ h2.pagetitle,.sec-h h2.pagetitle{font-size:26px}
 /* With 44px stepper buttons, "Add to bag: AED 75" still took two lines
    from 360 to 374px; the button gives up side padding there, not size. */
 @media (min-width:360px) and (max-width:374px){ .buy .atcrow .btn{padding-left:14px;padding-right:14px} }
+
+/* ---- the notch on the big landscape phones ---------------------------------
+   An iPhone Plus or Pro Max in landscape (926 to 932px wide) gets the desktop
+   layout, and viewport-fit=cover lets the page run beside its notch there as
+   well, where the strip, the masthead, the category bar, every section, the
+   footer and the home page's banner card kept 28px. They keep 28px as the
+   least they get and take the inset where it is larger. The home page's
+   reassurance band runs edge to edge, its cells padded 20px: its two end
+   cells take the inset on their outer side (iOS reports the same inset on
+   both sides in landscape, so the Arabic mirror needs nothing more). A
+   screen without a notch has an inset of 0, so a desktop computes as
+   before. The buy bar there has its own rule above, and the added-to-bag
+   card lines up with the masthead's bag. */
+@media (min-width:901px) and (orientation:landscape){
+  .wrap,.mast .wrap,.catnav .wrap{padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px))}
+  .hero{width:calc(100% - max(28px,env(safe-area-inset-left,0px)) - max(28px,env(safe-area-inset-right,0px)))}
+  .usp > div:first-child{padding-inline-start:max(20px,env(safe-area-inset-left,0px))}
+  .usp > div:last-child{padding-inline-end:max(20px,env(safe-area-inset-right,0px))}
+}

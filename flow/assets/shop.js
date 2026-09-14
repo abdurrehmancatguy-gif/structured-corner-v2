@@ -1616,7 +1616,11 @@ bgsRun(function () {
     var bag = document.querySelector(BAGLINK);
     var r = bag && bag.getBoundingClientRect();
     var shown = !!r && (r.width > 0 || r.height > 0);
-    var end = shown ? Math.max(16, Math.round(rtl ? r.left : document.documentElement.clientWidth - r.right)) : 16;
+    /* never nearer the edge than the masthead's own padding, which takes
+       the notch's inset on a landscape iPhone */
+    var mw = document.querySelector(".mast .wrap");
+    var edge = Math.max(16, mw ? parseFloat(getComputedStyle(mw)[rtl ? "paddingLeft" : "paddingRight"]) || 0 : 0);
+    var end = shown ? Math.max(edge, Math.round(rtl ? r.left : document.documentElement.clientWidth - r.right)) : edge;
     var top;
     if (shown && r.bottom > 0) {
       top = r.bottom + 12;
