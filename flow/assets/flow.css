@@ -2193,3 +2193,53 @@ h2.pagetitle,.sec-h h2.pagetitle{font-size:26px}
    pulls a word apart; in Arabic they have none. */
 [dir="rtl"] :is(.eyebrow,.badge,.p .meta,footer h5,.cs a span,.notestop b,.qstep,.slot,
   .galcount,.fbox h4,.heroimg .none.corner){letter-spacing:0}
+
+/* ---- phone layout: the narrow end ------------------------------------------
+   The fold cover (280px) scrolled sideways by 26px, which pushed the tab bar
+   under the screen: the logo, three 40px icons and the masthead's padding
+   need 306px. Under 300 the logo takes what the icons leave, at its own
+   shape (132px wide, 21px tall at 280). */
+@media (max-width:300px){
+  .mast .wrap{padding-left:10px;padding-right:10px;gap:6px}
+  .logo .brandmark{height:auto;width:calc(100vw - 148px)}
+}
+/* The footer's brand column (logo, legal line, address, newsletter) spans
+   both phone columns, so the email box is not squeezed to 40px; and the
+   footer logo, drawn 26px tall into a column narrower than it, keeps its
+   shape (it was 5 to 19% out of shape under 360). */
+@media (max-width:560px){ footer .cols > div:first-child{grid-column:1 / -1} }
+@media (max-width:700px){ .foot-logo{height:auto;max-height:26px;width:auto} }
+/* The drawer's button read "Show33products": a flex box drops the spaces at
+   the edges of the words beside the count, so the gap puts them back. */
+.draweractions .btn{gap:.3em}
+@media (max-width:900px){
+  /* the sort box is as tall as its select, not the select plus padding */
+  .sel{padding-top:0;padding-bottom:0}
+  /* Remove kept a hair from the quantity stepper beside it */
+  .line .lrem{margin-inline-start:14px}
+}
+/* Add to bag beside the quantity holds one line down to 360; under that it
+   gives up a pixel and some padding, and on the fold cover it takes a row of
+   its own. Buttons there give up some side padding too, so "Browse the
+   collection" and "WhatsApp me my profile" keep one line. */
+@media (max-width:359px){ .buy .atcrow .btn{font-size:14px;padding-left:12px;padding-right:12px} }
+@media (max-width:300px){
+  .buy .atcrow{flex-wrap:wrap}
+  .buy .atcrow .btn{flex-basis:100%}
+  .btn{padding-left:14px;padding-right:14px}
+}
+/* The confirmation's two buttons wrapped "Track this order" onto three
+   lines at 320; on a phone they share the row and go under each other when
+   both do not fit. */
+@media (max-width:560px){
+  .page-confirmed .btn{flex:1 1 auto}
+  .page-confirmed div:has(> .btn){flex-wrap:wrap}
+}
+/* Two size chips side by side on a card broke "3 ml · AED 45" over three
+   lines at 320, and over two on the four-column tablet grid. Up to 900px
+   they stack, each the card's width and on one line. An amount in the
+   bag's summary does not break either: the label beside it does. */
+@media (max-width:900px){
+  .p .sizes{flex-direction:column}
+  .sum .r > span:last-child{white-space:nowrap}
+}
