@@ -1655,10 +1655,20 @@ bgsRun(function () {
      bar without the caret. A card taller than the room left scrolls. */
   function place() {
     var s = el.style;
-    s.top = s.left = s.right = s.maxHeight = s.overflowY = "";
+    s.top = s.left = s.right = s.bottom = s.maxHeight = s.overflowY = "";
     s.removeProperty("--caret");
     el.classList.remove("anchored");
-    if (matchMedia("(max-width:900px)").matches) return;
+    if (matchMedia("(max-width:900px)").matches) {
+      /* The sheet rests on the tab bar, where the product page's buy bar
+         rests too: an Add from that bar opened the sheet right over the
+         button that keeps the focus. Opened from it while it shows, the
+         sheet rests on the buy bar instead, and drops back when it goes. */
+      var bar = trigger && trigger.closest && trigger.closest(".stickybuy");
+      if (bar && document.contains(bar) && !bar.classList.contains("hidden") && bar.offsetHeight) {
+        s.bottom = (parseFloat(getComputedStyle(bar).bottom) || 0) + bar.offsetHeight + "px";
+      }
+      return;
+    }
     var rtl = getComputedStyle(el).direction === "rtl";
     var bag = document.querySelector(BAGLINK);
     var r = bag && bag.getBoundingClientRect();

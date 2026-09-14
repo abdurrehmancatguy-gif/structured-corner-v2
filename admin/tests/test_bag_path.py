@@ -200,6 +200,30 @@ class BagPath(unittest.TestCase):
         self.assertEqual(self.js("localStorage.getItem('bgs_cart')"), '[{"id":"royal-amber","qty":4}]')
         self.no_page_errors()
 
+    def test_an_add_from_the_buy_bar_leaves_its_button_in_sight(self):
+        for w, h in ((390, 844), (667, 375)):
+            self.view(w, h)
+            self.open("product.html?p=edward-the-black-prince", bag=[])
+            self.js("scrollTo(0, 1400)")
+            self.c.wait("!document.querySelector('.stickybuy').classList.contains('hidden')", 5, what="the buy bar")
+            time.sleep(0.3)
+            self.click(".stickybuy [data-add]", scroll=False)
+            self.wait_open()
+            s = self.js("""(() => { const b = document.querySelector('.stickybuy'), a = b.querySelector('[data-add]'), r = a.getBoundingClientRect();
+              const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+              return {bar: b.getBoundingClientRect().top, focused: document.activeElement === a, covered: !!(hit && hit.closest('.added'))}; })()""")
+            p = self.panel()
+            self.assertAlmostEqual(p["bottom"], s["bar"], delta=1, msg="the sheet rests on the buy bar at %dx%d" % (w, h))
+            self.assertEqual((s["focused"], s["covered"]), (True, False), "the pressed button keeps the focus, in sight")
+            # the inline Add still opens the sheet on the tab bar
+            self.c.key("Escape")
+            self.wait_closed()
+            self.click(".atcrow [data-add]")
+            self.wait_open()
+            p = self.panel()
+            self.assertAlmostEqual(p["bottom"], p["tab"], delta=1, msg="the sheet rests on the tab bar at %dx%d" % (w, h))
+        self.no_page_errors()
+
     def test_a_gift_box_pick_opens_no_panel(self):
         self.view(390, 844)
         self.open("gift-box.html", bag=[])
