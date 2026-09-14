@@ -2749,3 +2749,14 @@ code{border:1px solid var(--line)}
 .fam a:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 .fam b{text-shadow:0 1px 2px rgba(52,38,11,.45)}
 @media (prefers-reduced-motion:reduce){ .fam a .fbg{transition:none} .fam a:hover .fbg{transform:none} }
+/* ---- a section's link beside its heading on phones --------------------------
+   Up to 900px a section's heading row stacked, so "All 13 →" or "All attars
+   →" went under the heading at the left. Where the row is a heading and its
+   link, the link keeps the heading's line, at its right (its left in
+   Arabic) on the heading's first baseline, and the heading wraps when the two
+   do not fit. Page headers with other things beside them still stack. */
+@media (max-width:900px){
+  .sec-h:has(> h2 + a:last-child){flex-direction:row;align-items:baseline;justify-content:space-between;gap:12px}
+  .sec-h:has(> h2 + a:last-child) > h2{flex:1 1 auto;min-width:0}
+  .sec-h:has(> h2 + a:last-child) > a{flex:none;white-space:nowrap}
+}
