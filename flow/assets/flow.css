@@ -9,7 +9,7 @@
   --primary:#a8791e; --secondary:#34260B;
   --ink:var(--secondary); --body:#4a423a; --mut:#6b6154; --faint:#726858;
   --line:#e6e0d6; --hair:#f0ece4; --bg:#fff; --alt:#fff;
-  --gold:var(--primary); --gold-d:#8a5a14; --gold-l:#f6efdd;
+  --gold:var(--primary); --gold-d:#8a5a14; --gold-l:#fff;
   --red:#b3261e; --green:#2e6b3e; --blue:#2b5b7a;
   --f-oud:#3E4A33; --f-amber:#94480F; --f-musk:#44555F; --f-floral:#9B3A5B;
   --f-fresh:#4B6B1C; --f-sweet:#6D2F5C; --f-res:#34260B;
@@ -131,7 +131,7 @@ section.alt{background:var(--alt)}
 .norm{font-size:11px;color:var(--faint)}
 
 /* ---------- banners ---------- */
-.band{background:var(--gold-l);border:1px solid #ecdfc0;border-radius:var(--r);
+.band{background:var(--gold-l);border:1px solid var(--line);border-radius:var(--r);
  padding:26px 30px;display:flex;align-items:center;justify-content:space-between;gap:26px}
 .band h3{margin:0 0 6px;font:600 19px/1.25 inherit}
 .band p{margin:0;color:var(--body);font-size:13.5px;max-width:62ch}
@@ -1966,7 +1966,7 @@ footer .slot,footer .soon{color:#b9b0a4}
 /* Quiz banner in the shop's own look: the cream and gold edge of the
    Discovery band, dark words and the dark shop button, in place of the plum
    stripes. */
-.quizband{background:var(--gold-l);background-image:none;border:1px solid #ecdfc0;color:var(--ink)}
+.quizband{background:var(--gold-l);background-image:none;border:1px solid var(--line);color:var(--ink)}
 .quizband h3{color:var(--ink)}
 .quizband p{color:var(--body)}
 .quizband .eyebrow{color:var(--gold-d)}
@@ -2540,7 +2540,7 @@ h2.pagetitle,.sec-h h2.pagetitle{font-size:26px}
    Sign out under the email, since the menu's own Sign out scrolls off to
    the right there. */
 .signin[hidden],.acct-head[hidden],.acct[hidden]{display:none}
-.signin{max-width:560px;margin:14px 0 6px;padding:28px 30px;border:1px solid #ecdfc0;border-radius:var(--r);background:var(--gold-l)}
+.signin{max-width:560px;margin:14px 0 6px;padding:28px 30px;border:1px solid var(--line);border-radius:var(--r);background:var(--gold-l)}
 .signin h2{font-size:25px;font-weight:600;line-height:1.25;letter-spacing:-.01em;margin:0 0 8px}
 .signin p{margin:0 0 20px;color:var(--body);font-size:15px;line-height:1.55;max-width:46ch}
 .signin .signin-msg{margin:-6px 0 18px;padding:11px 14px;border:1px solid var(--line);border-radius:var(--r-sm);
@@ -2552,7 +2552,7 @@ h2.pagetitle,.sec-h h2.pagetitle{font-size:26px}
 .signin-b .btn:disabled{opacity:.6;cursor:progress}
 .signin-b .btn:focus-visible,.acct-out:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .avatar{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:24px;height:24px;
- border-radius:50%;overflow:hidden;background:var(--gold-l);border:1px solid #ecdfc0;color:var(--gold-d);
+ border-radius:50%;overflow:hidden;background:var(--gold-l);border:1px solid var(--line);color:var(--gold-d);
  font-size:13px;font-weight:700;line-height:1}
 .avatar img{display:block;width:100%;height:100%;object-fit:cover}
 .avatar.big{width:60px;height:60px;font-size:24px}
@@ -2676,3 +2676,40 @@ h2.pagetitle,.sec-h h2.pagetitle{font-size:26px}
    that used to go grey under the pointer is underlined instead. */
 footer .slot{background:transparent;border-color:rgba(255,255,255,.3)}
 .acctnav a:hover{text-decoration:underline;text-underline-offset:3px}
+/* ---- no yellow ---------------------------------------------------------------
+   Every cream or yellow fill is white with a hairline now: --gold-l in the
+   first :root (the Discovery band, the quiz banner, the sign-in panel, the
+   selected tier, the account's letter disc, code) and its cream edge
+   #ecdfc0, which is --line. The note panels (the product page's scent notes
+   and the voucher and delivery notes) were dark satin with pale-yellow words;
+   they are white with a hairline and brown words, the labels and icons in
+   the darker gold (5.9:1). The category bar's current pill was filled pale
+   yellow: it is white with brown words on the brown bar, its idle pills
+   edged in white, and on a desktop the current category is white words
+   with a gold rule under them. Gold stays in the logo and small accents
+   (rules, icons, progress, the current dot, a count, the wishlist heart);
+   a gold button is the brand brown on a light ground and white on the
+   banner, and the Bestseller badge takes the darker gold so its white words
+   pass AA. Photographs keep their own colours. */
+.sec-h a{border-bottom-color:var(--line)}
+code{border:1px solid var(--line)}
+.notestop,.note{background:#fff;border:1px solid var(--line);box-shadow:none}
+.note{color:var(--body);border-left:3px solid var(--gold)}
+[dir="rtl"] .note{border-left:1px solid var(--line);border-right:3px solid var(--gold)}
+.notestop .ni,.notestop b{color:var(--gold-d)}
+.notestop p{color:var(--ink)}
+.tiers .t.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.avatar{color:var(--ink)}
+.catnav a.on{color:#fff;border-bottom-color:var(--gold)}
+.catnav a:focus-visible{outline-color:#fff}
+@media (min-width:901px){ .catnav a + a::before{background:rgba(255,255,255,.22)} }
+@media (max-width:900px){
+  .catnav a{border-color:rgba(255,255,255,.28)}
+  .catnav a:hover{border-color:rgba(255,255,255,.6)}
+  .catnav a.on{background:#fff;border-color:#fff;color:var(--ink)}
+}
+.btn.gold{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.gold:hover{background:#241a07;border-color:#241a07}
+.hero .btn.gold{background:#fff;border-color:#fff;color:var(--ink)}
+.hero .btn.gold:hover{background:#fff;border-color:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.35)}
+.badge.best{background:var(--gold-d)}
