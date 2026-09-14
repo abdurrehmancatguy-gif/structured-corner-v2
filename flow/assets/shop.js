@@ -210,10 +210,14 @@ bgsRun(function () {
         if (n.nodeType !== 3) continue;
         var t = n.nodeValue.trim();
         if (!t) continue;
+        /* the "more" arrows point the way the page reads: left in Arabic.
+           Put back before the English, which is looked up as it was. */
         if (arOn) {
           if (AR[t]) { n.dataset = null; n.__en = t; n.nodeValue = n.nodeValue.replace(t, AR[t]); }
-        } else if (n.__en) {
-          n.nodeValue = n.nodeValue.replace(AR[n.__en], n.__en);
+          if (n.nodeValue.indexOf("→") >= 0) { n.__arw = true; n.nodeValue = n.nodeValue.replace(/→/g, "←"); }
+        } else {
+          if (n.__arw) { n.__arw = false; n.nodeValue = n.nodeValue.replace(/←/g, "→"); }
+          if (n.__en) n.nodeValue = n.nodeValue.replace(AR[n.__en], n.__en);
         }
       }
     });
