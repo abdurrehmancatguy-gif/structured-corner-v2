@@ -108,7 +108,7 @@ class PhoneLayout(unittest.TestCase):
         self.open("product.html?p=royal-amber")
         for sel in self.ROWS + (".stickybuy",):
             self.assertEqual(self.pads(sel), [59, 59], sel)
-        self.press(".atcrow [data-add]", scroll=False)
+        self.press(".atcrow [data-add]")
         self.c.wait("document.querySelector('.added.on') !== null", 10, what="the added-to-bag card")
         self.assertAlmostEqual(self.rect(".added")["right"], 932 - 59, delta=1, msg="the card stays out of the inset")
         # without a notch every row keeps the padding it had
@@ -119,6 +119,42 @@ class PhoneLayout(unittest.TestCase):
         self.view(844, 390)
         self.open("product.html?p=royal-amber")
         self.assertEqual(self.pads(".stickybuy"), [14, 14])
+        self.no_page_errors()
+
+    # ---- type on the big landscape phones ----------------------------------------
+    def sizes(self, sels):
+        return self.js("(() => { const o = {}; for (const s of %s) { const e = [...document.querySelectorAll(s)]"
+                       ".find((x) => x.getBoundingClientRect().width > 0); o[s] = e ? parseFloat(getComputedStyle(e).fontSize) : null; }"
+                       " return o; })()" % J(sels))
+
+    def lines(self, sel):
+        """How many lines each visible match's text takes."""
+        return self.js("""[...document.querySelectorAll(%s)].filter((b) => b.getBoundingClientRect().width > 0).map((b) => {
+          const ls = [], rg = document.createRange(); rg.selectNodeContents(b);
+          for (const q of rg.getClientRects()) if (q.width >= 1 && !ls.some((t) => Math.abs(t - q.top) < 3)) ls.push(q.top);
+          return ls.length; })""" % J(sel))
+
+    BAG_TEXT = {".lmeta": 14, ".line .lrem": 14, ".prog .lb": 14, ".stepper i": 16, ".lname": 16, ".sum .r": 15, ".codnote": 14}
+    PDP_TEXT = {".atcrow [data-add]": 15, ".permeta": 14, ".tabs2 button": 14, ".kv div": 14, ".p .btn.sm": 15, ".p .nm": 16}
+
+    def test_the_big_landscape_phones_read_the_phone_sizes(self):
+        for w, h in ((915, 412), (932, 430)):
+            self.view(w, h)
+            self.open("cart.html", bag=FIVE)
+            self.assertEqual(self.sizes(list(self.BAG_TEXT)), self.BAG_TEXT, "the bag at %dx%d" % (w, h))
+            self.open("product.html?p=royal-amber")
+            self.assertEqual(self.sizes(list(self.PDP_TEXT)), self.PDP_TEXT, "the product page at %dx%d" % (w, h))
+            # card size chips stack, one line each
+            self.open("gift-box.html")
+            chips = self.lines(".two .grid.g4 .p .sizes button")
+            self.assertTrue(chips and set(chips) == {1}, "gift box chips take %s lines" % chips)
+            self.open("collection.html?cat=attars")
+            chips = self.lines("[data-grid] .p .sizes button")
+            self.assertTrue(chips and set(chips) == {1}, "collection chips take %s lines" % chips)
+        # a desktop with a mouse keeps its sizes
+        self.view(1440, 900, "desktop")
+        self.open("cart.html", bag=FIVE)
+        self.assertEqual(self.sizes([".lmeta", ".stepper i", ".sum .r"]), {".lmeta": 12.5, ".stepper i": 13, ".sum .r": 13.5})
         self.no_page_errors()
 
 

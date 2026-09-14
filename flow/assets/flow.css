@@ -2387,3 +2387,38 @@ h2.pagetitle,.sec-h h2.pagetitle{font-size:26px}
   .usp > div:first-child{padding-inline-start:max(20px,env(safe-area-inset-left,0px))}
   .usp > div:last-child{padding-inline-end:max(20px,env(safe-area-inset-right,0px))}
 }
+
+/* ---- the phone type scale on the big landscape phones ----------------------
+   The 915 and 932 wide phones in landscape get the desktop layout, and with
+   it the desktop's 12 to 13.5px for the bag, the product page, checkout and
+   the collection, where the same phone held upright reads 14 to 16px. Where
+   a screen that wide is 500px tall or less and touched, the phone scale's
+   running sizes apply: 14px secondary text, 15px buttons and summary rows,
+   16px body copy, names, prices and quantities. Headings keep their desktop
+   sizes, which are larger. */
+@media (min-width:901px) and (max-height:500px) and (pointer:coarse){
+  body{font-size:16px}
+  .lmeta,.kv div,.qresult .kv span:last-child,.tabs2 span,.tabs2 button,.sec-h a,.sec-h span.norm,.mini,
+  .pill,.buy .pills .pill,.linkbtn,.pay span,.pay button,.prog .lb,.line .lrem,.note,.buy .belowbuy .note,
+  .buy .pricerow .permeta,.usp b,.fam b,.buy .sizeblock .sizes button,.acctnav a,footer a,footer p,
+  footer .soon,.qopts button span,.toolbar .fhead,.toolbar .count,.codnote,.sec-h .aside,.sum .r.vat,
+  .tiernote,.rmeta,.sendnote,.acct-head .contact,.sharebtn,.ingbox p,.added-meta,.added-q{font-size:14px}
+  .p .notes,.promo span:not(.none),.notestop p{font-size:14px;line-height:1.45}
+  .btn,.btn.sm,.p .btn.sm,.hero .btn,.added-b .btn,.sum .r,.tiers .t b,.qback{font-size:15px}
+  .p .nm{font-size:16px;line-height:1.3}
+  .lname,.lprice,.p .pr b,.stepper i,.promo b,.reel span,.refbox .code,.tier,.emptybody,.consent,.optin,
+  .fbox label,.qopts button,.story span,.hero p,.quizband p,.band p,.intro,.buy p{font-size:16px}
+  /* four product cards to a row were 104px wide in the collection and 103px
+     beside the gift box, narrower than on a 320px phone: too narrow for a
+     size chip or Add to bag on one line. Three to a row. */
+  .grid.g4,.two .grid.g4{grid-template-columns:repeat(3,minmax(0,1fr))}
+  /* the quiz result's band: the larger paragraph beside it squeezed "Choose
+     three" onto two lines; the button keeps its width and the words wrap */
+  .band .btn{flex-shrink:0}
+}
+/* Two size chips side by side on a card broke "3 ml · AED 45" over two to
+   four lines on the touch screens above 900px (the big landscape phones and
+   the tablets). They stack there as they do on a phone, each on one line. */
+@media (min-width:901px) and (pointer:coarse){
+  .p .sizes{flex-direction:column}
+}
