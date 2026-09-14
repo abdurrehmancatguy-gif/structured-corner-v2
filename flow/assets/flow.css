@@ -6,14 +6,14 @@
                 what --gold-d is for, at 5.91:1.
      --secondary the dark brown. Carries the structural dark: body text, the
                 delivery strip, the footer, and every solid button. */
-  --primary:#a8791e; --secondary:#171310;
+  --primary:#a8791e; --secondary:#34260B;
   --ink:var(--secondary); --body:#4a423a; --mut:#6b6154; --faint:#726858;
   --line:#e6e0d6; --hair:#f0ece4; --bg:#fff; --alt:#faf7f2;
   --gold:var(--primary); --gold-d:#8a5a14; --gold-l:#f6efdd;
   --red:#b3261e; --green:#2e6b3e; --blue:#2b5b7a;
   --f-oud:#3E4A33; --f-amber:#94480F; --f-musk:#44555F; --f-floral:#9B3A5B;
-  --f-fresh:#4B6B1C; --f-sweet:#6D2F5C; --f-res:#171310;
-  --r:20px; --r-sm:14px; --r-ctl:999px; --r-pill:999px; --shadow:0 1px 2px rgba(23,19,16,.05);
+  --f-fresh:#4B6B1C; --f-sweet:#6D2F5C; --f-res:#34260B;
+  --r:20px; --r-sm:14px; --r-ctl:999px; --r-pill:999px; --shadow:0 1px 2px rgba(52,38,11,.05);
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
@@ -58,7 +58,7 @@ section.alt{background:var(--alt)}
 .burger,.msearch{display:none}
 
 /* ---------- hero ---------- */
-.hero{position:relative;background:#0e0c0a;color:#fff;overflow:hidden}
+.hero{position:relative;background:#34260B;color:#fff;overflow:hidden}
 
 .hero .over{position:absolute;inset:0;display:flex;align-items:center}
 .hero .box{max-width:520px;padding:0 28px}
@@ -104,7 +104,7 @@ section.alt{background:var(--alt)}
    theirs (see "a filled gift-box slot"). */
 .p{border-radius:var(--r);background:#fff;overflow:hidden;
  display:flex;flex-direction:column}
-.p .ph{position:relative;background:#0e0c0a;aspect-ratio:1/1;overflow:hidden;display:flex;
+.p .ph{position:relative;background:#34260B;aspect-ratio:1/1;overflow:hidden;display:flex;
  align-items:center;justify-content:center}
 .p .ph img{width:100%;height:100%;object-fit:cover}
 .p .ph .none{color:#6a6055;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase}
@@ -164,9 +164,9 @@ section.alt{background:var(--alt)}
 .pdp{display:grid;grid-template-columns:1.05fr 1fr;gap:44px}
 .gal{display:grid;grid-template-columns:78px minmax(0,1fr);gap:12px}
 .gal .th{display:flex;flex-direction:column;gap:10px}
-.gal .th div{aspect-ratio:1/1;background:#0e0c0a;border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden}
+.gal .th div{aspect-ratio:1/1;background:#34260B;border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden}
 .gal .th div.on{border-color:var(--gold);border-width:2px}
-.gal .main{background:#0e0c0a;border-radius:var(--r);overflow:hidden;aspect-ratio:1/1.05}
+.gal .main{background:#34260B;border-radius:var(--r);overflow:hidden;aspect-ratio:1/1.05}
 .gal .main img{width:100%;height:100%;object-fit:cover}
 .buy h1{font:600 27px/1.2 inherit;margin:8px 0 10px}
 .kv{display:flex;flex-direction:column;border-top:1px solid var(--hair)}
@@ -186,7 +186,7 @@ section.alt{background:var(--alt)}
 .two{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:34px}
 .line{display:grid;grid-template-columns:88px minmax(0,1fr) auto;gap:16px;padding:16px 0;
  border-bottom:1px solid var(--hair);align-items:center}
-.line .im{background:#0e0c0a;aspect-ratio:1/1;border-radius:var(--r-sm);overflow:hidden}
+.line .im{background:#34260B;aspect-ratio:1/1;border-radius:var(--r-sm);overflow:hidden}
 .sum{border:1px solid var(--line);border-radius:var(--r);padding:20px;background:var(--alt)}
 .sum .r{display:flex;justify-content:space-between;padding:8px 0;font-size:13.5px}
 .sum .r.t{border-top:1px solid var(--line);margin-top:8px;padding-top:14px;font-size:17px;font-weight:700}
@@ -213,7 +213,7 @@ footer a,footer p{display:block;font-size:13px;margin:0 0 9px;color:#b9b0a4;line
 .nl{display:flex;gap:0;margin-top:12px;max-width:340px}
 .nl .field{flex-grow:1;border-radius:var(--r-ctl) 0 0 var(--r-ctl);background:#fff;border-color:#fff}
 .nl .btn{border-radius:0 var(--r-ctl) var(--r-ctl) 0;border-color:var(--gold);background:var(--gold);color:#fff}
-.bot{border-top:1px solid #2c2622;margin-top:34px;padding-top:20px;display:flex;
+.bot{border-top:1px solid rgba(255,255,255,.14);margin-top:34px;padding-top:20px;display:flex;
  justify-content:space-between;gap:16px;font-size:12px;flex-wrap:wrap}
 .tabbar{display:none}
 
@@ -260,11 +260,11 @@ footer a,footer p{display:block;font-size:13px;margin:0 0 9px;color:#b9b0a4;line
 .p .ph{background:#f7f4ee}
 .p .ph .none{color:#a89d8d;font-size:10px;letter-spacing:.14em;text-transform:uppercase;
  border:1px dashed #dcd3c4;padding:8px 12px;border-radius:var(--r-pill);background:#fffdf9}
-.heroimg{height:420px;background:repeating-linear-gradient(135deg,#232019,#232019 9px,#2a2620 9px,#2a2620 18px);
+.heroimg{height:420px;background:repeating-linear-gradient(135deg,#34260B,#34260B 9px,#3b2b0d 9px,#3b2b0d 18px);
  display:flex;align-items:center;justify-content:center}
 .heroimg .none{color:#8d8375;font-size:11px;letter-spacing:.14em;text-transform:uppercase;
  border:1px dashed #4d463c;padding:10px 16px;border-radius:var(--r-pill)}
-.hero .over{background:linear-gradient(90deg,rgba(14,12,10,.86) 0%,rgba(14,12,10,.45) 60%,transparent 100%)}
+.hero .over{background:linear-gradient(90deg,rgba(52,38,11,.86) 0%,rgba(52,38,11,.45) 60%,transparent 100%)}
 .cats .c{background:#f7f4ee;border:1px dashed #ded5c6;color:#a89d8d}
 .cats .c .none{font-size:10px;letter-spacing:.12em;text-transform:uppercase}
 .gal .main,.gal .th div{background:#f7f4ee;border:1px dashed #ded5c6;display:flex;align-items:center;justify-content:center}
@@ -310,13 +310,13 @@ footer .wm{color:#fff}
 /* ---------- hero slideshow ---------- */
 .hero{position:relative}
 .heroimg .none.corner{position:absolute;top:16px;right:18px;border:1px dashed #4d463c;
- padding:6px 10px;font-size:9.5px;letter-spacing:.12em;color:#8d8375;background:rgba(14,12,10,.5)}
+ padding:6px 10px;font-size:9.5px;letter-spacing:.12em;color:#8d8375;background:rgba(52,38,11,.5)}
 .heroimg{position:relative;justify-content:flex-end;align-items:flex-start}
 .hero .arrow{position:absolute;top:50%;transform:translateY(-50%);width:46px;height:46px;
- border-radius:50%;border:1px solid rgba(255,255,255,.28);background:rgba(14,12,10,.45);
+ border-radius:50%;border:1px solid rgba(255,255,255,.28);background:rgba(52,38,11,.45);
  color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:3;
  padding:0;transition:background .15s,border-color .15s}
-.hero .arrow:hover{background:rgba(14,12,10,.75);border-color:rgba(255,255,255,.6)}
+.hero .arrow:hover{background:rgba(52,38,11,.75);border-color:rgba(255,255,255,.6)}
 .hero .arrow.prev{left:18px}
 .hero .arrow.next{right:18px}
 .hero .over{z-index:2}
@@ -342,9 +342,9 @@ footer .wm{color:#fff}
   .strip .wrap{height:auto;padding:7px 14px;font-size:11.5px}
 
   /* --- hero: content sets the height, nothing overlaps --- */
-  .hero{background:#0e0c0a}
+  .hero{background:#34260B}
   .heroimg{position:absolute;inset:0;height:100%}
-  .hero .over{position:relative;inset:auto;padding:26px 0 78px;background:linear-gradient(180deg,rgba(14,12,10,.35),rgba(14,12,10,.8))}
+  .hero .over{position:relative;inset:auto;padding:26px 0 78px;background:linear-gradient(180deg,rgba(52,38,11,.35),rgba(52,38,11,.8))}
   .hero .box{max-width:none;padding:0 16px}
   .hero h1{font-size:29px;margin:10px 0 12px}
   .hero p{font-size:13.5px;margin-bottom:18px}
@@ -521,7 +521,7 @@ footer .wm{color:#fff}
 
   .plp .side{display:block;position:fixed;top:0;bottom:0;left:0;width:86%;max-width:340px;
    background:#fff;z-index:40;overflow-y:auto;padding:0 16px 16px;
-   transform:translateX(-102%);transition:transform .22s ease;box-shadow:0 0 40px rgba(0,0,0,.18)}
+   transform:translateX(-102%);transition:transform .22s ease;box-shadow:0 0 40px rgba(52,38,11,.18)}
   body.filters-open .plp .side{transform:none}
   body.filters-open{overflow:hidden}
   .drawerhead{display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;
@@ -530,7 +530,7 @@ footer .wm{color:#fff}
    width:44px;height:44px;cursor:pointer}
   .draweractions{display:block;position:sticky;bottom:0;background:#fff;padding:12px 0;
    border-top:1px solid var(--line)}
-  .scrim{display:block;position:fixed;inset:0;background:rgba(23,19,16,.45);z-index:39;
+  .scrim{display:block;position:fixed;inset:0;background:rgba(52,38,11,.45);z-index:39;
    opacity:0;pointer-events:none;transition:opacity .22s}
   body.filters-open .scrim{opacity:1;pointer-events:auto}
   .fbox label{min-height:42px}
@@ -552,7 +552,7 @@ footer .wm{color:#fff}
   /* sticky add-to-bag, the one control that must always be reachable */
   .stickybuy{display:flex;position:fixed;left:0;right:0;bottom:56px;z-index:30;
    background:#fff;border-top:1px solid var(--line);padding:9px 14px;gap:12px;
-   align-items:center;justify-content:space-between;box-shadow:0 -2px 10px rgba(23,19,16,.06)}
+   align-items:center;justify-content:space-between;box-shadow:0 -2px 10px rgba(52,38,11,.06)}
   .stickybuy b{display:block;font-size:13px;line-height:1.2}
   .stickybuy span{font-size:11.5px;color:var(--mut)}
   .stickybuy .btn{flex-shrink:0;min-height:42px;padding:10px 20px}
@@ -743,7 +743,7 @@ footer .wm{color:#fff}
 .cs a{padding:0;gap:0;overflow:hidden;justify-content:flex-end;min-height:106px}
 .cs a span{position:relative;z-index:2;width:100%;background:var(--tint);
  padding:9px 6px;font-size:11.5px;font-weight:600;line-height:1.2;
- border-top:1px solid rgba(23,19,16,.06)}
+ border-top:1px solid rgba(52,38,11,.06)}
 
 @media (max-width:900px){
   .cs a{min-height:92px}
@@ -764,7 +764,7 @@ footer .wm{color:#fff}
  width:min(108px,86%);aspect-ratio:1/1;border-radius:50%;inset:auto}
 .cs a::before{z-index:-2;background-size:cover;background-position:center;opacity:1}
 .cs a::after{z-index:-1;background:var(--tint);opacity:.3;
- box-shadow:inset 0 0 0 1px rgba(23,19,16,.07)}
+ box-shadow:inset 0 0 0 1px rgba(52,38,11,.07)}
 .cs a .circle{width:min(108px,86%);aspect-ratio:1/1;position:relative;
  display:flex;align-items:center;justify-content:center;margin-bottom:10px}
 .cs a span{background:none;border:0;padding:0;width:auto;text-align:center;
@@ -794,7 +794,7 @@ footer .wm{color:#fff}
    sat here only existed to hold a white icon on the picture; with no icon it
    was just darkening the middle of every photograph. */
 .cs a .circle::after{content:"";position:absolute;top:0;right:0;bottom:0;left:0;
- box-shadow:inset 0 0 0 1px rgba(23,19,16,.10);border-radius:50%}
+ box-shadow:inset 0 0 0 1px rgba(52,38,11,.10);border-radius:50%}
 .cs a .circle{background:var(--tint)}
 .cs a::before,.cs a::after{content:none}
 .cs a span:not(.circle){position:static;background:none;border:0;padding:0;width:100%;
@@ -808,17 +808,17 @@ footer .wm{color:#fff}
 
 /* ---------- circles: lift off the page ---------- */
 .cs a .circle{
-  box-shadow:0 10px 20px -7px rgba(23,19,16,.34),
-             0 2px 5px -2px rgba(23,19,16,.20),
+  box-shadow:0 10px 20px -7px rgba(52,38,11,.34),
+             0 2px 5px -2px rgba(52,38,11,.20),
              inset 0 0 0 1px rgba(255,255,255,.30);
   transition:box-shadow .2s ease, transform .2s ease}
 .cs a:hover .circle{
-  box-shadow:0 16px 28px -8px rgba(23,19,16,.42),
-             0 3px 7px -2px rgba(23,19,16,.24),
+  box-shadow:0 16px 28px -8px rgba(52,38,11,.42),
+             0 3px 7px -2px rgba(52,38,11,.24),
              inset 0 0 0 1px rgba(255,255,255,.38);
   transform:translateY(-3px)}
 @media (max-width:900px){
-  .cs a .circle{box-shadow:0 7px 14px -5px rgba(23,19,16,.30),0 1px 3px -1px rgba(23,19,16,.18)}
+  .cs a .circle{box-shadow:0 7px 14px -5px rgba(52,38,11,.30),0 1px 3px -1px rgba(52,38,11,.18)}
 }
 
 /* ---------- quiz banner: plum, the one hue the page does not otherwise use ----------
@@ -965,16 +965,16 @@ footer .wm{color:#fff}
 .hero{min-height:430px;position:relative}
 /* the image band was fixed at 340px inside a 430px hero, leaving a dead strip
    under the photograph; it fills the hero now */
-.heroimg{position:absolute;inset:0;height:100%;background:#000}
+.heroimg{position:absolute;inset:0;height:100%;background:#34260B}
 .heroimg img{object-position:80% center}
 .hero .over .wrap{width:100%}
 .hero .over .box{max-width:min(540px,44%)}
 .hero .over{background:linear-gradient(90deg,
-  rgba(0,0,0,.86) 0%,
-  rgba(0,0,0,.72) 34%,
-  rgba(0,0,0,.55) 48%,
-  rgba(0,0,0,.16) 70%,
-  rgba(0,0,0,0) 86%)}
+  rgba(52,38,11,.86) 0%,
+  rgba(52,38,11,.72) 34%,
+  rgba(52,38,11,.55) 48%,
+  rgba(52,38,11,.16) 70%,
+  rgba(52,38,11,0) 86%)}
 .hero .over .eyebrow.gold{color:#E8C87E}
 
 @media (max-width:900px){
@@ -982,7 +982,7 @@ footer .wm{color:#fff}
   .heroimg img{object-position:80% center}
   .hero .over .box{max-width:none}
   .hero .over{background:linear-gradient(180deg,
-    rgba(0,0,0,.30) 0%, rgba(0,0,0,.70) 38%, rgba(0,0,0,.88) 100%)}
+    rgba(52,38,11,.30) 0%, rgba(52,38,11,.70) 38%, rgba(52,38,11,.88) 100%)}
 }
 
 /* ==========================================================================
@@ -1059,7 +1059,7 @@ footer .wm{color:#fff}
    -------------------------------------------------------------------------- */
 .search .go{appearance:none;-webkit-appearance:none;border:0;cursor:pointer;
   font-family:inherit;justify-content:center}
-.search .go:hover{background:#000}
+.search .go:hover{background:#241a07}
 .search .go:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
 .search input:focus{outline:none}
 
@@ -1331,14 +1331,14 @@ footer .slot,footer .soon{color:#b9b0a4}
    at .30, which over the same marble left the eyebrow around 2:1. It starts at
    .68 now. */
 .hero .over{background:linear-gradient(90deg,
-  rgba(0,0,0,.86) 0%,
-  rgba(0,0,0,.78) 34%,
-  rgba(0,0,0,.70) 46%,
-  rgba(0,0,0,.34) 60%,
-  rgba(0,0,0,0) 78%)}
+  rgba(52,38,11,.90) 0%,
+  rgba(52,38,11,.86) 34%,
+  rgba(52,38,11,.82) 46%,
+  rgba(52,38,11,.40) 60%,
+  rgba(52,38,11,0) 78%)}
 @media (max-width:900px){
   .hero .over{background:linear-gradient(180deg,
-    rgba(0,0,0,.68) 0%, rgba(0,0,0,.78) 38%, rgba(0,0,0,.90) 100%)}
+    rgba(52,38,11,.68) 0%, rgba(52,38,11,.78) 38%, rgba(52,38,11,.90) 100%)}
 }
 
 /* ---- phone hero: stack, do not overlay -----------------------------------
@@ -1395,7 +1395,7 @@ footer .slot,footer .soon{color:#b9b0a4}
   .dots i::after{content:"";position:absolute;inset:-16px -5px}
 
   /* the slide count read as a dashed placeholder box over the photograph */
-  .heroimg .none.corner{border-color:transparent;background:rgba(0,0,0,.5);
+  .heroimg .none.corner{border-color:transparent;background:rgba(52,38,11,.5);
     color:#fff;top:12px;right:12px;bottom:auto;left:auto}
 
   /* The longest eyebrow measures 304px against a 273px box, and fitting it on
@@ -1480,9 +1480,9 @@ footer .slot,footer .soon{color:#b9b0a4}
 @media (max-width:900px){
   .hero .arrow{display:flex;top:calc(min(100vw,560px) / 3.7);bottom:auto;
     transform:translateY(-50%);width:34px;height:34px;
-    background:rgba(0,0,0,.44);border-color:rgba(255,255,255,.5)}
+    background:rgba(52,38,11,.44);border-color:rgba(255,255,255,.5)}
   .hero .arrow::after{content:"";position:absolute;inset:-6px;border-radius:50%}
-  .hero .arrow:active{background:rgba(0,0,0,.66)}
+  .hero .arrow:active{background:rgba(52,38,11,.66)}
   .hero .arrow.prev{left:10px;right:auto}
   .hero .arrow.next{right:10px;left:auto}
   .hero .arrow svg{width:17px;height:17px}
@@ -1585,8 +1585,8 @@ footer .slot,footer .soon{color:#b9b0a4}
    28px as the carousel turned. A number here would go stale the first time the
    copy changes, so it is measured instead. */
 @media (max-width:900px){
-  .hero .over{box-shadow:0 -10px 22px -12px rgba(0,0,0,.6),
-    0 14px 30px -18px rgba(23,19,16,.45)}
+  .hero .over{box-shadow:0 -10px 22px -12px rgba(52,38,11,.6),
+    0 14px 30px -18px rgba(52,38,11,.45)}
 }
 
 /* ---- let the phone break the headlines itself -----------------------------
@@ -1610,7 +1610,7 @@ footer .slot,footer .soon{color:#b9b0a4}
    1.03:1 against it - invisible, so the carousel looked like it had one slide.
    The secondary at 22% reads on cream without competing with the gold. */
 @media (max-width:900px){
-  .dots i{background:rgba(23,19,16,.22)}
+  .dots i{background:rgba(52,38,11,.22)}
   .dots i.on{background:var(--gold)}
 }
 
@@ -1705,11 +1705,11 @@ footer .slot,footer .soon{color:#b9b0a4}
       rgba(255,255,255,.045) 62%, rgba(255,255,255,.008) 84%, rgba(255,255,255,.028) 100%),
     radial-gradient(140% 200% at 2% -30%, rgba(255,255,255,.07), rgba(255,255,255,0) 62%),
     repeating-linear-gradient(45deg,  rgba(255,255,255,.018) 0 1px, rgba(255,255,255,0) 1px 3px),
-    repeating-linear-gradient(-45deg, rgba(0,0,0,.06) 0 1px, rgba(0,0,0,0) 1px 3px),
+    repeating-linear-gradient(-45deg, rgba(52,38,11,.06) 0 1px, rgba(52,38,11,0) 1px 3px),
     linear-gradient(100deg, #2a221b 0%, #1c1712 46%, #120e0b 100%);
 }
 .notestop,.note{background:var(--satin);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.05), 0 1px 3px -1px rgba(23,19,16,.25)}
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05), 0 1px 3px -1px rgba(52,38,11,.25)}
 .notestop{border:1px solid rgba(232,200,126,.16)}
 .notestop .ni{color:#C9A567}
 .notestop b{color:#E8C87E}
@@ -1805,7 +1805,7 @@ footer .slot,footer .soon{color:#b9b0a4}
   .catnav a{min-height:24px;padding:0 9px;font-size:11px;border-radius:999px;
     border:1px solid rgba(232,200,126,.3);background:rgba(255,255,255,.05)}
   .catnav a:hover{border-color:rgba(232,200,126,.55)}
-  .catnav a.on{background:#E8C87E;border-color:#E8C87E;color:#171310;font-weight:600}
+  .catnav a.on{background:#E8C87E;border-color:#E8C87E;color:#34260B;font-weight:600}
 }
 /* "Build Your Gift Box" is ten letters longer than the "Discovery" it replaced,
    and at 360px it pushed the bar to a third row and the second row of home
@@ -1836,10 +1836,10 @@ footer .slot,footer .soon{color:#b9b0a4}
     var(--w-bak)}
 .cs a.pop .circle::before{content:"";position:absolute;left:17%;right:17%;bottom:18%;
   height:12%;border-radius:50%;
-  background:radial-gradient(closest-side,rgba(23,19,16,.30),rgba(23,19,16,0))}
+  background:radial-gradient(closest-side,rgba(52,38,11,.30),rgba(52,38,11,0))}
 .cs a.pop .circle img{top:auto;bottom:24%;left:9%;width:82%;height:auto;
   object-fit:fill;z-index:1;transform-origin:50% 100%;
-  filter:drop-shadow(0 4px 3px rgba(23,19,16,.28))}
+  filter:drop-shadow(0 4px 3px rgba(52,38,11,.28))}
 .cs a.pop:hover .circle img{transform:translateY(-3px)}
 /* A wide group (the gift boxes) cannot rise out of the circle without being
    drawn tiny: at 82% of the circle it came out at 42% of its height. It is
@@ -1901,7 +1901,7 @@ footer .slot,footer .soon{color:#b9b0a4}
 .reel video{opacity:0;transition:opacity .4s ease}
 .reel video.on{opacity:1}
 .reel span{position:absolute;left:0;right:0;bottom:0;padding:32px 12px 12px;font-size:14px;font-weight:600;
-  background:linear-gradient(rgba(23,19,16,0),rgba(23,19,16,.72))}
+  background:linear-gradient(rgba(52,38,11,0),rgba(52,38,11,.72))}
 @media (max-width:700px){ .reelrow{grid-auto-columns:42%;gap:10px} }
 @media (prefers-reduced-motion:reduce){ .reel video{transition:none} }
 
@@ -1988,7 +1988,7 @@ footer .slot,footer .soon{color:#b9b0a4}
    tab bar and the category bar (20), under the filter scrim (39) and drawer
    (40). There is no global [hidden] rule, so it has its own. */
 .added[hidden]{display:none}
-.added{position:fixed;z-index:35;box-sizing:border-box;width:min(380px,calc(100vw - 32px));display:grid;gap:12px;padding:16px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 14px 36px rgba(23,19,16,.16);opacity:0;transform:translateY(-6px);transition:opacity .16s ease,transform .16s ease}
+.added{position:fixed;z-index:35;box-sizing:border-box;width:min(380px,calc(100vw - 32px));display:grid;gap:12px;padding:16px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 14px 36px rgba(52,38,11,.16);opacity:0;transform:translateY(-6px);transition:opacity .16s ease,transform .16s ease}
 .added.on{opacity:1;transform:none}
 .added:not(.on){pointer-events:none}
 .added::before{content:"";position:absolute;top:-7px;inset-inline-end:var(--caret,16px);width:12px;height:12px;background:var(--bg);border-top:1px solid var(--line);border-left:1px solid var(--line);transform:rotate(45deg)}
@@ -2012,7 +2012,7 @@ footer .slot,footer .soon{color:#b9b0a4}
 .added-b{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .added-b .btn{min-height:48px;padding:0 12px;font-size:14px;white-space:nowrap}
 @media (max-width:900px){
- .added{left:0;right:0;top:auto;width:auto;bottom:calc(39px + env(safe-area-inset-bottom,0px));padding:16px max(16px,calc((100% - 560px) / 2)) 14px;border-width:1px 0 0;border-radius:var(--r) var(--r) 0 0;box-shadow:0 -10px 30px rgba(23,19,16,.14);transform:translateY(16px);transition:opacity .2s ease,transform .2s ease}
+ .added{left:0;right:0;top:auto;width:auto;bottom:calc(39px + env(safe-area-inset-bottom,0px));padding:16px max(16px,calc((100% - 560px) / 2)) 14px;border-width:1px 0 0;border-radius:var(--r) var(--r) 0 0;box-shadow:0 -10px 30px rgba(52,38,11,.14);transform:translateY(16px);transition:opacity .2s ease,transform .2s ease}
  .added.on{transform:none}
  .added-x{inset-inline-end:max(6px,calc((100% - 560px) / 2 - 10px))}
 }
@@ -2038,7 +2038,7 @@ footer .slot,footer .soon{color:#b9b0a4}
    is also visibility hidden, which takes its link out of the tab order. */
 .bagbar{display:none}
 @media (max-width:900px),(max-height:500px){
- .bagbar{display:flex;align-items:center;gap:14px;position:fixed;left:0;right:0;z-index:19;bottom:env(safe-area-inset-bottom,0px);padding:10px max(16px,calc((100% - 560px) / 2));background:var(--bg);border-top:1px solid var(--line);border-radius:var(--r) var(--r) 0 0;box-shadow:0 -8px 24px rgba(23,19,16,.10);transform:translateY(calc(100% + 40px));visibility:hidden;transition:transform .2s ease,visibility 0s linear .2s}
+ .bagbar{display:flex;align-items:center;gap:14px;position:fixed;left:0;right:0;z-index:19;bottom:env(safe-area-inset-bottom,0px);padding:10px max(16px,calc((100% - 560px) / 2));background:var(--bg);border-top:1px solid var(--line);border-radius:var(--r) var(--r) 0 0;box-shadow:0 -8px 24px rgba(52,38,11,.10);transform:translateY(calc(100% + 40px));visibility:hidden;transition:transform .2s ease,visibility 0s linear .2s}
  .bagbar.on{transform:none;visibility:visible;transition:transform .2s ease,visibility 0s}
  .bagbar .bb-t{flex:1 1 auto;min-width:0;display:flex;flex-direction:column}
  .bagbar .bb-t span{font-size:14px;line-height:1.2;color:var(--mut)}
@@ -2350,7 +2350,7 @@ h2.pagetitle,.sec-h h2.pagetitle{font-size:26px}
   .mast .wrap{padding-top:6px;padding-bottom:6px}
   .stickybuy{display:flex;position:fixed;left:0;right:0;bottom:env(safe-area-inset-bottom,0px);z-index:30;
     gap:12px;align-items:center;justify-content:space-between;background:#fff;border-top:1px solid var(--line);
-    border-radius:var(--r) var(--r) 0 0;box-shadow:0 -2px 10px rgba(23,19,16,.06);
+    border-radius:var(--r) var(--r) 0 0;box-shadow:0 -2px 10px rgba(52,38,11,.06);
     padding:6px max(28px,env(safe-area-inset-right,0px)) 6px max(28px,env(safe-area-inset-left,0px))}
   .stickybuy > div{min-width:0}
   .stickybuy b{display:block;font-size:16px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -2586,3 +2586,24 @@ h2.pagetitle,.sec-h h2.pagetitle{font-size:26px}
    at pushed a phone's page wider than the screen. It wraps anywhere, as the
    one under their name does. */
 .kv [data-me]{overflow-wrap:anywhere;min-width:0}
+/* ---- the brand dark is #34260B ---------------------------------------------
+   Every dark surface and dark text takes one brown: --secondary (and so
+   --ink) in the first :root, the body copy that was #4a423a, and the
+   near-blacks that were written out above (#171310, #0e0c0a, #000 and their
+   rgba, now rgba(52,38,11,a)): the strip, the category bar, the banner's
+   ground and phone card, dark buttons, badges, the footer and the shadows.
+   The category bar's satin gradient goes flat to the same brown.
+   Measured on #34260B: white 14.7:1, the strip's #e8e2d8 11.4 and #a89e91
+   5.6, the footer's #b9b0a4 6.9, the bar's #E4DCCE 10.8. Gold on it is only
+   3.79:1, so the strip's cut-off time and the gallery's and banner's counts
+   turn white; dark words on the gold button fell to 3.79:1 as well, so it
+   takes the darker gold with white words, 5.9:1. A brown scrim over a light
+   photograph is lighter than a black one at the same strength, so the
+   desktop banner's scrim holds .82 or more across the text column: the 15px
+   copy (#cdc5b8) stays at 4.8:1 even over white. */
+:root{--body:var(--secondary);--satin:var(--secondary)}
+.catnav{border-bottom-color:var(--secondary)}
+.notestop,.note{box-shadow:none}
+.strip b,.galcount b,.heroimg .none.corner b{color:#fff}
+.btn.gold{background:var(--gold-d);border-color:var(--gold-d);color:#fff}
+.btn.gold:hover{background:#7a4f11;border-color:#7a4f11}

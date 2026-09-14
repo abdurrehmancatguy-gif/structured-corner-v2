@@ -22,7 +22,7 @@ from PIL import Image, ImageFilter
 FLOW = pathlib.Path(__file__).resolve().parent.parent
 SRC = FLOW / "assets" / "img" / "logo-emblem.png"
 IMG = FLOW / "assets" / "img"
-INK = (23, 19, 16, 255)          # --ink #171310, the footer ground
+INK = (52, 38, 11, 255)          # --ink #34260B, the footer ground
 APPLE_INSET = 0.82               # emblem occupies 82% of the iOS tile
 
 

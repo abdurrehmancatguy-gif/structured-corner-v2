@@ -1882,9 +1882,9 @@ pathlib.Path("404.html").write_text("""<!doctype html>
 <meta name="theme-color" content="#faf8f4">
 <title>%(title)s | %(suffix)s</title><meta name="robots" content="noindex">
 <style>body{margin:0;min-height:100vh;display:grid;place-items:center;text-align:center;
-background:#faf8f4;color:#171310;font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+background:#faf8f4;color:#34260B;font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 main{padding:24px}h1{font:600 28px/1.2 Georgia,"Times New Roman",serif;margin:0 0 10px}
-a{display:inline-block;margin-top:18px;background:#171310;color:#fff;padding:12px 22px;text-decoration:none;border-radius:999px}</style>
+a{display:inline-block;margin-top:18px;background:#34260B;color:#fff;padding:12px 22px;text-decoration:none;border-radius:999px}</style>
 </head><body><main><h1>%(heading)s</h1><p>%(body)s</p>
 <a id="home" href="/">%(button)s</a></main>
 <script>document.getElementById("home").href=location.pathname.indexOf("/structured-corner-v2/")===0?"/structured-corner-v2/":"/";</script>
