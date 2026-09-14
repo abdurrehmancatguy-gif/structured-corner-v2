@@ -224,6 +224,9 @@ bgsRun(function () {
     document.querySelectorAll("[data-langtoggle]").forEach(function (a) {
       a.textContent = arOn ? "English" : "العربية";
     });
+    /* text a script writes in the page's language (the bag heading's
+       count) is written again in the new one */
+    document.dispatchEvent(new CustomEvent("bgs:lang"));
   }
   document.querySelectorAll("[data-langtoggle]").forEach(function (a) {
     a.addEventListener("click", toggleLang);
@@ -1355,9 +1358,22 @@ bgsRun(function () {
       el.textContent = n;
       el.hidden = n === 0;
     });
+    /* The bag heading's count: the separator, then the count on its own in
+       a <bdi>, in the page's language. Isolated alone, the count keeps its
+       own order in Arabic and the dot stays between it and the title; the
+       whole " · 5 items" as one run put the dot at its far end and the
+       count against the Arabic word. The language toggle asks for it again. */
     var label = document.querySelector("[data-bagitems]");
-    if (label) label.textContent = n ? " · " + bgsFill(n === 1 ? bgsCopy("cart.items.one", "{n} item")
-                                                               : bgsCopy("cart.items.many", "{n} items"), { n: n }) : "";
+    if (label) {
+      label.textContent = "";
+      if (n) {
+        var count = document.createElement("bdi");
+        count.textContent = bgsFill(bgsAr(n === 1 ? bgsCopy("cart.items.one", "{n} item")
+                                                  : bgsCopy("cart.items.many", "{n} items")), { n: n });
+        label.appendChild(document.createTextNode(" · "));
+        label.appendChild(count);
+      }
+    }
   }
 
   function money(n) {
@@ -1488,6 +1504,8 @@ bgsRun(function () {
   /* another tab changed the bag: repaint, so this one cannot write back a
      stale copy over it */
   addEventListener("storage", function (e) { if (e.key === KEY || e.key === null) { paintCount(); render(); } });
+  /* the language toggle: the heading's count in the new language */
+  document.addEventListener("bgs:lang", paintCount);
 
   paintCount();
   render();

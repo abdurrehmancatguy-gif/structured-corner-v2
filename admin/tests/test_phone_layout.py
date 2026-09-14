@@ -157,6 +157,38 @@ class PhoneLayout(unittest.TestCase):
         self.assertEqual(self.sizes([".lmeta", ".stepper i", ".sum .r"]), {".lmeta": 12.5, ".stepper i": 13, ".sum .r": 13.5})
         self.no_page_errors()
 
+    # ---- the bag heading in Arabic ---------------------------------------------
+    TITLE = """(() => { const h = document.querySelector('h2.pagetitle'), sp = h.querySelector('[data-bagitems]');
+      const t = [...h.childNodes].find((n) => n.nodeType === 3 && n.nodeValue.trim());
+      const box = (n, a, b) => { const r = document.createRange(); if (a === undefined) r.selectNodeContents(n); else { r.setStart(n, a); r.setEnd(n, b); }
+        const q = r.getBoundingClientRect(); return [q.left, q.right]; };
+      const sep = sp.firstChild, i = sep && sep.nodeType === 3 ? sep.nodeValue.indexOf(String.fromCharCode(0xB7)) : -1;
+      const c = sp.querySelector('bdi');
+      return {word: box(t), dot: i >= 0 ? box(sep, i, i + 1) : null, text: c ? c.textContent : null,
+              count: c ? [c.getBoundingClientRect().left, c.getBoundingClientRect().right] : null}; })()"""
+
+    def test_the_bag_title_keeps_its_dot_between_the_title_and_the_count(self):
+        for w, h, kind in ((320, 568, "phone"), (1440, 900, "desktop")):
+            self.view(w, h, kind)
+            self.open("cart.html", bag=FIVE)
+            en = self.js("window.BGS_COPY.cart.items.many").replace("{n}", "5")
+            t = self.js(self.TITLE)
+            self.assertEqual(t["text"], en)
+            self.assertTrue(t["word"][1] < t["dot"][0] < t["dot"][1] < t["count"][0], "title, dot, count: %s" % t)
+            # Arabic: title, dot and count from the right, a space either side of the dot
+            self.js("document.querySelector('[data-langtoggle]').click()")
+            ar = self.js("window.BGS_AR['{n} items'] || '{n} items'").replace("{n}", "5")
+            t = self.js(self.TITLE)
+            self.assertEqual(t["text"], ar, "the count in Arabic")
+            self.assertGreaterEqual(t["word"][0] - t["dot"][1], 2, "a space between the title and the dot: %s" % t)
+            self.assertGreaterEqual(t["dot"][0] - t["count"][1], 2, "a space between the dot and the count: %s" % t)
+            # and back
+            self.js("document.querySelector('[data-langtoggle]').click()")
+            t = self.js(self.TITLE)
+            self.assertEqual(t["text"], en, "the count in English again")
+            self.assertTrue(t["word"][1] < t["dot"][0] < t["dot"][1] < t["count"][0], "title, dot, count: %s" % t)
+        self.no_page_errors()
+
 
 if __name__ == "__main__":
     unittest.main()
