@@ -184,6 +184,7 @@ ports between 4700 and 4799; 4310 is your preview.
 | `test_history.py` | History, the sentences that describe a change, and restore | `ADMIN_HISTORY_PORT` | 4781 |
 | `test_publish.py` | Review, commit and go live, against throwaway repositories with a temporary bare remote | `ADMIN_PUBLISH_PORT` | 4782 |
 | `test_bag_path.py` | The storefront's way to checkout: the panel after Add to bag on a phone and a desktop, and the bag page's checkout bar; needs Chrome | `ADMIN_BAG_PATH_PORT` | 4791 |
+| `test_phone_layout.py` | The storefront on phones and other touch screens: the notch, type on the big landscape phones, Arabic word order, the masthead, the buy bar and the bag at 200% text; needs Chrome | `ADMIN_PHONE_LAYOUT_PORT` | 4792 |
 
 The three Chrome files are skipped when Chrome is not installed. Helpers:
 `box.py` (the temporary clone and its server) and `cdp_pipe.py` (headless

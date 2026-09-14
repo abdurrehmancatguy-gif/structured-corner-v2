@@ -604,6 +604,39 @@ domain on 2026-09-10.
     scrolling, no primary action covered, the bag's Checkout and Add to bag in reach at
     every size, and no script errors. Checkout, payments, VAT, COD and the pricing formulas
     are untouched.
+- **2026-09-14, the review of the phone work.** A second pass over the matrix, the desktop and
+  the keyboard found 14 problems. Each was confirmed on the code first and fixed in its own
+  commit, tested in `admin/tests/test_phone_layout.py` (new) or `test_bag_path.py`:
+  - The notch. With `viewport-fit=cover` the page pads itself: the product page's buy bar on
+    landscape phones, and on the 926 to 932 wide phones in the desktop layout the strip,
+    masthead, category bar, sections, footer, banner card and the reassurance band's end
+    cells take the inset where it is larger than their padding; the added-to-bag card is
+    never nearer the edge than the masthead. Desktops compute as before. Emulated insets
+    only, still not seen on an iPhone.
+  - The 915 and 932 wide landscape phones get the phone type scale (14px secondary, 15px
+    buttons, 16px body and prices) in the desktop layout, three product cards to a row, and
+    card size chips stack on every touch screen above 900px.
+  - Arabic: the bag heading's count sits in a `bdi`, so the dot stays between the title and
+    the count, and a pressed Add's label follows the language toggle (`bgsText`,
+    `bgsEnglish`). The toggle now fires `bgs:lang` for text a script writes itself.
+  - The bag's progress rows keep a 10px gap between label and status; the masthead's icons
+    are 44px under 341px too (the logo is 122px wide on the fold cover); the buy bar keeps
+    one line of details; the landscape panel's heading and subtotal and the bag bar's Total
+    stay 14px.
+  - Keyboard: the bag bar keeps its focused Checkout until focus leaves it, and a sheet
+    opened from the buy bar rests on it instead of covering the focused button. The
+    desktop card is placed again as the page scrolls.
+  - With a phone's text at 200%, the bag bar's total wraps instead of running under
+    Checkout, and the collection's sort row wraps (390px wide again, from 448). Not fixed:
+    the product page still measures 409px wide on a 390px phone at 200%; the buy bar, which
+    the review blamed, is not the cause (the page is as wide with it hidden), and the cause
+    was not found. The collection on the fold cover at 200% is 324px wide.
+  - The final audit, all 734 jobs, no errors and no stop criterion hit: buttons whose label
+    wraps in 38 cells (from 80), bars over 30% of the screen in 10 (from 15), and 3 kinds
+    of tap target under 44px (from 7): the category pills (decision 25), the strip's
+    language toggle at 42px wide on the touch screens above 900px, and the gallery's
+    thumbnails at 43px on phones. The labels that still wrap are the quiz's two-line
+    options, three size chips at 280 and at 1280x800, and a gift set's Add to bag at 320.
 
 ---
 
@@ -795,8 +828,9 @@ raw background Bash. Use the Browser pane's `preview_start` with the `bgs-flow` 
 20. **Arabic follows the exact English.** The Arabic dictionary is keyed by the exact English
    text, so editing a label drops its Arabic. Text shop.js writes after load (the
    added-to-bag panel, a pressed Add) is looked up the same way through `bgsAr`, and a
-   counted text by its template (`Qty {n}`, `{n} items`). The bag heading's count and the
-   volume discount row still read in English in Arabic.
+   counted text by its template (`Qty {n}`, `{n} items`). The bag heading's count reads in
+   Arabic through `{n} items` and is written again when the language changes; the volume
+   discount row still reads in English in Arabic.
 21. **Three quiz profiles can never win.** No combination of quiz answers matches Suit Up,
    Amore or Soleil Frais.
 22. **Checkout and order confirmed state the delivery rules in their own words.** Both pages
