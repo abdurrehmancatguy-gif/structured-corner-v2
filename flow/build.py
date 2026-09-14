@@ -380,6 +380,9 @@ SHELL_TEXT = {
 CRUMB_HOME = page_text("shell.crumb_home")
 COPY_JS["title_suffix"] = raw_text("seo.default_title_suffix", doc="settings")
 COPY_JS["crumb_home"] = js_text("shell.crumb_home")
+# Once a shopper is signed in, the header's account link and the phone tab
+# bar's Account say who it is: shop.js fills {name} into this label.
+COPY_JS["shell"] = {"header": {"signed_in": js_text("shell.header.signed_in", need=("name",))}}
 
 def tab_link(label, href, icon, on):
     """One tab-bar entry, drawn as its icon. The label stays as the accessible
@@ -1532,6 +1535,13 @@ for _part, _keys in (("wallet", ("heading", "voucher_label", "redeem_label", "re
                                   "order_updates", "offers", "note"))):
     for _k in _keys:
         ACCOUNT_TEXT["a_%s_%s" % (_part, _k)] = page_text("account.%s.%s" % (_part, _k))
+# Shopper sign-in's words, pages.json "account.signin". The page prints the
+# panel's heading, sentence and buttons, and the phones' Sign out, when
+# sign-in is set up; the messages shop.js writes reach it as BGS_COPY either
+# way, like every text it reads.
+SIGNIN_TEXT = {k: page_text("account.signin." + k) for k in ("heading", "body", "sign_in", "create", "sign_out")}
+COPY_JS["account"] = {"signin": {k: js_text("account.signin." + k)
+                                 for k in ("working", "cancelled", "failed", "unsupported")}}
 
 account = """
 <section><div class="wrap">

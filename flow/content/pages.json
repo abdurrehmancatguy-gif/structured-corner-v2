@@ -5,7 +5,8 @@
     "header": {
       "account": "Account",
       "wishlist": "Wishlist",
-      "bag": "Bag"
+      "bag": "Bag",
+      "signed_in": "Account, signed in as {name}"
     },
     "footer": {
       "contact": {
@@ -452,6 +453,17 @@
       "order_updates": "Order updates on WhatsApp",
       "offers": "Offers and new drops on WhatsApp",
       "note": "Each opt-in is stored with its time, source and language. Opting out here also stops messages sent from the CRM."
+    },
+    "signin": {
+      "heading": "Sign in to your account",
+      "body": "Sign in or create an account with your email address or your Google account.",
+      "sign_in": "Sign in",
+      "create": "Create account",
+      "sign_out": "Sign out",
+      "working": "Signing you in…",
+      "cancelled": "Sign-in was cancelled or not allowed. You can try again.",
+      "failed": "We could not sign you in. Please try again.",
+      "unsupported": "Sign-in could not start in this browser."
     }
   },
   "not_found": {
