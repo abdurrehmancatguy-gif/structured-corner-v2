@@ -2713,3 +2713,14 @@ code{border:1px solid var(--line)}
 .hero .btn.gold{background:#fff;border-color:#fff;color:var(--ink)}
 .hero .btn.gold:hover{background:#fff;border-color:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.35)}
 .badge.best{background:var(--gold-d)}
+/* ---- two grey patches left -------------------------------------------------
+   The collection's filter pills are buttons, and a button with no background
+   of its own is painted the browser's light grey, so "Ready today" sat on a
+   grey pill. And the closed filter drawer, parked off the left edge, still
+   cast its 40px shadow into the page, a grey shade down the left side of
+   every phone collection; it casts it only while open. */
+.pills .pill:not(.on){background:#fff}
+@media (max-width:900px){
+  .plp .side{box-shadow:none}
+  body.filters-open .plp .side{box-shadow:0 0 40px rgba(52,38,11,.18)}
+}
