@@ -569,6 +569,50 @@ class PagesPartTwoTests(_Pages, unittest.TestCase):
         self.assertEqual(err.count("pages.json cart.line.remove must be text"), 1)
         self.assertEqual(changed, [])
 
+    def test_the_added_to_bag_panel_and_the_phone_checkout_bar_take_the_bag_words(self):
+        # the panel after every Add reads its words, and the summary's
+        # Subtotal and Checkout, from BGS_COPY; the bag page prints the phone
+        # checkout bar with the summary's Total and Checkout
+        data = self.doc()["data"]
+        self.assertEqual(global_in(self.flow, "BGS_COPY")["cart"]["added"], data["cart"]["added"])
+        before, cart = data, self.page("cart.html")
+
+        def change(d):
+            d["cart"]["added"].update(title="In your bag", qty="{n} in the bag", view_bag="See the bag",
+                                      close="Shut", button="In the bag")
+            d["cart"]["summary"].update(subtotal="Items", total="To pay", checkout="Pay now")
+        st, res = self.put(change)
+        try:
+            self.assertEqual(st, 200, res)
+            js = global_in(self.flow, "BGS_COPY")["cart"]
+            self.assertEqual(js["added"], {"title": "In your bag", "qty": "{n} in the bag", "view_bag": "See the bag",
+                                           "close": "Shut", "button": "In the bag"})
+            self.assertEqual((js["summary"]["subtotal"], js["summary"]["checkout"]), ("Items", "Pay now"))
+            page = self.page("cart.html")
+            self.assertIn('href="checkout.html" data-checkout style="margin-top:12px">Pay now</a>', page)
+            self.assertIn('<div class="bagbar" data-bagbar aria-hidden="true"><div class="bb-t"><span>To pay</span>'
+                          '<b data-bagbartotal>AED 0</b></div><a class="btn solid" href="checkout.html">Pay now</a></div>', page)
+        finally:
+            self.restore(before)
+        self.assertEqual(self.page("cart.html"), cart)
+        self.refused([
+            ("format", lambda d: d["cart"]["added"].update(qty="Qty")),
+            ("format", lambda d: d["cart"]["added"].update(view_bag="View {n}")),
+            ("too_long", lambda d: d["cart"]["added"].update(title="B" * 41)),
+            ("required", lambda d: d["cart"]["added"].update(button=" ")),
+        ], "cart.html")
+
+    def test_the_build_stops_on_broken_added_to_bag_words(self):
+        def change(d):
+            d["cart"]["added"]["qty"] = "Qty"
+            del d["cart"]["added"]["view_bag"]
+            d["cart"]["added"]["close"] = "Close {x}"
+        err, changed = self.broken_build(change)
+        for msg in ("pages.json cart.added.qty must contain {n}", "pages.json cart.added.view_bag must be text",
+                    "pages.json cart.added.close has {x}, which it cannot use"):
+            self.assertIn(msg, err)
+        self.assertEqual(changed, [])
+
 
 if __name__ == "__main__":
     unittest.main()
