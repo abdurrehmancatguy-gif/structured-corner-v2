@@ -48,8 +48,8 @@
   },
   "categories": {
     "attars": {
-      "label": "Attars",
-      "crumb": "Attars"
+      "label": "Oud Attar",
+      "crumb": "Oud Attar"
     },
     "bakhoor": {
       "label": "Bakhoor",
@@ -69,8 +69,8 @@
     }
   },
   "collection_intros": {
-    "all": "Every blend in the shop: attars and perfume oils, bakhoor, EDP sprays and gift sets.",
-    "attars": "Alcohol-free attars and perfume oils in 3 ml and 6 ml.",
+    "all": "Every blend in the shop: oud attar, bakhoor, EDP sprays and gift sets.",
+    "attars": "Alcohol-free oud attar in 3 ml and 6 ml.",
     "bakhoor": "Bakhoor for the home, in 20 g to 50 g tins.",
     "edp": "Eau de parfum sprays, 50 ml, with declared note profiles.",
     "gift-sets": "Wrapped sets, built from the house blends."

@@ -1,7 +1,7 @@
 {
   "main": [
     {
-      "label": "Attars/Perfume Oils",
+      "label": "Oud Attar",
       "href": "collection.html?cat=attars"
     },
     {
@@ -54,7 +54,7 @@
   ],
   "categories": [
     {
-      "label": "Attars/Perfume Oils",
+      "label": "Oud Attar",
       "href": "collection.html?cat=attars",
       "tint": "oud",
       "image": "assets/cat/attars.png",
@@ -100,7 +100,7 @@
       "heading": "Shop",
       "links": [
         {
-          "label": "Attars/Perfume Oils",
+          "label": "Oud Attar",
           "href": "collection.html?cat=attars"
         },
         {

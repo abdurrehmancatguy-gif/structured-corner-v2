@@ -191,8 +191,8 @@ RULE_TEXT = {
 # One-line description per page for <meta name=description> and OG.
 PAGE_DESC = {
     "index.html": "Alcohol-free oud oils, bakhoor and EDP sprays, blended in Dubai. Same-day delivery in Dubai, free over %s." % RULE_TEXT["rule_free_over"],
-    "collection.html": "Shop BGS Corner: attars and perfume oils, bakhoor, EDP sprays and gift sets. Filter by category, price and gender.",
-    "product.html": "House-blended, alcohol-free fragrance from BGS Corner, Dubai. Attars and perfume oils, bakhoor and EDP sprays.",
+    "collection.html": "Shop BGS Corner: oud attar, bakhoor, EDP sprays and gift sets. Filter by category, price and gender.",
+    "product.html": "House-blended, alcohol-free fragrance from BGS Corner, Dubai. Oud attar, bakhoor and EDP sprays.",
     "gift-box.html": "Build a gift box of three or six house scents, wrapped, with a handwritten card. BGS Corner, Dubai.",
     "cart.html": "Your BGS Corner bag.",
     "checkout.html": "Guest checkout with card, Apple Pay, Tabby, Tamara or cash on delivery. BGS Corner, Dubai.",
@@ -693,7 +693,7 @@ SHELVES = {
 }
 _SHELF_WAS = {"house_ouds": (5, "All {n}"), "reserve": (None, "All attars"), "gift_sets": (5, "All sets"),
               "bakhoor": (None, "Shop bakhoor"), "edp": (5, "All {n}")}
-_HEADING_WAS = {"house_ouds": "Attars and perfume oils", "reserve": "Never discounted", "gift_sets": "Gift sets",
+_HEADING_WAS = {"house_ouds": "Oud Attar", "reserve": "Never discounted", "gift_sets": "Gift sets",
                 "scent_family": "Shop by scent family", "bakhoor": "Bakhoor & home", "edp": "EDP sprays"}
 _BAD_HOME = []
 
@@ -1724,8 +1724,8 @@ def emit_catalogue():
 # An empty title leaves the tab with the Title suffix from Settings alone:
 # the homepage is just "BGS Corner".
 PAGES = [("index.html","",home,"","Home"),
-         ("collection.html","Attars and Perfume Oils: Alcohol-Free, 3 ml and 6 ml",collection,"Attars/Perfume Oils","Shop"),
-         ("product.html","Royal Amber",product,"Attars/Perfume Oils","Shop"),
+         ("collection.html","Oud Attar: Alcohol-Free, 3 ml and 6 ml",collection,"Oud Attar","Shop"),
+         ("product.html","Royal Amber",product,"Oud Attar","Shop"),
          ("gift-box.html","Build a Gift Box: Three or Six Scents, Wrapped",giftbox,"Gift Sets","Gifts"),
          ("cart.html","Your Bag",cart,"","Bag"),
          ("checkout.html","Checkout: Guest Checkout, COD and Tabby",checkout,"","Bag"),
