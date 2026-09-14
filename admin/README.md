@@ -198,6 +198,31 @@ Chrome over its DevTools pipe, standard library only).
 - `admin/devtools/dom_diff.py --base REV --ports A,B`: renders the pages of
   both in headless Chrome after their scripts run and compares what a
   visitor gets.
+- `admin/devtools/viewport_audit.py`: the storefront at 28 screen sizes
+  (portrait and landscape phones, the fold closed and open, tablets,
+  desktops, ultrawide) and 29 page states (every page, each category, a
+  search, the filter drawer, five product pages and one just after Add to
+  bag, the bag empty, with one line and with five, the quiz and its result,
+  and index, product and bag in Arabic), in headless Chrome with phones and
+  tablets emulated as touch screens. `list` shows the matrix. `run` serves
+  a checkout and works through the jobs in batches that fit a two-minute
+  limit; repeat the same command until it exits 0 (3 means jobs remain):
+
+  ```bash
+  perl -e 'alarm shift; exec @ARGV' 110 /usr/bin/python3 admin/devtools/viewport_audit.py run \
+      --clone /path/to/checkout --port 4970 --out /tmp/va
+  ```
+
+  `--viewports` and `--pages` take sets and names (`phones`, `landscape`,
+  `tablets`, `desktops`, `touch`; `pdp`, `cart`, `coll`, `ar`, or one state
+  like `cart-1`), `--redo` runs a selection again. Each job saves its
+  measurements and a first-screen screenshot; `report --out /tmp/va`
+  rebuilds `report.txt` (issues by type and element: sideways scrolling,
+  text under 12px, fields under 16px, tap targets under 44px, bars' share of
+  the screen, covered actions, the bag's Checkout, pictures, clipped or
+  overlapping text, lost spaces, wrapping labels, the tab bar, the language
+  toggle, Arabic order and arrows, script errors), `matrix.txt` and
+  `checkout.txt`. The file's docstring has every option.
 
 More: `DESIGN.md` (decisions), `docs/PLAN.md` (architecture),
 `docs/HARDCODED.md` (what is still typed into the code),
