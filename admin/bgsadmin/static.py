@@ -10,7 +10,7 @@ import re
 import urllib.parse
 
 from .config import UI, UNPUBLISHED_ASSETS
-from .security import ADMIN_HEADERS, STOREFRONT_HEADERS, safe_join
+from .security import ADMIN_HEADERS, safe_join, storefront_headers
 
 MIME = {
     ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8",
@@ -91,7 +91,7 @@ def send_file(handler, path, method, headers, status=200, allow_range=False):
 def send_404(handler, cfg, method):
     page = cfg.flow / "404.html"
     if page.is_file():
-        return send_file(handler, page, method, STOREFRONT_HEADERS, status=404)
+        return send_file(handler, page, method, storefront_headers(cfg), status=404)
     handler.send_response(404)
     handler.send_header("Content-Length", "0")
     handler.end_headers()
@@ -103,7 +103,7 @@ def serve_storefront(handler, cfg, method):
     target = safe_join(cfg.flow, rel) if published(rel) else None
     if target is None or not target.is_file():
         return send_404(handler, cfg, method)
-    send_file(handler, target, method, STOREFRONT_HEADERS, allow_range=True)
+    send_file(handler, target, method, storefront_headers(cfg), allow_range=True)
 
 
 def ui_file(rel):

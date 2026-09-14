@@ -2108,3 +2108,43 @@ footer .slot,footer .soon{color:#b9b0a4}
   .heroimg .none.corner{font-size:12px !important}
   .notestop b{font-size:13px !important}
 }
+/* Shopper sign-in. The account page opens on a panel for a shopper who is
+   not signed in: a heading, one sentence and the two buttons, in the cream
+   and gold edge of the Discovery band. A signed-in account's head shows the
+   shopper's picture, or their first letter, beside their name and email.
+   The account's head and grid show and hide with [hidden], which their
+   display:flex and display:grid would otherwise outrank. Phones stack the
+   buttons full width and 48px tall, with text of 14px and up, and put a
+   Sign out under the email, since the menu's own Sign out scrolls off to
+   the right there. */
+.signin[hidden],.acct-head[hidden],.acct[hidden]{display:none}
+.signin{max-width:560px;margin:14px 0 6px;padding:28px 30px;border:1px solid #ecdfc0;border-radius:var(--r);background:var(--gold-l)}
+.signin h2{font-size:25px;font-weight:600;line-height:1.25;letter-spacing:-.01em;margin:0 0 8px}
+.signin p{margin:0 0 20px;color:var(--body);font-size:15px;line-height:1.55;max-width:46ch}
+.signin .signin-msg{margin:-6px 0 18px;padding:11px 14px;border:1px solid var(--line);border-radius:var(--r-sm);
+ background:#fff;color:var(--ink);font-size:14px;max-width:none}
+.signin .signin-msg:empty{display:none}
+.signin .signin-msg.err{border-color:#e3bdb8;color:var(--red)}
+.signin-b{display:flex;flex-wrap:wrap;gap:12px}
+.signin-b .btn{min-width:180px;font-size:14px;cursor:pointer}
+.signin-b .btn:disabled{opacity:.6;cursor:progress}
+.signin-b .btn:focus-visible,.acct-out:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.avatar{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:24px;height:24px;
+ border-radius:50%;overflow:hidden;background:var(--gold-l);border:1px solid #ecdfc0;color:var(--gold-d);
+ font-size:13px;font-weight:700;line-height:1}
+.avatar img{display:block;width:100%;height:100%;object-fit:cover}
+.avatar.big{width:60px;height:60px;font-size:24px}
+.acct-me{display:flex;align-items:center;gap:16px;min-width:0}
+.acct-me > div{min-width:0}
+.acct-me h2,.acct-me p{overflow-wrap:anywhere}
+.acct-out{display:none}
+@media (max-width:900px){
+  .signin{padding:22px 18px;margin-top:12px}
+  .signin h2{font-size:22px}
+  .signin-b{flex-direction:column}
+  .signin-b .btn{width:100%;min-height:48px;font-size:15px}
+  .avatar.big{width:52px;height:52px;font-size:22px}
+  .acct-me{align-items:flex-start}
+  .acct-me p{font-size:14px !important}
+  .acct-out{display:inline-flex;margin-top:12px;min-height:44px;padding:10px 20px;font-size:14px;cursor:pointer}
+}

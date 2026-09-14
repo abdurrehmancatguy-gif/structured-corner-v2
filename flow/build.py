@@ -1543,18 +1543,43 @@ SIGNIN_TEXT = {k: page_text("account.signin." + k) for k in ("heading", "body", 
 COPY_JS["account"] = {"signin": {k: js_text("account.signin." + k)
                                  for k in ("working", "cancelled", "failed", "unsupported")}}
 
+# With sign-in set up, the page opens on the sign-in panel and keeps the
+# account (its head, menu and cards) hidden until shop.js finds a signed-in
+# shopper, whose name, email and picture then fill the head and the email
+# row; the menu's Sign out, and on phones a button under the email, sign
+# out. Without it the page is as it was, placeholders and all.
+if AUTH:
+    SIGNIN_PARTS = {
+        "signin": """  <div class="signin" data-signin>
+    <h2>%(heading)s</h2>
+    <p>%(body)s</p>
+    <p class="signin-msg" data-signinmsg role="status"></p>
+    <div class="signin-b"><button type="button" class="btn solid" data-signin-go>%(sign_in)s</button><button type="button" class="btn" data-signin-go="signup">%(create)s</button></div>
+  </div>
+""" % SIGNIN_TEXT,
+        "view": " data-acctview hidden",
+        "me_open": '<div class="acct-me"><span class="avatar big" data-meavatar aria-hidden="true"></span><div>',
+        "me_close": "</div></div>",
+        "me_name": ' data-me="name"', "me_email": ' data-me="email"',
+        "out_btn": '\n      <button type="button" class="btn acct-out" data-signout>%s</button>' % SIGNIN_TEXT["sign_out"],
+        "signout": " data-signout",
+    }
+else:
+    SIGNIN_PARTS = dict.fromkeys(("signin", "view", "me_name", "me_email", "out_btn", "signout"), "")
+    SIGNIN_PARTS.update(me_open="<div>", me_close="</div>")
+
 account = """
 <section><div class="wrap">
   <span class="eyebrow">%(a_crumb)s</span>
-  <div class="acct-head">
-    <div>
-      <h2 style="font-size:26px;margin:8px 0 6px">%(name)s</h2>
-      <p style="color:var(--mut);font-size:13.5px;margin:0">%(contact)s</p>
-    </div>
+%(signin)s  <div class="acct-head"%(view)s>
+    %(me_open)s
+      <h2 style="font-size:26px;margin:8px 0 6px"%(me_name)s>%(name)s</h2>
+      <p style="color:var(--mut);font-size:13.5px;margin:0"%(me_email)s>%(contact)s</p>%(out_btn)s
+    %(me_close)s
     <div class="tierbadge"><span class="eyebrow gold-d">%(a_prog)s</span><b>%(a_tier)s</b></div>
   </div>
 
-  <div class="acct">
+  <div class="acct"%(view)s>
     <nav class="acctnav">
       <a class="on" href="account.html">Overview</a>
       <a href="account.html">Orders</a>
@@ -1562,7 +1587,7 @@ account = """
       <a href="account.html">Referrals</a>
       <a href="account.html">Addresses</a>
       <a href="account.html">Details &amp; consent</a>
-      <a href="index.html" class="out">Sign out</a>
+      <a href="index.html" class="out"%(signout)s>Sign out</a>
     </nav>
 
     <div class="acctbody">
@@ -1617,7 +1642,7 @@ account = """
       <div class="sum" style="background:#fff">
         <div class="kv">
           <div><span>%(a_consent_phone_label)s</span><span>%(contact)s</span></div>
-          <div><span>%(a_consent_email_label)s</span><span>%(email)s</span></div>
+          <div><span>%(a_consent_email_label)s</span><span%(me_email)s>%(email)s</span></div>
           <div><span>%(a_consent_language_label)s</span><span>%(a_consent_language)s</span></div>
         </div>
         <label class="consent"><input type="checkbox">%(a_consent_order_updates)s</label>
@@ -1627,7 +1652,7 @@ account = """
     </div>
   </div>
 </div></section>
-""" % dict(ACCOUNT_TEXT, name=slot("customer name"), contact=slot("phone"), email=slot("email"),
+""" % dict(ACCOUNT_TEXT, **SIGNIN_PARTS, name=slot("customer name"), contact=slot("phone"), email=slot("email"),
            drops=slot("0"), credit=slot("AED 0"), orders=slot("0"), tierpct="0%",
            voucher=slot("none active"), refcode=slot("unique code per customer"),
            referred=slot("0"))

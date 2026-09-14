@@ -64,6 +64,65 @@ function bgsAr(en) {
   return document.documentElement.lang === "ar" && d && typeof en === "string" &&
     Object.prototype.hasOwnProperty.call(d, en) && typeof d[en] === "string" && d[en] !== "" ? d[en] : en;
 }
+/* ---------- shopper sign-in: what every page shares -----------------------
+   Shoppers sign in with Auth0. catalogue.js carries its domain and the Client
+   ID of its Single Page Application as BGS_AUTH, from settings.json. bgsAuth()
+   is { base, clientId }, or null when sign-in is not set up or the domain is
+   not one the shop will use: a host name, over https, or 127.0.0.1 with a
+   port, over plain http, which only the admin's tests serve. No other host is
+   ever reached over plain http. */
+function bgsAuth() {
+  var a = window.BGS_AUTH, d = a && typeof a.domain === "string" ? a.domain : "",
+      c = a && typeof a.client_id === "string" ? a.client_id : "";
+  if (!/^[A-Za-z0-9]{20,40}$/.test(c)) return null;
+  if (/^127\.0\.0\.1:[1-9][0-9]{0,4}$/.test(d)) return { base: "http://" + d, clientId: c };
+  return /^(?=.{4,100}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(d)
+    ? { base: "https://" + d, clientId: c } : null;
+}
+/* The signed-in shopper, as the account page keeps them after a sign-in:
+   { sub, name, email, picture, exp } in localStorage, never a token. Past its
+   exp (the id_token's) nobody is signed in, and the old one is removed; with
+   sign-in not set up nobody is either. */
+var BGS_PROFILE = "bgs_profile";
+function bgsProfile() {
+  if (!bgsAuth()) return null;
+  var raw = null, p = null;
+  try { raw = localStorage.getItem(BGS_PROFILE); p = JSON.parse(raw || "null"); } catch (e) { p = null; }
+  if (p && typeof p === "object" && typeof p.sub === "string" && p.sub &&
+      typeof p.exp === "number" && p.exp * 1000 > Date.now()) return p;
+  if (raw !== null) { try { localStorage.removeItem(BGS_PROFILE); } catch (e) {} }
+  return null;
+}
+/* This site's own addresses, from links every page carries (the logo and the
+   header's account link), so they come out right on GitHub Pages' sub-path,
+   on Netlify, whose pretty URLs turn account.html into /account, and on the
+   shop's own domain. */
+function bgsSiteLink(sel, fallback) {
+  var a = document.querySelector(sel), u;
+  try { u = new URL((a && a.getAttribute("href")) || fallback, location.href); } catch (e) { return null; }
+  u.search = ""; u.hash = "";
+  return u;
+}
+function bgsSiteRoot() {
+  var u = bgsSiteLink("a.logo[href]", "index.html");
+  if (u) u.pathname = u.pathname.replace(/index(\.html)?$/, "");
+  return u;
+}
+function bgsAccountPage() { return bgsSiteLink("a.act-acct[href]", "account.html"); }
+/* A signed-in shopper's picture in el: their first letter until it loads,
+   and for good when there is none or it fails. Only an https picture is
+   shown (or one from the tests' local provider), without a referrer. */
+function bgsAvatar(el, p) {
+  if (!el || !p) return;
+  var name = String(p.name || p.email || "").trim(), pic = String(p.picture || ""), a = bgsAuth();
+  el.textContent = (Array.from(name)[0] || "").toLocaleUpperCase();
+  el.classList.add("avatar");
+  if (!/^https:\/\//.test(pic) && !(a && pic.indexOf(a.base + "/") === 0)) return;
+  var im = new Image();
+  im.alt = ""; im.referrerPolicy = "no-referrer"; im.decoding = "async";
+  im.onload = function () { el.textContent = ""; el.appendChild(im); el.classList.add("pic"); };
+  im.src = pic;
+}
 /* Each feature below runs on its own: an error in one (bad data in storage, a
    missing element) is logged and the rest still work. As one plain script, the
    first throw stopped every feature after it, the bag included. */
@@ -2048,4 +2107,191 @@ bgsRun(function () {
     });
   }, { threshold: 0.6 });
   films.forEach(function (v) { io.observe(v); });
+});
+
+/* ---------- shopper sign-in on the account page ----------------------------
+   The Authorization Code flow with PKCE (S256), written out here with no
+   library. Sign in and Create account: a random code_verifier, its SHA-256 as
+   the code_challenge, and a random state and nonce, kept in sessionStorage
+   with the redirect_uri (this site's account page) and the page to go back
+   to; then Auth0's /authorize, with screen_hint=signup for Create account.
+   Back here with ?code and ?state: the state has to be the one kept, the code
+   goes to /oauth/token with the verifier and the same redirect_uri, and the
+   id_token's iss, aud, nonce, exp and iat are checked. Its signature is not:
+   the token came straight from the token endpoint over TLS, which OpenID
+   Connect accepts in its place. Only the small profile is kept (bgsProfile);
+   the tokens are dropped. code and state leave the address bar, and the
+   shopper goes back to the page they came from when it is a page of this
+   site. ?error= reads as a message; the provider's description is never
+   shown, as anyone can put one in a link. Sign out forgets the profile and
+   goes through Auth0's /v2/logout back to this site's home page.
+--------------------------------------------------------------------------- */
+bgsRun(function () {
+  "use strict";
+  var auth = bgsAuth(), panel = document.querySelector("[data-signin]");
+  if (!auth || !panel) return;
+  var KEY = "bgs_signin";
+  var msg = panel.querySelector("[data-signinmsg]");
+  var buttons = panel.querySelectorAll("[data-signin-go]");
+
+  function say(text, err) {
+    if (!msg) return;
+    msg.textContent = text || "";
+    msg.classList.toggle("err", !!err);
+  }
+  function busy(on) {
+    buttons.forEach(function (b) { b.disabled = on; });
+    panel.setAttribute("aria-busy", on ? "true" : "false");
+  }
+  function failed() { return bgsAr(bgsCopy("account.signin.failed", "We could not sign you in. Please try again.")); }
+  function unsupported() { return bgsAr(bgsCopy("account.signin.unsupported", "Sign-in could not start in this browser.")); }
+  function render(p) {
+    panel.hidden = !!p;
+    document.querySelectorAll("[data-acctview]").forEach(function (v) { v.hidden = !p; });
+    if (!p) return;
+    document.querySelectorAll('[data-me="name"]').forEach(function (e) { e.textContent = String(p.name || p.email || ""); });
+    document.querySelectorAll('[data-me="email"]').forEach(function (e) { e.textContent = String(p.email || ""); });
+    bgsAvatar(document.querySelector("[data-meavatar]"), p);
+  }
+
+  /* a page of this site, other than this one, to go back to after signing in */
+  function backTo(v) {
+    var u, root = bgsSiteRoot(), here = bgsAccountPage();
+    if (typeof v !== "string" || !v || !root || !here) return null;
+    try { u = new URL(v, location.href); } catch (e) { return null; }
+    var bare = function (s) { return s.replace(/\.html$/, ""); };
+    return u.origin === location.origin && u.pathname.indexOf(root.pathname) === 0 &&
+      bare(u.pathname) !== bare(here.pathname) ? u.href : null;
+  }
+
+  function b64url(bytes) {
+    var s = "";
+    for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+    return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  }
+  function random(n) { var a = new Uint8Array(n); crypto.getRandomValues(a); return b64url(a); }
+
+  function start(signup) {
+    var c = window.crypto, here = bgsAccountPage();
+    if (!c || !c.getRandomValues || !c.subtle || !window.TextEncoder || !window.fetch || !here) {
+      say(unsupported(), true);
+      return;
+    }
+    say("");
+    busy(true);
+    var att = { verifier: random(32), state: random(16), nonce: random(16), redirect_uri: here.href,
+                return_to: backTo(document.referrer) || "" };
+    c.subtle.digest("SHA-256", new TextEncoder().encode(att.verifier)).then(function (h) {
+      sessionStorage.setItem(KEY, JSON.stringify(att));
+      var q = { response_type: "code", client_id: auth.clientId, redirect_uri: att.redirect_uri,
+                scope: "openid profile email", state: att.state, nonce: att.nonce,
+                code_challenge: b64url(new Uint8Array(h)), code_challenge_method: "S256" };
+      if (signup) q.screen_hint = "signup";
+      location.assign(auth.base + "/authorize?" + new URLSearchParams(q).toString());
+    }).catch(function () {
+      busy(false);
+      say(unsupported(), true);
+    });
+  }
+
+  function claims(jwt) {
+    var part = typeof jwt === "string" ? jwt.split(".")[1] : "";
+    if (!part) throw new Error("no id_token");
+    var b = part.replace(/-/g, "+").replace(/_/g, "/");
+    while (b.length % 4) b += "=";
+    var bin = atob(b), bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return JSON.parse(new TextDecoder().decode(bytes));
+  }
+  function text(v) { return typeof v === "string" ? v.slice(0, 200) : ""; }
+  function profileOf(jwt, nonce) {
+    var c = claims(jwt), now = Date.now() / 1000, aud = c && c.aud;
+    if (!c || typeof c !== "object") throw new Error("id_token");
+    if (c.iss !== auth.base + "/") throw new Error("iss");
+    if (!(aud === auth.clientId || (Array.isArray(aud) && aud.indexOf(auth.clientId) >= 0 &&
+          (aud.length === 1 || c.azp === auth.clientId)))) throw new Error("aud");
+    if (typeof c.nonce !== "string" || c.nonce !== nonce) throw new Error("nonce");
+    if (typeof c.exp !== "number" || c.exp <= now) throw new Error("exp");
+    if (typeof c.iat !== "number" || c.iat > now + 600 || c.iat < now - 86400 || c.iat > c.exp) throw new Error("iat");
+    if (typeof c.sub !== "string" || !c.sub) throw new Error("sub");
+    var pic = typeof c.picture === "string" && c.picture.length <= 2000 &&
+      (/^https:\/\//.test(c.picture) || c.picture.indexOf(auth.base + "/") === 0) ? c.picture : "";
+    return { sub: c.sub.slice(0, 200), name: text(c.name) || text(c.nickname) || text(c.email),
+             email: text(c.email), picture: pic, exp: c.exp };
+  }
+  function exchange(att, code) {
+    return fetch(auth.base + "/oauth/token", {
+      method: "POST", credentials: "omit", cache: "no-store", referrerPolicy: "no-referrer",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ grant_type: "authorization_code", client_id: auth.clientId,
+        code_verifier: att.verifier, code: code, redirect_uri: att.redirect_uri }).toString()
+    }).then(function (r) {
+      if (!r.ok) throw new Error("token endpoint " + r.status);
+      return r.json();
+    }).then(function (t) { return profileOf(t && t.id_token, att.nonce); });
+  }
+
+  var qs = new URLSearchParams(location.search);
+  var code = qs.get("code"), state = qs.get("state"), error = qs.get("error");
+  /* the attempt this callback belongs to, used once */
+  function take() {
+    var a = null;
+    try { a = JSON.parse(sessionStorage.getItem(KEY) || "null"); sessionStorage.removeItem(KEY); } catch (e) { a = null; }
+    return a && typeof a === "object" ? a : null;
+  }
+  function tidy() {
+    ["code", "state", "error", "error_description", "error_uri"].forEach(function (k) { qs.delete(k); });
+    var s = qs.toString();
+    history.replaceState(history.state, "", location.pathname + (s ? "?" + s : "") + location.hash);
+  }
+
+  buttons.forEach(function (b) {
+    b.addEventListener("click", function () { start(b.getAttribute("data-signin-go") === "signup"); });
+  });
+  document.querySelectorAll("[data-signout]").forEach(function (a) {
+    a.addEventListener("click", function (e) {
+      e.preventDefault();
+      try { localStorage.removeItem(BGS_PROFILE); sessionStorage.removeItem(KEY); } catch (x) {}
+      var root = bgsSiteRoot();
+      location.assign(auth.base + "/v2/logout?" + new URLSearchParams({ client_id: auth.clientId,
+        returnTo: root ? root.href : location.origin + "/" }).toString());
+    });
+  });
+  /* back from Auth0's page to this one kept in memory: nothing is under way */
+  window.addEventListener("pageshow", function (e) {
+    if (e.persisted) { busy(false); render(bgsProfile()); }
+  });
+
+  if (error) {
+    take(); tidy(); render(null);
+    say(error === "access_denied"
+      ? bgsAr(bgsCopy("account.signin.cancelled", "Sign-in was cancelled or not allowed. You can try again."))
+      : failed(), true);
+    return;
+  }
+  if (code || state) {
+    var att = take();
+    tidy(); render(null);
+    if (!code || !state || !att || typeof att.state !== "string" || att.state !== state ||
+        typeof att.verifier !== "string" || typeof att.nonce !== "string" || typeof att.redirect_uri !== "string") {
+      say(failed(), true);
+      return;
+    }
+    busy(true);
+    say(bgsAr(bgsCopy("account.signin.working", "Signing you in…")));
+    exchange(att, code).then(function (p) {
+      localStorage.setItem(BGS_PROFILE, JSON.stringify(p));
+      var kept = bgsProfile();
+      if (!kept) throw new Error("the profile was not kept");
+      var back = backTo(att.return_to);
+      if (back) { location.replace(back); return; }
+      busy(false); say(""); render(kept);
+      document.dispatchEvent(new CustomEvent("bgs:profile"));
+    }).catch(function () {
+      busy(false);
+      say(failed(), true);
+    });
+    return;
+  }
+  render(bgsProfile());
 });
