@@ -2072,3 +2072,12 @@ footer .slot,footer .soon{color:#b9b0a4}
   .catnav .wrap{padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px))}
   .tabbar{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
 }
+/* Category shelf without circles. Each picture is a cut-out standing on the
+   page in the square the circle used to fill, with no disc, ring or shadow
+   behind it and the whole picture in view. */
+.cs a .circle,.cs a:hover .circle,.cs a.pop .circle,.cs a.pop:hover .circle{background:none;box-shadow:none;
+ border-radius:0;overflow:visible;transform:none}
+.cs a .circle::after,.cs a.pop .circle::before{content:none}
+.cs a .circle img,.cs a.pop .circle img,.cs a.pop.wide .circle img{top:0;left:0;bottom:auto;width:100%;height:100%;
+ max-width:none;object-fit:contain;object-position:center bottom}
+.cs a:hover .circle img,.cs a.pop:hover .circle img{transform:translateY(-3px)}

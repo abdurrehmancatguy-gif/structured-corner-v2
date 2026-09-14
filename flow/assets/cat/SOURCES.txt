@@ -6,9 +6,11 @@ content/navigation.json ("image"), not in the stylesheet.
   edp.png     BGS Corner product, supplied in chat   EDP Sprays  (Pride of Arabia)
   gift-sets.png  gift box pair, supplied in chat   Gift Sets
   floral.jpg  Pexels photos/1303087            (was Gift Sets, no longer shown)
-  fresh.jpg   Pexels photos/7269476            Build Your Gift Box (was Discovery)
+  fresh.jpg   Pexels photos/7269476            (was Build Your Gift Box, no longer shown)
   amber.jpg   Pexels photos/9127154            Shop by Occasion
-  corporate.png  skyscraper cut-out, supplied in chat   Corporate Gifting
+  corporate.png  skyscraper cut-out, supplied in chat   (was Corporate Gifting, no longer shown)
+  gift-box.png  cut out of img/banner-4.jpg (the Amore, Vibe and Be Mine trio in its box)   Build Your Gift Box
+  corporate-gifts.png  cut out of img/discovery-trio-1.jpg (three BGS boxes)   Corporate Gifting
 
 bak.png arrived with a checkerboard painted into the pixels: an RGB image with
 no alpha channel, so it only looked transparent. The checkerboard was keyed

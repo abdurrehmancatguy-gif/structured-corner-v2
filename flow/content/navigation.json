@@ -85,13 +85,14 @@
       "label": "Build Your Gift Box",
       "href": "gift-box.html",
       "tint": "fresh",
-      "image": "assets/cat/fresh-216.jpg"
+      "image": "assets/cat/gift-box.png",
+      "cutout": true
     },
     {
       "label": "Corporate Gifting",
       "href": "corporate.html",
       "tint": "sweet",
-      "image": "assets/cat/corporate.png",
+      "image": "assets/cat/corporate-gifts.png",
       "cutout": true
     }
   ],
