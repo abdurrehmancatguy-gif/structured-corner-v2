@@ -114,6 +114,16 @@ _SHELL = [
          pattern=needs("name"), patternHelp="Keep {name}: it is where the shopper's name goes.",
          help="What screen readers hear on the header's account link and the phone tab bar's Account while a "
               "shopper is signed in; the link also shows the shopper's picture or first letter."),
+    text("/shell/search/see_all", "See all results row", SHELL, 40, section="Search",
+         help="The last row of the list that opens under the search box as a shopper types. "
+              "It opens the collection page with every product the words find."),
+    text("/shell/search/none", "No matches line", SHELL, 80, section="Search",
+         help="In the list, when no product matches what is typed. Screen readers hear it too."),
+    text("/shell/search/count_one", "Result count, one", SHELL, 40, section="Search", pattern=COUNT,
+         patternHelp=COUNT_HELP, help="What screen readers hear when the words find one product. {n} is 1."),
+    text("/shell/search/count_many", "Result count, several", SHELL, 40, section="Search", pattern=COUNT,
+         patternHelp=COUNT_HELP, help="What screen readers hear when the words find more than one product. "
+                                      "{n} is how many."),
     text("/shell/footer/contact/address", "Address", SHELL, 120, section="Footer", required=False,
          help="The footer line under the legal name. While address, hours and phone are all empty, "
               "the footer shows its address, hours, phone placeholder."),

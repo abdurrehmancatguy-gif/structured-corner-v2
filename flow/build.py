@@ -383,6 +383,12 @@ COPY_JS["crumb_home"] = js_text("shell.crumb_home")
 # Once a shopper is signed in, the header's account link and the phone tab
 # bar's Account say who it is: shop.js fills {name} into this label.
 COPY_JS["shell"] = {"header": {"signed_in": js_text("shell.header.signed_in", need=("name",))}}
+# The list that opens under either search box as a shopper types: its last
+# row, its line when nothing matches, and what screen readers hear as the
+# number of matches changes ({n}, one and many).
+COPY_JS["shell"]["search"] = {"see_all": js_text("shell.search.see_all"), "none": js_text("shell.search.none"),
+                              "count_one": js_text("shell.search.count_one", need=("n",)),
+                              "count_many": js_text("shell.search.count_many", need=("n",))}
 
 def tab_link(label, href, icon, on):
     """One tab-bar entry, drawn as its icon. The label stays as the accessible
@@ -1807,7 +1813,7 @@ def emit_catalogue():
             doc["images"] = pr["images"]
         for k_src, k_out in (("top","top"), ("heart","heart"), ("base","base"),
                              ("ingredients","ing"), ("barcode","sku"),
-                             ("gender","gender"), ("story","story")):
+                             ("gender","gender"), ("story","story"), ("family","family")):
             if pr.get(k_src):
                 doc[k_out] = pr[k_src]
         if isinstance(pr.get("stock"), int):

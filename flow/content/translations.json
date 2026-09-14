@@ -55,6 +55,10 @@
     "We could not sign you in. Please try again.": "تعذّر تسجيل دخولك. يُرجى المحاولة مرة أخرى.",
     "Sign-in could not start in this browser.": "تعذّر بدء تسجيل الدخول في هذا المتصفح.",
     "Account, signed in as {name}": "الحساب، تم تسجيل الدخول باسم {name}",
-    "Exclusive BGS creations": "إبداعات BGS الحصرية"
+    "Exclusive BGS creations": "إبداعات BGS الحصرية",
+    "See all results": "عرض كل النتائج",
+    "No products match that search.": "لا توجد منتجات تطابق هذا البحث.",
+    "{n} result": "عدد النتائج: {n}",
+    "{n} results": "عدد النتائج: {n}"
   }
 }

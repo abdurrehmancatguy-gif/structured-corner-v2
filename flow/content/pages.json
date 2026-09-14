@@ -8,6 +8,12 @@
       "bag": "Bag",
       "signed_in": "Account, signed in as {name}"
     },
+    "search": {
+      "see_all": "See all results",
+      "none": "No products match that search.",
+      "count_one": "{n} result",
+      "count_many": "{n} results"
+    },
     "footer": {
       "contact": {
         "address": "",
