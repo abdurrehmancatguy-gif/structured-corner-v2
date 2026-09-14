@@ -402,7 +402,8 @@ library and nothing downloaded:
 - **Signed in**: the account page shows the name, email and picture (the rest stays
   placeholders until the database), and the header's account link and the tab bar's Account
   say who it is. The profile holds until the id_token's `exp`, then the shopper reads as
-  signed out.
+  signed out. A sign-in or sign-out in another tab shows on an account page already open
+  there, without a reload.
 - **Sign out**, in the account menu and, on phones, under the email: forgets the profile and
   goes through `/v2/logout?client_id=...&returnTo=<this site's home page>`.
 

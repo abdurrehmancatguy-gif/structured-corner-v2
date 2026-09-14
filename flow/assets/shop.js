@@ -2274,6 +2274,15 @@ bgsRun(function () {
   window.addEventListener("pageshow", function (e) {
     if (e.persisted) { busy(false); render(bgsProfile()); }
   });
+  /* a sign-in or sign-out in another tab shows here too, so a shopper who
+     signs out elsewhere leaves no name or email on screen; not while this
+     tab is signing in itself (busy), which renders when it is done */
+  window.addEventListener("storage", function (e) {
+    if ((e.key !== null && e.key !== BGS_PROFILE) || panel.getAttribute("aria-busy") === "true") return;
+    var p = bgsProfile();
+    if (p) say("");
+    render(p);
+  });
 
   /* A callback this page cannot use (no attempt kept for it, another state,
      a failed exchange, or ?error=): a shopper who is signed in all the same,

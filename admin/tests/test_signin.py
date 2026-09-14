@@ -548,6 +548,45 @@ class SigninFlow(unittest.TestCase):
                 self.assertEqual((link["signed"], link["svg"]), (False, True))
                 self.no_errors()
 
+    def test_a_sign_in_or_sign_out_in_another_tab_shows_on_an_open_account_page(self):
+        self.open(390, 844, True)
+        one = self.c.sid
+        tid = self.c.call("Target.createTarget", {"url": "about:blank"}, browser=True)["targetId"]
+        two = self.c.call("Target.attachToTarget", {"targetId": tid, "flatten": True}, browser=True)["sessionId"]
+        try:
+            self.c.sid = two
+            self.c.call("Page.enable")
+            self.c.call("Runtime.enable")
+            view(self.c, 390, 844, True)
+            self.open(390, 844, True)
+            self.assertTrue(self.js(PANEL)["shown"])
+            self.js("window.__stayed = true")
+            # the first tab signs in: the second shows the shopper
+            self.c.sid = one
+            self.js("document.querySelector('[data-signin-go=\"\"]').click()")
+            self.signed_in_here()
+            self.c.sid = two
+            until(self.c, "document.querySelector('[data-signin]').hidden", 10, what="the account in the second tab")
+            me = self.js(ME)
+            self.assertEqual((me["name"], me["email"], me["views"]), ("Noor Haddad", "noor@example.com", [False, False]))
+            self.assertTrue(self.js(LINKS)["tab"]["signed"])
+            # the first tab signs out: the second hides the name, email and menu and shows the panel
+            self.c.sid = one
+            self.js("document.querySelector('.acct-out').click()")
+            until(self.c, "location.href === %s && %s" % (J(SITE + "/"), READY), 20, what="the home page")
+            self.c.sid = two
+            until(self.c, "!document.querySelector('[data-signin]').hidden", 10, what="the panel in the second tab")
+            p = self.js(PANEL)
+            self.assertEqual((p["shown"], p["views"], p["msg"]), (True, [True, True], ""))
+            self.assertNotIn("Noor Haddad", p["text"])
+            self.assertNotIn("noor@example.com", p["text"])
+            self.assertFalse(self.js(LINKS)["tab"]["signed"])
+            self.assertTrue(self.js("window.__stayed === true && location.href === %s" % J(SITE + "/account.html")),
+                            "the second tab was not reloaded")
+            self.no_errors()
+        finally:
+            self.c.sid = one
+
     # ---- the provider's address ----------------------------------------------------------
     def test_no_host_but_the_tests_own_is_reached_over_plain_http(self):
         self.open(1440, 900, False)
