@@ -120,8 +120,9 @@ The left navigation, in order:
   a number of days, always keeping each file's newest 50.
 - **Settings:** store details, delivery, gift box, volume discount, gift
   with purchase, low stock, brand (with the logo and emblem uploads), search
-  and sharing, social links, analytics and languages. Payments and tax are
-  shown locked.
+  and sharing, social links, shopper sign-in (the Auth0 domain and Client
+  ID; both empty hide sign-in on the shop), analytics and languages.
+  Payments and tax are shown locked.
 
 Every save is checked, written safely and followed by a rebuild of the site,
 so the preview shows it at once. If the site would not build with a change,
@@ -184,10 +185,12 @@ ports between 4700 and 4799; 4310 is your preview.
 | `test_history.py` | History, the sentences that describe a change, and restore | `ADMIN_HISTORY_PORT` | 4781 |
 | `test_publish.py` | Review, commit and go live, against throwaway repositories with a temporary bare remote | `ADMIN_PUBLISH_PORT` | 4782 |
 | `test_bag_path.py` | The storefront's way to checkout: the panel after Add to bag on a phone and a desktop, and the bag page's checkout bar; needs Chrome | `ADMIN_BAG_PATH_PORT` | 4791 |
+| `test_signin.py` | Shopper sign-in against a stand-in for Auth0 on a phone and a desktop: the account page's panel, Sign in and Create account, refused callbacks, an expired profile, Sign out, the header and tab bar, the Settings fields, and the GitHub Pages, Netlify and bgscorner.com addresses against the lists in Auth0; needs Chrome | `ADMIN_SIGNIN_PORT` and `ADMIN_SIGNIN_OIDC_PORT` | 4792 and 4793 |
 
-The three Chrome files are skipped when Chrome is not installed. Helpers:
-`box.py` (the temporary clone and its server) and `cdp_pipe.py` (headless
-Chrome over its DevTools pipe, standard library only).
+The Chrome files and tests are skipped when Chrome is not installed.
+Helpers: `box.py` (the temporary clone and its server), `cdp_pipe.py`
+(headless Chrome over its DevTools pipe, standard library only) and
+`fake_oidc.py` (a stand-in for Auth0 on 127.0.0.1, for `test_signin.py`).
 
 ## Developer tools
 

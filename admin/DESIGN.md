@@ -174,7 +174,7 @@ As `docs/PLAN.md` security_model, items 1 to 15, all of them. In short: bind
 a per-run token in a meta tag, required as `X-Admin-Token` on every API call
 (401); the admin HTML only for top-level navigations, with COOP same-origin,
 `frame-ancestors 'none'` and a strict CSP with no inline script or style;
-storefront preview responses carry `connect-src 'none'`; JSON-only bodies
+storefront preview responses carry `connect-src 'none'`, or the shopper sign-in domain alone once Settings names one; JSON-only bodies
 (415), raw typed uploads, size caps, no chunked bodies; `safe_join` on every
 path; Pillow bomb limits and re-encoding; ffmpeg with a forced demuxer and the
 file protocol only; content validation against stored XSS (no `<` or `>` in

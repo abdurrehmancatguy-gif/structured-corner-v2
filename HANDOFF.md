@@ -169,7 +169,7 @@ One file per command, from the repo root, each on its own port:
 ADMIN_RULES_PORT=4741 /usr/bin/python3 -m unittest discover -s admin/tests -p 'test_rules.py'
 ```
 
-`admin/README.md` lists the 14 files with their port variables. Each runs on a temporary
+`admin/README.md` lists the 15 files with their port variables. Each runs on a temporary
 clone with `--no-push` and never touches `flow/content`.
 
 ### Cache-busting
@@ -220,11 +220,12 @@ in it has to be written `%%` now.
 
 ### The client - `flow/assets/shop.js`
 
-Vanilla JS, no build step, 27 self-contained `bgsRun` blocks. Each is independent; one
+Vanilla JS, no build step, 29 self-contained `bgsRun` blocks. Each is independent; one
 throwing does not kill the others. It reads content only through the window globals in
 `catalogue.js`: `bgsRule(path, fallback)` for the store rules, `bgsCopy`, `bgsCopyHtml` and
 `bgsFill` for page text, `bgsAr` for the Arabic of text written after load, `catText` for
-category text, and `BGS_AR` and `BGS_QUIZ`. Each
+category text, `bgsAuth` and `bgsProfile` for shopper sign-in (`BGS_AUTH`), and `BGS_AR` and
+`BGS_QUIZ`. Each
 fallback is the text or number the shop had before, so a missing key falls back to it. The
 list below is from before the admin and is kept for orientation. Order in file:
 
@@ -253,6 +254,11 @@ list below is from before the admin and is kept for orientation. Order in file:
     bag wider
 22. **Bag checkout bar** - on phones and short screens, the total and a Checkout while the
     summary's Checkout is out of sight (`bgs:bagchange` from the cart block)
+23. **Shopper sign-in on the account page** - the Authorization Code flow with PKCE against
+    Auth0, the account page's signed-out and signed-in states, and Sign out (see Shopper
+    sign-in below)
+24. **Who is signed in** - the header's account link and the tab bar's Account show the
+    shopper's picture or first letter and say their name (`bgs:profile` from block 23)
 
 ### The styles - `flow/assets/flow.css`
 
@@ -367,6 +373,41 @@ and COD stay locked in code: the admin refuses a change to them.
 | Volume discount | 10% at 3 items, 15% at 6; never-discounted products excluded |
 | Gift with purchase | Mystery oud, 3 ml, over AED 300 |
 | Low stock | badge at 5 or fewer |
+
+### Shopper sign-in - Auth0
+
+`settings.auth` holds the tenant's domain (`dev-i8cqekmfe57ladb2.us.auth0.com`) and the Client
+ID of its "bgs-corner" Single Page Application, both public. A SPA has no client secret and
+none is kept anywhere. The owner edits them under Settings, Shopper sign-in. `build.py` checks
+them (a host name reached over https, or `127.0.0.1:<port>` over plain http for the tests
+only) and writes them into `catalogue.js` as `BGS_AUTH`; both empty make it `null`, and no page
+shows sign-in. `shop.js` runs the Authorization Code flow with PKCE (S256) itself, with no
+library and nothing downloaded:
+
+- **Sign in and Create account**, on the account page's panel: a random `code_verifier`, its
+  SHA-256 as the `code_challenge`, a random `state` and `nonce`, kept in sessionStorage
+  (`bgs_signin`) with the `redirect_uri` and the page to go back to; then `/authorize`, with
+  `screen_hint=signup` for Create account. The `redirect_uri` is this site's account page as
+  the header's account link names it: `.../structured-corner-v2/account.html` on GitHub Pages,
+  `/account` on Netlify (its pretty URLs rewrite the links), `/account.html` elsewhere.
+- **The callback**, on the account page: the `state` must match; the code goes to
+  `/oauth/token` with the verifier and the same `redirect_uri`; the id_token's `iss`, `aud`,
+  `nonce`, `exp` and `iat` are checked, not its signature (it came straight from the token
+  endpoint over TLS). Only `{sub, name, email, picture, exp}` is kept, in localStorage
+  (`bgs_profile`); the tokens are dropped. `code` and `state` leave the address bar and the
+  shopper goes back to the page they started from. `?error=` shows a message from Pages; the
+  provider's description is never shown, since anyone can write one into a link.
+- **Signed in**: the account page shows the name, email and picture (the rest stays
+  placeholders until the database), and the header's account link and the tab bar's Account
+  say who it is. The profile holds until the id_token's `exp`, then the shopper reads as
+  signed out.
+- **Sign out**, in the account menu and, on phones, under the email: forgets the profile and
+  goes through `/v2/logout?client_id=...&returnTo=<this site's home page>`.
+
+The words are in Pages (Account, Sign-in; the signed-in label under Header and footer), with
+their Arabic. The local preview's CSP lets store pages reach the sign-in domain and nothing
+else (`admin/bgsadmin/security.py`). Saved addresses, orders and wishlists wait for the
+database and hosting.
 
 ### The admin - `admin/`
 
@@ -574,6 +615,15 @@ domain on 2026-09-10.
   and landscape rows keep out from under the notch; checked with Chrome's emulated insets,
   not yet on a real iPhone. `admin/tests/test_bag_path.py` drives it in Chrome. Checkout,
   payments, VAT, COD and the pricing formulas are untouched.
+- **2026-09-14, shopper sign-in.** Auth0, with the owner's tenant and its "bgs-corner" Single
+  Page Application: the account page opens on a sign-in panel with Sign in and Create account,
+  signs the shopper in with the Authorization Code flow and PKCE written in `shop.js`, shows
+  their name, email and picture, and signs them out through Auth0. The header's account link
+  and the phone tab bar's Account say who is signed in. Settings has the domain and Client ID;
+  both empty hide sign-in. `admin/tests/test_signin.py` drives it in Chrome against
+  `fake_oidc.py`, a stand-in provider, and checks the GitHub Pages, Netlify and bgscorner.com
+  addresses against the application's lists in Auth0 without calling it. There is no backend:
+  nothing about a shopper is kept beyond their own browser.
 
 ---
 
@@ -688,8 +738,9 @@ raw background Bash. Use the Browser pane's `preview_start` with the `bgs-flow` 
    delivery over AED 150, same-day before 2 PM, COD withheld over AED 300, "alcohol-free",
    "blended in Dubai". These are commitments, not puffery - but if any is not true yet it
    must come out, and that is a more serious kind of claim than the ones already removed.
-7. **The backend is next.** The owner's own PostgreSQL database for the admin, then Auth0
-   sign-in, then commerce (`admin/docs/PLAN.md`).
+7. **The backend is next.** The owner's own PostgreSQL database for the admin, then
+   commerce (`admin/docs/PLAN.md`). Shopper sign-in with Auth0 is in (§5, Shopper sign-in);
+   saved addresses, orders and wishlists wait for the database and hosting.
 8. **Category cards: the "3D" breakout.** Raised on 2026-09-09 with a reference:
    product cards where the cut-out product **overflows the top edge of the panel**
    and casts a soft shadow onto it, so it reads as standing in front of the card,
@@ -768,6 +819,16 @@ raw background Bash. Use the Browser pane's `preview_start` with the `bgs-flow` 
    `lint.locked_pages`). Whether they should read the rules from settings is still open.
 23. **The Collections screen has no upload for the circle picture.** It shows the picture;
    the picture is changed under Navigation or Files.
+24. **Auth0 before the shop goes live.** Checked with GET requests on 2026-09-14: `/authorize`
+   sends each listed callback to the login page and refuses an unlisted one (403), and
+   `/v2/logout` returns to listed addresses only. Still with the owner: check that the Google
+   connection uses the shop's own Google client ID and secret rather than Auth0's development
+   keys; keep the application's Token Endpoint Authentication Method at None (a SPA's
+   default: the browser exchanges the code with no secret); leave Allowed Origins (CORS)
+   empty, which allows the callback URLs' origins, or list the five site origins there;
+   point bgscorner.com and www at the host before their callbacks can be reached; phone
+   (Twilio) and Apple need no site change. How long a shopper stays signed in is the
+   application's ID token expiration.
 
 ---
 
