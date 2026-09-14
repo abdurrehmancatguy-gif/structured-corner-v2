@@ -2724,3 +2724,10 @@ code{border:1px solid var(--line)}
   .plp .side{box-shadow:none}
   body.filters-open .plp .side{box-shadow:0 0 40px rgba(52,38,11,.18)}
 }
+/* ---- room under the quiz banner --------------------------------------------
+   The banner's section had no padding under it (an inline style in build.py,
+   which no rule could reach), so the banner sat right on the section after
+   it. It is a class now, with 40px under the banner on a desktop and 30px on
+   a phone, on top of the next section's own padding. */
+.quizsec{padding-top:26px;padding-bottom:40px}
+@media (max-width:900px){ .quizsec{padding-bottom:30px} }

@@ -909,7 +909,7 @@ home = """
 </div></div>
 
 %(reels)s
-<section style="padding-top:26px;padding-bottom:0"><div class="wrap">
+<section class="quizsec"><div class="wrap">
   <div class="quizband">
     <div>
       <span class="eyebrow gold">%(qb_eyebrow)s</span>
