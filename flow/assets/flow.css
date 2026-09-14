@@ -1963,3 +1963,19 @@ footer .slot,footer .soon{color:#b9b0a4}
   .mast .wrap .acts{gap:0}
   .acts .act{min-width:40px}
 }
+/* Quiz banner in the shop's own look: the cream and gold edge of the
+   Discovery band, dark words and the dark shop button, in place of the plum
+   stripes. */
+.quizband{background:var(--gold-l);background-image:none;border:1px solid #ecdfc0;color:var(--ink)}
+.quizband h3{color:var(--ink)}
+.quizband p{color:var(--body)}
+.quizband .eyebrow{color:var(--gold-d)}
+/* The promo boxes on phones: one full-width box per row so the words have
+   room. The two-column rule for .grid.g3 came later and was winning. */
+@media (max-width:900px){
+  .grid.g3.promos{grid-template-columns:1fr;gap:12px}
+  .promo{min-height:88px;padding:14px 16px;gap:16px}
+  .promo .none{width:76px;height:60px}
+  .promo b{font-size:16px;margin-bottom:4px}
+  .promo span:not(.none){font-size:14px;line-height:1.45}
+}

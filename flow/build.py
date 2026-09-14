@@ -758,7 +758,7 @@ def hero_slides():
     return "".join(out)
 
 def reels():
-    """Portrait product films (9:16) in a row of their own under the EDP shelf.
+    """Portrait product films (9:16) in a row of their own, above the quiz banner.
        Each card shows a still first; shop.js requests the muted film only once
        the card is on screen and pauses it when it leaves, so a visitor who never
        scrolls this far downloads none of it. The list is content (home.json
@@ -869,6 +869,7 @@ home = """
   %(usp)s
 </div>
 
+%(reels)s
 <section style="padding-top:26px;padding-bottom:0"><div class="wrap">
   <div class="quizband">
     <div>
@@ -876,7 +877,7 @@ home = """
       <h3>%(qb_heading)s</h3>
       <p>%(qb_body)s</p>
     </div>
-    <a class="btn gold" href="%(qb_href)s">%(qb_cta)s</a>
+    <a class="btn solid" href="%(qb_href)s">%(qb_cta)s</a>
   </div>
 </div></section>
 
@@ -930,8 +931,7 @@ home = """
 <section><div class="wrap">
   %(edp_h)s
   <div class="grid g5">%(edp)s</div>
-</div></section>
-%(reels)s""" % dict(discovery_band(), promos=promos(), reels=reels(), catstrip=catstrip(), usp=usp_strip(),
+</div></section>""" % dict(discovery_band(), promos=promos(), reels=reels(), catstrip=catstrip(), usp=usp_strip(),
            hero=hero_slides(), hero_img=hero_images(), hero_dots=hero_dots(),
            hero_n=len(HOME["hero_slides"]),
            qb_eyebrow=COPY["quiz_banner"]["eyebrow"], qb_heading=COPY["quiz_banner"]["heading"],
