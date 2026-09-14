@@ -511,7 +511,7 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
        own from the home template; strip_here went with it."""
     return """<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="only light">
 <meta name="theme-color" content="#ffffff">
 <script>document.documentElement.className+=" js"</script>
@@ -1299,9 +1299,21 @@ COPY_JS["cart"] = {
     "line": {k: js_text("cart.line." + k) for k in ("no_image", "remove")},
     "gift_line": {"placeholder": js_text("cart.gift_line.placeholder"),
                   "meta": js_text("cart.gift_line.meta", allow=("amount",))},
-    "summary": {"free": js_text("cart.summary.free")},
+    # the summary's words shop.js writes too: the added-to-bag panel's
+    # subtotal row and Checkout button
+    "summary": {"free": js_text("cart.summary.free"), "checkout": js_text("cart.summary.checkout"),
+                "subtotal": js_text("cart.summary.subtotal")},
+    # the panel that opens after an Add on every page, and what the pressed
+    # button says for a moment
+    "added": {"title": js_text("cart.added.title"), "qty": js_text("cart.added.qty", need=("n",)),
+              "view_bag": js_text("cart.added.view_bag"), "close": js_text("cart.added.close"),
+              "button": js_text("cart.added.button")},
 }
 
+# The bar after the section is the phone checkout bar: shop.js slides it in,
+# with the summary's total and a Checkout, while the summary's own Checkout
+# (data-checkout) is out of sight. Its words are the summary's, printed here,
+# so the language toggle translates them as it does the summary's.
 cart = """
 <section><div class="wrap">
   <div class="sec-h"><h2 style="font-size:26px">%(c_title)s<span data-bagitems></span></h2><a href="%(c_cont_href)s">%(c_cont)s &rarr;</a></div>
@@ -1324,12 +1336,13 @@ cart = """
       <div class="r" style="color:var(--green)" data-tierrow><span>%(c_discount)s &middot; <b data-tierpct>%(rule_tier_pct)s</b>%%</span><span data-tieramt>&minus; AED 19.50</span></div>
       <div class="r"><span>%(c_delivery)s</span><span data-delivery style="color:var(--green)">%(c_free)s</span></div>
       <div class="r t"><span>%(c_total)s</span><span data-total>AED 825.50</span></div>
-      <a class="btn solid block" href="checkout.html" style="margin-top:12px">%(c_checkout)s</a>
+      <a class="btn solid block" href="checkout.html" data-checkout style="margin-top:12px">%(c_checkout)s</a>
       <div class="pay" data-pay style="margin-top:14px;justify-content:center"><span>Card</span><span>Apple Pay</span><span>Tabby</span><span>Tamara</span><span class="off">COD</span></div>
       <p data-codnote style="font-size:11.5px;color:var(--mut);margin:12px 0 0;text-align:center">Cash on delivery is withheld over AED 300.</p>
     </div></div>
   </div>
 </div></section>
+<div class="bagbar" data-bagbar aria-hidden="true"><div class="bb-t"><span>%(c_total)s</span><b data-bagbartotal>AED 0</b></div><a class="btn solid" href="checkout.html">%(c_checkout)s</a></div>
 """ % dict(RULE_TEXT, vat=slot("VAT registration expected ~month 9"), **CART_TEXT)
 
 # The bag and the gift box above print these rules; shop.js prices with them.

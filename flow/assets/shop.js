@@ -51,6 +51,19 @@ function bgsFill(text, vals) {
     return Object.prototype.hasOwnProperty.call(vals, k) ? String(vals[k]) : m;
   });
 }
+/* Arabic for text shop.js writes after load. The language toggle swaps what
+   is on the page when it is pressed; text written later (a pressed Add, the
+   added-to-bag panel) comes through here instead, looked up by its exact
+   English in BGS_AR as the toggle looks it up, and stays English without an
+   entry. Wrap the literal call, so admin/tests/test_pages.py still sees its
+   path: bgsAr(bgsCopy("cart.added.title", "Added to your bag")). A counted
+   text is translated as its template, then filled:
+   bgsFill(bgsAr(bgsCopy("cart.added.qty", "Qty {n}")), { n: 2 }). */
+function bgsAr(en) {
+  var d = window.BGS_AR;
+  return document.documentElement.lang === "ar" && d && typeof en === "string" &&
+    Object.prototype.hasOwnProperty.call(d, en) && typeof d[en] === "string" && d[en] !== "" ? d[en] : en;
+}
 /* Each feature below runs on its own: an error in one (bad data in storage, a
    missing element) is logged and the rest still work. As one plain script, the
    first throw stopped every feature after it, the bag included. */
@@ -1406,7 +1419,17 @@ bgsRun(function () {
     }));
 
     if (typeof window.BGS_RECALC === "function") window.BGS_RECALC();
+    /* the bag page's checkout bar copies the total recalc has just written */
+    document.dispatchEvent(new CustomEvent("bgs:bagchange"));
   }
+
+  /* The bag as it is now, for the added-to-bag panel: the lines whose product
+     the catalogue still has, with read()'s 1 to 20 clamp, and the bag lines'
+     own money format, so the panel cannot disagree with cart.html. */
+  window.BGS_BAG = {
+    lines: function () { return read().filter(function (l) { return cat(l.id); }); },
+    money: money
+  };
 
   /* add to bag, from anywhere */
   document.addEventListener("click", function (e) {
@@ -1424,9 +1447,18 @@ bgsRun(function () {
         qty = q ? parseInt(q.textContent, 10) || 1 : 1;
       }
       if (add(id, qty)) {
-        var was = btn.textContent;
-        btn.textContent = "Added";
-        setTimeout(function () { btn.textContent = was; }, 1200);
+        /* The label to go back to is kept from the first press only: a
+           second press inside the 1.2 s used to save "Added" as it, for good. */
+        if (!btn.hasAttribute("data-was")) btn.setAttribute("data-was", btn.textContent);
+        btn.textContent = bgsAr(bgsCopy("cart.added.button", "Added"));
+        clearTimeout(btn._bgsT);
+        btn._bgsT = setTimeout(function () {
+          btn.textContent = btn.getAttribute("data-was");
+          btn.removeAttribute("data-was");
+        }, 1200);
+        /* the added-to-bag panel listens in a block of its own: an error in
+           a listener stays there, and the add above has already happened */
+        document.dispatchEvent(new CustomEvent("bgs:added", { detail: { id: id, trigger: btn } }));
       }
       return;
     }
@@ -1455,6 +1487,307 @@ bgsRun(function () {
 
   paintCount();
   render();
+});
+
+/* ---------- added to bag: one panel after every Add -------------------------
+   An Add used to turn its button into "Added" for a moment and bump the
+   masthead count, which a phone has usually scrolled out of sight, and
+   nothing led on to the bag or to checkout. Every Add now opens this panel:
+   the product as the bag holds it (picture, name, size line, quantity and
+   line price), the bag's count and subtotal, View bag and Checkout. It is
+   filled from the bag after the add, with the bag page's own sums, so it
+   cannot disagree with cart.html. It names no size chip, because the bag
+   keeps none yet and charges the default (HANDOFF, open decision 15).
+
+   Up to 900px it is a sheet resting on the tab bar; wider, a card under the
+   masthead's bag, or under the category bar once the masthead has scrolled
+   away. There is one panel: an Add while it is open refreshes it. It never
+   takes focus and never closes on a timer, since it holds actions (WCAG
+   2.2.1): its cross, Escape, a click or tap anywhere else, or leaving the
+   page close it, and scrolling leaves it be. Tab from the pressed button
+   goes into it, and Tab from its cross goes on to what followed the button.
+   A screen reader hears it through a polite live region.
+
+   The bag's add handler announces an add with "bgs:added", so an error in
+   here cannot stop one. The gift box stops its cards' clicks before that
+   handler runs, so picking a slot opens nothing. */
+bgsRun(function () {
+  "use strict";
+  var BAG = window.BGS_BAG;
+  if (!BAG || document.querySelector("[data-cartlines]")) return;   // the bag page has no Add
+  var el = null, live = null, trigger = null, hideT = null, liveT = null;
+  var BAGLINK = '.mast a.act[href="cart.html"]';
+  var FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), ' +
+                  'select:not([disabled]), textarea:not([disabled]), [tabindex]';
+  function q(s) { return el.querySelector(s); }
+  function isOpen() { return !!el && !el.hidden && el.classList.contains("on"); }
+
+  function build() {
+    if (el) return;
+    el = document.createElement("section");
+    el.className = "added";
+    el.id = "bgs-added";
+    el.setAttribute("aria-labelledby", "bgs-added-h");
+    el.hidden = true;
+    /* fixed markup only: every word and all catalogue text go in with
+       textContent, in fill(). The order makes Tab run View bag, Checkout,
+       then the cross. */
+    el.innerHTML =
+      '<p class="added-hd" id="bgs-added-h"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" ' +
+      'stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span data-at></span></p>' +
+      '<div class="added-p"><a class="added-im" tabindex="-1" aria-hidden="true" href="product.html"></a>' +
+      '<div class="added-t"><span class="added-nm"></span><span class="added-meta"></span>' +
+      '<span class="added-q"></span></div><b class="added-pr"></b></div>' +
+      '<div class="added-s"><span></span><b></b></div>' +
+      '<div class="added-b"><a class="btn" href="cart.html"></a><a class="btn solid" href="checkout.html"></a></div>' +
+      '<button type="button" class="added-x"><span aria-hidden="true">&times;</span></button>';
+    live = document.createElement("div");
+    live.className = "none-visual";
+    live.setAttribute("role", "status");
+    live.setAttribute("aria-live", "polite");
+    live.setAttribute("aria-atomic", "true");
+    live.setAttribute("data-addedlive", "");
+    document.body.appendChild(el);
+    document.body.appendChild(live);
+    q(".added-x").addEventListener("click", function () { hide(); });
+  }
+
+  /* Everything from the bag after the add: n is how many of this product
+     it holds now (a second press reads Qty 2), and the line price and the
+     subtotal are the bag lines' pn times quantity. Returns the sentence the
+     live region reads. */
+  function fill(id, p) {
+    var n = 0, units = 0, sub = 0;
+    BAG.lines().forEach(function (l) {
+      units += l.qty;
+      sub += bgsProduct(l.id).pn * l.qty;
+      if (l.id === id) n = l.qty;
+    });
+    var title = bgsAr(bgsCopy("cart.added.title", "Added to your bag"));
+    var qty = bgsFill(bgsAr(bgsCopy("cart.added.qty", "Qty {n}")), { n: n });
+    var subLabel = bgsAr(bgsCopy("cart.summary.subtotal", "Subtotal"));
+    var count = bgsFill(bgsAr(units === 1 ? bgsCopy("cart.items.one", "{n} item")
+                                          : bgsCopy("cart.items.many", "{n} items")), { n: units });
+    q("[data-at]").textContent = title;
+    var im = q(".added-im");
+    im.setAttribute("href", "product.html?p=" + encodeURIComponent(id));
+    im.textContent = "";
+    if (p.images && p.images[0]) {
+      var img = document.createElement("img");
+      img.alt = "";
+      img.width = 160;
+      img.height = 160;
+      img.src = bgsImg(p.images[0], "-thumb");
+      im.appendChild(img);
+    } else {
+      var none = document.createElement("span");
+      none.className = "none";
+      none.textContent = bgsAr(bgsCopy("cart.line.no_image", "Image"));
+      im.appendChild(none);
+    }
+    q(".added-nm").textContent = p.name;
+    q(".added-meta").textContent = p.meta || "";
+    q(".added-q").textContent = qty;
+    q(".added-pr").textContent = BAG.money(p.pn * n);
+    q(".added-s span").textContent = subLabel + " · " + count;
+    q(".added-s b").textContent = BAG.money(sub);
+    q(".added-b .btn:not(.solid)").textContent = bgsAr(bgsCopy("cart.added.view_bag", "View bag"));
+    q(".added-b .btn.solid").textContent = bgsAr(bgsCopy("cart.summary.checkout", "Checkout"));
+    q(".added-x").setAttribute("aria-label", bgsAr(bgsCopy("cart.added.close", "Close")));
+    return title + ": " + p.name + ", " + qty + ". " + subLabel + " " + BAG.money(sub) + ", " + count + ".";
+  }
+
+  /* Up to 900px the sheet is all CSS. Wider, the card hangs 12px under the
+     masthead's bag, its end edge in line with the bag's and its caret at
+     the bag icon; once the masthead has scrolled away, under the category
+     bar without the caret. A card taller than the room left scrolls. */
+  function place() {
+    var s = el.style;
+    s.top = s.left = s.right = s.maxHeight = s.overflowY = "";
+    s.removeProperty("--caret");
+    el.classList.remove("anchored");
+    if (matchMedia("(max-width:900px)").matches) return;
+    var rtl = getComputedStyle(el).direction === "rtl";
+    var bag = document.querySelector(BAGLINK);
+    var r = bag && bag.getBoundingClientRect();
+    var shown = !!r && (r.width > 0 || r.height > 0);
+    var end = shown ? Math.max(16, Math.round(rtl ? r.left : document.documentElement.clientWidth - r.right)) : 16;
+    var top;
+    if (shown && r.bottom > 0) {
+      top = r.bottom + 12;
+      el.classList.add("anchored");
+    } else {
+      var nav = document.querySelector(".catnav");
+      top = (nav ? Math.max(0, nav.getBoundingClientRect().bottom) : 0) + 12;
+    }
+    top = Math.round(top);
+    s.top = top + "px";
+    s[rtl ? "left" : "right"] = end + "px";
+    if (el.classList.contains("anchored")) {
+      var ir = (bag.querySelector("svg") || bag).getBoundingClientRect(), mid = ir.left + ir.width / 2;
+      var box = el.getBoundingClientRect();
+      var caret = rtl ? mid - box.left - 6 : box.right - mid - 6;
+      s.setProperty("--caret", Math.round(Math.max(12, Math.min(box.width - 24, caret))) + "px");
+    }
+    var room = innerHeight - top - 12;
+    if (el.offsetHeight > room) {
+      s.maxHeight = Math.max(120, Math.floor(room)) + "px";
+      s.overflowY = "auto";
+      el.classList.remove("anchored");
+    }
+  }
+
+  function say(msg) {
+    clearTimeout(liveT);
+    live.textContent = "";
+    liveT = setTimeout(function () { live.textContent = msg; }, 120);
+  }
+
+  function show(d) {
+    var id = d && d.id, p = bgsProduct(id);
+    if (!p) return;
+    build();
+    var msg = fill(id, p);
+    trigger = d.trigger || null;
+    clearTimeout(hideT);
+    if (el.hidden) {
+      el.hidden = false;
+      place();
+      void el.offsetWidth;                 // one layout read, so the entrance runs from its start
+    } else {
+      place();                             // open already: refreshed, no second entrance
+    }
+    el.classList.add("on");
+    say(msg);
+  }
+
+  /* now: straight away, for pagehide. Focus inside the panel goes back to
+     the pressed button, or to the masthead's bag if that button is gone
+     (the collection redraws its cards on every filter change). */
+  function hide(now) {
+    if (!el || el.hidden) return;
+    var inside = el.contains(document.activeElement);
+    el.classList.remove("on");
+    clearTimeout(hideT);
+    if (now || matchMedia("(prefers-reduced-motion: reduce)").matches) el.hidden = true;
+    else hideT = setTimeout(function () { el.hidden = true; }, 220);
+    if (inside && !now) {
+      var back = trigger && document.contains(trigger) ? trigger : document.querySelector(BAGLINK);
+      if (back) back.focus();
+    }
+  }
+
+  /* the first visible control after the pressed button, outside the panel */
+  function nextAfter(t) {
+    if (!t || !document.contains(t)) return null;
+    var all = document.querySelectorAll(FOCUSABLE);
+    for (var i = 0; i < all.length; i++) {
+      var n = all[i];
+      if (n.tabIndex < 0 || el.contains(n) || !(t.compareDocumentPosition(n) & Node.DOCUMENT_POSITION_FOLLOWING)) continue;
+      var r = n.getBoundingClientRect();
+      if ((r.width > 0 || r.height > 0) && getComputedStyle(n).visibility !== "hidden") return n;
+    }
+    return null;
+  }
+
+  document.addEventListener("bgs:added", function (e) { show(e.detail); });
+
+  /* Capture: the bag's add handler stops the click and the gift box's stops
+     it outright, so a listener on the way back up would miss both. An Add
+     is let through, so the next one refreshes the panel instead of closing
+     and reopening it. The language toggle counts as outside. */
+  document.addEventListener("click", function (e) {
+    if (!isOpen()) return;
+    var t = e.target;
+    if (el.contains(t) || (t.closest && t.closest("[data-add]"))) return;
+    hide();
+  }, true);
+
+  /* no trap: Escape closes, and three Tab hand-offs join the panel to the
+     button that opened it; every other key is the browser's own */
+  document.addEventListener("keydown", function (e) {
+    if (!isOpen()) return;
+    if (e.key === "Escape" || e.key === "Esc") { hide(); return; }
+    if (e.key !== "Tab" || e.altKey || e.ctrlKey || e.metaKey) return;
+    var a = document.activeElement, first = q(".added-b .btn"), there = trigger && document.contains(trigger);
+    if (!e.shiftKey && there && a === trigger) {
+      e.preventDefault(); first.focus();
+    } else if (e.shiftKey && there && a === first) {
+      e.preventDefault(); trigger.focus();
+    } else if (!e.shiftKey && a === q(".added-x")) {
+      var n = nextAfter(trigger);
+      if (n) { e.preventDefault(); n.focus(); }
+    }
+  });
+
+  addEventListener("resize", function () { if (isOpen()) place(); });
+  /* a page restored from the back/forward cache opens without it */
+  addEventListener("pagehide", function () { hide(true); });
+});
+
+/* ---------- bag page: checkout bar on phones and short screens --------------
+   On a phone the summary, and its Checkout, sits under the progress bars and
+   the lines: below the fold with a single line on every phone, on a landscape
+   phone, and with a full bag on a portrait tablet. This bar holds the total
+   and a Checkout while that button is not fully in sight above the tab bar,
+   and steps aside once it is, so one Checkout is on screen at a time. It is
+   back once the summary has scrolled up out of sight, so the foot of the page
+   has a way to checkout too. The total is the summary's own text, copied
+   after each recalc: there is no second sum.
+
+   An IntersectionObserver, which the product page's sticky bar gave up on
+   (its note above), so with that bar's lessons: the first state is measured
+   outright, the observer is rebuilt when the window or the breakpoint
+   changes, and it reports at 0, 0.5 and 1, which a jumped scroll still
+   crosses. Without an observer the bar stays hidden and the summary's own
+   button is the way through. */
+bgsRun(function () {
+  "use strict";
+  var bar = document.querySelector("[data-bagbar]");
+  var link = document.querySelector("[data-checkout]");
+  var summary = document.querySelector("[data-cartsummary]");
+  if (!bar || !link || !summary || !("IntersectionObserver" in window)) return;
+  var total = bar.querySelector("[data-bagbartotal]");
+  var mq = matchMedia("(max-width:900px), (max-height:500px)");
+  var io = null, seen = false, t = null;
+
+  /* the tab bar is only there up to 900px; the fold stops at its top */
+  function tabH() {
+    var tb = document.querySelector(".tabbar");
+    return tb && getComputedStyle(tb).display !== "none" ? Math.round(tb.getBoundingClientRect().height) : 0;
+  }
+
+  /* an empty bag hides the summary, and recalc stops before the total then,
+     so the bar goes with it rather than show a stale amount */
+  function sync() {
+    var src = document.querySelector("[data-total]");
+    if (src) total.textContent = src.textContent;
+    var on = mq.matches && !summary.hidden && !seen;
+    if (bar.classList.contains("on") !== on) {
+      bar.classList.toggle("on", on);
+      bar.setAttribute("aria-hidden", on ? "false" : "true");
+    }
+  }
+
+  function watch() {
+    if (io) io.disconnect();
+    var h = tabH(), r = link.getBoundingClientRect();
+    seen = r.height > 0 && r.top >= 0 && r.bottom <= innerHeight - h;
+    io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { seen = e.isIntersecting && e.intersectionRatio > 0.98; });
+      sync();
+    }, { threshold: [0, 0.5, 1], rootMargin: "0px 0px -" + h + "px 0px" });
+    io.observe(link);
+    sync();
+  }
+
+  addEventListener("resize", function () { clearTimeout(t); t = setTimeout(watch, 150); });
+  if (mq.addEventListener) mq.addEventListener("change", watch);
+  else if (mq.addListener) mq.addListener(watch);
+  /* a quantity change, a remove, or the bag changed in another tab */
+  document.addEventListener("bgs:bagchange", sync);
+  watch();
 });
 
 /* ---------- share the product ----------------------------------------------

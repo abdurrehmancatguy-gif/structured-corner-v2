@@ -275,6 +275,13 @@
       "free": "Free",
       "total": "Total",
       "checkout": "Checkout"
+    },
+    "added": {
+      "title": "Added to your bag",
+      "qty": "Qty {n}",
+      "view_bag": "View bag",
+      "close": "Close",
+      "button": "Added"
     }
   },
   "track": {
