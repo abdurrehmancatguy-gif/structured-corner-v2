@@ -51,6 +51,19 @@ function bgsFill(text, vals) {
     return Object.prototype.hasOwnProperty.call(vals, k) ? String(vals[k]) : m;
   });
 }
+/* Arabic for text shop.js writes after load. The language toggle swaps what
+   is on the page when it is pressed; text written later (a pressed Add, the
+   added-to-bag panel) comes through here instead, looked up by its exact
+   English in BGS_AR as the toggle looks it up, and stays English without an
+   entry. Wrap the literal call, so admin/tests/test_pages.py still sees its
+   path: bgsAr(bgsCopy("cart.added.title", "Added to your bag")). A counted
+   text is translated as its template, then filled:
+   bgsFill(bgsAr(bgsCopy("cart.added.qty", "Qty {n}")), { n: 2 }). */
+function bgsAr(en) {
+  var d = window.BGS_AR;
+  return document.documentElement.lang === "ar" && d && typeof en === "string" &&
+    Object.prototype.hasOwnProperty.call(d, en) && typeof d[en] === "string" && d[en] !== "" ? d[en] : en;
+}
 /* Each feature below runs on its own: an error in one (bad data in storage, a
    missing element) is logged and the rest still work. As one plain script, the
    first throw stopped every feature after it, the bag included. */
@@ -1424,9 +1437,15 @@ bgsRun(function () {
         qty = q ? parseInt(q.textContent, 10) || 1 : 1;
       }
       if (add(id, qty)) {
-        var was = btn.textContent;
-        btn.textContent = "Added";
-        setTimeout(function () { btn.textContent = was; }, 1200);
+        /* The label to go back to is kept from the first press only: a
+           second press inside the 1.2 s used to save "Added" as it, for good. */
+        if (!btn.hasAttribute("data-was")) btn.setAttribute("data-was", btn.textContent);
+        btn.textContent = bgsAr(bgsCopy("cart.added.button", "Added"));
+        clearTimeout(btn._bgsT);
+        btn._bgsT = setTimeout(function () {
+          btn.textContent = btn.getAttribute("data-was");
+          btn.removeAttribute("data-was");
+        }, 1200);
       }
       return;
     }

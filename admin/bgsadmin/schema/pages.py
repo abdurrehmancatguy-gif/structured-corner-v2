@@ -390,6 +390,8 @@ _BAG = [
          help="For free delivery, and for a bag line that costs nothing, such as the free gift."),
     text("/cart/summary/total", "Total row", BAG, 20, section="Summary"),
     text("/cart/summary/checkout", "Checkout button", BAG, 30, section="Summary"),
+    text("/cart/added/button", "Add button, just pressed", BAG, 20, section="Added to bag panel",
+         help="What an Add to bag button says for a moment after it is pressed."),
 ]
 
 # ---- track order ------------------------------------------------------------------

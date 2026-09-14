@@ -275,6 +275,9 @@
       "free": "Free",
       "total": "Total",
       "checkout": "Checkout"
+    },
+    "added": {
+      "button": "Added"
     }
   },
   "track": {

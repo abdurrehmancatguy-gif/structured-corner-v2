@@ -1300,6 +1300,8 @@ COPY_JS["cart"] = {
     "gift_line": {"placeholder": js_text("cart.gift_line.placeholder"),
                   "meta": js_text("cart.gift_line.meta", allow=("amount",))},
     "summary": {"free": js_text("cart.summary.free")},
+    # what an Add to bag button says for a moment after it is pressed, on every page
+    "added": {"button": js_text("cart.added.button")},
 }
 
 cart = """
