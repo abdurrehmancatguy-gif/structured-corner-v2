@@ -218,6 +218,26 @@ class PhoneLayout(unittest.TestCase):
                 self.assertEqual(r["statusLines"], 1, r)
         self.no_page_errors()
 
+    # ---- the phone masthead ------------------------------------------------------
+    MAST = """(() => { const acts = [...document.querySelectorAll('.mast .acts .act')].filter((a) => a.getBoundingClientRect().width > 0)
+        .map((a) => { const r = a.getBoundingClientRect(); return [r.width, r.height, r.left, r.right]; });
+      const img = document.querySelector('.mast .logo .brandmark'), r = img.getBoundingClientRect();
+      return {acts, logo: [r.left, r.right, r.width / r.height, img.naturalWidth / img.naturalHeight],
+              wide: document.documentElement.scrollWidth}; })()"""
+
+    def test_the_masthead_icons_are_44px_at_every_phone_width(self):
+        for w, h in ((280, 653), (320, 568), (340, 720), (360, 640)):
+            self.view(w, h)
+            self.open("index.html")
+            m = self.js(self.MAST)
+            self.assertEqual(len(m["acts"]), 3, "search, wishlist and bag at %d" % w)
+            for a in m["acts"]:
+                self.assertGreaterEqual(min(a[0], a[1]), 44, "%d: %s" % (w, m["acts"]))
+            self.assertLessEqual(m["logo"][1], m["acts"][0][2] + 0.5, "the logo stays clear of the icons at %d" % w)
+            self.assertAlmostEqual(m["logo"][2], m["logo"][3], delta=0.1, msg="the logo keeps its shape at %d" % w)
+            self.assertLessEqual(m["wide"], w, "no sideways scrolling at %d" % w)
+        self.no_page_errors()
+
 
 if __name__ == "__main__":
     unittest.main()

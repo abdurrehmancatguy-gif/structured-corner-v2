@@ -2427,6 +2427,18 @@ h2.pagetitle,.sec-h h2.pagetitle{font-size:26px}
    status keeps one line and at least 10px from the label, which wraps. */
 .prog .lb{column-gap:10px}
 .prog .lb > :last-child{flex:none;white-space:nowrap}
+
+/* ---- the phone masthead's icons: 44px at every width -----------------------
+   Under 341px search, wishlist and bag were 40px wide, under the 44px every
+   other touch target has, since the logo, three 44px icons and the
+   masthead's padding did not fit. The masthead gives up 4px of side padding
+   and its gap instead, and the logo takes what the icons leave, at its own
+   shape: all of its 162px at 320, 122px on the fold cover. */
+@media (max-width:340px){
+  .mast .wrap{padding-left:10px;padding-right:10px;gap:6px}
+  .acts .act{min-width:44px}
+  .logo .brandmark{height:auto;width:auto;max-height:26px;max-width:calc(100vw - 158px)}
+}
 /* Two size chips side by side on a card broke "3 ml · AED 45" over two to
    four lines on the touch screens above 900px (the big landscape phones and
    the tablets). They stack there as they do on a phone, each on one line. */
