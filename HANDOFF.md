@@ -63,9 +63,10 @@ structured-corner-v2/
 │   ├── ui/                 app.js (navigation and router), lib/, components/ (crop tool,
 │   │                       photo grid, upload fields), screens/ (one module per screen),
 │   │                       css/ (one stylesheet per screen that needs its own)
-│   ├── tests/              13 test files, one port each, plus box.py and cdp_pipe.py
+│   ├── tests/              14 test files, one port each, plus box.py and cdp_pipe.py
 │   └── devtools/           compare_build.py and dom_diff.py: prove a content move left
-│                           the pages as they were
+│                           the pages as they were; viewport_audit.py: every page state
+│                           at 28 screen sizes in headless Chrome
 └── flow/                   ←←← THE SITE. Its HTML, favicon.ico, robots.txt and assets/ are published.
     ├── build.py            the generator. Run it to rebuild every page.
     ├── server.py           a two-line launcher for admin/server.py (python3 flow/server.py 4310)
@@ -574,6 +575,35 @@ domain on 2026-09-10.
   and landscape rows keep out from under the notch; checked with Chrome's emulated insets,
   not yet on a real iPhone. `admin/tests/test_bag_path.py` drives it in Chrome. Checkout,
   payments, VAT, COD and the pricing formulas are untouched.
+- **2026-09-14, phones at every size.** The owner found the text too small on a phone.
+  Measured first with a new tool, `admin/devtools/viewport_audit.py`: 28 screen sizes (the
+  fold closed and open, portrait and landscape phones, tablets, desktops, ultrawide) and 29
+  page states, with phones and tablets emulated as touch screens. Before, every phone and
+  tablet had text under 12px (8.5px badges, 9px card meta lines, 9.5px labels), the fold
+  cover (280px) scrolled sideways and pushed the tab bar under the screen, Arabic could not
+  be switched on below 900px, and in Arabic "3 ml · AED 45" read "ml · AED 45 3". The
+  drawer button read "Show33products", touch targets were 18 to 40px, and on a landscape
+  phone the header took half the screen. Now:
+  - build.py's 34 inline font sizes are classes (`pagetitle`, `intro`, `subhead`, `codnote`
+    and so on) carrying the same values, so a phone rule can reach them. Desktop computed
+    styles were compared element by element before and after: unchanged.
+  - One phone type scale up to 900px, in a commented block at the end of `flow.css`: 16px
+    body copy, product names, card and bag prices and every field (iOS no longer zooms
+    into search), 14px secondary text, 15px buttons, 12px labels as the floor, 22px section
+    headings and 26px page and product titles. Card size chips stay 12px and stack; the
+    category pills are 13px (12px at 370 and below). Wide touch screens get the 12px floor
+    and 16px fields; a desktop with a mouse is unchanged.
+  - Touch targets are 44px on touch screens. The tab bar is 45px there, and the sticky buy
+    bar, the added-to-bag sheet and the bag's checkout bar rest on it.
+  - Short landscape screens get a one-line strip, a slimmer masthead and the category bar
+    as one scrolling row that does not stick; the 915 and 932 wide phones, which get the
+    desktop layout, get the product page's buy bar.
+  - Arabic: the toggle stays in the strip on phones, English runs with numbers keep their
+    own order, and the "more" arrows turn to point left.
+  - The final audit, all 734 jobs: no text under 12px on phones and tablets, no sideways
+    scrolling, no primary action covered, the bag's Checkout and Add to bag in reach at
+    every size, and no script errors. Checkout, payments, VAT, COD and the pricing formulas
+    are untouched.
 
 ---
 
@@ -664,6 +694,14 @@ raw background Bash. Use the Browser pane's `preview_start` with the `bgs-flow` 
   appending; the Publish screen showed "null" on an empty card until it did.
 - **Key presses in the hidden Browser pane arrive with an empty key.** Keyboard checks there
   prove nothing; drive keys through headless Chrome (`admin/tests/cdp_pipe.py`) instead.
+- **An inline style in build.py outranks every rule in `flow.css`.** The phone type scale
+  could not reach 34 sizes build.py wrote inline until they became classes. Give a size a
+  class, not a `style` attribute.
+- **The tab bar is 45px on touch screens and 39px with a mouse.** The sticky buy bar, the
+  added-to-bag sheet and the bag's checkout bar sit at `calc(45px + env(safe-area-inset-bottom))`
+  in the `(pointer:coarse) and (max-width:900px)` block; change the four together.
+- **`viewport_audit.py run` works in batches.** Repeat the same command until it exits 0;
+  use a fresh `--out` directory for each audit, or `--redo` to run a selection again.
 
 ---
 
@@ -768,6 +806,20 @@ raw background Bash. Use the Browser pane's `preview_start` with the `bgs-flow` 
    `lint.locked_pages`). Whether they should read the rules from settings is still open.
 23. **The Collections screen has no upload for the circle picture.** It shows the picture;
    the picture is changed under Navigation or Files.
+24. **Desktop labels stay 9 to 10px.** Eyebrows, the card meta line and the badges are as they
+   were with a mouse; only touch screens got the 12px floor. Raise them on desktop too?
+25. **The category pills are 24px tall on phones**, under the 44px the other controls have: at
+   44px the bar's two rows would cost 40px of every first screen and of the screen once
+   scrolled, where the bar sticks.
+26. **Some pictures are drawn larger than their files** on 3x screens: the logo on the big
+   landscape phones (a 486px file), the phone banner on landscape phones (1110px) and bag
+   thumbnails (160px) on wide touch screens. Larger copies from `tools/make_derivatives.py`
+   would fix it.
+27. **English left in Arabic mode.** About 170 pieces of text (hero, strip, headings, bag
+   lines) stay English in Arabic; their Arabic has to come from the owner, in Translations.
+   They now read in the right order.
+28. **The home page's second row of category circles** is no longer on the first screen at
+   375x812: the larger hero text took the room.
 
 ---
 
