@@ -2129,7 +2129,14 @@ bgsRun(function () {
 bgsRun(function () {
   "use strict";
   var auth = bgsAuth(), panel = document.querySelector("[data-signin]");
-  if (!auth || !panel) return;
+  if (!panel) return;
+  if (!auth) {
+    /* a page built for sign-in beside a catalogue without usable settings
+       for it: the account shows as it does on a shop without sign-in */
+    panel.hidden = true;
+    document.querySelectorAll("[data-acctview]").forEach(function (v) { v.hidden = false; });
+    return;
+  }
   var KEY = "bgs_signin";
   var msg = panel.querySelector("[data-signinmsg]");
   var buttons = panel.querySelectorAll("[data-signin-go]");
