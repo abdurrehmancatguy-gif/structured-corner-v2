@@ -54,6 +54,7 @@
     "Sign-in was cancelled or not allowed. You can try again.": "أُلغي تسجيل الدخول أو لم يُسمح به. يمكنك المحاولة مرة أخرى.",
     "We could not sign you in. Please try again.": "تعذّر تسجيل دخولك. يُرجى المحاولة مرة أخرى.",
     "Sign-in could not start in this browser.": "تعذّر بدء تسجيل الدخول في هذا المتصفح.",
-    "Account, signed in as {name}": "الحساب، تم تسجيل الدخول باسم {name}"
+    "Account, signed in as {name}": "الحساب، تم تسجيل الدخول باسم {name}",
+    "Exclusive BGS creations": "إبداعات BGS الحصرية"
   }
 }
