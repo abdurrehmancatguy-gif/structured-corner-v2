@@ -2418,6 +2418,15 @@ h2.pagetitle,.sec-h h2.pagetitle{font-size:26px}
      three" onto two lines; the button keeps its width and the words wrap */
   .band .btn{flex-shrink:0}
 }
+
+/* ---- the bag's progress rows: a gap between the label and its status -------
+   Each row is a label and its status ("Unlocked", "AED 75 to go", "5 of 6")
+   pushed apart on one flex line, with nothing between them. Once the
+   phone's larger type wrapped the label, the two met: "Free UAE delivery
+   overUnlocked" at 280, and in Arabic "Unlocked" ran into the amount. The
+   status keeps one line and at least 10px from the label, which wraps. */
+.prog .lb{column-gap:10px}
+.prog .lb > :last-child{flex:none;white-space:nowrap}
 /* Two size chips side by side on a card broke "3 ml · AED 45" over two to
    four lines on the touch screens above 900px (the big landscape phones and
    the tablets). They stack there as they do on a phone, each on one line. */

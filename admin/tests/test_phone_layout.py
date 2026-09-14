@@ -189,6 +189,35 @@ class PhoneLayout(unittest.TestCase):
             self.assertTrue(t["word"][1] < t["dot"][0] < t["dot"][1] < t["count"][0], "title, dot, count: %s" % t)
         self.no_page_errors()
 
+    # ---- the bag's progress rows ---------------------------------------------------
+    PROG = """(() => [...document.querySelectorAll('[data-cartprogress] .lb')].map((lb) => {
+      const a = lb.firstElementChild, b = lb.lastElementChild;
+      const rects = (e) => { const r = document.createRange(); r.selectNodeContents(e); return [...r.getClientRects()].filter((q) => q.width >= 1); };
+      let gap = null;
+      for (const x of rects(a)) for (const y of rects(b)) {
+        if (Math.min(x.bottom, y.bottom) - Math.max(x.top, y.top) < 2) continue;
+        const g = Math.max(y.left - x.right, x.left - y.right);
+        if (gap === null || g < gap) gap = g;
+      }
+      const tops = rects(b).map((q) => Math.round(q.top));
+      return {label: a.textContent.trim(), status: b.textContent.trim(), gap, statusLines: new Set(tops).size};
+    }))()"""
+
+    def test_the_bag_progress_rows_keep_their_label_and_status_apart(self):
+        for w, h, ar, bag in ((280, 653, False, FIVE), (280, 653, False, [{"id": "royal-amber", "qty": 1}]),
+                              (320, 568, True, FIVE), (390, 844, False, FIVE)):
+            self.view(w, h)
+            self.open("cart.html", bag=bag)
+            if ar:
+                self.js("document.querySelector('[data-langtoggle]').click()")
+            rows = self.js(self.PROG)
+            self.assertEqual(len(rows), 3)
+            for r in rows:
+                if r["gap"] is not None:      # side by side on a line they share
+                    self.assertGreaterEqual(r["gap"], 8, "%dx%d%s: %s" % (w, h, " ar" if ar else "", r))
+                self.assertEqual(r["statusLines"], 1, r)
+        self.no_page_errors()
+
 
 if __name__ == "__main__":
     unittest.main()
