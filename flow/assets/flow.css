@@ -2243,3 +2243,46 @@ h2.pagetitle,.sec-h h2.pagetitle{font-size:26px}
   .p .sizes{flex-direction:column}
   .sum .r > span:last-child{white-space:nowrap}
 }
+
+/* ---- touch targets: 44px where a finger has to land ---------------------
+   On a touch screen the bag icon was 18px square on tablets, footer links
+   21px tall, Remove 18px, Clear all 15px, the steppers, hearts, size chips,
+   card buttons and pills 28 to 40px, and the tab bar's icons 38px. Controls
+   in a row of text (a section's "All 13 →", Remove, Clear all, the strip's
+   links) keep their look and get the room from an ::after around them; the
+   rest grow to 44px. A mouse keeps the desktop sizes.
+
+   The one exception is the category bar's pills, 24px tall, the minimum
+   target size: at 44px its two rows would cost 40px of every first screen
+   and of the screen once scrolled, where the bar sticks.
+
+   The tab bar grows from 39px to 45px (44 and its border), so what rests on
+   it moves up with it: the sticky buy bar, the added-to-bag sheet and the
+   bag's checkout bar, each with the home indicator's inset as before. */
+@media (pointer:coarse){
+  .logo{min-height:44px}
+  .act{min-width:44px;min-height:44px;justify-content:center}
+  footer a,footer .soon{display:block;padding:11px 0;margin:0}
+  .sec-h a,.line .lrem,.linkbtn,.strip .r a{position:relative}
+  .sec-h a::after,.linkbtn::after,.strip .r a::after{content:"";position:absolute;inset:-12px -8px}
+  .line .lrem{margin-top:12px}
+  .line .lrem::after{content:"";position:absolute;inset:-12px -8px}
+  .stepper button{width:44px;height:44px}
+  .sizes button,.btn.sm,.p .btn.sm,.pill,.filterbtn,.search,.consent,.fbox label,.acctnav a,.sel select{min-height:44px}
+  .heart,.p .ph .heart{width:44px;height:44px}
+  .tabs2 span,.tabs2 button{padding-top:14px;padding-bottom:14px}
+}
+@media (pointer:coarse) and (max-width:900px){
+  .tabbar a{padding-top:11px;padding-bottom:12px}
+  .stickybuy{bottom:calc(45px + env(safe-area-inset-bottom,0px))}
+  .stickybuy.hidden{transform:translateY(calc(100% + 46px + env(safe-area-inset-bottom,0px)))}
+  .added{bottom:calc(45px + env(safe-area-inset-bottom,0px))}
+  .bagbar{bottom:calc(45px + env(safe-area-inset-bottom,0px))}
+  body{padding-bottom:calc(70px + env(safe-area-inset-bottom,0px))}
+  body.has-sticky{padding-bottom:calc(130px + env(safe-area-inset-bottom,0px))}
+}
+/* the quantity box gives up its middle, not its buttons, where the row is
+   tight: beside Add to bag under 360, and in a bag line on the fold cover,
+   whose picture gives up 10px as well */
+@media (pointer:coarse) and (max-width:359px){ .stepper i{width:28px} }
+@media (pointer:coarse) and (max-width:300px){ .line{grid-template-columns:52px minmax(0,1fr) auto} }
