@@ -2012,3 +2012,22 @@ footer .slot,footer .soon{color:#b9b0a4}
  .added-x{top:50%;transform:translateY(-50%)}
 }
 @media (prefers-reduced-motion:reduce){ .added,.added.on{transition:none;transform:none} }
+/* ---- bag page: Checkout stays in reach on phones and short screens --------
+   The summary, and its Checkout, sits under the progress bars and the lines,
+   below the fold on a phone even with one line. shop.js "bag page: checkout
+   bar" slides this bar in, with the total and a Checkout, while that button
+   is not fully in sight, and away once it is. It rests on the tab bar up to
+   900px and on the bottom edge of a short landscape screen wider than that.
+   z-index 19, under the tab bar's 20, so it slides out behind it; hidden, it
+   is also visibility hidden, which takes its link out of the tab order. */
+.bagbar{display:none}
+@media (max-width:900px),(max-height:500px){
+ .bagbar{display:flex;align-items:center;gap:14px;position:fixed;left:0;right:0;z-index:19;bottom:env(safe-area-inset-bottom,0px);padding:10px max(16px,calc((100% - 560px) / 2));background:var(--bg);border-top:1px solid var(--line);border-radius:var(--r) var(--r) 0 0;box-shadow:0 -8px 24px rgba(23,19,16,.10);transform:translateY(calc(100% + 40px));visibility:hidden;transition:transform .2s ease,visibility 0s linear .2s}
+ .bagbar.on{transform:none;visibility:visible;transition:transform .2s ease,visibility 0s}
+ .bagbar .bb-t{flex:1 1 auto;min-width:0;display:flex;flex-direction:column}
+ .bagbar .bb-t span{font-size:13px;line-height:1.2;color:var(--mut)}
+ .bagbar .bb-t b{font-size:18px;line-height:1.25;font-weight:700;white-space:nowrap}
+ .bagbar .btn{flex:0 0 auto;min-width:46%;min-height:48px;padding:0 20px;font-size:15px}
+}
+@media (max-width:900px){ .bagbar{bottom:calc(39px + env(safe-area-inset-bottom,0px))} }
+@media (prefers-reduced-motion:reduce){ .bagbar,.bagbar.on{transition:none} }

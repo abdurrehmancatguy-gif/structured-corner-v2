@@ -29,8 +29,8 @@ GROUPS = [
     {"key": "gift-box", "label": GIFT_BOX, "page": "gift-box.html",
      "about": "The gift box builder: its heading, slots, summary and gift options. The box fee and its discount are under Discounts."},
     {"key": "bag", "label": BAG, "page": "cart.html",
-     "about": "The bag page: its progress bars, lines, empty state and summary, and the panel that opens "
-              "after Add to bag on every page. "
+     "about": "The bag page: its progress bars, lines, empty state and summary, the checkout bar on phones, "
+              "and the panel that opens after Add to bag on every page. "
               "The payment chips and the cash on delivery note belong to checkout and stay in code."},
     {"key": "track-order", "label": TRACK, "page": "track-order.html",
      "about": "The order tracking page and the replies its button gives."},
@@ -390,9 +390,11 @@ _BAG = [
     text("/cart/summary/delivery", "Delivery row", BAG, 20, section="Summary"),
     text("/cart/summary/free", "Free", BAG, 20, section="Summary",
          help="For free delivery, and for a bag line that costs nothing, such as the free gift."),
-    text("/cart/summary/total", "Total row", BAG, 20, section="Summary"),
+    text("/cart/summary/total", "Total row", BAG, 20, section="Summary",
+         help="Also beside the total on the checkout bar a phone shows at the foot of the bag page."),
     text("/cart/summary/checkout", "Checkout button", BAG, 30, section="Summary",
-         help="Also the Checkout button of the panel that opens after Add to bag."),
+         help="Also the Checkout button of the panel that opens after Add to bag, and of the checkout bar "
+              "a phone shows at the foot of the bag page."),
     text("/cart/added/title", "Heading", BAG, 40, section="Added to bag panel",
          help="Opens after Add to bag on any page, with the product, the bag count and subtotal, a View bag "
               "button and the Summary Checkout button."),

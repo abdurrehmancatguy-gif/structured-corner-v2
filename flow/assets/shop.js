@@ -1419,6 +1419,8 @@ bgsRun(function () {
     }));
 
     if (typeof window.BGS_RECALC === "function") window.BGS_RECALC();
+    /* the bag page's checkout bar copies the total recalc has just written */
+    document.dispatchEvent(new CustomEvent("bgs:bagchange"));
   }
 
   /* The bag as it is now, for the added-to-bag panel: the lines whose product
@@ -1722,6 +1724,70 @@ bgsRun(function () {
   addEventListener("resize", function () { if (isOpen()) place(); });
   /* a page restored from the back/forward cache opens without it */
   addEventListener("pagehide", function () { hide(true); });
+});
+
+/* ---------- bag page: checkout bar on phones and short screens --------------
+   On a phone the summary, and its Checkout, sits under the progress bars and
+   the lines: below the fold with a single line on every phone, on a landscape
+   phone, and with a full bag on a portrait tablet. This bar holds the total
+   and a Checkout while that button is not fully in sight above the tab bar,
+   and steps aside once it is, so one Checkout is on screen at a time. It is
+   back once the summary has scrolled up out of sight, so the foot of the page
+   has a way to checkout too. The total is the summary's own text, copied
+   after each recalc: there is no second sum.
+
+   An IntersectionObserver, which the product page's sticky bar gave up on
+   (its note above), so with that bar's lessons: the first state is measured
+   outright, the observer is rebuilt when the window or the breakpoint
+   changes, and it reports at 0, 0.5 and 1, which a jumped scroll still
+   crosses. Without an observer the bar stays hidden and the summary's own
+   button is the way through. */
+bgsRun(function () {
+  "use strict";
+  var bar = document.querySelector("[data-bagbar]");
+  var link = document.querySelector("[data-checkout]");
+  var summary = document.querySelector("[data-cartsummary]");
+  if (!bar || !link || !summary || !("IntersectionObserver" in window)) return;
+  var total = bar.querySelector("[data-bagbartotal]");
+  var mq = matchMedia("(max-width:900px), (max-height:500px)");
+  var io = null, seen = false, t = null;
+
+  /* the tab bar is only there up to 900px; the fold stops at its top */
+  function tabH() {
+    var tb = document.querySelector(".tabbar");
+    return tb && getComputedStyle(tb).display !== "none" ? Math.round(tb.getBoundingClientRect().height) : 0;
+  }
+
+  /* an empty bag hides the summary, and recalc stops before the total then,
+     so the bar goes with it rather than show a stale amount */
+  function sync() {
+    var src = document.querySelector("[data-total]");
+    if (src) total.textContent = src.textContent;
+    var on = mq.matches && !summary.hidden && !seen;
+    if (bar.classList.contains("on") !== on) {
+      bar.classList.toggle("on", on);
+      bar.setAttribute("aria-hidden", on ? "false" : "true");
+    }
+  }
+
+  function watch() {
+    if (io) io.disconnect();
+    var h = tabH(), r = link.getBoundingClientRect();
+    seen = r.height > 0 && r.top >= 0 && r.bottom <= innerHeight - h;
+    io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { seen = e.isIntersecting && e.intersectionRatio > 0.98; });
+      sync();
+    }, { threshold: [0, 0.5, 1], rootMargin: "0px 0px -" + h + "px 0px" });
+    io.observe(link);
+    sync();
+  }
+
+  addEventListener("resize", function () { clearTimeout(t); t = setTimeout(watch, 150); });
+  if (mq.addEventListener) mq.addEventListener("change", watch);
+  else if (mq.addListener) mq.addListener(watch);
+  /* a quantity change, a remove, or the bag changed in another tab */
+  document.addEventListener("bgs:bagchange", sync);
+  watch();
 });
 
 /* ---------- share the product ----------------------------------------------
