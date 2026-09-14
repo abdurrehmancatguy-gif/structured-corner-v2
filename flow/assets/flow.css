@@ -2618,3 +2618,10 @@ h2.pagetitle,.sec-h h2.pagetitle{font-size:26px}
 .cs a span:not(.circle){color:#fff}
 .cs a.pop .circle img{filter:none}
 .cs a:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:var(--r-sm)}
+/* ---- the quiz banner's button: bluish purple ---------------------------------
+   "Test your scent" is the one call on the page in a colour of its own:
+   #5B4FD9 with white words (5.9:1), a shade darker on hover (#4A3FC4,
+   7.5:1), and a ring of the same purple around it for the keyboard. */
+.quizband .btn,.quizband .btn.solid{background:#5B4FD9;border-color:#5B4FD9;color:#fff}
+.quizband .btn:hover,.quizband .btn.solid:hover{background:#4A3FC4;border-color:#4A3FC4;color:#fff}
+.quizband .btn:focus-visible{outline:2px solid #5B4FD9;outline-offset:3px}
