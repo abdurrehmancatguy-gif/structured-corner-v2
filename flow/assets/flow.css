@@ -2463,6 +2463,15 @@ h2.pagetitle,.sec-h h2.pagetitle{font-size:26px}
 @media (max-width:900px){
   .stickybuy span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 }
+
+/* ---- the bag's checkout bar with a reader's larger text ---------------------
+   The total held one line beside Checkout. With a phone's text at 200% it
+   needed 195px in a 164px box and ran on under the button. It wraps
+   instead, the amount under its currency where it has to, and the bar
+   grows; at the usual sizes it still fits one line and nothing moves. */
+@media (max-width:900px),(max-height:500px){
+  .bagbar .bb-t b{white-space:normal;overflow-wrap:anywhere}
+}
 /* Two size chips side by side on a card broke "3 ml · AED 45" over two to
    four lines on the touch screens above 900px (the big landscape phones and
    the tablets). They stack there as they do on a phone, each on one line. */

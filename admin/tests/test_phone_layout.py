@@ -288,6 +288,30 @@ class PhoneLayout(unittest.TestCase):
       const a = d.querySelector('.count').getBoundingClientRect(), b = d.querySelector('.sel').getBoundingClientRect();
       return {oneLine: b.top < a.bottom && a.top < b.bottom, right: Math.max(a.right, b.right)}; })()"""
 
+    BAGBAR = """(() => { const b = document.querySelector('[data-bagbar]'), t = b.querySelector('.bb-t b'), a = b.querySelector('.btn');
+      const r = document.createRange(); r.selectNodeContents(t);
+      const q = [...r.getClientRects()].filter((x) => x.width >= 1);
+      return {on: b.classList.contains('on'), textRight: Math.max(...q.map((x) => x.right)), lines: new Set(q.map((x) => Math.round(x.top))).size,
+              btnLeft: a.getBoundingClientRect().left, spill: t.scrollWidth - t.clientWidth}; })()"""
+
+    def test_the_bag_bar_total_stays_clear_of_checkout_at_200_percent_text(self):
+        self.view(390, 844)
+        self.open("cart.html", bag=FIVE)
+        self.c.wait("document.querySelector('[data-bagbar]').classList.contains('on')", 5, what="the bag's bar")
+        s = self.js(self.BAGBAR)
+        self.assertEqual(s["lines"], 1, "one line at the usual size: %s" % s)
+        sid = self.big_text()
+        try:
+            self.open("cart.html")
+            self.c.wait("document.querySelector('[data-bagbar]').classList.contains('on')", 5, what="the bag's bar")
+            self.assertEqual(self.js("getComputedStyle(document.body).fontSize"), "32px", "the text is at 200%")
+            s = self.js(self.BAGBAR)
+            self.assertLessEqual(s["spill"], 0, "the total stays in its box: %s" % s)
+            self.assertLess(s["textRight"], s["btnLeft"], "the total ends before Checkout starts: %s" % s)
+        finally:
+            self.c.call("Page.removeScriptToEvaluateOnNewDocument", {"identifier": sid})
+        self.no_page_errors()
+
     def test_the_collection_fits_a_phone_at_200_percent_text(self):
         self.view(390, 844)
         self.open("collection.html")
