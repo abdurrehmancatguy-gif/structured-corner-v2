@@ -44,6 +44,16 @@
     "Close": "إغلاق",
     "{n} item": "عدد القطع: {n}",
     "{n} items": "عدد القطع: {n}",
-    "Image": "صورة"
+    "Image": "صورة",
+    "Sign in to your account": "سجّل الدخول إلى حسابك",
+    "Sign in or create an account with your email address or your Google account.": "سجّل الدخول أو أنشئ حسابًا باستخدام بريدك الإلكتروني أو حسابك في Google.",
+    "Sign in": "تسجيل الدخول",
+    "Create account": "إنشاء حساب",
+    "Sign out": "تسجيل الخروج",
+    "Signing you in…": "جارٍ تسجيل دخولك…",
+    "Sign-in was cancelled or not allowed. You can try again.": "أُلغي تسجيل الدخول أو لم يُسمح به. يمكنك المحاولة مرة أخرى.",
+    "We could not sign you in. Please try again.": "تعذّر تسجيل دخولك. يُرجى المحاولة مرة أخرى.",
+    "Sign-in could not start in this browser.": "تعذّر بدء تسجيل الدخول في هذا المتصفح.",
+    "Account, signed in as {name}": "الحساب، تم تسجيل الدخول باسم {name}"
   }
 }

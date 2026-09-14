@@ -225,7 +225,7 @@ Without these measures, storefront JS could fetch /admin, read the token and dri
 (b) The admin page carries Cross-Origin-Opener-Policy: same-origin and storefront pages do not. A window the storefront opens onto /admin lands in a separate browsing context group and its handle is severed, because COOP matches policy as well as origin.
 (c) frame-ancestors 'none' and X-Frame-Options: DENY on the admin.
 (d) The admin opens the store with target=_blank rel='noopener noreferrer' and never sets window.name. Its inline device preview is an iframe with sandbox='allow-scripts' and no allow-same-origin, so the framed store runs in an opaque origin and cannot reach window.parent. The bag and wishlist do not persist inside it, by design; the full-fidelity preview is the new tab.
-(e) Storefront responses from this server carry Content-Security-Policy: connect-src 'none'. shop.js makes no fetch, XHR or beacon calls today (verified), so even a leaked token could not be replayed from a storefront page. If the store ever needs network calls, this preview-only policy is widened on purpose.
+(e) Storefront responses from this server carry Content-Security-Policy: connect-src 'none', or, once settings.json "auth" names a shopper sign-in domain, connect-src with that origin alone (widened on purpose on 2026-09-14): the account page posts a sign-in's code to its token endpoint, and that is the only call shop.js makes. A store page still cannot reach the admin API on this origin, so even a leaked token could not be replayed from it.
 (f) Third-party scripts such as analytics pixels stay out of the local preview until the admin moves to its own origin with login.
 
 6. REQUEST HYGIENE

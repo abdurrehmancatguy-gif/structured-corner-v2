@@ -380,6 +380,9 @@ SHELL_TEXT = {
 CRUMB_HOME = page_text("shell.crumb_home")
 COPY_JS["title_suffix"] = raw_text("seo.default_title_suffix", doc="settings")
 COPY_JS["crumb_home"] = js_text("shell.crumb_home")
+# Once a shopper is signed in, the header's account link and the phone tab
+# bar's Account say who it is: shop.js fills {name} into this label.
+COPY_JS["shell"] = {"header": {"signed_in": js_text("shell.header.signed_in", need=("name",))}}
 
 def tab_link(label, href, icon, on):
     """One tab-bar entry, drawn as its icon. The label stays as the accessible
@@ -499,6 +502,43 @@ def catstrip():
 # content lets the admin edit it; build.py itself prints no Arabic.
 TRANSLATIONS = json.loads((CONTENT_DIR / "translations.json").read_text(encoding="utf-8"))
 EXTRA_GLOBALS.append(("BGS_AR", lambda: TRANSLATIONS.get("ar", {})))
+
+# ---------------------------------------------------------------- sign-in
+# Shoppers sign in with Auth0: settings.json "auth" names the tenant's domain
+# and the Client ID of its Single Page Application, and catalogue.js carries
+# both to shop.js as window.BGS_AUTH, which runs the Authorization Code flow
+# with PKCE in the browser. Both are public; such an application has no
+# client secret, and none is ever kept here. With both empty BGS_AUTH is
+# null and no page shows sign-in. The domain is a host name the shop reaches
+# over https. 127.0.0.1 with a port is read too, over plain http, so the
+# admin's tests can stand a local provider in (the admin's field refuses
+# it). Anything else, one value without the other included, stops the build
+# rather than send shoppers somewhere unexpected.
+AUTH_DOMAIN = re.compile(r"(?=.{4,100}$)(?:[a-z0-9](?:[a-z0-9\-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}")
+AUTH_TEST_DOMAIN = re.compile(r"127\.0\.0\.1:[1-9][0-9]{0,4}")
+AUTH_CLIENT_ID = re.compile(r"[A-Za-z0-9]{20,40}")
+
+def _auth(v):
+    if v is None:
+        return None, []
+    if not isinstance(v, dict):
+        return None, ["auth must be a domain and a client_id"]
+    dom, cid = v.get("domain", ""), v.get("client_id", "")
+    if not isinstance(dom, str) or not isinstance(cid, str):
+        return None, ["auth domain and client_id must be text"]
+    if not dom and not cid:
+        return None, []
+    bad = []
+    if not (AUTH_DOMAIN.fullmatch(dom) or AUTH_TEST_DOMAIN.fullmatch(dom)):
+        bad.append("auth domain must be a host name like dev-abc123.us.auth0.com, with no https:// and no slash")
+    if not AUTH_CLIENT_ID.fullmatch(cid):
+        bad.append("auth client_id must be the application's Client ID: 20 to 40 letters and digits")
+    return (None if bad else {"domain": dom, "client_id": cid}), bad
+
+AUTH, _BAD_AUTH = _auth(C["settings"].get("auth"))
+if _BAD_AUTH:
+    sys.exit("build failed:\n  " + "\n  ".join("settings.json " + p for p in _BAD_AUTH))
+EXTRA_GLOBALS.append(("BGS_AUTH", lambda: AUTH))
 
 # The bag, checkout, confirmation, account and tracking pages are for someone
 # mid-purchase, not for search results.
@@ -1495,19 +1535,51 @@ for _part, _keys in (("wallet", ("heading", "voucher_label", "redeem_label", "re
                                   "order_updates", "offers", "note"))):
     for _k in _keys:
         ACCOUNT_TEXT["a_%s_%s" % (_part, _k)] = page_text("account.%s.%s" % (_part, _k))
+# Shopper sign-in's words, pages.json "account.signin". The page prints the
+# panel's heading, sentence and buttons, and the phones' Sign out, when
+# sign-in is set up; the messages shop.js writes reach it as BGS_COPY either
+# way, like every text it reads.
+SIGNIN_TEXT = {k: page_text("account.signin." + k) for k in ("heading", "body", "sign_in", "create", "sign_out")}
+COPY_JS["account"] = {"signin": {k: js_text("account.signin." + k)
+                                 for k in ("working", "cancelled", "failed", "unsupported")}}
+
+# With sign-in set up, the page opens on the sign-in panel and keeps the
+# account (its head, menu and cards) hidden until shop.js finds a signed-in
+# shopper, whose name, email and picture then fill the head and the email
+# row; the menu's Sign out, and on phones a button under the email, sign
+# out. Without it the page is as it was, placeholders and all.
+if AUTH:
+    SIGNIN_PARTS = {
+        "signin": """  <div class="signin" data-signin>
+    <h2>%(heading)s</h2>
+    <p>%(body)s</p>
+    <p class="signin-msg" data-signinmsg role="status"></p>
+    <div class="signin-b"><button type="button" class="btn solid" data-signin-go>%(sign_in)s</button><button type="button" class="btn" data-signin-go="signup">%(create)s</button></div>
+  </div>
+""" % SIGNIN_TEXT,
+        "view": " data-acctview hidden",
+        "me_open": '<div class="acct-me"><span class="avatar big" data-meavatar aria-hidden="true"></span><div>',
+        "me_close": "</div></div>",
+        "me_name": ' data-me="name"', "me_email": ' data-me="email"',
+        "out_btn": '\n      <button type="button" class="btn acct-out" data-signout>%s</button>' % SIGNIN_TEXT["sign_out"],
+        "signout": " data-signout",
+    }
+else:
+    SIGNIN_PARTS = dict.fromkeys(("signin", "view", "me_name", "me_email", "out_btn", "signout"), "")
+    SIGNIN_PARTS.update(me_open="<div>", me_close="</div>")
 
 account = """
 <section><div class="wrap">
   <span class="eyebrow">%(a_crumb)s</span>
-  <div class="acct-head">
-    <div>
-      <h2 style="font-size:26px;margin:8px 0 6px">%(name)s</h2>
-      <p style="color:var(--mut);font-size:13.5px;margin:0">%(contact)s</p>
-    </div>
+%(signin)s  <div class="acct-head"%(view)s>
+    %(me_open)s
+      <h2 style="font-size:26px;margin:8px 0 6px"%(me_name)s>%(name)s</h2>
+      <p style="color:var(--mut);font-size:13.5px;margin:0"%(me_email)s>%(contact)s</p>%(out_btn)s
+    %(me_close)s
     <div class="tierbadge"><span class="eyebrow gold-d">%(a_prog)s</span><b>%(a_tier)s</b></div>
   </div>
 
-  <div class="acct">
+  <div class="acct"%(view)s>
     <nav class="acctnav">
       <a class="on" href="account.html">Overview</a>
       <a href="account.html">Orders</a>
@@ -1515,7 +1587,7 @@ account = """
       <a href="account.html">Referrals</a>
       <a href="account.html">Addresses</a>
       <a href="account.html">Details &amp; consent</a>
-      <a href="index.html" class="out">Sign out</a>
+      <a href="index.html" class="out"%(signout)s>Sign out</a>
     </nav>
 
     <div class="acctbody">
@@ -1570,7 +1642,7 @@ account = """
       <div class="sum" style="background:#fff">
         <div class="kv">
           <div><span>%(a_consent_phone_label)s</span><span>%(contact)s</span></div>
-          <div><span>%(a_consent_email_label)s</span><span>%(email)s</span></div>
+          <div><span>%(a_consent_email_label)s</span><span%(me_email)s>%(email)s</span></div>
           <div><span>%(a_consent_language_label)s</span><span>%(a_consent_language)s</span></div>
         </div>
         <label class="consent"><input type="checkbox">%(a_consent_order_updates)s</label>
@@ -1580,7 +1652,7 @@ account = """
     </div>
   </div>
 </div></section>
-""" % dict(ACCOUNT_TEXT, name=slot("customer name"), contact=slot("phone"), email=slot("email"),
+""" % dict(ACCOUNT_TEXT, **SIGNIN_PARTS, name=slot("customer name"), contact=slot("phone"), email=slot("email"),
            drops=slot("0"), credit=slot("AED 0"), orders=slot("0"), tierpct="0%",
            voucher=slot("none active"), refcode=slot("unique code per customer"),
            referred=slot("0"))

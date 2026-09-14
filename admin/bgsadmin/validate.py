@@ -354,6 +354,13 @@ def settings_rules(data):
             errors.append(err(ptr + "/units", "order", "Each rung needs more items than the rung before it."))
         if _whole(a.get("percent")) and _whole(b.get("percent")) and b["percent"] <= a["percent"]:
             errors.append(err(ptr + "/percent", "order", "Each rung has to save more than the rung before it."))
+    # Sign-in needs both the Auth0 domain and the Client ID; with neither the
+    # shop shows no sign-in, but one alone would show buttons that fail.
+    auth = data.get("auth") if isinstance(data.get("auth"), dict) else {}
+    dom, cid = auth.get("domain", ""), auth.get("client_id", "")
+    if isinstance(dom, str) and isinstance(cid, str) and bool(dom.strip()) != bool(cid.strip()):
+        errors.append(err("/auth/client_id" if dom.strip() else "/auth/domain", "required",
+                          "Fill in the Auth0 domain and the Client ID together, or leave both empty."))
     return errors
 
 

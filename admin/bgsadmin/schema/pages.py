@@ -37,8 +37,9 @@ GROUPS = [
     {"key": "corporate", "label": CORPORATE, "page": "corporate.html",
      "about": "The corporate gifting page, its enquiry form and the replies the form gives."},
     {"key": "account", "label": ACCOUNT, "page": "account.html",
-     "about": "The account page's headings and its programme, wallet, referral and consent text. "
-              "A customer's own details stay placeholders until login arrives."},
+     "about": "The account page's sign-in panel, its headings and its programme, wallet, referral and consent text. "
+              "A signed-in shopper's name, email and picture come from sign-in; their other details stay placeholders "
+              "until the database arrives."},
     {"key": "404", "label": NOT_FOUND, "page": "404.html",
      "about": "The page a visitor sees when a link leads nowhere."},
     {"key": "checkout", "label": "Checkout", "page": "checkout.html", "locked": LOCKED,
@@ -109,6 +110,10 @@ _SHELL = [
     text("/shell/header/wishlist", "Wishlist link", SHELL, 20, section="Header",
          help="It opens the account page, which has no wishlist yet."),
     text("/shell/header/bag", "Bag link", SHELL, 20, section="Header"),
+    text("/shell/header/signed_in", "Account link, signed in", SHELL, 60, section="Header",
+         pattern=needs("name"), patternHelp="Keep {name}: it is where the shopper's name goes.",
+         help="What screen readers hear on the header's account link and the phone tab bar's Account while a "
+              "shopper is signed in; the link also shows the shopper's picture or first letter."),
     text("/shell/footer/contact/address", "Address", SHELL, 120, section="Footer", required=False,
          help="The footer line under the legal name. While address, hours and phone are all empty, "
               "the footer shows its address, hours, phone placeholder."),
@@ -481,15 +486,35 @@ _CORPORATE = [
 
 # ---- account --------------------------------------------------------------------------
 
-# A customer's own details stay placeholders until login and the database
-# arrive, and the account menu stays in code with them. Nothing runs the
+# A signed-in shopper's name, email and picture come from sign-in (Auth0);
+# the rest of a customer's own details stay placeholders until the database
+# arrives, and the account menu stays in code with them. Nothing runs the
 # programme, the wallet or referrals yet, so these words describe what the
 # shop means to offer.
 PROMISE = "Nothing runs this yet, so it describes what the shop means to offer: keep it true of that."
+SIGNIN = "Sign-in"
 _ACCOUNT = [
     text("/account/crumb", "Breadcrumb", ACCOUNT, 30, section="Top of the page", help="After the breadcrumb start."),
     text("/account/programme", "Programme name", ACCOUNT, 30, section="Top of the page",
          help="In the badge beside the customer's name, the heading above the tiers and the account menu."),
+    text("/account/signin/heading", "Heading", ACCOUNT, 60, section=SIGNIN,
+         help="At the top of the page for a shopper who is not signed in, in place of the account."),
+    text("/account/signin/body", "Sentence", ACCOUNT, 200, section=SIGNIN, kind="textarea",
+         help="Under the heading. Auth0's page lists every way to sign in that is switched on there, "
+              "so keep this true when one is added."),
+    text("/account/signin/sign_in", "Sign in button", ACCOUNT, 30, section=SIGNIN, help="It opens Auth0's page to sign in."),
+    text("/account/signin/create", "Create account button", ACCOUNT, 30, section=SIGNIN,
+         help="It opens Auth0's page on its sign-up form."),
+    text("/account/signin/sign_out", "Sign out button", ACCOUNT, 30, section=SIGNIN,
+         help="On phones, under the shopper's name and email. The account menu's Sign out stays in code with the menu."),
+    text("/account/signin/working", "While signing in", ACCOUNT, 60, section=SIGNIN,
+         help="Shown for a moment after Auth0 sends the shopper back, while the shop finishes the sign-in."),
+    text("/account/signin/cancelled", "Cancelled", ACCOUNT, 160, section=SIGNIN, kind="textarea",
+         help="When Auth0 answers that the sign-in was cancelled or not allowed."),
+    text("/account/signin/failed", "Did not work", ACCOUNT, 160, section=SIGNIN, kind="textarea",
+         help="When a sign-in cannot be finished for any other reason."),
+    text("/account/signin/unsupported", "Browser cannot sign in", ACCOUNT, 160, section=SIGNIN, kind="textarea",
+         help="When the browser lacks what sign-in needs, as a very old one does."),
 ] + [
     f for key, label in (("drops", "Drops card"), ("credit", "Wallet credit card"), ("orders", "Orders card"))
     for f in (text("/account/stats/%s/label" % key, label, ACCOUNT, 30, section="Summary cards",

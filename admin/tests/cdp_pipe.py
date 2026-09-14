@@ -33,7 +33,9 @@ MODS = {"alt": 1, "ctrl": 2, "meta": 4, "shift": 8}
 
 
 class Chrome:
-    def __init__(self, width=1280, height=900):
+    def __init__(self, width=1280, height=900, args=()):
+        """args: more Chrome switches, such as --host-resolver-rules to keep
+        a test off the network."""
         self.prof = tempfile.mkdtemp(prefix="cdp-prof-")
         self.downloads = tempfile.mkdtemp(prefix="cdp-dl-")
         r_cmd, self.w = os.pipe()
@@ -52,7 +54,7 @@ class Chrome:
             [CHROME, "--headless=new", "--disable-gpu", "--no-first-run", "--no-default-browser-check",
              "--disable-extensions", "--disable-background-networking", "--disable-sync", "--mute-audio",
              "--hide-scrollbars", "--user-data-dir=" + self.prof, "--window-size=%d,%d" % (width, height),
-             "--remote-debugging-pipe", "about:blank"],
+             "--remote-debugging-pipe"] + list(args) + ["about:blank"],
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, preexec_fn=child, close_fds=False)
         for fd in (r_cmd, w_resp, hi_r, hi_w):
             os.close(fd)
