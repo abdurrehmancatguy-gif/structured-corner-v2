@@ -2140,6 +2140,10 @@ bgsRun(function () {
   var KEY = "bgs_signin";
   var msg = panel.querySelector("[data-signinmsg]");
   var buttons = panel.querySelectorAll("[data-signin-go]");
+  /* The page a sign-in started here goes back to: the page the shopper came
+     from, or, on a page a callback landed on, the one the attempt before had
+     kept, since that page's referrer is only what the redirects left. */
+  var returnTo = "";
 
   function say(text, err) {
     if (!msg) return;
@@ -2187,7 +2191,7 @@ bgsRun(function () {
     say("");
     busy(true);
     var att = { verifier: random(32), state: random(16), nonce: random(16), redirect_uri: here.href,
-                return_to: backTo(document.referrer) || "" };
+                return_to: returnTo };
     c.subtle.digest("SHA-256", new TextEncoder().encode(att.verifier)).then(function (h) {
       sessionStorage.setItem(KEY, JSON.stringify(att));
       var q = { response_type: "code", client_id: auth.clientId, redirect_uri: att.redirect_uri,
@@ -2270,7 +2274,9 @@ bgsRun(function () {
   });
 
   if (error) {
-    take(); tidy(); render(null);
+    var was = take();
+    returnTo = (was && backTo(was.return_to)) || "";
+    tidy(); render(null);
     say(error === "access_denied"
       ? bgsAr(bgsCopy("account.signin.cancelled", "Sign-in was cancelled or not allowed. You can try again."))
       : failed(), true);
@@ -2278,6 +2284,7 @@ bgsRun(function () {
   }
   if (code || state) {
     var att = take();
+    returnTo = (att && backTo(att.return_to)) || "";
     tidy(); render(null);
     if (!code || !state || !att || typeof att.state !== "string" || att.state !== state ||
         typeof att.verifier !== "string" || typeof att.nonce !== "string" || typeof att.redirect_uri !== "string") {
@@ -2300,6 +2307,7 @@ bgsRun(function () {
     });
     return;
   }
+  returnTo = backTo(document.referrer) || "";
   render(bgsProfile());
 });
 
