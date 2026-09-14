@@ -2452,6 +2452,17 @@ h2.pagetitle,.sec-h h2.pagetitle{font-size:26px}
   .toolbar .sel{min-width:0;max-width:100%}
   .toolbar .sel select{min-width:0;max-width:100%;text-overflow:ellipsis}
 }
+
+/* ---- the product page's buy bar: one line of details -----------------------
+   The line under the name ("AED 75 · 3 ml / 6 ml") wrapped at 14px on the
+   fold cover, and a gift set's longer one at 320 and 360 too, so the bar
+   grew from 63 to 86px; with the category bar and the tab bar, fixed bars
+   held a third of the fold cover once scrolled. It keeps one line, as the
+   name above it does, and ends in an ellipsis where it is cut; the price
+   comes first. */
+@media (max-width:900px){
+  .stickybuy span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}
 /* Two size chips side by side on a card broke "3 ml · AED 45" over two to
    four lines on the touch screens above 900px (the big landscape phones and
    the tablets). They stack there as they do on a phone, each on one line. */

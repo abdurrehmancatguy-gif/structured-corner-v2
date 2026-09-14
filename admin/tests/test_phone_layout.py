@@ -238,6 +238,27 @@ class PhoneLayout(unittest.TestCase):
             self.assertLessEqual(m["wide"], w, "no sideways scrolling at %d" % w)
         self.no_page_errors()
 
+    # ---- the product page's buy bar ------------------------------------------------
+    STICKY = """(() => { const s = document.querySelector('.stickybuy'), sp = s.querySelector('span');
+      const r = document.createRange(); r.selectNodeContents(sp);
+      const tops = new Set([...r.getClientRects()].filter((q) => q.width >= 1).map((q) => Math.round(q.top)));
+      return {hidden: s.classList.contains('hidden'), height: s.getBoundingClientRect().height, lines: tops.size,
+              meta: sp.textContent}; })()"""
+
+    def test_the_buy_bar_keeps_its_details_on_one_line(self):
+        for w, h in ((280, 653), (320, 568), (360, 640)):
+            self.view(w, h)
+            for pid in ("royal-amber", "eid-royal-hamper"):
+                self.open("product.html?p=" + pid)
+                self.js("scrollTo(0, 1100)")
+                self.c.wait("!document.querySelector('.stickybuy').classList.contains('hidden')", 5, what="the buy bar")
+                time.sleep(0.3)
+                s = self.js(self.STICKY)
+                self.assertTrue(s["meta"].startswith("AED "), s)
+                self.assertEqual(s["lines"], 1, "%s at %d: %s" % (pid, w, s))
+                self.assertLessEqual(s["height"], 64, "%s at %d: %s" % (pid, w, s))
+        self.no_page_errors()
+
     # ---- a reader's own text size -------------------------------------------------
     BIG = ("document.addEventListener('DOMContentLoaded', () => { const s = document.createElement('style'); "
            "s.textContent = 'html{-webkit-text-size-adjust:200% !important;text-size-adjust:200% !important}'; "
