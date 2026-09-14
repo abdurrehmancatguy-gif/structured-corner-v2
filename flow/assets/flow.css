@@ -1935,3 +1935,8 @@ footer .slot,footer .soon{color:#b9b0a4}
   .stickybuy{border-radius:var(--r) var(--r) 0 0}   /* a sheet over the tab bar */
   .plp .side{border-radius:0 var(--r) var(--r) 0}  /* the filters drawer's open edge */
 }
+/* Light mode on every device. The shop has one look: this keeps form
+   controls and scrollbars light, and with the color-scheme meta in each
+   page's head it tells browsers that darken pages on their own (Chrome's
+   auto dark theme on Android, among others) to leave these pages alone. */
+:root{color-scheme:only light}

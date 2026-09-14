@@ -512,6 +512,8 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
     return """<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="only light">
+<meta name="theme-color" content="#ffffff">
 <title>%(full_title)s</title>
 <meta name="description" content="%(desc)s">
 %(robots)s<link rel="canonical" href="%(canon)s">
@@ -1790,6 +1792,8 @@ print("wrote", len(PAGES), "pages")
 pathlib.Path("404.html").write_text("""<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="only light">
+<meta name="theme-color" content="#faf8f4">
 <title>%(title)s | %(suffix)s</title><meta name="robots" content="noindex">
 <style>body{margin:0;min-height:100vh;display:grid;place-items:center;text-align:center;
 background:#faf8f4;color:#171310;font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
