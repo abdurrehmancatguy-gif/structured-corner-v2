@@ -417,6 +417,33 @@ class SigninFlow(unittest.TestCase):
         finally:
             IDP.user = dict(IDP.user, name="Noor Haddad")
 
+    def test_a_long_email_wraps_on_a_phone_in_english_and_arabic(self):
+        long = "mohammedabdulrahmanalfalasifamilyandfriends2024@hotmail.com"
+        prof = {"sub": "auth0|long", "name": "Noor Haddad", "email": long, "picture": "", "exp": int(time.time()) + 3600}
+        # nothing past either edge of the screen, but for fixed bars and what scrolls inside its own box
+        wide = """(() => { const W = innerWidth, out = [];
+          for (const e of document.querySelectorAll('body *')) { const r = e.getBoundingClientRect();
+            if (!r.width || (r.right <= W + 0.5 && r.left >= -0.5) || getComputedStyle(e).position === 'fixed') continue;
+            let inside = false;
+            for (let p = e.parentElement; p && p !== document.body; p = p.parentElement)
+              if (/(auto|scroll|hidden)/.test(getComputedStyle(p).overflowX) || getComputedStyle(p).position === 'fixed') { inside = true; break; }
+            if (!inside) out.push(e.tagName + ' ' + e.className + ' ' + Math.round(r.left) + '..' + Math.round(r.right)); }
+          return {iw: W, sw: document.documentElement.scrollWidth, out: out.slice(0, 5),
+            row: document.querySelectorAll('[data-me="email"]')[1].textContent}; })()"""
+        for w, h in ((390, 844), (360, 640)):
+            with self.subTest(width=w):
+                self.fresh(w, h, True, "index.html")
+                self.js("localStorage.setItem('bgs_profile', %s)" % J(J(prof)))
+                self.open(w, h, True)
+                for lang in ("en", "ar"):
+                    if lang == "ar":
+                        self.js("document.querySelector('[data-langtoggle]').click()")
+                        time.sleep(0.3)
+                    got = self.js(wide)
+                    self.assertEqual(got["row"], long, lang)
+                    self.assertEqual((got["iw"], got["sw"], got["out"]), (w, w, []), lang)
+                self.no_errors()
+
     # ---- refused -------------------------------------------------------------------
     def test_a_callback_with_a_state_that_was_not_sent_is_refused(self):
         IDP.wrong_state = True

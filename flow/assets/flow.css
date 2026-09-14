@@ -2159,3 +2159,8 @@ footer .slot,footer .soon{color:#b9b0a4}
   .tabbar a.signed .avatar{width:26px;height:26px;margin:-2.5px 0;font-size:14px}
   .tabbar a.signed.on .avatar{box-shadow:0 0 0 1.5px var(--ink)}
 }
+/* A long email on the account page. Details & consent shows the signed-in
+   shopper's email beside its label, and an address with no hyphen to break
+   at pushed a phone's page wider than the screen. It wraps anywhere, as the
+   one under their name does. */
+.kv [data-me]{overflow-wrap:anywhere;min-width:0}
