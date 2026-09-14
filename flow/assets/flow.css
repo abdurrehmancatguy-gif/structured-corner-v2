@@ -2085,6 +2085,10 @@ footer .slot,footer .soon{color:#b9b0a4}
    them short beside the bottles and the tin. They run wider than their square,
    as they used to spill past the circle, so they read at the same size. */
 .cs a.pop.wide .circle img{left:-25%;width:150%}
+/* A category shown with a photograph rather than a cut-out is a rounded square
+   tile the size of the cut-outs' square, the photo filling it. */
+.cs a:not(.pop) .circle{border-radius:var(--r-sm);overflow:hidden}
+.cs a:not(.pop) .circle img{object-fit:cover;object-position:center}
 /* Phones: no small capital-letter titles. The decorative lines over the
    banner, quiz and Discovery headings go; every other label that carries
    information (breadcrumbs, a card's type and sizes, badges, section labels,
