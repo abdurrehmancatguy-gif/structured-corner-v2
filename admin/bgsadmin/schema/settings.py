@@ -12,6 +12,15 @@ UPLOAD = "Not changeable from the admin yet: there is no upload for the link pre
 LOGO = "A PNG with a transparent background, at least 486 px wide; the pages show a copy 486 px wide. The logo it replaces goes to the trash."
 ICON = "Made from the emblem: upload a new one at Favicon above."
 LOGIN = "Arrives with login: a tracking ID adds a third-party script to every page."
+# Shopper sign-in runs on Auth0. Both values come from the "bgs-corner"
+# application's Settings tab and are public: every shopper's browser reads
+# them. The application is a Single Page Application, which has no client
+# secret, so there is no field for one. build.py checks the same two patterns
+# and validate.py that both are set or both are empty.
+SIGNIN = "Shopper sign-in"
+SIGNIN_HELP = "Shoppers sign in and create accounts on Auth0's page for this shop. Leave this and the Client ID empty and the shop shows no sign-in."
+AUTH_DOMAIN = r"(?=.{4,100}$)(?:[a-z0-9](?:[a-z0-9\-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}"
+AUTH_CLIENT_ID = r"[A-Za-z0-9]{20,40}"
 
 FIELDS = [
     {"path": "/store/name", "type": "text", "label": "Store name", "required": True, "maxLength": 60, "group": "Store details"},
@@ -74,6 +83,13 @@ FIELDS = [
     {"path": "/social/instagram", "type": "href", "social": True, "label": "Instagram", "group": "Social", "rendered": False, "notShown": NOT_SHOWN},
     {"path": "/social/whatsapp", "type": "href", "social": True, "label": "WhatsApp", "group": "Social", "rendered": False, "notShown": NOT_SHOWN},
     {"path": "/social/tiktok", "type": "href", "social": True, "label": "TikTok", "group": "Social", "rendered": False, "notShown": NOT_SHOWN},
+    {"path": "/auth/domain", "type": "text", "label": "Auth0 domain", "maxLength": 100, "group": SIGNIN,
+     "pattern": AUTH_DOMAIN, "patternHelp": "Only the domain, in lower case, like dev-abc123.us.auth0.com: no https:// and no slash.",
+     "help": SIGNIN_HELP + " The Domain on the application's Settings tab in Auth0; the shop reaches it over https."},
+    {"path": "/auth/client_id", "type": "text", "label": "Client ID", "maxLength": 40, "group": SIGNIN,
+     "pattern": AUTH_CLIENT_ID, "patternHelp": "Letters and digits only, as Auth0 shows the Client ID. A client secret is longer and never goes here.",
+     "help": "The Client ID on the same Settings tab. It is not a secret: every shopper's browser sees it. "
+             "The application is a Single Page Application, which has no client secret, and none belongs anywhere in the shop."},
     {"path": "/analytics/ga4_id", "type": "text", "label": "Google Analytics", "group": "Analytics", "locked": LOGIN},
     {"path": "/analytics/meta_pixel_id", "type": "text", "label": "Meta pixel", "group": "Analytics", "locked": LOGIN},
     {"path": "/analytics/tiktok_pixel_id", "type": "text", "label": "TikTok pixel", "group": "Analytics", "locked": LOGIN},

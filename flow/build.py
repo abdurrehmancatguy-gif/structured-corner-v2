@@ -500,6 +500,43 @@ def catstrip():
 TRANSLATIONS = json.loads((CONTENT_DIR / "translations.json").read_text(encoding="utf-8"))
 EXTRA_GLOBALS.append(("BGS_AR", lambda: TRANSLATIONS.get("ar", {})))
 
+# ---------------------------------------------------------------- sign-in
+# Shoppers sign in with Auth0: settings.json "auth" names the tenant's domain
+# and the Client ID of its Single Page Application, and catalogue.js carries
+# both to shop.js as window.BGS_AUTH, which runs the Authorization Code flow
+# with PKCE in the browser. Both are public; such an application has no
+# client secret, and none is ever kept here. With both empty BGS_AUTH is
+# null and no page shows sign-in. The domain is a host name the shop reaches
+# over https. 127.0.0.1 with a port is read too, over plain http, so the
+# admin's tests can stand a local provider in (the admin's field refuses
+# it). Anything else, one value without the other included, stops the build
+# rather than send shoppers somewhere unexpected.
+AUTH_DOMAIN = re.compile(r"(?=.{4,100}$)(?:[a-z0-9](?:[a-z0-9\-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}")
+AUTH_TEST_DOMAIN = re.compile(r"127\.0\.0\.1:[1-9][0-9]{0,4}")
+AUTH_CLIENT_ID = re.compile(r"[A-Za-z0-9]{20,40}")
+
+def _auth(v):
+    if v is None:
+        return None, []
+    if not isinstance(v, dict):
+        return None, ["auth must be a domain and a client_id"]
+    dom, cid = v.get("domain", ""), v.get("client_id", "")
+    if not isinstance(dom, str) or not isinstance(cid, str):
+        return None, ["auth domain and client_id must be text"]
+    if not dom and not cid:
+        return None, []
+    bad = []
+    if not (AUTH_DOMAIN.fullmatch(dom) or AUTH_TEST_DOMAIN.fullmatch(dom)):
+        bad.append("auth domain must be a host name like dev-abc123.us.auth0.com, with no https:// and no slash")
+    if not AUTH_CLIENT_ID.fullmatch(cid):
+        bad.append("auth client_id must be the application's Client ID: 20 to 40 letters and digits")
+    return (None if bad else {"domain": dom, "client_id": cid}), bad
+
+AUTH, _BAD_AUTH = _auth(C["settings"].get("auth"))
+if _BAD_AUTH:
+    sys.exit("build failed:\n  " + "\n  ".join("settings.json " + p for p in _BAD_AUTH))
+EXTRA_GLOBALS.append(("BGS_AUTH", lambda: AUTH))
+
 # The bag, checkout, confirmation, account and tracking pages are for someone
 # mid-purchase, not for search results.
 NOINDEX = {"page-cart", "page-checkout", "page-confirmed", "page-account", "page-track-order"}
