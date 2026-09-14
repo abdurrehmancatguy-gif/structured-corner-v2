@@ -2360,3 +2360,7 @@ h2.pagetitle,.sec-h h2.pagetitle{font-size:26px}
    The "more" arrows turn to point left in Arabic (shop.js, the toggle). */
 [dir="rtl"] :is(.sizes button,.permeta,.p .meta,.badge,[data-p3lb],[data-bagitems],.lmeta,footer .bot span,
   [data-codnote],.hero h1,.hero p,[data-sbmeta],.added-meta){unicode-bidi:plaintext}
+
+/* With 44px stepper buttons, "Add to bag: AED 75" still took two lines
+   from 360 to 374px; the button gives up side padding there, not size. */
+@media (min-width:360px) and (max-width:374px){ .buy .atcrow .btn{padding-left:14px;padding-right:14px} }
