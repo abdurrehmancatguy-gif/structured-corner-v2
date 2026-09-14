@@ -123,6 +123,32 @@ function bgsAvatar(el, p) {
   im.onload = function () { el.textContent = ""; el.appendChild(im); el.classList.add("pic"); };
   im.src = pic;
 }
+/* Text a script puts back into an element that the language toggle already
+   switches (a pressed Add's label). bgsText writes the English as one text
+   node and, on an Arabic page, shows its Arabic and marks the node the way
+   the toggle marks what it translates, so the next switch turns it back;
+   text written with plain textContent in Arabic stayed Arabic on the English
+   page. bgsEnglish reads an element's text with anything the toggle
+   translated put back into English. */
+function bgsText(el, en) {
+  var n = document.createTextNode(en), t = en.trim(), d = window.BGS_AR;
+  if (document.documentElement.lang === "ar" && d && Object.prototype.hasOwnProperty.call(d, t) &&
+      typeof d[t] === "string" && d[t] !== "") {
+    n.__en = t;
+    n.nodeValue = en.replace(t, d[t]);
+  }
+  el.textContent = "";
+  el.appendChild(n);
+}
+function bgsEnglish(el) {
+  var d = window.BGS_AR || {}, s = "";
+  for (var i = 0; i < el.childNodes.length; i++) {
+    var n = el.childNodes[i], v = n.nodeType === 3 ? n.nodeValue : n.textContent;
+    if (n.__en && d[n.__en]) v = v.replace(d[n.__en], n.__en);
+    s += v;
+  }
+  return s;
+}
 /* Each feature below runs on its own: an error in one (bad data in storage, a
    missing element) is logged and the rest still work. As one plain script, the
    first throw stopped every feature after it, the bag included. */
@@ -269,16 +295,23 @@ bgsRun(function () {
         if (n.nodeType !== 3) continue;
         var t = n.nodeValue.trim();
         if (!t) continue;
+        /* the "more" arrows point the way the page reads: left in Arabic.
+           Put back before the English, which is looked up as it was. */
         if (arOn) {
           if (AR[t]) { n.dataset = null; n.__en = t; n.nodeValue = n.nodeValue.replace(t, AR[t]); }
-        } else if (n.__en) {
-          n.nodeValue = n.nodeValue.replace(AR[n.__en], n.__en);
+          if (n.nodeValue.indexOf("→") >= 0) { n.__arw = true; n.nodeValue = n.nodeValue.replace(/→/g, "←"); }
+        } else {
+          if (n.__arw) { n.__arw = false; n.nodeValue = n.nodeValue.replace(/←/g, "→"); }
+          if (n.__en) n.nodeValue = n.nodeValue.replace(AR[n.__en], n.__en);
         }
       }
     });
     document.querySelectorAll("[data-langtoggle]").forEach(function (a) {
       a.textContent = arOn ? "English" : "العربية";
     });
+    /* text a script writes in the page's language (the bag heading's
+       count) is written again in the new one */
+    document.dispatchEvent(new CustomEvent("bgs:lang"));
   }
   document.querySelectorAll("[data-langtoggle]").forEach(function (a) {
     a.addEventListener("click", toggleLang);
@@ -1410,9 +1443,22 @@ bgsRun(function () {
       el.textContent = n;
       el.hidden = n === 0;
     });
+    /* The bag heading's count: the separator, then the count on its own in
+       a <bdi>, in the page's language. Isolated alone, the count keeps its
+       own order in Arabic and the dot stays between it and the title; the
+       whole " · 5 items" as one run put the dot at its far end and the
+       count against the Arabic word. The language toggle asks for it again. */
     var label = document.querySelector("[data-bagitems]");
-    if (label) label.textContent = n ? " · " + bgsFill(n === 1 ? bgsCopy("cart.items.one", "{n} item")
-                                                               : bgsCopy("cart.items.many", "{n} items"), { n: n }) : "";
+    if (label) {
+      label.textContent = "";
+      if (n) {
+        var count = document.createElement("bdi");
+        count.textContent = bgsFill(bgsAr(n === 1 ? bgsCopy("cart.items.one", "{n} item")
+                                                  : bgsCopy("cart.items.many", "{n} items")), { n: n });
+        label.appendChild(document.createTextNode(" · "));
+        label.appendChild(count);
+      }
+    }
   }
 
   function money(n) {
@@ -1507,12 +1553,14 @@ bgsRun(function () {
       }
       if (add(id, qty)) {
         /* The label to go back to is kept from the first press only: a
-           second press inside the 1.2 s used to save "Added" as it, for good. */
-        if (!btn.hasAttribute("data-was")) btn.setAttribute("data-was", btn.textContent);
-        btn.textContent = bgsAr(bgsCopy("cart.added.button", "Added"));
+           second press inside the 1.2 s used to save "Added" as it, for good.
+           It is kept in English and both words go in through bgsText, so
+           they follow the language toggle, even one pressed in between. */
+        if (!btn.hasAttribute("data-was")) btn.setAttribute("data-was", bgsEnglish(btn));
+        bgsText(btn, bgsCopy("cart.added.button", "Added"));
         clearTimeout(btn._bgsT);
         btn._bgsT = setTimeout(function () {
-          btn.textContent = btn.getAttribute("data-was");
+          bgsText(btn, btn.getAttribute("data-was"));
           btn.removeAttribute("data-was");
         }, 1200);
         /* the added-to-bag panel listens in a block of its own: an error in
@@ -1543,6 +1591,8 @@ bgsRun(function () {
   /* another tab changed the bag: repaint, so this one cannot write back a
      stale copy over it */
   addEventListener("storage", function (e) { if (e.key === KEY || e.key === null) { paintCount(); render(); } });
+  /* the language toggle: the heading's count in the new language */
+  document.addEventListener("bgs:lang", paintCount);
 
   paintCount();
   render();
@@ -1563,7 +1613,8 @@ bgsRun(function () {
    away. There is one panel: an Add while it is open refreshes it. It never
    takes focus and never closes on a timer, since it holds actions (WCAG
    2.2.1): its cross, Escape, a click or tap anywhere else, or leaving the
-   page close it, and scrolling leaves it be. Tab from the pressed button
+   page close it, and scrolling leaves it open (a card on a wide screen
+   moves with it, see place()). Tab from the pressed button
    goes into it, and Tab from its cross goes on to what followed the button.
    A screen reader hears it through a polite live region.
 
@@ -1663,15 +1714,29 @@ bgsRun(function () {
      bar without the caret. A card taller than the room left scrolls. */
   function place() {
     var s = el.style;
-    s.top = s.left = s.right = s.maxHeight = s.overflowY = "";
+    s.top = s.left = s.right = s.bottom = s.maxHeight = s.overflowY = "";
     s.removeProperty("--caret");
     el.classList.remove("anchored");
-    if (matchMedia("(max-width:900px)").matches) return;
+    if (matchMedia("(max-width:900px)").matches) {
+      /* The sheet rests on the tab bar, where the product page's buy bar
+         rests too: an Add from that bar opened the sheet right over the
+         button that keeps the focus. Opened from it while it shows, the
+         sheet rests on the buy bar instead, and drops back when it goes. */
+      var bar = trigger && trigger.closest && trigger.closest(".stickybuy");
+      if (bar && document.contains(bar) && !bar.classList.contains("hidden") && bar.offsetHeight) {
+        s.bottom = (parseFloat(getComputedStyle(bar).bottom) || 0) + bar.offsetHeight + "px";
+      }
+      return;
+    }
     var rtl = getComputedStyle(el).direction === "rtl";
     var bag = document.querySelector(BAGLINK);
     var r = bag && bag.getBoundingClientRect();
     var shown = !!r && (r.width > 0 || r.height > 0);
-    var end = shown ? Math.max(16, Math.round(rtl ? r.left : document.documentElement.clientWidth - r.right)) : 16;
+    /* never nearer the edge than the masthead's own padding, which takes
+       the notch's inset on a landscape iPhone */
+    var mw = document.querySelector(".mast .wrap");
+    var edge = Math.max(16, mw ? parseFloat(getComputedStyle(mw)[rtl ? "paddingLeft" : "paddingRight"]) || 0 : 0);
+    var end = shown ? Math.max(edge, Math.round(rtl ? r.left : document.documentElement.clientWidth - r.right)) : edge;
     var top;
     if (shown && r.bottom > 0) {
       top = r.bottom + 12;
@@ -1781,6 +1846,16 @@ bgsRun(function () {
   });
 
   addEventListener("resize", function () { if (isOpen()) place(); });
+  /* A card on a wide screen stayed where it opened while the page scrolled:
+     its caret pointed at nothing, and one opened under the category bar
+     sat over the masthead's icons once the page was back at the top. It is
+     placed again as the page scrolls, once a frame at most. */
+  var placing = false;
+  addEventListener("scroll", function () {
+    if (placing || !isOpen()) return;
+    placing = true;
+    requestAnimationFrame(function () { placing = false; if (isOpen()) place(); });
+  }, { passive: true });
   /* a page restored from the back/forward cache opens without it */
   addEventListener("pagehide", function () { hide(true); });
 });
@@ -1822,12 +1897,19 @@ bgsRun(function () {
   function sync() {
     var src = document.querySelector("[data-total]");
     if (src) total.textContent = src.textContent;
-    var on = mq.matches && !summary.hidden && !seen;
+    /* A bar that holds keyboard focus stays until focus leaves it: hidden
+       with its link focused, it dropped that focus to the page, and the
+       next Tab started again at the top. Its own focusin and focusout ask
+       again, the second once focus has landed. */
+    var held = bar.contains(document.activeElement);
+    var on = mq.matches && !summary.hidden && (!seen || held);
     if (bar.classList.contains("on") !== on) {
       bar.classList.toggle("on", on);
       bar.setAttribute("aria-hidden", on ? "false" : "true");
     }
   }
+  bar.addEventListener("focusin", sync);
+  bar.addEventListener("focusout", function () { setTimeout(sync, 0); });
 
   function watch() {
     if (io) io.disconnect();

@@ -2019,11 +2019,11 @@ footer .slot,footer .soon{color:#b9b0a4}
 @media (max-width:900px) and (max-height:500px){
  .added{grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:14px;row-gap:4px;padding-top:10px;padding-bottom:10px}
  .added-hd,.added-p,.added-s{grid-column:1}
- .added-hd{min-height:0;padding-inline-end:0;font-size:13px}
+ .added-hd{min-height:0;padding-inline-end:0}
  .added-p{grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center}
  .added-im{width:44px;height:44px}
  .added-meta{display:none}
- .added-s{padding-top:0;border-top:0;font-size:13px}
+ .added-s{padding-top:0;border-top:0}
  .added-b{grid-column:2;grid-row:1 / span 3;grid-template-columns:auto auto;margin-inline-end:48px}
  .added-x{top:50%;transform:translateY(-50%)}
 }
@@ -2041,7 +2041,7 @@ footer .slot,footer .soon{color:#b9b0a4}
  .bagbar{display:flex;align-items:center;gap:14px;position:fixed;left:0;right:0;z-index:19;bottom:env(safe-area-inset-bottom,0px);padding:10px max(16px,calc((100% - 560px) / 2));background:var(--bg);border-top:1px solid var(--line);border-radius:var(--r) var(--r) 0 0;box-shadow:0 -8px 24px rgba(23,19,16,.10);transform:translateY(calc(100% + 40px));visibility:hidden;transition:transform .2s ease,visibility 0s linear .2s}
  .bagbar.on{transform:none;visibility:visible;transition:transform .2s ease,visibility 0s}
  .bagbar .bb-t{flex:1 1 auto;min-width:0;display:flex;flex-direction:column}
- .bagbar .bb-t span{font-size:13px;line-height:1.2;color:var(--mut)}
+ .bagbar .bb-t span{font-size:14px;line-height:1.2;color:var(--mut)}
  .bagbar .bb-t b{font-size:18px;line-height:1.25;font-weight:700;white-space:nowrap}
  .bagbar .btn{flex:0 0 auto;min-width:46%;min-height:48px;padding:0 20px;font-size:15px}
 }
@@ -2057,8 +2057,9 @@ footer .slot,footer .soon{color:#b9b0a4}
    their own blocks above. In landscape the rows that run edge to edge keep
    their content out from under the notch, each with the side padding it
    already had as the least it gets: 16px for the page's wrap, 14px for the
-   strip, masthead and search row, 8px for the category bar, none for the
-   tab bar. */
+   strip, masthead, search row and the product page's buy bar, 8px for the
+   category bar, none for the tab bar; the bag's checkout bar and the
+   added-to-bag sheet keep their centring, or the inset where it is larger. */
 @media (max-width:900px){
   .tabbar{padding-bottom:env(safe-area-inset-bottom,0px)}
   .stickybuy{bottom:calc(39px + env(safe-area-inset-bottom,0px))}
@@ -2071,6 +2072,427 @@ footer .slot,footer .soon{color:#b9b0a4}
   .strip .wrap,.mast .wrap,.msearch{padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px))}
   .catnav .wrap{padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px))}
   .tabbar{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+  .stickybuy{padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px))}
+  .bagbar,.added{padding-left:max(16px,calc((100% - 560px) / 2),env(safe-area-inset-left,0px));
+    padding-right:max(16px,calc((100% - 560px) / 2),env(safe-area-inset-right,0px))}
+}
+/* ---- sizes that were inline styles in build.py ------------------------------
+   An inline style outranks every rule in this file, so the phone type scale
+   below could not reach these. Each class carries exactly what its element
+   had inline, so every width computes as before; margins that differ from
+   one use to the next stay inline. h2.pagetitle and .sec-h h2.subhead are
+   written with the h2 so they outrank .sec-h h2 in the phone blocks above. */
+h2.pagetitle,.sec-h h2.pagetitle{font-size:26px}
+.intro{color:var(--mut);font-size:13.5px;margin:6px 0 0}
+.emptybody{color:var(--mut);font-size:13.5px}
+.acct-head .contact{color:var(--mut);font-size:13.5px;margin:0}
+.sec-h h2.subhead{font-size:17px}
+.toolbar .fhead{font-size:13px}
+.toolbar .count{font-size:13px;color:var(--mut)}
+.codnote{font-size:11.5px;color:var(--mut);margin:12px 0 0;text-align:center}
+.sec-h .aside{font-size:13px;color:var(--mut)}
+.optin{display:flex;gap:9px;font-size:13px;color:var(--body)}
+.sum .r.vat{color:var(--mut);font-size:12.5px}
+.tiernote{font-size:12.5px;color:var(--mut);margin:0}
+.rname{font-weight:600;font-size:16px}
+.rmeta{font-size:12.5px;color:var(--mut);margin-top:3px}
+.rprice{font-weight:700;font-size:16px}
+.sendnote{font-size:13px;color:var(--mut);margin:8px 0 14px}
+.wm.foot-wm{color:#fff;font-size:20px;margin-bottom:14px}
+
+/* ==========================================================================
+   Phone type scale
+   --------------------------------------------------------------------------
+   Up to 900px (phones, the folding phone and portrait tablets, which all
+   get the phone layout) text was 8.5 to 13.5px: running text 13, product
+   names 13, card details 9 to 11, labels 8.5 to 9.5, fields 13 to 14 (so
+   iOS zoomed the page on every tap into search), and the same at 320 as at
+   430. One scale now, each rule repeating the selector it overrides so it
+   wins by coming last, without !important:
+
+     12px  one-line uppercase labels, badges, counters, placeholder tags,
+           the card's meta line, footer headings; the floor for any text
+     13px  category pills (12px at 370 and below), so the bar stays two rows
+     14px  secondary text: meta lines, notes, spec rows, helper sentences,
+           section links, tabs, chips, pills, footer links, the delivery
+           strip (13px under 360, where 14 wraps it)
+     15px  buttons, summary rows, tier names
+     16px  body copy, product names, prices on cards and bag lines,
+           quantities, every form field (under 16 iOS zooms on focus)
+     18px  sub-headings, totals, the story's first line, the drawer title
+     22px  section headings; 24 the quiz question; 26 page titles, the
+           product title, the hero headline and the product price
+
+   Two measured exceptions: card size chips stay 12px, two to a card that is
+   117px wide at 320 ("12 ml · AED 1,295" took three lines at 13px), and the
+   category pills as above. Desktop, above 900px, is untouched. */
+@media (max-width:900px){
+  body{font-size:16px}
+  /* 12px labels */
+  .eyebrow,.qstep,.notestop b,.p .meta,.badge,.p .tax,.p .rev,.p .norm,.norm,.slot,
+  .p .notes .slot,.p .tax .slot,.p .ph .none,.promo .none,.line .im .none,.gal .main .none,
+  .galslide .none,.heroimg .none.corner,.galcount,.galthumb,.fam span,.tiers .t span,
+  .filterbtn .fcount,.fbox .ct,.tabbar a,.cs a span:not(.circle),.p .sizes button{font-size:12px}
+  footer h5{font-size:12px;font-weight:600;line-height:1.2}
+  .acts .act .n{font-size:12px;min-width:18px;height:18px;line-height:18px}
+  .filterbtn .fcount{min-width:20px;height:20px;border-radius:10px}
+  .fbox h4{font-size:12px;font-weight:600;line-height:1.2}
+  /* 13px category pills */
+  .catnav a{font-size:13px}
+  /* 14px secondary */
+  .strip .wrap,.lmeta,.kv div,.qresult .kv span:last-child,.tabs2 span,.tabs2 button,
+  .sec-h a,.sec-h span.norm,.mini,.pill,.buy .pills .pill,.linkbtn,.stickybuy span,
+  .pay span,.pay button,.prog .lb,.line .lrem,.note,.buy .belowbuy .note,
+  .buy .pricerow .permeta,.usp b,.fam b,.buy .sizeblock .sizes button,.acctnav a,
+  footer a,footer p,footer .soon,.qopts button span,.toolbar .fhead,.toolbar .count,
+  .codnote,.sec-h .aside,.sum .r.vat,.tiernote,.rmeta,.sendnote,.acct-head .contact,
+  .sharebtn,.ingbox p,.nojs,.bagbar .bb-t span,.added-meta,.added-q{font-size:14px}
+  .p .notes{font-size:14px;line-height:1.45}
+  .promo span:not(.none){font-size:14px;line-height:1.45}
+  .notestop p{font-size:14px;line-height:1.45}
+  .usp b{line-height:1.3}
+  .ingbox p{line-height:1.5}
+  /* 15px buttons and compact data */
+  .btn,.btn.sm,.p .btn.sm,.hero .btn,.added-b .btn{font-size:15px}
+  .btn,.filterbtn,.qopts button{font-family:inherit}
+  .filterbtn{font-size:15px;font-weight:600;line-height:1}
+  .sum .r,.tiers .t b,.qback{font-size:15px}
+  /* 16px body, names, prices, fields */
+  .p .nm{font-size:16px;line-height:1.3}
+  .lname,.lprice,.p .pr b,.stepper i,.promo b,.reel span,.refbox .code,.tier,
+  .emptybody,.consent,.optin,.fbox label{font-size:16px}
+  .qopts button{font-size:16px;font-weight:600;line-height:1.3}
+  .field,input.field,.sel,.sel select,.search input{font-size:16px}
+  .search input{min-width:0}
+  .hero p,.quizband p,.band p,.intro,.buy p{font-size:16px;line-height:1.5}
+  .story span{font-size:16px}
+  .stickybuy b{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .stickybuy > div{min-width:0}
+  /* 18px sub-headings and totals */
+  .drawerhead,.emptystate b,.sum .r.t,.tierbadge b,.rname,.rprice{font-size:18px}
+  .story span:first-child{font-size:18px}
+  .band h3{font-size:18px;line-height:1.3}
+  .sec-h h2.subhead{font-size:18px}
+  /* 22px, 24px, 26px headings */
+  .sec-h h2{font-size:22px;line-height:1.25}
+  .qcard h2,.qtitle{font-size:24px}
+  .buy h1{font-size:26px;line-height:1.2}
+  h2.pagetitle,.sec-h h2.pagetitle{line-height:1.2}
+  /* what the larger type needs to keep every width from scrolling sideways:
+     the footer columns may shrink below their longest word, the promo tiles
+     stack (below), and the hero buttons go under each other when their
+     labels no longer fit side by side, full width, instead of spilling */
+  footer .cols{grid-template-columns:repeat(2,minmax(0,1fr))}
+  footer a,footer p{overflow-wrap:anywhere}
+  .hero .btn{min-width:max-content}
+}
+@media (max-width:560px){
+  .grid.promos{grid-template-columns:1fr}
+  .promo > div{min-width:0}
+}
+@media (max-width:370px){
+  .catnav .wrap{gap:4px 3px}
+  .catnav a{font-size:12px;padding:0 6px}
+}
+@media (max-width:374px){
+  .strip .wrap{font-size:13px}
+}
+/* Wide touch screens (the big landscape phones and tablets above 900px) get
+   the desktop layout, and its labels at 9 to 11.5px. They are raised to the
+   12px floor and the fields to 16px; a desktop with a mouse keeps them. */
+@media (min-width:901px) and (pointer:coarse){
+  .eyebrow,.qstep,.notestop b,.p .meta,.badge,.p .tax,.p .rev,.p .norm,.norm,.slot,
+  .p .notes .slot,.p .ph .none,.promo .none,.promo span:not(.none),.line .im .none,
+  .galslide .none,.heroimg .none.corner,.galcount,.galthumb,.fam span,.tiers .t span,
+  .fbox .ct,.sizes button,.p .notes,.mini,.codnote,.usp span,.added-im .none{font-size:12px}
+  footer h5{font-size:12px;font-weight:600;line-height:1.2}
+  .act .n{font-size:12px;min-width:18px;height:18px}
+  .field,input.field,.sel select,.search input{font-size:16px}
+}
+/* Arabic joins its letters, so the tracking these labels carry in English
+   pulls a word apart; in Arabic they have none. */
+[dir="rtl"] :is(.eyebrow,.badge,.p .meta,footer h5,.cs a span,.notestop b,.qstep,.slot,
+  .galcount,.fbox h4,.heroimg .none.corner){letter-spacing:0}
+
+/* ---- phone layout: the narrow end ------------------------------------------
+   The fold cover (280px) scrolled sideways by 26px, which pushed the tab bar
+   under the screen: the logo, three 40px icons and the masthead's padding
+   need 306px. Under 300 the logo takes what the icons leave, at its own
+   shape (132px wide, 21px tall at 280). */
+@media (max-width:300px){
+  .mast .wrap{padding-left:10px;padding-right:10px;gap:6px}
+  .logo .brandmark{height:auto;width:calc(100vw - 148px)}
+}
+/* The footer's brand column (logo, legal line, address, newsletter) spans
+   both phone columns, so the email box is not squeezed to 40px; and the
+   footer logo, drawn 26px tall into a column narrower than it, keeps its
+   shape (it was 5 to 19% out of shape under 360). */
+@media (max-width:560px){ footer .cols > div:first-child{grid-column:1 / -1} }
+@media (max-width:700px){ .foot-logo{height:auto;max-height:26px;width:auto} }
+/* The drawer's button read "Show33products": a flex box drops the spaces at
+   the edges of the words beside the count, so the gap puts them back. */
+.draweractions .btn{gap:.3em}
+@media (max-width:900px){
+  /* the sort box is as tall as its select, not the select plus padding */
+  .sel{padding-top:0;padding-bottom:0}
+  /* Remove kept a hair from the quantity stepper beside it */
+  .line .lrem{margin-inline-start:14px}
+}
+/* Add to bag beside the quantity holds one line down to 360; under that it
+   gives up a pixel and some padding, and on the fold cover it takes a row of
+   its own. Buttons there give up some side padding too, so "Browse the
+   collection" and "WhatsApp me my profile" keep one line. */
+@media (max-width:359px){ .buy .atcrow .btn{font-size:14px;padding-left:12px;padding-right:12px} }
+@media (max-width:300px){
+  .buy .atcrow{flex-wrap:wrap}
+  .buy .atcrow .btn{flex-basis:100%}
+  .btn{padding-left:14px;padding-right:14px}
+}
+/* The confirmation's two buttons wrapped "Track this order" onto three
+   lines at 320; on a phone they share the row and go under each other when
+   both do not fit. */
+@media (max-width:560px){
+  .page-confirmed .btn{flex:1 1 auto}
+  .page-confirmed div:has(> .btn){flex-wrap:wrap}
+}
+/* Two size chips side by side on a card broke "3 ml · AED 45" over three
+   lines at 320, and over two on the four-column tablet grid. Up to 900px
+   they stack, each the card's width and on one line. An amount in the
+   bag's summary does not break either: the label beside it does. */
+@media (max-width:900px){
+  .p .sizes{flex-direction:column}
+  .sum .r > span:last-child{white-space:nowrap}
+}
+
+/* ---- touch targets: 44px where a finger has to land ---------------------
+   On a touch screen the bag icon was 18px square on tablets, footer links
+   21px tall, Remove 18px, Clear all 15px, the steppers, hearts, size chips,
+   card buttons and pills 28 to 40px, and the tab bar's icons 38px. Controls
+   in a row of text (a section's "All 13 →", Remove, Clear all, the strip's
+   links) keep their look and get the room from an ::after around them; the
+   rest grow to 44px. A mouse keeps the desktop sizes.
+
+   The one exception is the category bar's pills, 24px tall, the minimum
+   target size: at 44px its two rows would cost 40px of every first screen
+   and of the screen once scrolled, where the bar sticks.
+
+   The tab bar grows from 39px to 45px (44 and its border), so what rests on
+   it moves up with it: the sticky buy bar, the added-to-bag sheet and the
+   bag's checkout bar, each with the home indicator's inset as before. */
+@media (pointer:coarse){
+  .logo{min-height:44px}
+  .act{min-width:44px;min-height:44px;justify-content:center}
+  footer a,footer .soon{display:block;padding:11px 0;margin:0}
+  .sec-h a,.line .lrem,.linkbtn,.strip .r a{position:relative}
+  .sec-h a::after,.linkbtn::after,.strip .r a::after{content:"";position:absolute;inset:-12px -8px}
+  .line .lrem{margin-top:12px}
+  .line .lrem::after{content:"";position:absolute;inset:-12px -8px}
+  .stepper button{width:44px;height:44px}
+  .sizes button,.btn.sm,.p .btn.sm,.pill,.filterbtn,.search,.consent,.fbox label,.acctnav a,.sel select{min-height:44px}
+  .heart,.p .ph .heart{width:44px;height:44px}
+  .tabs2 span,.tabs2 button{padding-top:14px;padding-bottom:14px}
+}
+@media (pointer:coarse) and (max-width:900px){
+  .tabbar a{padding-top:11px;padding-bottom:12px}
+  .stickybuy{bottom:calc(45px + env(safe-area-inset-bottom,0px))}
+  .stickybuy.hidden{transform:translateY(calc(100% + 46px + env(safe-area-inset-bottom,0px)))}
+  .added{bottom:calc(45px + env(safe-area-inset-bottom,0px))}
+  .bagbar{bottom:calc(45px + env(safe-area-inset-bottom,0px))}
+  body{padding-bottom:calc(70px + env(safe-area-inset-bottom,0px))}
+  body.has-sticky{padding-bottom:calc(130px + env(safe-area-inset-bottom,0px))}
+}
+/* the quantity box gives up its middle, not its buttons, where the row is
+   tight: beside Add to bag under 360, and in a bag line on the fold cover,
+   whose picture gives up 10px as well */
+@media (pointer:coarse) and (max-width:359px){ .stepper i{width:28px} }
+@media (pointer:coarse) and (max-width:300px){ .line{grid-template-columns:52px minmax(0,1fr) auto} }
+/* measured at 39 to 43px after the block above, so a few px more: the
+   search box's borders, the desktop footer's 13px links, the strip's
+   links, Clear all and, on a tablet, Remove */
+@media (pointer:coarse){
+  .search input,.search .go{min-height:44px}
+  footer a,footer .soon{padding-top:12px;padding-bottom:12px}
+  .strip .r a::after{inset:-13px -8px}
+  .linkbtn::after{inset:-15px -8px}
+  .line .lrem{margin-top:13px}
+  .line .lrem::after{inset:-13px -8px}
+}
+
+/* ---- short landscape screens: a header that leaves room for the page ------
+   On a landscape phone the strip, the masthead and the category bar's two
+   rows took 159 of 320px before the tab bar, so a product page showed its
+   breadcrumb and nothing else, and once scrolled the sticky category bar,
+   the buy bar and the tab bar held half the screen. Where the screen is
+   500px tall or less and touched, not moused, the strip keeps one line, the
+   masthead loses most of its padding, and the category bar becomes one row
+   that scrolls sideways (its first link at the start, not cut by centring)
+   and stays in the page instead of sticking. The buy bar and the bag's
+   checkout bar lose some padding. */
+@media (max-height:500px) and (orientation:landscape) and (pointer:coarse){
+  .strip .wrap > span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .catnav{position:static}
+}
+@media (max-width:900px) and (max-height:500px) and (orientation:landscape) and (pointer:coarse){
+  .strip .wrap{padding-top:5px;padding-bottom:5px}
+  .mast .wrap{padding-top:3px;padding-bottom:3px}
+  .catnav .wrap{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;justify-content:safe center;padding-top:3px;padding-bottom:3px}
+  .catnav a{flex:none}
+  .stickybuy{padding-top:6px;padding-bottom:6px}
+  .bagbar{padding-top:6px;padding-bottom:6px}
+  .bagbar .btn{min-height:44px}
+}
+/* The big landscape phones (915 and 932 wide) get the desktop layout, where
+   the product page had no buy bar: Add to bag started at the bottom edge of
+   a 412px screen. They get the phone's bar, resting on the bottom edge, and
+   a slimmer strip and masthead. */
+@media (min-width:901px) and (max-height:500px) and (orientation:landscape) and (pointer:coarse){
+  .strip .wrap{height:30px}
+  .mast .wrap{padding-top:6px;padding-bottom:6px}
+  .stickybuy{display:flex;position:fixed;left:0;right:0;bottom:env(safe-area-inset-bottom,0px);z-index:30;
+    gap:12px;align-items:center;justify-content:space-between;background:#fff;border-top:1px solid var(--line);
+    border-radius:var(--r) var(--r) 0 0;box-shadow:0 -2px 10px rgba(23,19,16,.06);
+    padding:6px max(28px,env(safe-area-inset-right,0px)) 6px max(28px,env(safe-area-inset-left,0px))}
+  .stickybuy > div{min-width:0}
+  .stickybuy b{display:block;font-size:16px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .stickybuy span{font-size:14px;color:var(--mut)}
+  .stickybuy .btn{flex-shrink:0;min-height:44px;padding:10px 24px;font-size:15px}
+  .stickybuy.hidden{transform:translateY(calc(100% + 1px + env(safe-area-inset-bottom,0px)))}
+  body.has-sticky{padding-bottom:calc(70px + env(safe-area-inset-bottom,0px))}
+}
+
+/* ---- Arabic on a phone -----------------------------------------------------
+   The only language toggle sat among the strip's links, which phones and
+   portrait tablets hide, so Arabic could not be switched on below 900px. It
+   stays in the strip there, alone at its end, with a 44px target around it
+   (the strip's notice goes to two lines under 375px to make room). */
+@media (max-width:900px){
+  .strip .r{display:flex;flex:none;align-items:center}
+  .strip .r > :not([data-langtoggle]){display:none}
+  .strip .wrap > span:first-child{min-width:0}
+  .strip [data-langtoggle]{position:relative;font-weight:600}
+  .strip [data-langtoggle]::after{content:"";position:absolute;inset:-12px -10px}
+}
+/* English words and numbers inside the Arabic page were drawn in the
+   page's order, not their own: "3 ml · AED 45" read "ml · AED 45 3", "4
+   left" read "left 4", "5 of 6" read "of 6 5", and an English sentence
+   began with its full stop. Each of these runs takes its direction from its
+   own first letter now, English left to right and Arabic right to left.
+   The "more" arrows turn to point left in Arabic (shop.js, the toggle).
+   The bag heading's count is not one of these: its dot has to stay between
+   the title and the count, so shop.js isolates the count alone in a bdi. */
+[dir="rtl"] :is(.sizes button,.permeta,.p .meta,.badge,[data-p3lb],.lmeta,footer .bot span,
+  [data-codnote],.hero h1,.hero p,[data-sbmeta],.added-meta){unicode-bidi:plaintext}
+
+/* With 44px stepper buttons, "Add to bag: AED 75" still took two lines
+   from 360 to 374px; the button gives up side padding there, not size. */
+@media (min-width:360px) and (max-width:374px){ .buy .atcrow .btn{padding-left:14px;padding-right:14px} }
+
+/* ---- the notch on the big landscape phones ---------------------------------
+   An iPhone Plus or Pro Max in landscape (926 to 932px wide) gets the desktop
+   layout, and viewport-fit=cover lets the page run beside its notch there as
+   well, where the strip, the masthead, the category bar, every section, the
+   footer and the home page's banner card kept 28px. They keep 28px as the
+   least they get and take the inset where it is larger. The home page's
+   reassurance band runs edge to edge, its cells padded 20px: its two end
+   cells take the inset on their outer side (iOS reports the same inset on
+   both sides in landscape, so the Arabic mirror needs nothing more). A
+   screen without a notch has an inset of 0, so a desktop computes as
+   before. The buy bar there has its own rule above, and the added-to-bag
+   card lines up with the masthead's bag. */
+@media (min-width:901px) and (orientation:landscape){
+  .wrap,.mast .wrap,.catnav .wrap{padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px))}
+  .hero{width:calc(100% - max(28px,env(safe-area-inset-left,0px)) - max(28px,env(safe-area-inset-right,0px)))}
+  .usp > div:first-child{padding-inline-start:max(20px,env(safe-area-inset-left,0px))}
+  .usp > div:last-child{padding-inline-end:max(20px,env(safe-area-inset-right,0px))}
+}
+
+/* ---- the phone type scale on the big landscape phones ----------------------
+   The 915 and 932 wide phones in landscape get the desktop layout, and with
+   it the desktop's 12 to 13.5px for the bag, the product page, checkout and
+   the collection, where the same phone held upright reads 14 to 16px. Where
+   a screen that wide is 500px tall or less and touched, the phone scale's
+   running sizes apply: 14px secondary text, 15px buttons and summary rows,
+   16px body copy, names, prices and quantities. Headings keep their desktop
+   sizes, which are larger. */
+@media (min-width:901px) and (max-height:500px) and (pointer:coarse){
+  body{font-size:16px}
+  .lmeta,.kv div,.qresult .kv span:last-child,.tabs2 span,.tabs2 button,.sec-h a,.sec-h span.norm,.mini,
+  .pill,.buy .pills .pill,.linkbtn,.pay span,.pay button,.prog .lb,.line .lrem,.note,.buy .belowbuy .note,
+  .buy .pricerow .permeta,.usp b,.fam b,.buy .sizeblock .sizes button,.acctnav a,footer a,footer p,
+  footer .soon,.qopts button span,.toolbar .fhead,.toolbar .count,.codnote,.sec-h .aside,.sum .r.vat,
+  .tiernote,.rmeta,.sendnote,.acct-head .contact,.sharebtn,.ingbox p,.added-meta,.added-q{font-size:14px}
+  .p .notes,.promo span:not(.none),.notestop p{font-size:14px;line-height:1.45}
+  .btn,.btn.sm,.p .btn.sm,.hero .btn,.added-b .btn,.sum .r,.tiers .t b,.qback{font-size:15px}
+  .p .nm{font-size:16px;line-height:1.3}
+  .lname,.lprice,.p .pr b,.stepper i,.promo b,.reel span,.refbox .code,.tier,.emptybody,.consent,.optin,
+  .fbox label,.qopts button,.story span,.hero p,.quizband p,.band p,.intro,.buy p{font-size:16px}
+  /* four product cards to a row were 104px wide in the collection and 103px
+     beside the gift box, narrower than on a 320px phone: too narrow for a
+     size chip or Add to bag on one line. Three to a row. */
+  .grid.g4,.two .grid.g4{grid-template-columns:repeat(3,minmax(0,1fr))}
+  /* the quiz result's band: the larger paragraph beside it squeezed "Choose
+     three" onto two lines; the button keeps its width and the words wrap */
+  .band .btn{flex-shrink:0}
+}
+
+/* ---- the bag's progress rows: a gap between the label and its status -------
+   Each row is a label and its status ("Unlocked", "AED 75 to go", "5 of 6")
+   pushed apart on one flex line, with nothing between them. Once the
+   phone's larger type wrapped the label, the two met: "Free UAE delivery
+   overUnlocked" at 280, and in Arabic "Unlocked" ran into the amount. The
+   status keeps one line and at least 10px from the label, which wraps. */
+.prog .lb{column-gap:10px}
+.prog .lb > :last-child{flex:none;white-space:nowrap}
+
+/* ---- the phone masthead's icons: 44px at every width -----------------------
+   Under 341px search, wishlist and bag were 40px wide, under the 44px every
+   other touch target has, since the logo, three 44px icons and the
+   masthead's padding did not fit. The masthead gives up 4px of side padding
+   and its gap instead, and the logo takes what the icons leave, at its own
+   shape: all of its 162px at 320, 122px on the fold cover. */
+@media (max-width:340px){
+  .mast .wrap{padding-left:10px;padding-right:10px;gap:6px}
+  .acts .act{min-width:44px}
+  .logo .brandmark{height:auto;width:auto;max-height:26px;max-width:calc(100vw - 158px)}
+}
+
+/* ---- the collection's sort row with a reader's larger text ------------------
+   With a phone's text size at 200%, the product count and the sort box
+   stayed side by side on one line 432px wide, so the collection became
+   448px wide on a 390px phone and the phone zoomed the whole page out. The
+   row may wrap, and the sort box may shrink to the row, its label cut
+   short, rather than push the page out. At the usual sizes both still fit
+   on one line and nothing moves. */
+@media (max-width:900px){
+  .toolbar > div:has(> .sel){flex-wrap:wrap;min-width:0;max-width:100%}
+  .toolbar .sel{min-width:0;max-width:100%}
+  .toolbar .sel select{min-width:0;max-width:100%;text-overflow:ellipsis}
+}
+
+/* ---- the product page's buy bar: one line of details -----------------------
+   The line under the name ("AED 75 · 3 ml / 6 ml") wrapped at 14px on the
+   fold cover, and a gift set's longer one at 320 and 360 too, so the bar
+   grew from 63 to 86px; with the category bar and the tab bar, fixed bars
+   held a third of the fold cover once scrolled. It keeps one line, as the
+   name above it does, and ends in an ellipsis where it is cut; the price
+   comes first. */
+@media (max-width:900px){
+  .stickybuy span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}
+
+/* ---- the bag's checkout bar with a reader's larger text ---------------------
+   The total held one line beside Checkout. With a phone's text at 200% it
+   needed 195px in a 164px box and ran on under the button. It wraps
+   instead, the amount under its currency where it has to, and the bar
+   grows; at the usual sizes it still fits one line and nothing moves. */
+@media (max-width:900px),(max-height:500px){
+  .bagbar .bb-t b{white-space:normal;overflow-wrap:anywhere}
+}
+/* Two size chips side by side on a card broke "3 ml · AED 45" over two to
+   four lines on the touch screens above 900px (the big landscape phones and
+   the tablets). They stack there as they do on a phone, each on one line. */
+@media (min-width:901px) and (pointer:coarse){
+  .p .sizes{flex-direction:column}
 }
 /* Category shelf without circles. Each picture is a cut-out standing on the
    page in the square the circle used to fill, with no disc, ring or shadow

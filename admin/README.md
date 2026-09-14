@@ -186,6 +186,7 @@ ports between 4700 and 4799; 4310 is your preview.
 | `test_publish.py` | Review, commit and go live, against throwaway repositories with a temporary bare remote | `ADMIN_PUBLISH_PORT` | 4782 |
 | `test_bag_path.py` | The storefront's way to checkout: the panel after Add to bag on a phone and a desktop, and the bag page's checkout bar; needs Chrome | `ADMIN_BAG_PATH_PORT` | 4791 |
 | `test_signin.py` | Shopper sign-in against a stand-in for Auth0 on a phone and a desktop: the account page's panel, Sign in and Create account, refused callbacks, an expired profile, Sign out, the header and tab bar, the Settings fields, and the GitHub Pages, Netlify and bgscorner.com addresses against the lists in Auth0; needs Chrome | `ADMIN_SIGNIN_PORT` and `ADMIN_SIGNIN_OIDC_PORT` | 4792 and 4793 |
+| `test_phone_layout.py` | The storefront on phones and other touch screens: the notch, type on the big landscape phones, Arabic word order, the masthead, the buy bar and the bag at 200% text; needs Chrome | `ADMIN_PHONE_LAYOUT_PORT` | 4792 |
 
 The Chrome files and tests are skipped when Chrome is not installed.
 Helpers: `box.py` (the temporary clone and its server), `cdp_pipe.py`
@@ -201,6 +202,31 @@ Helpers: `box.py` (the temporary clone and its server), `cdp_pipe.py`
 - `admin/devtools/dom_diff.py --base REV --ports A,B`: renders the pages of
   both in headless Chrome after their scripts run and compares what a
   visitor gets.
+- `admin/devtools/viewport_audit.py`: the storefront at 28 screen sizes
+  (portrait and landscape phones, the fold closed and open, tablets,
+  desktops, ultrawide) and 29 page states (every page, each category, a
+  search, the filter drawer, five product pages and one just after Add to
+  bag, the bag empty, with one line and with five, the quiz and its result,
+  and index, product and bag in Arabic), in headless Chrome with phones and
+  tablets emulated as touch screens. `list` shows the matrix. `run` serves
+  a checkout and works through the jobs in batches that fit a two-minute
+  limit; repeat the same command until it exits 0 (3 means jobs remain):
+
+  ```bash
+  perl -e 'alarm shift; exec @ARGV' 110 /usr/bin/python3 admin/devtools/viewport_audit.py run \
+      --clone /path/to/checkout --port 4970 --out /tmp/va
+  ```
+
+  `--viewports` and `--pages` take sets and names (`phones`, `landscape`,
+  `tablets`, `desktops`, `touch`; `pdp`, `cart`, `coll`, `ar`, or one state
+  like `cart-1`), `--redo` runs a selection again. Each job saves its
+  measurements and a first-screen screenshot; `report --out /tmp/va`
+  rebuilds `report.txt` (issues by type and element: sideways scrolling,
+  text under 12px, fields under 16px, tap targets under 44px, bars' share of
+  the screen, covered actions, the bag's Checkout, pictures, clipped or
+  overlapping text, lost spaces, wrapping labels, the tab bar, the language
+  toggle, Arabic order and arrows, script errors), `matrix.txt` and
+  `checkout.txt`. The file's docstring has every option.
 
 More: `DESIGN.md` (decisions), `docs/PLAN.md` (architecture),
 `docs/HARDCODED.md` (what is still typed into the code),

@@ -63,9 +63,10 @@ structured-corner-v2/
 │   ├── ui/                 app.js (navigation and router), lib/, components/ (crop tool,
 │   │                       photo grid, upload fields), screens/ (one module per screen),
 │   │                       css/ (one stylesheet per screen that needs its own)
-│   ├── tests/              13 test files, one port each, plus box.py and cdp_pipe.py
+│   ├── tests/              14 test files, one port each, plus box.py and cdp_pipe.py
 │   └── devtools/           compare_build.py and dom_diff.py: prove a content move left
-│                           the pages as they were
+│                           the pages as they were; viewport_audit.py: every page state
+│                           at 28 screen sizes in headless Chrome
 └── flow/                   ←←← THE SITE. Its HTML, favicon.ico, robots.txt and assets/ are published.
     ├── build.py            the generator. Run it to rebuild every page.
     ├── server.py           a two-line launcher for admin/server.py (python3 flow/server.py 4310)
@@ -627,6 +628,68 @@ domain on 2026-09-10.
   `fake_oidc.py`, a stand-in provider, and checks the GitHub Pages, Netlify and bgscorner.com
   addresses against the application's lists in Auth0 without calling it. There is no backend:
   nothing about a shopper is kept beyond their own browser.
+- **2026-09-14, phones at every size.** The owner found the text too small on a phone.
+  Measured first with a new tool, `admin/devtools/viewport_audit.py`: 28 screen sizes (the
+  fold closed and open, portrait and landscape phones, tablets, desktops, ultrawide) and 29
+  page states, with phones and tablets emulated as touch screens. Before, every phone and
+  tablet had text under 12px (8.5px badges, 9px card meta lines, 9.5px labels), the fold
+  cover (280px) scrolled sideways and pushed the tab bar under the screen, Arabic could not
+  be switched on below 900px, and in Arabic "3 ml · AED 45" read "ml · AED 45 3". The
+  drawer button read "Show33products", touch targets were 18 to 40px, and on a landscape
+  phone the header took half the screen. Now:
+  - build.py's 34 inline font sizes are classes (`pagetitle`, `intro`, `subhead`, `codnote`
+    and so on) carrying the same values, so a phone rule can reach them. Desktop computed
+    styles were compared element by element before and after: unchanged.
+  - One phone type scale up to 900px, in a commented block at the end of `flow.css`: 16px
+    body copy, product names, card and bag prices and every field (iOS no longer zooms
+    into search), 14px secondary text, 15px buttons, 12px labels as the floor, 22px section
+    headings and 26px page and product titles. Card size chips stay 12px and stack; the
+    category pills are 13px (12px at 370 and below). Wide touch screens get the 12px floor
+    and 16px fields; a desktop with a mouse is unchanged.
+  - Touch targets are 44px on touch screens. The tab bar is 45px there, and the sticky buy
+    bar, the added-to-bag sheet and the bag's checkout bar rest on it.
+  - Short landscape screens get a one-line strip, a slimmer masthead and the category bar
+    as one scrolling row that does not stick; the 915 and 932 wide phones, which get the
+    desktop layout, get the product page's buy bar.
+  - Arabic: the toggle stays in the strip on phones, English runs with numbers keep their
+    own order, and the "more" arrows turn to point left.
+  - The final audit, all 734 jobs: no text under 12px on phones and tablets, no sideways
+    scrolling, no primary action covered, the bag's Checkout and Add to bag in reach at
+    every size, and no script errors. Checkout, payments, VAT, COD and the pricing formulas
+    are untouched.
+- **2026-09-14, the review of the phone work.** A second pass over the matrix, the desktop and
+  the keyboard found 14 problems. Each was confirmed on the code first and fixed in its own
+  commit, tested in `admin/tests/test_phone_layout.py` (new) or `test_bag_path.py`:
+  - The notch. With `viewport-fit=cover` the page pads itself: the product page's buy bar on
+    landscape phones, and on the 926 to 932 wide phones in the desktop layout the strip,
+    masthead, category bar, sections, footer, banner card and the reassurance band's end
+    cells take the inset where it is larger than their padding; the added-to-bag card is
+    never nearer the edge than the masthead. Desktops compute as before. Emulated insets
+    only, still not seen on an iPhone.
+  - The 915 and 932 wide landscape phones get the phone type scale (14px secondary, 15px
+    buttons, 16px body and prices) in the desktop layout, three product cards to a row, and
+    card size chips stack on every touch screen above 900px.
+  - Arabic: the bag heading's count sits in a `bdi`, so the dot stays between the title and
+    the count, and a pressed Add's label follows the language toggle (`bgsText`,
+    `bgsEnglish`). The toggle now fires `bgs:lang` for text a script writes itself.
+  - The bag's progress rows keep a 10px gap between label and status; the masthead's icons
+    are 44px under 341px too (the logo is 122px wide on the fold cover); the buy bar keeps
+    one line of details; the landscape panel's heading and subtotal and the bag bar's Total
+    stay 14px.
+  - Keyboard: the bag bar keeps its focused Checkout until focus leaves it, and a sheet
+    opened from the buy bar rests on it instead of covering the focused button. The
+    desktop card is placed again as the page scrolls.
+  - With a phone's text at 200%, the bag bar's total wraps instead of running under
+    Checkout, and the collection's sort row wraps (390px wide again, from 448). Not fixed:
+    the product page still measures 409px wide on a 390px phone at 200%; the buy bar, which
+    the review blamed, is not the cause (the page is as wide with it hidden), and the cause
+    was not found. The collection on the fold cover at 200% is 324px wide.
+  - The final audit, all 734 jobs, no errors and no stop criterion hit: buttons whose label
+    wraps in 38 cells (from 80), bars over 30% of the screen in 10 (from 15), and 3 kinds
+    of tap target under 44px (from 7): the category pills (decision 26), the strip's
+    language toggle at 42px wide on the touch screens above 900px, and the gallery's
+    thumbnails at 43px on phones. The labels that still wrap are the quiz's two-line
+    options, three size chips at 280 and at 1280x800, and a gift set's Add to bag at 320.
 
 ---
 
@@ -717,6 +780,14 @@ raw background Bash. Use the Browser pane's `preview_start` with the `bgs-flow` 
   appending; the Publish screen showed "null" on an empty card until it did.
 - **Key presses in the hidden Browser pane arrive with an empty key.** Keyboard checks there
   prove nothing; drive keys through headless Chrome (`admin/tests/cdp_pipe.py`) instead.
+- **An inline style in build.py outranks every rule in `flow.css`.** The phone type scale
+  could not reach 34 sizes build.py wrote inline until they became classes. Give a size a
+  class, not a `style` attribute.
+- **The tab bar is 45px on touch screens and 39px with a mouse.** The sticky buy bar, the
+  added-to-bag sheet and the bag's checkout bar sit at `calc(45px + env(safe-area-inset-bottom))`
+  in the `(pointer:coarse) and (max-width:900px)` block; change the four together.
+- **`viewport_audit.py run` works in batches.** Repeat the same command until it exits 0;
+  use a fresh `--out` directory for each audit, or `--redo` to run a selection again.
 
 ---
 
@@ -811,8 +882,9 @@ raw background Bash. Use the Browser pane's `preview_start` with the `bgs-flow` 
 20. **Arabic follows the exact English.** The Arabic dictionary is keyed by the exact English
    text, so editing a label drops its Arabic. Text shop.js writes after load (the
    added-to-bag panel, a pressed Add) is looked up the same way through `bgsAr`, and a
-   counted text by its template (`Qty {n}`, `{n} items`). The bag heading's count and the
-   volume discount row still read in English in Arabic.
+   counted text by its template (`Qty {n}`, `{n} items`). The bag heading's count reads in
+   Arabic through `{n} items` and is written again when the language changes; the volume
+   discount row still reads in English in Arabic.
 21. **Three quiz profiles can never win.** No combination of quiz answers matches Suit Up,
    Amore or Soleil Frais.
 22. **Checkout and order confirmed state the delivery rules in their own words.** Both pages
@@ -832,6 +904,20 @@ raw background Bash. Use the Browser pane's `preview_start` with the `bgs-flow` 
    point bgscorner.com and www at the host before their callbacks can be reached; phone
    (Twilio) and Apple need no site change. How long a shopper stays signed in is the
    application's ID token expiration.
+25. **Desktop labels stay 9 to 10px.** Eyebrows, the card meta line and the badges are as they
+   were with a mouse; only touch screens got the 12px floor. Raise them on desktop too?
+26. **The category pills are 24px tall on phones**, under the 44px the other controls have: at
+   44px the bar's two rows would cost 40px of every first screen and of the screen once
+   scrolled, where the bar sticks.
+27. **Some pictures are drawn larger than their files** on 3x screens: the logo on the big
+   landscape phones (a 486px file), the phone banner on landscape phones (1110px) and bag
+   thumbnails (160px) on wide touch screens. Larger copies from `tools/make_derivatives.py`
+   would fix it.
+28. **English left in Arabic mode.** About 170 pieces of text (hero, strip, headings, bag
+   lines) stay English in Arabic; their Arabic has to come from the owner, in Translations.
+   They now read in the right order.
+29. **The home page's second row of category pictures** is no longer on the first screen at
+   375x812: the larger hero text took the room.
 
 ---
 

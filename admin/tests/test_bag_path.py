@@ -200,6 +200,30 @@ class BagPath(unittest.TestCase):
         self.assertEqual(self.js("localStorage.getItem('bgs_cart')"), '[{"id":"royal-amber","qty":4}]')
         self.no_page_errors()
 
+    def test_an_add_from_the_buy_bar_leaves_its_button_in_sight(self):
+        for w, h in ((390, 844), (667, 375)):
+            self.view(w, h)
+            self.open("product.html?p=edward-the-black-prince", bag=[])
+            self.js("scrollTo(0, 1400)")
+            self.c.wait("!document.querySelector('.stickybuy').classList.contains('hidden')", 5, what="the buy bar")
+            time.sleep(0.3)
+            self.click(".stickybuy [data-add]", scroll=False)
+            self.wait_open()
+            s = self.js("""(() => { const b = document.querySelector('.stickybuy'), a = b.querySelector('[data-add]'), r = a.getBoundingClientRect();
+              const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+              return {bar: b.getBoundingClientRect().top, focused: document.activeElement === a, covered: !!(hit && hit.closest('.added'))}; })()""")
+            p = self.panel()
+            self.assertAlmostEqual(p["bottom"], s["bar"], delta=1, msg="the sheet rests on the buy bar at %dx%d" % (w, h))
+            self.assertEqual((s["focused"], s["covered"]), (True, False), "the pressed button keeps the focus, in sight")
+            # the inline Add still opens the sheet on the tab bar
+            self.c.key("Escape")
+            self.wait_closed()
+            self.click(".atcrow [data-add]")
+            self.wait_open()
+            p = self.panel()
+            self.assertAlmostEqual(p["bottom"], p["tab"], delta=1, msg="the sheet rests on the tab bar at %dx%d" % (w, h))
+        self.no_page_errors()
+
     def test_a_gift_box_pick_opens_no_panel(self):
         self.view(390, 844)
         self.open("gift-box.html", bag=[])
@@ -223,6 +247,33 @@ class BagPath(unittest.TestCase):
         self.assertEqual([l[0] for l in p["links"]], [ar("View bag"), ar("Checkout")])
         self.assertEqual((p["close"], p["qty"]), (ar("Close"), ar("Qty {n}").replace("{n}", "1")))
         self.assertAlmostEqual(p["bottom"], p["tab"], delta=1)
+        self.no_page_errors()
+
+    def test_an_add_label_follows_the_language_toggle(self):
+        self.view(390, 844)
+        ar = lambda en: self.js("window.BGS_AR[%s]" % J(en))
+        toggle = "document.querySelector('[data-langtoggle]').click()"
+        # pressed in Arabic, then back to English: the buy bar's Add reads English again
+        self.open("product.html?p=vibe", bag=[])
+        label = self.js("document.querySelector('.stickybuy [data-add]').textContent")
+        self.js(toggle)
+        self.js("document.querySelector('.stickybuy [data-add]').click()")
+        self.assertEqual(self.js("document.querySelector('.stickybuy [data-add]').textContent"), ar("Added"))
+        time.sleep(1.5)
+        self.assertEqual(self.js("document.querySelector('.stickybuy [data-add]').textContent"), ar(label))
+        self.js(toggle)
+        self.assertEqual(self.js("document.documentElement.lang"), "en")
+        self.assertEqual(self.js("document.querySelector('.stickybuy [data-add]').textContent"), label)
+        # pressed in English and switched to Arabic while it reads Added: it comes back in Arabic
+        self.open("index.html", bag=[])
+        card = self.js("document.querySelector('.p [data-add]').textContent")
+        self.js("document.querySelector('.p [data-add]').click()")
+        self.js(toggle)
+        self.assertEqual(self.js("document.querySelector('.p [data-add]').textContent"), ar("Added"))
+        time.sleep(1.5)
+        self.assertEqual(self.js("[...document.querySelectorAll('.p [data-add]')].slice(0, 3).map((b) => b.textContent)"), [ar(card)] * 3)
+        self.js(toggle)
+        self.assertEqual(self.js("[...document.querySelectorAll('.p [data-add]')].slice(0, 3).map((b) => b.textContent)"), [card] * 3)
         self.no_page_errors()
 
     # ---- the panel on a desktop ----------------------------------------------
@@ -261,6 +312,30 @@ class BagPath(unittest.TestCase):
         self.assertEqual(p["qty"], "Qty 2")
         self.no_page_errors()
 
+    def test_on_a_desktop_the_card_follows_the_scroll(self):
+        self.view(1440, 900, phone=False)
+        self.open("product.html?p=royal-amber", bag=[])
+        self.click(".atcrow [data-add]", scroll=False)
+        self.wait_open()
+        bag = lambda: self.js("document.querySelector('.mast a.act[href=\"cart.html\"]').getBoundingClientRect().bottom")
+        p = self.panel()
+        self.assertTrue(p["anchored"])
+        self.assertAlmostEqual(p["top"], bag() + 12, delta=1)
+        # the masthead scrolls away: the card moves under the category bar, without its caret
+        self.js("scrollTo(0, 520)")
+        time.sleep(0.4)
+        p = self.panel()
+        nav = self.js("document.querySelector('.catnav').getBoundingClientRect().bottom")
+        self.assertEqual((p["open"], p["anchored"]), (True, False))
+        self.assertAlmostEqual(p["top"], max(0, nav) + 12, delta=1)
+        # back at the top it hangs under the bag again, clear of the masthead's icons
+        self.js("scrollTo(0, 0)")
+        time.sleep(0.4)
+        p = self.panel()
+        self.assertTrue(p["anchored"])
+        self.assertAlmostEqual(p["top"], bag() + 12, delta=1)
+        self.no_page_errors()
+
     # ---- the checkout bar on the bag page --------------------------------------
     def bar_hands_off(self, w, h):
         self.view(w, h)
@@ -292,6 +367,27 @@ class BagPath(unittest.TestCase):
 
     def test_the_bag_bar_hands_off_to_the_summary_on_a_landscape_phone(self):
         self.bar_hands_off(844, 390)
+
+    def test_the_bag_bar_keeps_keyboard_focus_until_it_leaves(self):
+        self.view(390, 844)
+        self.open("cart.html", bag=FIVE)
+        self.c.wait("document.querySelector('[data-bagbar]').classList.contains('on')", 5, what="the bar on load")
+        self.js("document.querySelector('[data-bagbar] a').focus()")
+        # the summary's Checkout comes into sight while the bar's has focus
+        self.js("document.querySelector('[data-cartsummary] [data-checkout]').scrollIntoView({block: 'center'})")
+        time.sleep(0.6)
+        s = self.js(BAR)
+        self.assertEqual((s["on"], s["hidden"], s["visible"]), (True, "false", "visible"), "the bar stays while it holds focus")
+        self.assertTrue(self.js("document.activeElement === document.querySelector('[data-bagbar] a')"), "focus stays on its Checkout")
+        # Tab goes on to the next control, not back to the top of the page
+        self.c.key("Tab")
+        time.sleep(0.3)
+        self.assertFalse(self.js("document.querySelector('[data-bagbar]').contains(document.activeElement)"))
+        self.assertTrue(self.js("document.activeElement !== document.body && !!document.activeElement.closest('footer')"),
+                        "focus went on to the footer")
+        s = self.js(BAR)
+        self.assertEqual(s["hidden"], "false" if s["on"] else "true")
+        self.no_page_errors()
 
     def test_a_desktop_bag_has_no_bar(self):
         self.view(1440, 900, phone=False)
