@@ -2439,6 +2439,19 @@ h2.pagetitle,.sec-h h2.pagetitle{font-size:26px}
   .acts .act{min-width:44px}
   .logo .brandmark{height:auto;width:auto;max-height:26px;max-width:calc(100vw - 158px)}
 }
+
+/* ---- the collection's sort row with a reader's larger text ------------------
+   With a phone's text size at 200%, the product count and the sort box
+   stayed side by side on one line 432px wide, so the collection became
+   448px wide on a 390px phone and the phone zoomed the whole page out. The
+   row may wrap, and the sort box may shrink to the row, its label cut
+   short, rather than push the page out. At the usual sizes both still fit
+   on one line and nothing moves. */
+@media (max-width:900px){
+  .toolbar > div:has(> .sel){flex-wrap:wrap;min-width:0;max-width:100%}
+  .toolbar .sel{min-width:0;max-width:100%}
+  .toolbar .sel select{min-width:0;max-width:100%;text-overflow:ellipsis}
+}
 /* Two size chips side by side on a card broke "3 ml · AED 45" over two to
    four lines on the touch screens above 900px (the big landscape phones and
    the tablets). They stack there as they do on a phone, each on one line. */

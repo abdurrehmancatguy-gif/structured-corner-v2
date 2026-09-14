@@ -238,6 +238,34 @@ class PhoneLayout(unittest.TestCase):
             self.assertLessEqual(m["wide"], w, "no sideways scrolling at %d" % w)
         self.no_page_errors()
 
+    # ---- a reader's own text size -------------------------------------------------
+    BIG = ("document.addEventListener('DOMContentLoaded', () => { const s = document.createElement('style'); "
+           "s.textContent = 'html{-webkit-text-size-adjust:200% !important;text-size-adjust:200% !important}'; "
+           "document.head.appendChild(s); });")
+
+    def big_text(self):
+        """Text at 200%, as a phone's own text size setting enlarges it; returns
+        the script's id for Page.removeScriptToEvaluateOnNewDocument."""
+        return self.c.call("Page.addScriptToEvaluateOnNewDocument", {"source": self.BIG})["identifier"]
+
+    SORTROW = """(() => { const d = document.querySelector('.toolbar:has(.sel) > div:has(> .sel)');
+      const a = d.querySelector('.count').getBoundingClientRect(), b = d.querySelector('.sel').getBoundingClientRect();
+      return {oneLine: b.top < a.bottom && a.top < b.bottom, right: Math.max(a.right, b.right)}; })()"""
+
+    def test_the_collection_fits_a_phone_at_200_percent_text(self):
+        self.view(390, 844)
+        self.open("collection.html")
+        self.assertTrue(self.js(self.SORTROW)["oneLine"], "the count and the sort box share a line at the usual size")
+        sid = self.big_text()
+        try:
+            self.open("collection.html")
+            self.assertEqual(self.js("getComputedStyle(document.body).fontSize"), "32px", "the text is at 200%")
+            self.assertEqual(self.js("innerWidth"), 390, "the page does not widen past the phone")
+            self.assertLessEqual(self.js(self.SORTROW)["right"], 390)
+        finally:
+            self.c.call("Page.removeScriptToEvaluateOnNewDocument", {"identifier": sid})
+        self.no_page_errors()
+
 
 if __name__ == "__main__":
     unittest.main()
