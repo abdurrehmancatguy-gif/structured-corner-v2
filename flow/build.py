@@ -1299,9 +1299,15 @@ COPY_JS["cart"] = {
     "line": {k: js_text("cart.line." + k) for k in ("no_image", "remove")},
     "gift_line": {"placeholder": js_text("cart.gift_line.placeholder"),
                   "meta": js_text("cart.gift_line.meta", allow=("amount",))},
-    "summary": {"free": js_text("cart.summary.free")},
-    # what an Add to bag button says for a moment after it is pressed, on every page
-    "added": {"button": js_text("cart.added.button")},
+    # the summary's words shop.js writes too: the added-to-bag panel's
+    # subtotal row and Checkout button
+    "summary": {"free": js_text("cart.summary.free"), "checkout": js_text("cart.summary.checkout"),
+                "subtotal": js_text("cart.summary.subtotal")},
+    # the panel that opens after an Add on every page, and what the pressed
+    # button says for a moment
+    "added": {"title": js_text("cart.added.title"), "qty": js_text("cart.added.qty", need=("n",)),
+              "view_bag": js_text("cart.added.view_bag"), "close": js_text("cart.added.close"),
+              "button": js_text("cart.added.button")},
 }
 
 cart = """

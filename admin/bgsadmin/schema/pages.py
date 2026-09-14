@@ -29,7 +29,8 @@ GROUPS = [
     {"key": "gift-box", "label": GIFT_BOX, "page": "gift-box.html",
      "about": "The gift box builder: its heading, slots, summary and gift options. The box fee and its discount are under Discounts."},
     {"key": "bag", "label": BAG, "page": "cart.html",
-     "about": "The bag page: its progress bars, lines, empty state and summary. "
+     "about": "The bag page: its progress bars, lines, empty state and summary, and the panel that opens "
+              "after Add to bag on every page. "
               "The payment chips and the cash on delivery note belong to checkout and stay in code."},
     {"key": "track-order", "label": TRACK, "page": "track-order.html",
      "about": "The order tracking page and the replies its button gives."},
@@ -382,14 +383,24 @@ _BAG = [
     text("/cart/empty/text", "Empty bag", BAG, 60, section="Empty bag"),
     text("/cart/empty/cta_label", "Button", BAG, 30, section="Empty bag"),
     href("/cart/empty/cta_href", "Its link", BAG, section="Empty bag"),
-    text("/cart/summary/subtotal", "Subtotal row", BAG, 20, section="Summary"),
+    text("/cart/summary/subtotal", "Subtotal row", BAG, 20, section="Summary",
+         help="Also the bag row of the panel that opens after Add to bag."),
     text("/cart/summary/discount", "Volume discount row", BAG, 30, section="Summary",
          help="The rate after it follows the bag."),
     text("/cart/summary/delivery", "Delivery row", BAG, 20, section="Summary"),
     text("/cart/summary/free", "Free", BAG, 20, section="Summary",
          help="For free delivery, and for a bag line that costs nothing, such as the free gift."),
     text("/cart/summary/total", "Total row", BAG, 20, section="Summary"),
-    text("/cart/summary/checkout", "Checkout button", BAG, 30, section="Summary"),
+    text("/cart/summary/checkout", "Checkout button", BAG, 30, section="Summary",
+         help="Also the Checkout button of the panel that opens after Add to bag."),
+    text("/cart/added/title", "Heading", BAG, 40, section="Added to bag panel",
+         help="Opens after Add to bag on any page, with the product, the bag count and subtotal, a View bag "
+              "button and the Summary Checkout button."),
+    text("/cart/added/qty", "Quantity line", BAG, 20, section="Added to bag panel", pattern=COUNT,
+         patternHelp=COUNT_HELP, help="Under the product name. {n} prints how many of it the bag now holds."),
+    text("/cart/added/view_bag", "View bag button", BAG, 20, section="Added to bag panel"),
+    text("/cart/added/close", "Close button", BAG, 20, section="Added to bag panel",
+         help="Read out by screen readers; the button itself shows a cross."),
     text("/cart/added/button", "Add button, just pressed", BAG, 20, section="Added to bag panel",
          help="What an Add to bag button says for a moment after it is pressed."),
 ]
