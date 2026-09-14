@@ -16,7 +16,8 @@ FRAME = r"(?!banner-)(?!.*-card-360\.jpg$)[a-z0-9]+(?:-[a-z0-9]+)*-(?!600\.jpg$)
 FIELDS = [
     {"path": "/name", "type": "text", "label": "Title", "required": True, "maxLength": 60},
     {"path": "/category", "type": "enum", "label": "Category", "required": True, "enum": ALL,
-     "enumLabels": ["Attars and perfume oils", "EDP sprays", "Bakhoor", "Gift sets"],
+     # the names the shop shows today (navigation.json); the stored keys stay as they are
+     "enumLabels": ["Oud Attar", "EDP Sprays", "Bakhoor", "Gift Sets"],
      "help": "The category decides which fields the card and the product page use."},
     {"path": "/published", "type": "bool", "label": "Active",
      "help": "Off is a draft: gone from the shop at the next save. It is still readable in the public GitHub repository."},

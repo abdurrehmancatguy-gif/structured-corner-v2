@@ -6,7 +6,8 @@ import { icon } from "../icons.js";
 import { banner, formDialog, toast, guard } from "../lib/ui.js";
 import { iconBtn } from "../lib/forms.js";
 
-const CATS = { attars: "Attars", edp: "EDP sprays", bakhoor: "Bakhoor", "gift-sets": "Gift sets" };
+// the names the shop shows today (navigation.json); the stored keys stay as they are
+const CATS = { attars: "Oud Attar", edp: "EDP Sprays", bakhoor: "Bakhoor", "gift-sets": "Gift Sets" };
 
 function priceText(d) {
   if (Array.isArray(d.sizes) && d.sizes.length > 1) {
