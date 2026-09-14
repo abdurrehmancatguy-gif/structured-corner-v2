@@ -904,9 +904,9 @@ home = """
 </div>
 
 %(catstrip)s
-<div class="usp">
+<div class="usp"><div class="wrap usp-row">
   %(usp)s
-</div>
+</div></div>
 
 %(reels)s
 <section style="padding-top:26px;padding-bottom:0"><div class="wrap">
