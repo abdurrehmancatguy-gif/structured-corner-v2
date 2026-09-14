@@ -2286,3 +2286,14 @@ h2.pagetitle,.sec-h h2.pagetitle{font-size:26px}
    whose picture gives up 10px as well */
 @media (pointer:coarse) and (max-width:359px){ .stepper i{width:28px} }
 @media (pointer:coarse) and (max-width:300px){ .line{grid-template-columns:52px minmax(0,1fr) auto} }
+/* measured at 39 to 43px after the block above, so a few px more: the
+   search box's borders, the desktop footer's 13px links, the strip's
+   links, Clear all and, on a tablet, Remove */
+@media (pointer:coarse){
+  .search input,.search .go{min-height:44px}
+  footer a,footer .soon{padding-top:12px;padding-bottom:12px}
+  .strip .r a::after{inset:-13px -8px}
+  .linkbtn::after{inset:-15px -8px}
+  .line .lrem{margin-top:13px}
+  .line .lrem::after{inset:-13px -8px}
+}
