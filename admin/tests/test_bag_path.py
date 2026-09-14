@@ -288,6 +288,30 @@ class BagPath(unittest.TestCase):
         self.assertEqual(p["qty"], "Qty 2")
         self.no_page_errors()
 
+    def test_on_a_desktop_the_card_follows_the_scroll(self):
+        self.view(1440, 900, phone=False)
+        self.open("product.html?p=royal-amber", bag=[])
+        self.click(".atcrow [data-add]", scroll=False)
+        self.wait_open()
+        bag = lambda: self.js("document.querySelector('.mast a.act[href=\"cart.html\"]').getBoundingClientRect().bottom")
+        p = self.panel()
+        self.assertTrue(p["anchored"])
+        self.assertAlmostEqual(p["top"], bag() + 12, delta=1)
+        # the masthead scrolls away: the card moves under the category bar, without its caret
+        self.js("scrollTo(0, 520)")
+        time.sleep(0.4)
+        p = self.panel()
+        nav = self.js("document.querySelector('.catnav').getBoundingClientRect().bottom")
+        self.assertEqual((p["open"], p["anchored"]), (True, False))
+        self.assertAlmostEqual(p["top"], max(0, nav) + 12, delta=1)
+        # back at the top it hangs under the bag again, clear of the masthead's icons
+        self.js("scrollTo(0, 0)")
+        time.sleep(0.4)
+        p = self.panel()
+        self.assertTrue(p["anchored"])
+        self.assertAlmostEqual(p["top"], bag() + 12, delta=1)
+        self.no_page_errors()
+
     # ---- the checkout bar on the bag page --------------------------------------
     def bar_hands_off(self, w, h):
         self.view(w, h)

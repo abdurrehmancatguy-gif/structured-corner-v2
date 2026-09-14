@@ -1554,7 +1554,8 @@ bgsRun(function () {
    away. There is one panel: an Add while it is open refreshes it. It never
    takes focus and never closes on a timer, since it holds actions (WCAG
    2.2.1): its cross, Escape, a click or tap anywhere else, or leaving the
-   page close it, and scrolling leaves it be. Tab from the pressed button
+   page close it, and scrolling leaves it open (a card on a wide screen
+   moves with it, see place()). Tab from the pressed button
    goes into it, and Tab from its cross goes on to what followed the button.
    A screen reader hears it through a polite live region.
 
@@ -1776,6 +1777,16 @@ bgsRun(function () {
   });
 
   addEventListener("resize", function () { if (isOpen()) place(); });
+  /* A card on a wide screen stayed where it opened while the page scrolled:
+     its caret pointed at nothing, and one opened under the category bar
+     sat over the masthead's icons once the page was back at the top. It is
+     placed again as the page scrolls, once a frame at most. */
+  var placing = false;
+  addEventListener("scroll", function () {
+    if (placing || !isOpen()) return;
+    placing = true;
+    requestAnimationFrame(function () { placing = false; if (isOpen()) place(); });
+  }, { passive: true });
   /* a page restored from the back/forward cache opens without it */
   addEventListener("pagehide", function () { hide(true); });
 });
