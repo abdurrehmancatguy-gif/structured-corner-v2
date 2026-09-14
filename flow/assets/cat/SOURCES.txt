@@ -10,7 +10,7 @@ content/navigation.json ("image"), not in the stylesheet.
   amber.jpg   Pexels photos/9127154            Shop by Occasion
   corporate.png  skyscraper cut-out, supplied in chat   (was Corporate Gifting, no longer shown)
   gift-box.png  cut out of img/banner-4.jpg (the Amore, Vibe and Be Mine trio in its box)   Build Your Gift Box
-  corporate-gifts-216.jpg  Pexels photos/33629670 (3D Render: black gift boxes, gold ribbons)   Corporate Gifting
+  corporate-gifts.jpg  Pexels photos/33629670 (3D Render: black gift boxes, gold ribbons)   Corporate Gifting (its -216 copy is shown)
 
 bak.png arrived with a checkerboard painted into the pixels: an RGB image with
 no alpha channel, so it only looked transparent. The checkerboard was keyed
