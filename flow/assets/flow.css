@@ -2031,3 +2031,28 @@ footer .slot,footer .soon{color:#b9b0a4}
 }
 @media (max-width:900px){ .bagbar{bottom:calc(39px + env(safe-area-inset-bottom,0px))} }
 @media (prefers-reduced-motion:reduce){ .bagbar,.bagbar.on{transition:none} }
+/* ---- iOS safe area: the home indicator and the notch ----------------------
+   viewport-fit=cover in the shell's viewport meta lets a page run under the
+   iPhone's home indicator and, in landscape, beside the notch, and makes
+   env(safe-area-inset-*) real. They stay 0 on a screen with neither, so
+   nothing here moves there. The tab bar grows by the bottom inset so its
+   icons clear the home indicator, and what rests on it moves up with it: the
+   sticky buy bar here, the added-to-bag sheet and the bag's checkout bar in
+   their own blocks above. In landscape the rows that run edge to edge keep
+   their content out from under the notch, each with the side padding it
+   already had as the least it gets: 16px for the page's wrap, 14px for the
+   strip, masthead and search row, 8px for the category bar, none for the
+   tab bar. */
+@media (max-width:900px){
+  .tabbar{padding-bottom:env(safe-area-inset-bottom,0px)}
+  .stickybuy{bottom:calc(39px + env(safe-area-inset-bottom,0px))}
+  .stickybuy.hidden{transform:translateY(calc(100% + 40px + env(safe-area-inset-bottom,0px)))}
+  body{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}
+  body.has-sticky{padding-bottom:calc(124px + env(safe-area-inset-bottom,0px))}
+}
+@media (max-width:900px) and (orientation:landscape){
+  .wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .strip .wrap,.mast .wrap,.msearch{padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px))}
+  .catnav .wrap{padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px))}
+  .tabbar{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+}

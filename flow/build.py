@@ -511,7 +511,7 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
        own from the home template; strip_here went with it."""
     return """<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="only light">
 <meta name="theme-color" content="#ffffff">
 <script>document.documentElement.className+=" js"</script>
