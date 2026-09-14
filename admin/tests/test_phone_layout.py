@@ -259,6 +259,21 @@ class PhoneLayout(unittest.TestCase):
                 self.assertLessEqual(s["height"], 64, "%s at %d: %s" % (pid, w, s))
         self.no_page_errors()
 
+    # ---- landscape: the added-to-bag panel and the bag's bar -------------------------
+    def test_landscape_panel_and_bag_bar_keep_14px_secondary_text(self):
+        for w, h in ((667, 375), (844, 390)):
+            self.view(w, h)
+            self.open("product.html?p=vibe", bag=[])
+            self.press(".atcrow [data-add]")
+            self.c.wait("document.querySelector('.added.on') !== null", 10, what="the added-to-bag sheet")
+            self.assertEqual(self.sizes([".added-hd", ".added-s span"]), {".added-hd": 14, ".added-s span": 14}, "%dx%d" % (w, h))
+        for w, h in ((915, 412), (932, 430)):
+            self.view(w, h)
+            self.open("cart.html", bag=FIVE)
+            self.c.wait("document.querySelector('[data-bagbar]').classList.contains('on')", 5, what="the bag's bar")
+            self.assertEqual(self.sizes([".bagbar .bb-t span"]), {".bagbar .bb-t span": 14}, "%dx%d" % (w, h))
+        self.no_page_errors()
+
     # ---- a reader's own text size -------------------------------------------------
     BIG = ("document.addEventListener('DOMContentLoaded', () => { const s = document.createElement('style'); "
            "s.textContent = 'html{-webkit-text-size-adjust:200% !important;text-size-adjust:200% !important}'; "
