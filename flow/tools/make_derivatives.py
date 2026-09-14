@@ -79,7 +79,17 @@ def png(src, dst, width):
         kept += 1
         return
     im = Image.open(src).convert("RGBA")
-    im = im.convert("RGBa").resize((width, round(im.height * width / im.width)), Image.LANCZOS).convert("RGBA")
+    size = (width, round(im.height * width / im.width))
+    # A logo in one colour stays that colour at every size: only its alpha is
+    # resized. Lanczos over- and undershoots at the edges, which un-premultiplied
+    # left a few pixels a shade off the colour (176,126,32 beside 168,121,30).
+    one = {c[:3] for n, c in im.getcolors(1 << 24) or () if c[3]}
+    if len(one) == 1:
+        flat = Image.new("RGBA", size, one.pop() + (0,))
+        flat.putalpha(im.getchannel("A").resize(size, Image.LANCZOS))
+        im = flat
+    else:
+        im = im.convert("RGBa").resize(size, Image.LANCZOS).convert("RGBA")
     im.quantize(256, method=Image.Quantize.FASTOCTREE).save(dst, optimize=True)
     made += 1
 

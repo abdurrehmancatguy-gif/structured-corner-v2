@@ -21,6 +21,11 @@ macOS only (it needs the system Bodoni). Output is committed, so it runs on
 demand, not at build time.
 
 Run from inside flow/:  python3 tools/make_gold_logo.py
+
+The committed logos are no longer these ramps: the owner asked for one solid
+#A8791E with no gradient, shine or glare, so tools/flat_logo.py recoloured
+both lockups and the emblem. Running this again brings the metal back; run
+flat_logo.py after it, then make_derivatives.py and make_favicon.py.
 """
 import json
 import pathlib
