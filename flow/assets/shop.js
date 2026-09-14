@@ -2295,3 +2295,56 @@ bgsRun(function () {
   }
   render(bgsProfile());
 });
+
+/* ---------- who is signed in, in the header and the tab bar ----------------
+   Once a shopper is signed in, the header's account link (wider screens) and
+   the phone tab bar's Account show their picture or first letter in place of
+   the person icon, and their accessible name says who it is, from Pages
+   ("Account, signed in as {name}"), in Arabic too. Signed out, or with
+   sign-in not set up, both stay as built. The tab is found by where it goes,
+   so it is found on Netlify's pretty URLs as well. A sign-in or sign-out in
+   another tab shows here too.
+--------------------------------------------------------------------------- */
+bgsRun(function () {
+  "use strict";
+  if (!bgsAuth()) return;
+  var here = bgsAccountPage(), was = [];
+  var links = [].slice.call(document.querySelectorAll(".mast a.act-acct"));
+  document.querySelectorAll(".tabbar a[href]").forEach(function (a) {
+    var u;
+    try { u = new URL(a.href); } catch (e) { return; }
+    if (here && u.origin === here.origin && u.pathname === here.pathname) links.push(a);
+  });
+  links.forEach(function (a) { was.push({ label: a.getAttribute("aria-label"), title: a.getAttribute("title") }); });
+  function put(a, name, v) { if (v === null) a.removeAttribute(name); else a.setAttribute(name, v); }
+  function show() {
+    var p = bgsProfile();
+    var label = p ? bgsFill(bgsAr(bgsCopy("shell.header.signed_in", "Account, signed in as {name}")),
+                            { name: String(p.name || p.email || "") }) : null;
+    links.forEach(function (a, i) {
+      var face = a.querySelector(".avatar");
+      a.classList.toggle("signed", !!p);
+      if (!p) {
+        if (face) face.parentNode.removeChild(face);
+        put(a, "aria-label", was[i].label);
+        put(a, "title", was[i].title);
+        return;
+      }
+      if (!face) {
+        face = document.createElement("span");
+        face.setAttribute("aria-hidden", "true");
+        a.insertBefore(face, a.firstChild);
+      }
+      var who = p.sub + " " + (p.picture || "") + " " + (p.name || p.email || "");
+      if (face.getAttribute("data-who") !== who) { face.setAttribute("data-who", who); bgsAvatar(face, p); }
+      a.setAttribute("aria-label", label);
+      if (was[i].title !== null) a.setAttribute("title", label);
+    });
+  }
+  show();
+  document.addEventListener("bgs:profile", show);
+  window.addEventListener("pageshow", function (e) { if (e.persisted) show(); });
+  window.addEventListener("storage", function (e) { if (e.key === null || e.key === BGS_PROFILE) show(); });
+  /* the language switch has changed the page's language by the time this runs */
+  document.querySelectorAll("[data-langtoggle]").forEach(function (t) { t.addEventListener("click", show); });
+});

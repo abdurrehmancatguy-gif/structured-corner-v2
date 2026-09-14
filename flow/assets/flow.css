@@ -2148,3 +2148,14 @@ footer .slot,footer .soon{color:#b9b0a4}
   .acct-me p{font-size:14px !important}
   .acct-out{display:inline-flex;margin-top:12px;min-height:44px;padding:10px 20px;font-size:14px;cursor:pointer}
 }
+/* Who is signed in. The header's account link (wider screens) and the phone
+   tab bar's Account show the shopper's picture or first letter in place of
+   the person icon. The tab keeps its height, and on the account page the
+   picture takes a dark ring, as the other tabs' icons turn dark there. */
+.act-acct.signed > svg,.tabbar a.signed > svg{display:none}
+.act-acct.signed .avatar{width:24px;height:24px;margin:-3px 0;font-size:13px}
+@media (max-width:900px){
+  .tabbar a.signed{display:flex;align-items:center;justify-content:center}
+  .tabbar a.signed .avatar{width:26px;height:26px;margin:-2.5px 0;font-size:14px}
+  .tabbar a.signed.on .avatar{box-shadow:0 0 0 1.5px var(--ink)}
+}
