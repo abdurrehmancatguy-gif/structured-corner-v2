@@ -842,11 +842,44 @@ def promos():
         '<a class="promo" href="%s"><span class="none">Banner</span><div><b>%s</b><span>%s</span></div></a>' % (href, t, s)
         for t, s, href in page_rows("index.promos", ("title", "sub", "href")))
 
-# The scent family tiles' links, colours and drawings stay in the template;
-# their words come from pages.json "index.families", keyed by the same slug.
+# The scent family tiles' links, colours and drawings are code; their words
+# and photographs come from pages.json "index.families", keyed by the same
+# slug, each {"label", "image"}. The image is a 900x675 original in
+# assets/fam, cut to the tile's 4:3, and tools/make_derivatives.py makes its
+# 450 px copy; V() puts a missing file among the build's problems below. The
+# tiles show no count: there is none to show yet.
 FAMILY_SLUGS = ("oud-and-woods", "amber-and-spice", "musk-and-clean", "floral-veil", "fresh-and-citrus",
                 "sweet-and-gourmand", "reserve", "bakhoor-and-home")
-FAMILY_TEXT = {"fam_" + s.replace("-", "_"): page_text("index.families." + s) for s in FAMILY_SLUGS}
+FAMILY_ART = {  # slug: (colour token, drawing)
+    'oud-and-woods': ('f-oud', '<path d="M4 20c4-2 6-6 6-10M8 20c3-2 5-5 6-9M13 20c2-2 4-5 5-8"/><circle cx="17" cy="6" r="2.5"/>'),
+    'amber-and-spice': ('f-amber', '<path d="M12 3l2.2 4.6L19 8.3l-3.5 3.4.9 4.9-4.4-2.4-4.4 2.4.9-4.9L5 8.3l4.8-.7z"/>'),
+    'musk-and-clean': ('f-musk', '<path d="M12 3s6 6.5 6 10.5A6 6 0 0 1 6 13.5C6 9.5 12 3 12 3z"/>'),
+    'floral-veil': ('f-floral', '<circle cx="12" cy="12" r="2.5"/><path d="M12 3a3.2 3.2 0 0 1 0 6.4M12 21a3.2 3.2 0 0 0 0-6.4M3 12a3.2 3.2 0 0 1 6.4 0M21 12a3.2 3.2 0 0 0-6.4 0"/>'),
+    'fresh-and-citrus': ('f-fresh', '<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17M3.5 12h17M6 6l12 12M18 6L6 18"/>'),
+    'sweet-and-gourmand': ('f-sweet', '<path d="M7 21V10a5 5 0 0 1 10 0v11z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/>'),
+    'reserve': ('f-res', '<path d="M4 8l4 3 4-6 4 6 4-3-2 11H6z"/>'),
+    'bakhoor-and-home': ('f-bak', '<path d="M6 14h12l-1.5 6h-9z"/><path d="M4 14h16"/><path d="M11 10c0-2 2-3 2-5 2 2 2 3.5 1.5 5"/>'),
+}
+FAMILY_PHOTO = re.compile(r"assets/fam/[a-z0-9][a-z0-9._-]*\.jpg")
+
+def family_tiles():
+    """The eight tiles: the photograph behind the drawing and the name, the
+    family colour under it until the photograph arrives."""
+    out = []
+    for s in FAMILY_SLUGS:
+        colour, art = FAMILY_ART[s]
+        img, pic = _value("index.families.%s.image" % s), ""
+        if not isinstance(img, str) or not FAMILY_PHOTO.fullmatch(img) or img.endswith("-450.jpg"):
+            _BAD_PAGES.append("pages.json index.families.%s.image must name a photo in assets/fam" % s)
+        else:
+            small = img[:-4] + "-450.jpg"
+            pic = ('<img class="fbg" src="%s" srcset="%s 450w, %s 900w" '
+                   'sizes="(max-width:900px) 50vw, (max-width:1180px) 25vw, 160px" alt="" width="900" height="675" '
+                   'loading="lazy" decoding="async">' % (esc(V(small)), esc(V(small)), esc(V(img))))
+        out.append('<a href="collection.html?family=%s" style="background:var(--%s)">%s<svg class="fic" viewBox="0 0 24 24" '
+                   'fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'
+                   '%s</svg><b>%s</b></a>' % (s, colour, pic, art, page_text("index.families.%s.label" % s)))
+    return "\n    ".join(out)
 
 def hero_images():
     """One photograph per slide, so the carousel changes picture and not only
@@ -945,14 +978,7 @@ home = """
 <section><div class="wrap">
   <div class="sec-h"><h2>%(fam_h)s</h2></div>
   <div class="fam">
-    <a href="collection.html?family=oud-and-woods" style="background:var(--f-oud)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20c4-2 6-6 6-10M8 20c3-2 5-5 6-9M13 20c2-2 4-5 5-8"/><circle cx="17" cy="6" r="2.5"/></svg><b>%(fam_oud_and_woods)s</b><span>%(ct)s</span></a>
-    <a href="collection.html?family=amber-and-spice" style="background:var(--f-amber)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.2 4.6L19 8.3l-3.5 3.4.9 4.9-4.4-2.4-4.4 2.4.9-4.9L5 8.3l4.8-.7z"/></svg><b>%(fam_amber_and_spice)s</b><span>%(ct)s</span></a>
-    <a href="collection.html?family=musk-and-clean" style="background:var(--f-musk)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.5 6 10.5A6 6 0 0 1 6 13.5C6 9.5 12 3 12 3z"/></svg><b>%(fam_musk_and_clean)s</b><span>%(ct)s</span></a>
-    <a href="collection.html?family=floral-veil" style="background:var(--f-floral)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.5"/><path d="M12 3a3.2 3.2 0 0 1 0 6.4M12 21a3.2 3.2 0 0 0 0-6.4M3 12a3.2 3.2 0 0 1 6.4 0M21 12a3.2 3.2 0 0 0-6.4 0"/></svg><b>%(fam_floral_veil)s</b><span>%(ct)s</span></a>
-    <a href="collection.html?family=fresh-and-citrus" style="background:var(--f-fresh)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17M3.5 12h17M6 6l12 12M18 6L6 18"/></svg><b>%(fam_fresh_and_citrus)s</b><span>%(ct)s</span></a>
-    <a href="collection.html?family=sweet-and-gourmand" style="background:var(--f-sweet)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 21V10a5 5 0 0 1 10 0v11z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg><b>%(fam_sweet_and_gourmand)s</b><span>%(ct)s</span></a>
-    <a href="collection.html?family=reserve" style="background:var(--f-res)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8l4 3 4-6 4 6 4-3-2 11H6z"/></svg><b>%(fam_reserve)s</b><span>%(ct)s</span></a>
-    <a href="collection.html?family=bakhoor-and-home" style="background:var(--f-bak)"><svg class="fic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14h12l-1.5 6h-9z"/><path d="M4 14h16"/><path d="M11 10c0-2 2-3 2-5 2 2 2 3.5 1.5 5"/></svg><b>%(fam_bakhoor_and_home)s</b><span>%(ct)s</span></a>
+    %(fam_tiles)s
   </div>
 </div></section>
 
@@ -980,7 +1006,7 @@ home = """
            attars_h=_SH["house_ouds"][0], attars=_SH["house_ouds"][1], oud_h=_SH["reserve"][0], oud=_SH["reserve"][1],
            sets_h=_SH["gift_sets"][0], sets=_SH["gift_sets"][1], fam_h=heading("scent_family"),
            bakhoor_h=_SH["bakhoor"][0], bakhoor=_SH["bakhoor"][1], edp_h=_SH["edp"][0], edp=_SH["edp"][1],
-           ct=slot("count"), **FAMILY_TEXT)
+           fam_tiles=family_tiles())
 if _BAD_HOME:
     sys.exit("build failed:\n  " + "\n  ".join("home.json " + p for p in _BAD_HOME))
 

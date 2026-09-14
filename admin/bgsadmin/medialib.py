@@ -20,7 +20,7 @@ from . import media, schema, validate, video
 from .errors import ApiError
 from .service import field_for, flatten
 
-FOLDERS = ("assets/img", "assets/cat", "assets/video")
+FOLDERS = ("assets/img", "assets/cat", "assets/fam", "assets/video")
 EXTS = (".jpg", ".png", ".mp4")
 TOOL_SOURCES = {
     "assets/img/logo.png": "The gold logo tool (tools/make_gold_logo.py) draws the logos from it",
@@ -49,6 +49,8 @@ def original_of(r):
                 return "assets/img/" + name[:-len(s + ".jpg")] + ".jpg"
     if folder == "assets/cat" and name.endswith("-216.jpg"):
         return "assets/cat/" + name[:-8] + ".jpg"
+    if folder == "assets/fam" and name.endswith("-450.jpg"):
+        return "assets/fam/" + name[:-8] + ".jpg"
     if folder == "assets/video" and name.endswith(".jpg"):
         return "assets/video/" + name[:-4] + ".mp4"
     return r
@@ -66,6 +68,8 @@ def kind_of(r):
         return "product-image" if media.is_frame(name) else "other"
     if folder == "assets/cat":
         return "cutout" if name.endswith(".png") else "category-photo"
+    if folder == "assets/fam":
+        return "family-photo"
     return "reel" if name.endswith(".mp4") else "other"
 
 

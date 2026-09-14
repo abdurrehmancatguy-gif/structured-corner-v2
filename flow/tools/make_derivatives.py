@@ -9,8 +9,10 @@ never sent a desktop file:
   <id>-<n>-card-360.jpg   product cards on phones (shown at about 166 px)
   <id>-<n>-thumb.jpg      gallery thumbnails and bag lines (51 to 108 px)
 Banners get a 750 px phone copy and a 1320 px desktop copy, category photos a
-216 px square (twice the largest circle), and the logos a 486 px copy (three
-times the phone logo, over twice the desktop one).
+216 px square (twice the largest circle), the logos a 486 px copy (three
+times the phone logo, over twice the desktop one), and the scent family
+photos (900x675 in assets/fam) a 450 px copy, since their tiles are 138 to
+227px wide.
 
 A copy is rewritten only when the bytes of its source, or the size and quality
 it is made at, differ from the ones recorded in tools/derivatives.json, so
@@ -30,6 +32,7 @@ from PIL import Image
 
 FLOW = pathlib.Path(__file__).resolve().parent.parent
 IMG, CAT = FLOW / "assets" / "img", FLOW / "assets" / "cat"
+FAM = FLOW / "assets" / "fam"
 QUALITY = 78
 # "vibe-1-600.jpg" also looks like frame 600 of "vibe-1", so a copy must never be
 # taken for an original; without this a second run made copies of copies.
@@ -108,13 +111,17 @@ for src in sorted(IMG.glob("*.jpg")):
 for src in sorted(CAT.glob("*.jpg")):
     if not src.stem.endswith("-216"):
         jpeg(src, CAT / (src.stem + "-216.jpg"), square=216)
+for src in sorted(FAM.glob("*.jpg")):
+    if not src.stem.endswith("-450"):
+        jpeg(src, FAM / (src.stem + "-450.jpg"), 450)
 for name in ("logo-gold", "logo-gold-light"):
     png(IMG / (name + ".png"), IMG / (name + "-486.png"), 486)
 
 # Copies whose original is gone (a re-import with fewer frames) go too, or they
 # would sit in assets/ referenced by nothing.
 removed = 0
-for folder, suffixes, ext in ((IMG, ("-600", "-card-360", "-thumb"), ".jpg"), (CAT, ("-216",), ".jpg")):
+for folder, suffixes, ext in ((IMG, ("-600", "-card-360", "-thumb"), ".jpg"), (CAT, ("-216",), ".jpg"),
+                              (FAM, ("-450",), ".jpg")):
     for suf in suffixes:
         for d in folder.glob("*" + suf + ext):
             if not (folder / (d.name[: -len(suf + ext)] + ext)).exists():

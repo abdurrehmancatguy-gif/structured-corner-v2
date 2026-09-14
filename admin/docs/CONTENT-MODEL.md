@@ -152,7 +152,7 @@ home.json:
 
 pages.json (new): the words on the fixed pages, one top-level key per page.
 - shell: noscript, crumb_home, header {account, wishlist, bag}, footer {contact {address, hours, phone}, newsletter {placeholder, button}, copyright_year}.
-- index: discovery_band {product, eyebrow, heading, body, cta_label, cta_href}, promos[] {title, sub, href}, families {slug: label}, reels_link {label, href}.
+- index: discovery_band {product, eyebrow, heading, body, cta_label, cta_href}, promos[] {title, sub, href}, families {slug: {label, image}}, reels_link {label, href}.
 - collection: crumb_categories, filters, price_bands, genders, count, sort, empty.
 - product: share, size_label, gift_cta, notes, voucher_note, specs, facts, tabs, pyramid, apply_steps[], apply_note, ingredients, delivery_rows[], reviews_empty, related, not_found.
 - gift_box: crumb, title, intro, size_label, picker_heading, slots, summary, options_heading, options[] {label, value, highlight}.

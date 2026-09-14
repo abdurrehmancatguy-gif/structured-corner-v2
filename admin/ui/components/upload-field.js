@@ -1,13 +1,13 @@
 // Upload buttons for the picture and film fields of the document editors:
-// the homepage banner and films, the category circles, the logos and the
-// emblem. A field's schema entry says what its file is (field.upload); the
+// the homepage banner and films, the category circles, the scent family
+// photos, the logos and the emblem. A field's schema entry says what its file is (field.upload); the
 // buttons send the file to staging, attach it (which saves and rebuilds),
 // and then reload the document.
 import { h } from "../lib/dom.js";
 import { icon } from "../icons.js";
 import { guard, toast } from "../lib/ui.js";
 import { KINDS, accept, pickFiles, progressList, progressRow, problems, saveFirst, sendOne } from "../lib/media.js";
-import { cropDialog, BANNER_FRAMES, SQUARE_FRAME } from "./crop.js";
+import { cropDialog, BANNER_FRAMES, SQUARE_FRAME, FAMILY_FRAME } from "./crop.js";
 
 const index = (ptr, re) => {
   const m = String(ptr).match(re);
@@ -41,6 +41,14 @@ const BUTTONS = {
         } },
       { label: "Upload a cut-out", kind: "cutout", target: async () => ({ kind: "cutout", index: i }) },
     ];
+  },
+  family: (ptr) => {
+    const m = String(ptr).match(/^\/index\/families\/([a-z0-9-]+)\/image$/);
+    return !m ? [] : [{ label: "Upload a photo", kind: "family-photo",
+      target: async (staged, file) => {
+        const c = await cropDialog({ file, width: staged.width, height: staged.height, frames: FAMILY_FRAME, title: "Crop the tile's photo" });
+        return c && { kind: "family-photo", family: m[1], crop: c.crop };
+      } }];
   },
   "logo-dark": () => [{ label: "Upload a new logo", kind: "logo", target: async () => ({ kind: "logo", variant: "dark" }) }],
   "logo-light": () => [{ label: "Upload a new logo", kind: "logo", target: async () => ({ kind: "logo", variant: "light" }) }],

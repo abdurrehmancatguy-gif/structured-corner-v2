@@ -329,8 +329,39 @@ def attach_reel(req, sid, meta, t, expect):
     return 202, {"job": job.id, "state": job.state}
 
 
+def attach_family(req, sid, meta, t, expect):
+    """A scent family tile's photograph: a new file in assets/fam named after
+    the family, and pages.json index.families.<slug>.image pointing at it.
+    The photo it replaces stays in Files until it is moved to the trash."""
+    store, cfg = req.app.store, req.app.cfg
+    pages, rev = store.doc("pages")
+    _expect(expect, rev)
+    fams = (pages.get("index") or {}).get("families") or {}
+    slug = t.get("family")
+    if not isinstance(slug, str) or slug not in fams:
+        raise ApiError(422, "validation", "Pick one of the scent families: %s." % ", ".join(fams), {"family": slug})
+    state = {}
+
+    def apply(txn, path, undo):
+        doc = txn.load("pages")
+        _expect(expect, store.doc("pages")[1])
+        name = media.free_name(cfg, "assets/fam", media.slug(slug, "family"), (".jpg", "-450.jpg"))
+        fam = doc["index"]["families"][slug]
+        if not isinstance(fam, dict):
+            fam = doc["index"]["families"][slug] = {"label": fam}
+        fam["image"] = "assets/fam/%s.jpg" % name
+        txn.put("pages", doc)
+        txn.add_file(cfg.assets / "fam" / (name + ".jpg"), path)
+        state["paths"] = ["assets/fam/%s.jpg" % name, "assets/fam/%s-450.jpg" % name]
+
+    txn = _attach(req, sid, "photo for the %s tile" % slug,
+                  lambda out: media.render_family(meta, t.get("crop"), out), apply)
+    return saved(req.app, txn, name="pages", rev=store.doc("pages")[1], **state)
+
+
 ATTACH = {"product-image": attach_frame, "banner": attach_banner, "category-photo": attach_category,
-          "cutout": attach_cutout, "logo": attach_logo, "emblem": attach_emblem, "reel": attach_reel}
+          "family-photo": attach_family, "cutout": attach_cutout, "logo": attach_logo, "emblem": attach_emblem,
+          "reel": attach_reel}
 
 
 def attach(req):

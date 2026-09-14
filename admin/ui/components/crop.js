@@ -13,6 +13,9 @@ export const BANNER_FRAMES = [
 export const SQUARE_FRAME = [
   { key: "crop", label: "Circle", aspect: 1, need: 432, what: "the square the circle is cut from (432x432)" },
 ];
+export const FAMILY_FRAME = [
+  { key: "crop", label: "Tile", aspect: 4 / 3, need: 900, what: "the scent family tile's picture (900x675)" },
+];
 
 export function cropDialog({ file, width: W, height: H, frames, title }) {
   return new Promise((resolve) => {

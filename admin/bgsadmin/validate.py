@@ -56,7 +56,7 @@ def text_problem(s, multiline=False):
     return None
 
 
-MEDIA_PATH = re.compile(r"assets/(?:img|cat|video)/[a-z0-9][a-z0-9._-]*\.(?:jpg|png|mp4)|favicon\.ico")
+MEDIA_PATH = re.compile(r"assets/(?:img|cat|fam|video)/[a-z0-9][a-z0-9._-]*\.(?:jpg|png|mp4)|favicon\.ico")
 
 
 def media_problem(s, t, flow):

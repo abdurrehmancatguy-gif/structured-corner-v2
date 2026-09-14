@@ -1,0 +1,18 @@
+Scent family tile photographs on the homepage. Which file each tile shows is
+set in content/pages.json (index.families.<slug>.image), not in build.py,
+shop.js or the stylesheet. Each is cut to the tile's 4:3 at 900x675, JPEG
+quality 78, from the 1280 px wide download; tools/make_derivatives.py makes
+the 450 px copy (<name>-450.jpg) and records it in tools/derivatives.json.
+
+  oud-and-woods.jpg       Pexels photos/9291756    dark resinous wood                 Oud & Woods
+  amber-and-spice.jpg     Pexels photos/30705538   cinnamon sticks and star anise     Amber & Spice
+  musk-and-clean.jpg      Pexels photos/32796552   white cotton branch                Musk & Clean
+  floral-veil.jpg         Pexels photos/34677052   white jasmine flowers              Floral Veil
+  fresh-and-citrus.jpg    Pexels photos/4115133    lemon slices on green leaves       Fresh & Citrus
+  sweet-and-gourmand.jpg  Pexels photos/14381803   vanilla pods on white silk         Sweet & Gourmand
+  reserve.jpg             Pexels photos/33654800   saffron threads                    Reserve
+  bakhoor-and-home.jpg    Pexels photos/17860048   bronze incense burner with smoke   Bakhoor & Home
+
+The owner approved these photographs for the tiles.
+Pexels License: free for commercial use, no attribution required.
+https://www.pexels.com/license/

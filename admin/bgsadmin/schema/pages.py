@@ -131,8 +131,8 @@ _SHELL = [
 
 # ---- homepage ---------------------------------------------------------------
 
-# The scent family tiles: their links, colours and drawings are code; only the
-# words are content.
+# The scent family tiles: their links, colours and drawings are code; the
+# words and the photographs are content.
 FAMILIES = (("oud-and-woods", "Oud & Woods"), ("amber-and-spice", "Amber & Spice"), ("musk-and-clean", "Musk & Clean"),
             ("floral-veil", "Floral Veil"), ("fresh-and-citrus", "Fresh & Citrus"),
             ("sweet-and-gourmand", "Sweet & Gourmand"), ("reserve", "Reserve"), ("bakhoor-and-home", "Bakhoor & Home"))
@@ -157,10 +157,13 @@ _HOME = [
          {"path": "/sub", "type": "text", "label": "Line under it", "required": True, "maxLength": 60},
          {"path": "/href", "type": "href", "label": "Link", "required": True},
      ]},
-] + [
-    text("/index/families/%s" % slug, name + " tile", HOME, 30, section="Scent families",
-         help="The tile opens the collection page, which does not filter by family yet, so it shows every product.")
-    for slug, name in FAMILIES
+] + [f for slug, name in FAMILIES for f in (
+    text("/index/families/%s/label" % slug, name + " tile", HOME, 30, section="Scent families",
+         help="The tile opens the collection page, which does not filter by family yet, so it shows every product."),
+    {"path": "/index/families/%s/image" % slug, "type": "image", "label": name + " photo", "required": True,
+     "upload": "family", "group": HOME, "section": "Scent families",
+     "help": "Behind the tile's name, under a dark overlay so the white words stay readable. It is cropped to the "
+             "tile's 4:3 at 900x675, and a 450 px copy is made from it."})
 ] + [
     text("/index/reels_link/label", "Link beside the films", HOME, 30, section="Product films",
          help="The films and their heading are under Homepage."),

@@ -25,7 +25,7 @@ PAGES = ("index.html", "collection.html", "product.html", "gift-box.html", "cart
          "corporate.html")
 
 # Files under flow/assets that the deploys leave out: never served locally either.
-UNPUBLISHED_ASSETS = {"assets/flow.css", "assets/cat/SOURCES.txt"}
+UNPUBLISHED_ASSETS = {"assets/flow.css", "assets/cat/SOURCES.txt", "assets/fam/SOURCES.txt"}
 
 
 class Config:

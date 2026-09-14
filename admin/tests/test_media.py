@@ -302,6 +302,33 @@ class MediaTests(unittest.TestCase):
 
     # ---- the other kinds -----------------------------------------------------
 
+    def test_a_scent_family_photo(self):
+        b = self.b
+        # too small for the 900x675 tile
+        st, res = self.stage("family-photo", jpeg(880, 700), "image/jpeg")
+        self.assertEqual(st, 422, res)
+        st, res = self.stage("family-photo", jpeg(1600, 1000), "image/jpeg")
+        self.assertEqual(st, 201, res)
+        sid = res["staging_id"]
+        st, pages = b.api("GET", "documents/pages")
+        st, res = self.attach(sid, pages["rev"], {"kind": "family-photo", "family": "no-such-family"})
+        self.assertEqual(st, 422, res)
+        st, res = self.attach(sid, pages["rev"], {"kind": "family-photo", "family": "reserve"})
+        self.assertEqual(st, 200, res)
+        orig, copy = res["paths"]
+        self.assertEqual(b.content("pages")["index"]["families"]["reserve"]["image"], orig)
+        with Image.open(self.flow / orig) as im:
+            self.assertEqual(im.size, (900, 675))
+        with Image.open(self.flow / copy) as im:
+            self.assertEqual(im.size, (450, 338))
+        home = (self.flow / "index.html").read_text()
+        self.assertIn(copy + "?v=", home)
+        self.assertIn(orig + "?v=", home)
+        # the photo it replaced is still published, and now unused
+        st, lib = b.api("GET", "media?unused=1&kind=family-photo")
+        self.assertEqual(st, 200, lib)
+        self.assertIn("assets/fam/reserve.jpg", [it["path"] for it in lib["items"]])
+
     def test_banner_category_cutout_logo_and_emblem(self):
         b = self.b
         img, cat = self.flow / "assets" / "img", self.flow / "assets" / "cat"

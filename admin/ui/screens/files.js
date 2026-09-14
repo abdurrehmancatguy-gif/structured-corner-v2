@@ -8,16 +8,17 @@ import { h, clear, useCss, nextId } from "../lib/dom.js";
 import { icon } from "../icons.js";
 import { banner, confirmDialog, toast, guard } from "../lib/ui.js";
 import { KINDS, dropZone, fmtBytes, mediaUrl, progressList, progressRow, problems, sendOne, wrote } from "../lib/media.js";
-import { cropDialog, BANNER_FRAMES, SQUARE_FRAME } from "../components/crop.js";
+import { cropDialog, BANNER_FRAMES, SQUARE_FRAME, FAMILY_FRAME } from "../components/crop.js";
 
 const TABS = [
   { key: "images", label: "Images", folder: "assets/img/", uploads: ["banner", "logo", "emblem"] },
   { key: "categories", label: "Category pictures", folder: "assets/cat/", uploads: ["category-photo", "cutout"] },
+  { key: "families", label: "Scent family photos", folder: "assets/fam/", uploads: ["family-photo"] },
   { key: "films", label: "Films", folder: "assets/video/", uploads: ["reel"] },
   { key: "trash", label: "Trash" },
 ];
 const KIND_LABEL = { "product-image": "Product photo", banner: "Banner", logo: "Logo", emblem: "Emblem",
-  "category-photo": "Category photo", cutout: "Cut-out", reel: "Film", other: "Other picture", orphan: "Copy without its original" };
+  "category-photo": "Category photo", "family-photo": "Scent family photo", cutout: "Cut-out", reel: "Film", other: "Other picture", orphan: "Copy without its original" };
 const base = (p) => String(p || "").split("/").pop();
 const line = (s) => String(s || "").replace(/\s+/g, " ").trim();
 
@@ -100,6 +101,13 @@ const UP = {
     note: "Trimmed to the object and stood in the circle of the entry you pick; an object much wider than it is tall is laid across the circle instead.",
     picks: (docs) => [{ name: "index", label: "Category", options: cats(docs) }],
     target: async (v) => ({ kind: "cutout", index: Number(v.index) }) },
+  "family-photo": { doc: "pages", label: "Scent family photo",
+    note: "Cropped to the tile's shape and shown behind the name of the scent family you pick, under a dark overlay. The old photo stays here until you move it to the trash.",
+    picks: (docs) => [{ name: "family", label: "Scent family", options: families(docs) }],
+    target: async (v, staged, file) => {
+      const c = await cropDialog({ file, width: staged.width, height: staged.height, frames: FAMILY_FRAME, title: "Crop the tile's photo" });
+      return c && { kind: "family-photo", family: v.family, crop: c.crop };
+    } },
   reel: { doc: "home", label: "Film",
     note: "Converted for the web on this computer before it is saved, and its poster is cut from it. One film at a time.",
     picks: (docs, app) => [{ name: "product", label: "Product the film links to", options: productOpts(app) },
@@ -115,6 +123,11 @@ function slides(docs) {
 function cats(docs) {
   const c = (docs.navigation && docs.navigation.data.categories) || [];
   return c.map((x, i) => ({ value: String(i), label: line(x.label) || "Entry " + (i + 1) }));
+}
+
+function families(docs) {
+  const f = (docs.pages && docs.pages.data.index && docs.pages.data.index.families) || {};
+  return Object.entries(f).map(([k, x]) => ({ value: k, label: line(x && x.label) || k }));
 }
 
 function productOpts(app) {

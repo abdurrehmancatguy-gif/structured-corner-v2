@@ -158,7 +158,7 @@ class PagesTests(_Pages, unittest.TestCase):
             d["shell"]["footer"]["newsletter"]["button"] = "Sign up"
             d["shell"]["footer"]["copyright_year"] = 2027
             d["index"]["promos"][1]["title"] = "Try 3 ml"
-            d["index"]["families"]["oud-and-woods"] = "Oud, woods & resin"
+            d["index"]["families"]["oud-and-woods"]["label"] = "Oud, woods & resin"
             d["index"]["reels_link"]["label"] = "Every spray"
             d["collection"]["sort"]["name"] = "Name, A first"
             d["collection"]["count"] = "{n} found"
@@ -178,7 +178,7 @@ class PagesTests(_Pages, unittest.TestCase):
                 self.assertIn("&copy; 2027 BGS Corner General Trading LLC", p, n)
             home = self.page("index.html")
             self.assertIn("<b>Try 3 ml</b>", home)
-            self.assertIn("<b>Oud, woods &amp; resin</b><span>", home)
+            self.assertIn("<b>Oud, woods &amp; resin</b></a>", home)
             self.assertIn('<a href="collection.html?cat=edp">Every spray &rarr;</a>', home)
             coll = self.page("collection.html")
             self.assertIn('<option value="name">Name, A first</option>', coll)

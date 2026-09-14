@@ -2731,3 +2731,21 @@ code{border:1px solid var(--line)}
    a phone, on top of the next section's own padding. */
 .quizsec{padding-top:26px;padding-bottom:40px}
 @media (max-width:900px){ .quizsec{padding-bottom:30px} }
+/* ---- scent family tiles: a photograph each ---------------------------------
+   Each tile carries its family's photograph behind the drawing and the name:
+   an <img> build.py writes from pages.json index.families, so no path lives
+   in this file or in shop.js. A brown overlay deepens towards the name, .55
+   at the top where the drawing is, .72 through the middle and .88 at the
+   foot where the name sits; over the whitest photograph (the cotton, the
+   jasmine) that holds the white name at 5.9:1 or more and the drawing at
+   3.5:1. The tile takes the photographs' own 4:3, and the [ count ]
+   placeholder is gone. The family colour shows until the photograph loads. */
+.fam a{position:relative;overflow:hidden;isolation:isolate;aspect-ratio:4/3}
+.fam a .fbg{position:absolute;top:0;left:0;width:100%;height:100%;max-width:none;object-fit:cover;z-index:-2;
+  transition:transform .35s ease}
+.fam a::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(180deg,rgba(52,38,11,.55) 0%,rgba(52,38,11,.72) 50%,rgba(52,38,11,.88) 100%)}
+.fam a:hover .fbg{transform:scale(1.05)}
+.fam a:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.fam b{text-shadow:0 1px 2px rgba(52,38,11,.45)}
+@media (prefers-reduced-motion:reduce){ .fam a .fbg{transition:none} .fam a:hover .fbg{transform:none} }

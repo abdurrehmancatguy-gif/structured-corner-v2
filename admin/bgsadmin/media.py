@@ -44,13 +44,15 @@ KINDS = {
     "product-image": (25 * MB, PHOTO),
     "banner": (30 * MB, PHOTO),
     "category-photo": (10 * MB, PHOTO),
+    "family-photo": (10 * MB, PHOTO),
     "cutout": (10 * MB, ("image/png",)),
     "logo": (10 * MB, ("image/png",)),
     "emblem": (10 * MB, ("image/png",)),
     "reel": (80 * MB, ("video/mp4",)),
 }
 LABELS = {"product-image": "product photo", "banner": "banner picture", "category-photo": "category photo",
-          "cutout": "cut-out", "logo": "logo", "emblem": "emblem", "reel": "film"}
+          "family-photo": "scent family photo", "cutout": "cut-out", "logo": "logo", "emblem": "emblem",
+          "reel": "film"}
 LARGEST = max(cap for cap, _ in KINDS.values())
 HEIC = "HEIC and AVIF photos cannot be read here. Export the photo as a JPEG first (in Photos or Preview: File, Export)."
 # The upload route takes these types only to say plainly why they are refused.
@@ -375,6 +377,9 @@ def stage_image(path, ctype, kind, dest_base):
                   "too_small")
     if kind == "category-photo" and min(w, h) < 432:
         raise bad("A category photo needs at least 432 px on its short side; this one is %dx%d px." % (w, h), "too_small")
+    if kind == "family-photo" and (w < 900 or h < 675):
+        raise bad("A scent family photo needs to be at least 900 px wide and 675 px tall; this one is %dx%d px." % (w, h),
+                  "too_small")
     if kind in ("cutout", "logo", "emblem"):
         if im.mode != "RGBA" or edge_clear(im) < 0.9:
             raise bad("This PNG has no transparent background: its edges are not see-through. Remove the background "
@@ -504,6 +509,14 @@ def render_category(meta, crop, out):
     return _jpeg(im.resize((432, 432), Image.LANCZOS, box=box), out / "category.jpg")
 
 
+def render_family(meta, crop, out):
+    """The scent family tile's 4:3 at 900x675; make_derivatives cuts the
+    450 px copy. With no crop the whole picture is trimmed about its centre."""
+    im = _flat(_master(meta))
+    box = crop_box(crop, im.size, 4 / 3, 900, "tile")
+    return _jpeg(im.resize((900, 675), Image.LANCZOS, box=box), out / "family.jpg")
+
+
 def render_cutout(meta, out):
     """Trimmed to the object and fitted like the existing cut-outs: standing
     on the bottom edge of a 204x240 canvas, or tight for a wide one. Then 256
@@ -582,6 +595,8 @@ def sized_copies(cfg, path):
             return [img / (name[:-4] + "-486.png")]
     if folder == "assets/cat" and name.endswith(".jpg") and not name.endswith("-216.jpg"):
         return [cat / (name[:-4] + "-216.jpg")]
+    if folder == "assets/fam" and name.endswith(".jpg") and not name.endswith("-450.jpg"):
+        return [cfg.assets / "fam" / (name[:-4] + "-450.jpg")]
     return []
 
 
@@ -592,7 +607,8 @@ def orphan_copies(cfg):
     snapshots them so a failed build puts them back and the sweep is not
     reported as a file the build should not have changed."""
     out = []
-    for folder, suffixes in ((cfg.assets / "img", ("-600", "-card-360", "-thumb")), (cfg.assets / "cat", ("-216",))):
+    for folder, suffixes in ((cfg.assets / "img", ("-600", "-card-360", "-thumb")), (cfg.assets / "cat", ("-216",)),
+                             (cfg.assets / "fam", ("-450",))):
         if not folder.is_dir():
             continue
         for suf in suffixes:
@@ -664,10 +680,11 @@ def slug(text, fallback):
 def free_name(cfg, folder, base, exts):
     """base, then base-2, base-3 and so on, until no file of that stem exists
     in folder under any of exts. A stem ending -216 would be taken for a
-    category photo's copy, so it is never used."""
+    category photo's copy, and one ending -450 for a scent family photo's,
+    so neither is ever used."""
     trashed = trash_names(cfg)
     k, name = 1, base
-    while name.endswith("-216") or any(_taken(cfg, "%s/%s%s" % (folder, name, e), trashed) for e in exts):
+    while name.endswith(("-216", "-450")) or any(_taken(cfg, "%s/%s%s" % (folder, name, e), trashed) for e in exts):
         k += 1
         name = "%s-%d" % (base, k)
     return name
