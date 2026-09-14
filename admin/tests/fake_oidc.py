@@ -189,7 +189,7 @@ class FakeOIDC:
             self.codes[code] = {"challenge": p["code_challenge"], "redirect_uri": p["redirect_uri"],
                                 "nonce": "another-nonce" if self.wrong_nonce else p["nonce"]}
             back["code"] = code
-            self.events.append({"kind": "authorize", "ok": True, "params": p})
+            self.events.append({"kind": "authorize", "ok": True, "params": p, "code": code})
         return self._send(h, 302, headers={"Location": p["redirect_uri"] + "?" + urllib.parse.urlencode(back)})
 
     def token(self, h, raw):

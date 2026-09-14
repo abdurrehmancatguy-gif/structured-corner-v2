@@ -488,6 +488,50 @@ class SigninFlow(unittest.TestCase):
         self.assertNotIn("0500000000", p["text"])
         self.no_errors()
 
+    def test_a_callback_that_cannot_be_used_leaves_a_signed_in_shopper_on_their_account(self):
+        self.open(1440, 900, False)
+        tap(self.c, '[data-signin-go=""]')
+        self.signed_in_here()
+        a = [e for e in IDP.events if e["kind"] == "authorize"][-1]
+        replay = "account.html?" + urllib.parse.urlencode({"code": a["code"], "state": a["params"]["state"]})
+
+        def account_as_it_was(what, tokens):
+            p, me = self.js(PANEL), self.js(ME)
+            self.assertEqual((p["shown"], p["msg"], p["views"]), (False, "", [False, False]), what)
+            self.assertNotEqual(p["busy"], "true", what)
+            self.assertEqual((me["name"], me["email"]), ("Noor Haddad", "noor@example.com"), what)
+            self.assertTrue(self.js(LINKS)["head"]["signed"], what)
+            self.assertEqual(self.js("location.href"), SITE + "/account.html", what)
+            self.assertEqual([e["ok"] for e in IDP.events if e["kind"] == "token"], tokens, what)
+            self.assertIsNotNone(self.profile(), what)
+
+        # the same callback again, and links anyone could write: nothing reaches the token endpoint
+        for path in (replay, "account.html?code=made-up&state=made-up", "account.html?state=made-up",
+                     "account.html?error=access_denied", "account.html?error=server_error&error_description=x"):
+            IDP.reset()
+            self.c.go(SITE + "/" + path)
+            until(self.c, READY + " && location.search === ''", 20, what=path)
+            time.sleep(0.3)
+            account_as_it_was(path, [])
+        # an attempt this tab kept, whose exchange the provider refuses
+        IDP.reset()
+        att = {"verifier": "v" * 43, "state": "kept-state", "nonce": "kept-nonce",
+               "redirect_uri": SITE + "/account.html", "return_to": ""}
+        self.js("sessionStorage.setItem('bgs_signin', %s)" % J(J(att)))
+        self.c.go(SITE + "/account.html?code=unknown-code&state=kept-state")
+        until(self.c, READY + " && location.search === '' && "
+                      "document.querySelector('[data-signin]').getAttribute('aria-busy') === 'false'", 20,
+              what="the exchange to end")
+        account_as_it_was("a refused exchange", [False])
+        # signed out, the same callback still reads as a message
+        self.js("localStorage.removeItem('bgs_profile')")
+        IDP.reset()
+        self.c.go(SITE + "/" + replay)
+        p = self.refused()
+        self.assertEqual((p["msg"], p["shown"], p["views"]), (self.w["failed"], True, [True, True]))
+        self.assertNotIn("token", IDP.kinds())
+        self.no_errors()
+
     # ---- signing out ---------------------------------------------------------------
     def test_signing_out_forgets_the_shopper_and_goes_through_the_logout_endpoint(self):
         for w, h, phone, button in ((1440, 900, False, ".acctnav [data-signout]"), (390, 844, True, ".acct-out")):

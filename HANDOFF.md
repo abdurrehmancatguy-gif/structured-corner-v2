@@ -396,7 +396,9 @@ library and nothing downloaded:
   endpoint over TLS). Only `{sub, name, email, picture, exp}` is kept, in localStorage
   (`bgs_profile`); the tokens are dropped. `code` and `state` leave the address bar and the
   shopper goes back to the page they started from. `?error=` shows a message from Pages; the
-  provider's description is never shown, since anyone can write one into a link.
+  provider's description is never shown, since anyone can write one into a link. A callback
+  that cannot be used (a stale or replayed one, a made-up link, a refused exchange) leaves a
+  shopper who is already signed in on their account, with no message.
 - **Signed in**: the account page shows the name, email and picture (the rest stays
   placeholders until the database), and the header's account link and the tab bar's Account
   say who it is. The profile holds until the id_token's `exp`, then the shopper reads as

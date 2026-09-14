@@ -2123,8 +2123,10 @@ bgsRun(function () {
    the tokens are dropped. code and state leave the address bar, and the
    shopper goes back to the page they came from when it is a page of this
    site. ?error= reads as a message; the provider's description is never
-   shown, as anyone can put one in a link. Sign out forgets the profile and
-   goes through Auth0's /v2/logout back to this site's home page.
+   shown, as anyone can put one in a link. A callback that cannot be used
+   leaves a shopper who is already signed in on their account, with no
+   message. Sign out forgets the profile and goes through Auth0's /v2/logout
+   back to this site's home page.
 --------------------------------------------------------------------------- */
 bgsRun(function () {
   "use strict";
@@ -2273,24 +2275,38 @@ bgsRun(function () {
     if (e.persisted) { busy(false); render(bgsProfile()); }
   });
 
+  /* A callback this page cannot use (no attempt kept for it, another state,
+     a failed exchange, or ?error=): a shopper who is signed in all the same,
+     as with a stale or replayed callback or a link anyone can write, keeps
+     their account on screen with no message; nobody signed in gets the panel
+     and the message. */
+  function refuse(text) {
+    var p = bgsProfile();
+    busy(false);
+    if (p) { say(""); render(p); return; }
+    render(null);
+    say(text, true);
+  }
+
   if (error) {
     var was = take();
     returnTo = (was && backTo(was.return_to)) || "";
-    tidy(); render(null);
-    say(error === "access_denied"
+    tidy();
+    refuse(error === "access_denied"
       ? bgsAr(bgsCopy("account.signin.cancelled", "Sign-in was cancelled or not allowed. You can try again."))
-      : failed(), true);
+      : failed());
     return;
   }
   if (code || state) {
     var att = take();
     returnTo = (att && backTo(att.return_to)) || "";
-    tidy(); render(null);
+    tidy();
     if (!code || !state || !att || typeof att.state !== "string" || att.state !== state ||
         typeof att.verifier !== "string" || typeof att.nonce !== "string" || typeof att.redirect_uri !== "string") {
-      say(failed(), true);
+      refuse(failed());
       return;
     }
+    render(null);
     busy(true);
     say(bgsAr(bgsCopy("account.signin.working", "Signing you in…")));
     exchange(att, code).then(function (p) {
@@ -2302,8 +2318,7 @@ bgsRun(function () {
       busy(false); say(""); render(kept);
       document.dispatchEvent(new CustomEvent("bgs:profile"));
     }).catch(function () {
-      busy(false);
-      say(failed(), true);
+      refuse(failed());
     });
     return;
   }
