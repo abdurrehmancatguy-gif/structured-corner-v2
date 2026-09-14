@@ -2056,3 +2056,26 @@ footer .slot,footer .soon{color:#b9b0a4}
   .catnav .wrap{padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px))}
   .tabbar{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
 }
+/* ---- sizes that were inline styles in build.py ------------------------------
+   An inline style outranks every rule in this file, so the phone type scale
+   below could not reach these. Each class carries exactly what its element
+   had inline, so every width computes as before; margins that differ from
+   one use to the next stay inline. h2.pagetitle and .sec-h h2.subhead are
+   written with the h2 so they outrank .sec-h h2 in the phone blocks above. */
+h2.pagetitle,.sec-h h2.pagetitle{font-size:26px}
+.intro{color:var(--mut);font-size:13.5px;margin:6px 0 0}
+.emptybody{color:var(--mut);font-size:13.5px}
+.acct-head .contact{color:var(--mut);font-size:13.5px;margin:0}
+.sec-h h2.subhead{font-size:17px}
+.toolbar .fhead{font-size:13px}
+.toolbar .count{font-size:13px;color:var(--mut)}
+.codnote{font-size:11.5px;color:var(--mut);margin:12px 0 0;text-align:center}
+.sec-h .aside{font-size:13px;color:var(--mut)}
+.optin{display:flex;gap:9px;font-size:13px;color:var(--body)}
+.sum .r.vat{color:var(--mut);font-size:12.5px}
+.tiernote{font-size:12.5px;color:var(--mut);margin:0}
+.rname{font-weight:600;font-size:16px}
+.rmeta{font-size:12.5px;color:var(--mut);margin-top:3px}
+.rprice{font-weight:700;font-size:16px}
+.sendnote{font-size:13px;color:var(--mut);margin:8px 0 14px}
+.wm.foot-wm{color:#fff;font-size:20px;margin-bottom:14px}

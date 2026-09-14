@@ -442,8 +442,7 @@ def footer_logo():
         size = ' width="%d" height="%d"' % (w, h) if w else ""
         return ('<img class="foot-logo" src="%s" alt="%s"%s loading="lazy" decoding="async">'
                 % (esc(V(logo)), _brand_alt(), size))
-    return ('<div class="wm" style="color:#fff;font-size:20px;margin-bottom:14px">'
-            'BGS CORNER</div>')
+    return '<div class="wm foot-wm">BGS CORNER</div>'
 
 NAV = [(n["label"], n["href"]) for n in NAVC["main"]]
 TABS = [(n["label"], n["href"], n.get("icon", "")) for n in NAVC["tabs"]]
@@ -975,12 +974,12 @@ collection = """
 <section><div class="wrap">
   <span class="eyebrow" data-crumb>%(crumb_home)s / %(all_crumb)s</span>
   <div class="sec-h" style="margin-top:10px"><div>
-    <h2 style="font-size:26px" data-title>%(all_title)s</h2>
-    <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0;max-width:70ch" data-intro>%(all_intro)s</p></div></div>
+    <h2 class="pagetitle" data-title>%(all_title)s</h2>
+    <p class="intro" style="max-width:70ch" data-intro>%(all_intro)s</p></div></div>
   <div class="plp">
     <div class="side" data-filters>
       <div class="drawerhead"><b>%(f_heading)s</b><button type="button" class="closex" data-closefilters aria-label="Close filters">&times;</button></div>
-      <div class="toolbar" style="border:0;padding:0;margin-bottom:6px"><b style="font-size:13px">%(f_heading)s</b><button type="button" class="linkbtn" data-clearall>%(f_clear)s</button></div>
+      <div class="toolbar" style="border:0;padding:0;margin-bottom:6px"><b class="fhead">%(f_heading)s</b><button type="button" class="linkbtn" data-clearall>%(f_clear)s</button></div>
       %(facets)s
       <div class="draweractions"><button type="button" class="btn solid block" data-closefilters>%(f_show)s</button></div>
     </div>
@@ -990,7 +989,7 @@ collection = """
         <button type="button" class="filterbtn" data-openfilters>%(filt)s %(f_heading)s <i class="fcount" data-fcount hidden>0</i></button>
         <div class="pills" data-pills></div>
         <div style="display:flex;gap:12px;align-items:center">
-          <span style="font-size:13px;color:var(--mut)">%(count)s</span>
+          <span class="count">%(count)s</span>
           <label class="sel"><span class="none-visual">Sort</span>
             <select data-sort aria-label="Sort products">
               <option value="featured">%(sort_featured)s</option>
@@ -1002,7 +1001,7 @@ collection = """
       <div class="grid g4" data-grid></div>
       <div class="emptystate" data-empty hidden>
         <b>%(empty_title)s</b>
-        <p style="color:var(--mut);font-size:13.5px;margin:6px 0 14px">%(empty_body)s</p>
+        <p class="emptybody" style="margin:6px 0 14px">%(empty_body)s</p>
         <button type="button" class="btn ghost" data-clearall>%(empty_clear)s</button>
       </div>
     </div>
@@ -1161,7 +1160,7 @@ product = """
   <div data-panel="reviews" hidden>
     <div class="emptystate" style="text-align:left;padding:20px 0">
       <b>%(p_rev_title)s</b>
-      <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">%(p_rev_body)s</p>
+      <p class="emptybody" style="margin:6px 0 0">%(p_rev_body)s</p>
     </div>
   </div>
 </div></section>
@@ -1221,15 +1220,15 @@ COPY_JS["gift_box"]["summary"].update(add=js_text("gift_box.summary.add", allow=
 giftbox = """
 <section><div class="wrap">
   <span class="eyebrow">%(b_crumb)s</span>
-  <div class="sec-h" style="margin-top:10px"><div><h2 style="font-size:26px">%(b_title)s</h2>
-  <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">%(b_intro)s</p></div></div>
+  <div class="sec-h" style="margin-top:10px"><div><h2 class="pagetitle">%(b_title)s</h2>
+  <p class="intro">%(b_intro)s</p></div></div>
   <div class="two">
     <div>
       <div class="pills" style="margin-bottom:18px">
         <button type="button" class="pill on" data-boxsize="3">%(b_size3)s</button>
         <button type="button" class="pill" data-boxsize="6">%(b_size6)s</button></div>
       <div class="grid g3" data-slots style="margin-bottom:22px"></div>
-      <div class="sec-h"><h2 style="font-size:17px">%(b_pick)s</h2></div>
+      <div class="sec-h"><h2 class="subhead">%(b_pick)s</h2></div>
       <div class="grid g4">%(pick)s</div>
     </div>
     <div>
@@ -1316,7 +1315,7 @@ COPY_JS["cart"] = {
 # so the language toggle translates them as it does the summary's.
 cart = """
 <section><div class="wrap">
-  <div class="sec-h"><h2 style="font-size:26px">%(c_title)s<span data-bagitems></span></h2><a href="%(c_cont_href)s">%(c_cont)s &rarr;</a></div>
+  <div class="sec-h"><h2 class="pagetitle">%(c_title)s<span data-bagitems></span></h2><a href="%(c_cont_href)s">%(c_cont)s &rarr;</a></div>
   <div class="two">
     <div>
       <div class="sum" data-cartprogress style="background:#fff;margin-bottom:18px">
@@ -1338,7 +1337,7 @@ cart = """
       <div class="r t"><span>%(c_total)s</span><span data-total>AED 825.50</span></div>
       <a class="btn solid block" href="checkout.html" data-checkout style="margin-top:12px">%(c_checkout)s</a>
       <div class="pay" data-pay style="margin-top:14px;justify-content:center"><span>Card</span><span>Apple Pay</span><span>Tabby</span><span>Tamara</span><span class="off">COD</span></div>
-      <p data-codnote style="font-size:11.5px;color:var(--mut);margin:12px 0 0;text-align:center">Cash on delivery is withheld over AED 300.</p>
+      <p class="codnote" data-codnote>Cash on delivery is withheld over AED 300.</p>
     </div></div>
   </div>
 </div></section>
@@ -1350,12 +1349,12 @@ EXTRA_GLOBALS.append(("BGS_RULES", lambda: RULES))
 
 checkout = """
 <section><div class="wrap">
-  <div class="sec-h"><h2 style="font-size:26px">Checkout</h2><span style="font-size:13px;color:var(--mut)">Guest checkout &middot; account optional</span></div>
+  <div class="sec-h"><h2 class="pagetitle">Checkout</h2><span class="aside">Guest checkout &middot; account optional</span></div>
   <div class="two">
     <div>
       <span class="eyebrow">1 &middot; Contact</span>
       <div class="grid g2" style="margin:10px 0 18px"><span class="field">Full name</span><span class="field">Phone &middot; UAE</span><span class="field" style="grid-column:1/-1">Email</span></div>
-      <label style="display:flex;gap:9px;font-size:13px;color:var(--body);margin-bottom:26px"><input type="checkbox">Send me order updates on WhatsApp <span class="norm">, unticked by default, consent logged</span></label>
+      <label class="optin" style="margin-bottom:26px"><input type="checkbox">Send me order updates on WhatsApp <span class="norm">, unticked by default, consent logged</span></label>
       <span class="eyebrow">2 &middot; Delivery</span>
       <div class="kv" style="margin:10px 0 26px">
         <div><span><b>Standard</b> &middot; free over AED 150</span><span>AED 12 below</span></div>
@@ -1370,7 +1369,7 @@ checkout = """
       <div class="r"><span>4 items</span><span data-subtotal>AED 845</span></div>
       <div class="r" style="color:var(--green)" data-tierrow><span>Volume discount &middot; <b data-tierpct>10</b>%</span><span data-tieramt>&minus; AED 19.50</span></div>
       <div class="r"><span>Delivery</span><span data-delivery style="color:var(--green)">Free</span></div>
-      <div class="r" data-vatrow style="color:var(--mut);font-size:12.5px"><span>Includes VAT at 5%</span><span data-vat>AED 39.31</span></div>
+      <div class="r vat" data-vatrow><span>Includes VAT at 5%</span><span data-vat>AED 39.31</span></div>
       <div class="r t"><span>Total</span><span data-total>AED 825.50</span></div>
       <a class="btn solid block" href="confirmed.html" style="margin-top:12px">Place order</a>
     </div></div>
@@ -1381,7 +1380,7 @@ confirmed = """
 <section><div class="wrap" style="max-width:760px">
   <div style="text-align:center;padding:20px 0 34px">
     <div class="tick">%(check)s</div>
-    <h2 style="font-size:26px;margin:0 0 8px">Order confirmed</h2>
+    <h2 class="pagetitle" style="margin:0 0 8px">Order confirmed</h2>
     <p style="color:var(--mut);margin:0">Order number %(num)s</p>
   </div>
   <div class="kv">
@@ -1400,7 +1399,7 @@ confirmed = """
 # keep a shorter name. The form sends nothing yet, and its replies (shop.js,
 # BGS_COPY["corporate"]["replies"]) say so.
 _CORP_TIER = ('<div class="sum" style="background:#fff"><span class="eyebrow">%s</span><div class="tier">%s</div>'
-              '<p style="font-size:12.5px;color:var(--mut);margin:0">%s</p></div>')
+              '<p class="tiernote">%s</p></div>')
 CORPORATE_TEXT = {
     "k_title": page_text("corporate.title"), "k_intro": page_text("corporate.intro"),
     "k_tiers": "\n    ".join(_CORP_TIER % r for r in page_rows("corporate.tiers", ("units", "price", "note"))),
@@ -1420,8 +1419,8 @@ COPY_JS["corporate"] = {"replies": {
 
 corporate = """
 <section><div class="wrap">
-  <div class="sec-h"><div><h2 style="font-size:26px">%(k_title)s</h2>
-  <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">%(k_intro)s</p></div></div>
+  <div class="sec-h"><div><h2 class="pagetitle">%(k_title)s</h2>
+  <p class="intro">%(k_intro)s</p></div></div>
   <div class="grid g4" style="margin-bottom:24px">
     %(k_tiers)s
   </div>
@@ -1454,8 +1453,8 @@ COPY_JS["track"] = {"replies": {"missing": js_text("track.replies.missing"),
 track = """
 <section><div class="wrap" style="max-width:720px">
   <span class="eyebrow">%(t_crumb)s</span>
-  <div class="sec-h" style="margin-top:10px"><div><h2 style="font-size:26px">%(t_title)s</h2>
-  <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">%(t_intro)s</p></div></div>
+  <div class="sec-h" style="margin-top:10px"><div><h2 class="pagetitle">%(t_title)s</h2>
+  <p class="intro">%(t_intro)s</p></div></div>
   <div class="grid g2" style="margin-bottom:14px"><input class="field" data-ordernum aria-label="%(t_number)s" placeholder="%(t_number)s"><input class="field" data-orderphone type="tel" aria-label="Phone number" placeholder="%(t_phone)s"></div>
   <button type="button" class="btn solid block" data-findorder style="margin-bottom:10px">%(t_button)s</button>
   <p class="note" data-findresult hidden style="margin:0 0 26px"></p>
@@ -1501,8 +1500,8 @@ account = """
   <span class="eyebrow">%(a_crumb)s</span>
   <div class="acct-head">
     <div>
-      <h2 style="font-size:26px;margin:8px 0 6px">%(name)s</h2>
-      <p style="color:var(--mut);font-size:13.5px;margin:0">%(contact)s</p>
+      <h2 class="pagetitle" style="margin:8px 0 6px">%(name)s</h2>
+      <p class="contact">%(contact)s</p>
     </div>
     <div class="tierbadge"><span class="eyebrow gold-d">%(a_prog)s</span><b>%(a_tier)s</b></div>
   </div>
@@ -1525,7 +1524,7 @@ account = """
         <div class="sum" style="background:#fff"><span class="eyebrow">%(a_orders)s</span><div class="tier">%(orders)s</div><p class="mini">%(a_orders_note)s</p></div>
       </div>
 
-      <div class="sec-h"><h2 style="font-size:17px">%(a_prog)s</h2><a href="#">%(a_how)s &rarr;</a></div>
+      <div class="sec-h"><h2 class="subhead">%(a_prog)s</h2><a href="#">%(a_how)s &rarr;</a></div>
       <div class="sum" style="background:#fff;margin-bottom:26px">
         <div class="tiers">
           %(a_tiers)s
@@ -1537,7 +1536,7 @@ account = """
         </div>
       </div>
 
-      <div class="sec-h"><h2 style="font-size:17px">%(a_wallet_heading)s</h2></div>
+      <div class="sec-h"><h2 class="subhead">%(a_wallet_heading)s</h2></div>
       <div class="sum" style="background:#fff;margin-bottom:26px">
         <div class="kv">
           <div><span>%(a_wallet_voucher_label)s</span><span>%(voucher)s</span></div>
@@ -1547,7 +1546,7 @@ account = """
         <p class="mini" style="margin:12px 0 0">%(a_wallet_note)s</p>
       </div>
 
-      <div class="sec-h"><h2 style="font-size:17px">%(a_referral_heading)s</h2></div>
+      <div class="sec-h"><h2 class="subhead">%(a_referral_heading)s</h2></div>
       <div class="sum" style="background:#fff;margin-bottom:26px">
         <div class="refbox"><span class="code">%(refcode)s</span><span class="btn sm">%(a_referral_copy_label)s</span></div>
         <div class="kv" style="margin-top:14px">
@@ -1557,7 +1556,7 @@ account = """
         </div>
       </div>
 
-      <div class="sec-h"><h2 style="font-size:17px">%(a_orders_heading)s</h2><a href="track-order.html">%(a_orders_track_label)s &rarr;</a></div>
+      <div class="sec-h"><h2 class="subhead">%(a_orders_heading)s</h2><a href="track-order.html">%(a_orders_track_label)s &rarr;</a></div>
       <div class="sum" style="background:#fff;margin-bottom:26px">
         <div class="emptystate">
           <b>%(a_orders_empty_title)s</b>
@@ -1566,7 +1565,7 @@ account = """
         </div>
       </div>
 
-      <div class="sec-h"><h2 style="font-size:17px">%(a_consent_heading)s</h2></div>
+      <div class="sec-h"><h2 class="subhead">%(a_consent_heading)s</h2></div>
       <div class="sum" style="background:#fff">
         <div class="kv">
           <div><span>%(a_consent_phone_label)s</span><span>%(contact)s</span></div>
@@ -1637,14 +1636,14 @@ quiz = """
     <h2 class="qtitle" data-rtitle></h2>
     <div class="pills" data-rpills style="margin:14px 0 22px"></div>
 
-    <div class="sec-h"><h2 style="font-size:17px">%(r_heading)s</h2></div>
+    <div class="sec-h"><h2 class="subhead">%(r_heading)s</h2></div>
     <div class="sum" style="background:#fff;margin-bottom:12px">
       <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap">
         <div style="min-width:0">
-          <div style="font-weight:600;font-size:16px" data-rname></div>
-          <div style="font-size:12.5px;color:var(--mut);margin-top:3px" data-rmeta></div>
+          <div class="rname" data-rname></div>
+          <div class="rmeta" data-rmeta></div>
         </div>
-        <div style="font-weight:700;font-size:16px" data-rprice></div>
+        <div class="rprice" data-rprice></div>
       </div>
       <div class="kv" style="margin-top:14px">
         <div><span>%(r_notes_label)s</span><span data-rnotes style="text-align:right;max-width:60%%"></span></div>
@@ -1668,7 +1667,7 @@ quiz = """
 
     <div class="sum" style="background:#fff">
       <span class="eyebrow">Send it to yourself</span>
-      <p style="font-size:13px;color:var(--mut);margin:8px 0 14px">We can send this profile to your phone so you have it when you visit the kiosk.</p>
+      <p class="sendnote">We can send this profile to your phone so you have it when you visit the kiosk.</p>
       <div class="grid g2" style="margin-bottom:12px"><span class="field">Your name</span><span class="field">+971 5X XXX XXXX</span></div>
       <label class="consent"><input type="checkbox">Send my scent profile and offers on WhatsApp</label>
       <p class="mini">Unticked on purpose. Nothing is sent unless you tick it, and the time, source and language of the
