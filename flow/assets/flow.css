@@ -2079,3 +2079,117 @@ h2.pagetitle,.sec-h h2.pagetitle{font-size:26px}
 .rprice{font-weight:700;font-size:16px}
 .sendnote{font-size:13px;color:var(--mut);margin:8px 0 14px}
 .wm.foot-wm{color:#fff;font-size:20px;margin-bottom:14px}
+
+/* ==========================================================================
+   Phone type scale
+   --------------------------------------------------------------------------
+   Up to 900px (phones, the folding phone and portrait tablets, which all
+   get the phone layout) text was 8.5 to 13.5px: running text 13, product
+   names 13, card details 9 to 11, labels 8.5 to 9.5, fields 13 to 14 (so
+   iOS zoomed the page on every tap into search), and the same at 320 as at
+   430. One scale now, each rule repeating the selector it overrides so it
+   wins by coming last, without !important:
+
+     12px  one-line uppercase labels, badges, counters, placeholder tags,
+           the card's meta line, footer headings; the floor for any text
+     13px  category pills (12px at 370 and below), so the bar stays two rows
+     14px  secondary text: meta lines, notes, spec rows, helper sentences,
+           section links, tabs, chips, pills, footer links, the delivery
+           strip (13px under 360, where 14 wraps it)
+     15px  buttons, summary rows, tier names
+     16px  body copy, product names, prices on cards and bag lines,
+           quantities, every form field (under 16 iOS zooms on focus)
+     18px  sub-headings, totals, the story's first line, the drawer title
+     22px  section headings; 24 the quiz question; 26 page titles, the
+           product title, the hero headline and the product price
+
+   Two measured exceptions: card size chips stay 12px, two to a card that is
+   117px wide at 320 ("12 ml · AED 1,295" took three lines at 13px), and the
+   category pills as above. Desktop, above 900px, is untouched. */
+@media (max-width:900px){
+  body{font-size:16px}
+  /* 12px labels */
+  .eyebrow,.qstep,.notestop b,.p .meta,.badge,.p .tax,.p .rev,.p .norm,.norm,.slot,
+  .p .notes .slot,.p .tax .slot,.p .ph .none,.promo .none,.line .im .none,.gal .main .none,
+  .galslide .none,.heroimg .none.corner,.galcount,.galthumb,.fam span,.tiers .t span,
+  .filterbtn .fcount,.fbox .ct,.tabbar a,.cs a span:not(.circle),.p .sizes button{font-size:12px}
+  footer h5{font-size:12px;font-weight:600;line-height:1.2}
+  .acts .act .n{font-size:12px;min-width:18px;height:18px;line-height:18px}
+  .filterbtn .fcount{min-width:20px;height:20px;border-radius:10px}
+  .fbox h4{font-size:12px;font-weight:600;line-height:1.2}
+  /* 13px category pills */
+  .catnav a{font-size:13px}
+  /* 14px secondary */
+  .strip .wrap,.lmeta,.kv div,.qresult .kv span:last-child,.tabs2 span,.tabs2 button,
+  .sec-h a,.sec-h span.norm,.mini,.pill,.buy .pills .pill,.linkbtn,.stickybuy span,
+  .pay span,.pay button,.prog .lb,.line .lrem,.note,.buy .belowbuy .note,
+  .buy .pricerow .permeta,.usp b,.fam b,.buy .sizeblock .sizes button,.acctnav a,
+  footer a,footer p,footer .soon,.qopts button span,.toolbar .fhead,.toolbar .count,
+  .codnote,.sec-h .aside,.sum .r.vat,.tiernote,.rmeta,.sendnote,.acct-head .contact,
+  .sharebtn,.ingbox p,.nojs,.bagbar .bb-t span,.added-meta,.added-q{font-size:14px}
+  .p .notes{font-size:14px;line-height:1.45}
+  .promo span:not(.none){font-size:14px;line-height:1.45}
+  .notestop p{font-size:14px;line-height:1.45}
+  .usp b{line-height:1.3}
+  .ingbox p{line-height:1.5}
+  /* 15px buttons and compact data */
+  .btn,.btn.sm,.p .btn.sm,.hero .btn,.added-b .btn{font-size:15px}
+  .btn,.filterbtn,.qopts button{font-family:inherit}
+  .filterbtn{font-size:15px;font-weight:600;line-height:1}
+  .sum .r,.tiers .t b,.qback{font-size:15px}
+  /* 16px body, names, prices, fields */
+  .p .nm{font-size:16px;line-height:1.3}
+  .lname,.lprice,.p .pr b,.stepper i,.promo b,.reel span,.refbox .code,.tier,
+  .emptybody,.consent,.optin,.fbox label{font-size:16px}
+  .qopts button{font-size:16px;font-weight:600;line-height:1.3}
+  .field,input.field,.sel,.sel select,.search input{font-size:16px}
+  .search input{min-width:0}
+  .hero p,.quizband p,.band p,.intro,.buy p{font-size:16px;line-height:1.5}
+  .story span{font-size:16px}
+  .stickybuy b{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .stickybuy > div{min-width:0}
+  /* 18px sub-headings and totals */
+  .drawerhead,.emptystate b,.sum .r.t,.tierbadge b,.rname,.rprice{font-size:18px}
+  .story span:first-child{font-size:18px}
+  .band h3{font-size:18px;line-height:1.3}
+  .sec-h h2.subhead{font-size:18px}
+  /* 22px, 24px, 26px headings */
+  .sec-h h2{font-size:22px;line-height:1.25}
+  .qcard h2,.qtitle{font-size:24px}
+  .buy h1{font-size:26px;line-height:1.2}
+  h2.pagetitle,.sec-h h2.pagetitle{line-height:1.2}
+  /* what the larger type needs to keep every width from scrolling sideways:
+     the footer columns may shrink below their longest word, the promo tiles
+     stack (below), and the hero buttons go under each other when their
+     labels no longer fit side by side, full width, instead of spilling */
+  footer .cols{grid-template-columns:repeat(2,minmax(0,1fr))}
+  footer a,footer p{overflow-wrap:anywhere}
+  .hero .btn{min-width:max-content}
+}
+@media (max-width:560px){
+  .grid.promos{grid-template-columns:1fr}
+  .promo > div{min-width:0}
+}
+@media (max-width:370px){
+  .catnav .wrap{gap:4px 3px}
+  .catnav a{font-size:12px;padding:0 6px}
+}
+@media (max-width:374px){
+  .strip .wrap{font-size:13px}
+}
+/* Wide touch screens (the big landscape phones and tablets above 900px) get
+   the desktop layout, and its labels at 9 to 11.5px. They are raised to the
+   12px floor and the fields to 16px; a desktop with a mouse keeps them. */
+@media (min-width:901px) and (pointer:coarse){
+  .eyebrow,.qstep,.notestop b,.p .meta,.badge,.p .tax,.p .rev,.p .norm,.norm,.slot,
+  .p .notes .slot,.p .ph .none,.promo .none,.promo span:not(.none),.line .im .none,
+  .galslide .none,.heroimg .none.corner,.galcount,.galthumb,.fam span,.tiers .t span,
+  .fbox .ct,.sizes button,.p .notes,.mini,.codnote,.usp span,.added-im .none{font-size:12px}
+  footer h5{font-size:12px;font-weight:600;line-height:1.2}
+  .act .n{font-size:12px;min-width:18px;height:18px}
+  .field,input.field,.sel select,.search input{font-size:16px}
+}
+/* Arabic joins its letters, so the tracking these labels carry in English
+   pulls a word apart; in Arabic they have none. */
+[dir="rtl"] :is(.eyebrow,.badge,.p .meta,footer h5,.cs a span,.notestop b,.qstep,.slot,
+  .galcount,.fbox h4,.heroimg .none.corner){letter-spacing:0}
