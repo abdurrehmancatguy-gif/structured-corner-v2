@@ -64,6 +64,32 @@ function bgsAr(en) {
   return document.documentElement.lang === "ar" && d && typeof en === "string" &&
     Object.prototype.hasOwnProperty.call(d, en) && typeof d[en] === "string" && d[en] !== "" ? d[en] : en;
 }
+/* Text a script puts back into an element that the language toggle already
+   switches (a pressed Add's label). bgsText writes the English as one text
+   node and, on an Arabic page, shows its Arabic and marks the node the way
+   the toggle marks what it translates, so the next switch turns it back;
+   text written with plain textContent in Arabic stayed Arabic on the English
+   page. bgsEnglish reads an element's text with anything the toggle
+   translated put back into English. */
+function bgsText(el, en) {
+  var n = document.createTextNode(en), t = en.trim(), d = window.BGS_AR;
+  if (document.documentElement.lang === "ar" && d && Object.prototype.hasOwnProperty.call(d, t) &&
+      typeof d[t] === "string" && d[t] !== "") {
+    n.__en = t;
+    n.nodeValue = en.replace(t, d[t]);
+  }
+  el.textContent = "";
+  el.appendChild(n);
+}
+function bgsEnglish(el) {
+  var d = window.BGS_AR || {}, s = "";
+  for (var i = 0; i < el.childNodes.length; i++) {
+    var n = el.childNodes[i], v = n.nodeType === 3 ? n.nodeValue : n.textContent;
+    if (n.__en && d[n.__en]) v = v.replace(d[n.__en], n.__en);
+    s += v;
+  }
+  return s;
+}
 /* Each feature below runs on its own: an error in one (bad data in storage, a
    missing element) is logged and the rest still work. As one plain script, the
    first throw stopped every feature after it, the bag included. */
@@ -1468,12 +1494,14 @@ bgsRun(function () {
       }
       if (add(id, qty)) {
         /* The label to go back to is kept from the first press only: a
-           second press inside the 1.2 s used to save "Added" as it, for good. */
-        if (!btn.hasAttribute("data-was")) btn.setAttribute("data-was", btn.textContent);
-        btn.textContent = bgsAr(bgsCopy("cart.added.button", "Added"));
+           second press inside the 1.2 s used to save "Added" as it, for good.
+           It is kept in English and both words go in through bgsText, so
+           they follow the language toggle, even one pressed in between. */
+        if (!btn.hasAttribute("data-was")) btn.setAttribute("data-was", bgsEnglish(btn));
+        bgsText(btn, bgsCopy("cart.added.button", "Added"));
         clearTimeout(btn._bgsT);
         btn._bgsT = setTimeout(function () {
-          btn.textContent = btn.getAttribute("data-was");
+          bgsText(btn, btn.getAttribute("data-was"));
           btn.removeAttribute("data-was");
         }, 1200);
         /* the added-to-bag panel listens in a block of its own: an error in

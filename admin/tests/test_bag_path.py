@@ -225,6 +225,33 @@ class BagPath(unittest.TestCase):
         self.assertAlmostEqual(p["bottom"], p["tab"], delta=1)
         self.no_page_errors()
 
+    def test_an_add_label_follows_the_language_toggle(self):
+        self.view(390, 844)
+        ar = lambda en: self.js("window.BGS_AR[%s]" % J(en))
+        toggle = "document.querySelector('[data-langtoggle]').click()"
+        # pressed in Arabic, then back to English: the buy bar's Add reads English again
+        self.open("product.html?p=vibe", bag=[])
+        label = self.js("document.querySelector('.stickybuy [data-add]').textContent")
+        self.js(toggle)
+        self.js("document.querySelector('.stickybuy [data-add]').click()")
+        self.assertEqual(self.js("document.querySelector('.stickybuy [data-add]').textContent"), ar("Added"))
+        time.sleep(1.5)
+        self.assertEqual(self.js("document.querySelector('.stickybuy [data-add]').textContent"), ar(label))
+        self.js(toggle)
+        self.assertEqual(self.js("document.documentElement.lang"), "en")
+        self.assertEqual(self.js("document.querySelector('.stickybuy [data-add]').textContent"), label)
+        # pressed in English and switched to Arabic while it reads Added: it comes back in Arabic
+        self.open("index.html", bag=[])
+        card = self.js("document.querySelector('.p [data-add]').textContent")
+        self.js("document.querySelector('.p [data-add]').click()")
+        self.js(toggle)
+        self.assertEqual(self.js("document.querySelector('.p [data-add]').textContent"), ar("Added"))
+        time.sleep(1.5)
+        self.assertEqual(self.js("[...document.querySelectorAll('.p [data-add]')].slice(0, 3).map((b) => b.textContent)"), [ar(card)] * 3)
+        self.js(toggle)
+        self.assertEqual(self.js("[...document.querySelectorAll('.p [data-add]')].slice(0, 3).map((b) => b.textContent)"), [card] * 3)
+        self.no_page_errors()
+
     # ---- the panel on a desktop ----------------------------------------------
     def test_on_a_desktop_the_panel_hangs_under_the_bag(self):
         self.view(1440, 900, phone=False)
