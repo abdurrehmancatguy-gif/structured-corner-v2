@@ -368,6 +368,7 @@ COMMON = r"""
   const SKIP = /^(on|hidden|seen|open|anchored|js|done)$/;
   const AR = new RegExp('[' + String.fromCharCode(0x0600) + '-' + String.fromCharCode(0x06FF) + ']');
   const ARROW = new RegExp('[' + String.fromCharCode(0x2192, 0x203A) + ']');
+  const ANY_ARROW = new RegExp('[' + String.fromCharCode(0x2190, 0x2192, 0x2039, 0x203A) + ']');
   const one = (e) => {
     let s = e.tagName.toLowerCase();
     if (e.id && !/^bgs-/.test(e.id)) return s + '#' + e.id;
@@ -564,9 +565,23 @@ PASS_A = r"""
   }
   out.taps = [...taps.values()];
 
-  // ---- text spilling past its box, clipped by it, or drawn over other text
+  // ---- text spilling past its box, clipped by it, or drawn over other text.
+  // Line boxes are cut to the boxes that clip them (a field that ends its
+  // text in an ellipsis), since only what is left of them is drawn.
   let spills = 0, clips = 0, ovs = 0;
-  const lines = [];
+  const lines = [], clipOf = new Map();
+  const clipBox = (e) => {
+    if (!e || e === body || e === de) return [-1e9, -1e9, 1e9, 1e9];
+    if (clipOf.has(e)) return clipOf.get(e);
+    let b = clipBox(e.parentElement);
+    const s = getComputedStyle(e);
+    if (s.overflowX !== 'visible' || s.overflowY !== 'visible') {
+      const r = e.getBoundingClientRect();
+      b = [Math.max(b[0], r.left), Math.max(b[1], r.top), Math.min(b[2], r.right), Math.min(b[3], r.bottom)];
+    }
+    clipOf.set(e, b);
+    return b;
+  };
   for (const [p, u] of parents) {
     const s = getComputedStyle(p), r = p.getBoundingClientRect();
     if (s.display !== 'inline' && s.display !== 'contents') {
@@ -577,7 +592,13 @@ PASS_A = r"""
       } else if ((u.r > r.right - br + 1.5 || u.l < r.left + bl - 1.5) && spills++ < 12)
         issue('text-spill', 'medium', p, 'text from ' + Math.round(u.l) + ' to ' + Math.round(u.r) + ' in a box from ' + Math.round(r.left + bl) + ' to ' + Math.round(r.right - br));
     }
-    if (!u.fixed) for (const q of u.lines) lines.push({ p, l: q[0], t: q[1], r: q[2], b: q[3] });
+    if (!u.fixed) {
+      const cb = clipBox(p);
+      for (const q of u.lines) {
+        const l = Math.max(q[0], cb[0]), t = Math.max(q[1], cb[1]), r2 = Math.min(q[2], cb[2]), b2 = Math.min(q[3], cb[3]);
+        if (r2 - l > 1 && b2 - t > 1) lines.push({ p, l, t, r: r2, b: b2 });
+      }
+    }
   }
   lines.sort((a, b) => a.t - b.t);
   const seenPair = new Set();
@@ -658,9 +679,11 @@ PASS_A = r"""
     for (const { n, p } of runs) {
       const s = n.nodeValue, t = s.trim(), ps = getComputedStyle(p);
       if (ps.direction === 'rtl' && /^[A-Za-z0-9]/.test(t) && !AR.test(t) && /[^A-Za-z0-9]/.test(t)) {
+        // a trailing arrow is the link's pointer, not part of the sentence:
+        // in Arabic it belongs at the left end, so it is left out here
         let i0 = 0, i1 = s.length - 1;
         while (i0 < s.length && /\s/.test(s[i0])) i0++;
-        while (i1 > 0 && /\s/.test(s[i1])) i1--;
+        while (i1 > 0 && (/\s/.test(s[i1]) || ANY_ARROW.test(s[i1]))) i1--;
         const a = document.createRange(); a.setStart(n, i0); a.setEnd(n, i0 + 1);
         const b = document.createRange(); b.setStart(n, i1); b.setEnd(n, i1 + 1);
         const ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
