@@ -2607,3 +2607,14 @@ h2.pagetitle,.sec-h h2.pagetitle{font-size:26px}
 .strip b,.galcount b,.heroimg .none.corner b{color:#fff}
 .btn.gold{background:var(--gold-d);border-color:var(--gold-d);color:#fff}
 .btn.gold:hover{background:#7a4f11;border-color:#7a4f11}
+/* ---- category shelf: one brown band ------------------------------------------
+   The row of category pictures under the banner is a single solid band of
+   the brand brown, edge to edge, with white labels (14.7:1). Nothing sits
+   behind a picture: no disc, tile, card, ring or shadow. The cut-outs stand
+   straight on the band and the one photograph (Corporate Gifting) is simply
+   the picture, its corners rounded. The focus ring is white to show on it. */
+.catstrip{background:var(--secondary);border-top:0;border-bottom:0}
+.cs a,.cs a:hover{background:none !important;border:0;box-shadow:none}
+.cs a span:not(.circle){color:#fff}
+.cs a.pop .circle img{filter:none}
+.cs a:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:var(--r-sm)}
