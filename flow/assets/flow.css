@@ -2081,6 +2081,10 @@ footer .slot,footer .soon{color:#b9b0a4}
 .cs a .circle img,.cs a.pop .circle img,.cs a.pop.wide .circle img{top:0;left:0;bottom:auto;width:100%;height:100%;
  max-width:none;object-fit:contain;object-position:center bottom}
 .cs a:hover .circle img,.cs a.pop:hover .circle img{transform:translateY(-3px)}
+/* The gift boxes are a group wider than tall, so fitting them in the square left
+   them short beside the bottles and the tin. They run wider than their square,
+   as they used to spill past the circle, so they read at the same size. */
+.cs a.pop.wide .circle img{left:-25%;width:150%}
 /* Phones: no small capital-letter titles. The decorative lines over the
    banner, quiz and Discovery headings go; every other label that carries
    information (breadcrumbs, a card's type and sizes, badges, section labels,
