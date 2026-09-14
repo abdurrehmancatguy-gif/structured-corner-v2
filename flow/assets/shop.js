@@ -457,6 +457,31 @@ bgsRun(function () {
 });
 
 
+/* ---------- phone masthead: the search button opens the search row ----------
+   On phones the search box sits in a row under the masthead that stays shut
+   (flow.css hides it once the "js" class is on the page) until the search
+   button in the top right corner opens it. A page showing search results
+   keeps it open, so the words searched for stay in view. */
+bgsRun(function () {
+  var btn = document.querySelector("[data-searchtoggle]");
+  var row = document.getElementById("msearch");
+  if (!btn || !row) return;
+  var input = row.querySelector('input[name="q"]');
+  function set(open) {
+    row.classList.toggle("open", open);
+    btn.setAttribute("aria-expanded", open ? "true" : "false");
+  }
+  set(!!new URLSearchParams(location.search).get("q"));
+  btn.addEventListener("click", function () {
+    var open = !row.classList.contains("open");
+    set(open);
+    if (open && input) input.focus();
+  });
+  row.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && row.classList.contains("open")) { set(false); btn.focus(); }
+  });
+});
+
 /* ---------- mobile filter drawer + sticky buy bar ---------- */
 bgsRun(function () {
   "use strict";

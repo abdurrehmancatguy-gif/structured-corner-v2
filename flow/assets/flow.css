@@ -1940,3 +1940,26 @@ footer .slot,footer .soon{color:#b9b0a4}
    page's head it tells browsers that darken pages on their own (Chrome's
    auto dark theme on Android, among others) to leave these pages alone. */
 :root{color-scheme:only light}
+/* Phone masthead: search, wishlist and bag in the top right corner; the
+   account is in the tab bar on phones. The search row under the masthead
+   stays shut until the search button opens it, but only once scripts run
+   (the "js" class set in the head), so a phone without them keeps the box.
+   Each action is a 44px square so it is easy to tap. */
+.act-search{display:none;-webkit-appearance:none;appearance:none;background:none;border:0;padding:0;
+ color:inherit;font:inherit;cursor:pointer}
+@media (max-width:900px){
+  .mast .wrap .acts{gap:2px}
+  .acts .act{display:flex;align-items:center;justify-content:center;min-width:44px;min-height:44px}
+  .acts .act.act-acct{display:none}
+  .acts .act.act-search{display:flex}
+  .acts .act.act-wish{display:flex}
+  .acts .act svg{width:22px;height:22px}
+  .acts .act .n{left:auto;right:3px;top:3px;min-width:17px;height:17px;padding:0 4px;
+   border-radius:999px;font-size:11px;line-height:17px;text-align:center}
+  .act-search[aria-expanded="true"]{color:var(--gold-d)}
+  .js .msearch:not(.open){display:none}
+}
+@media (max-width:340px){
+  .mast .wrap .acts{gap:0}
+  .acts .act{min-width:40px}
+}

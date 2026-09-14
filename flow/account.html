@@ -3,6 +3,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="only light">
 <meta name="theme-color" content="#ffffff">
+<script>document.documentElement.className+=" js"</script>
 <title>Your Account: BGS One, Wallet and Referrals | BGS Corner</title>
 <meta name="description" content="Your BGS Corner account: BGS One rewards, wallet and referrals.">
 <meta name="robots" content="noindex,follow">
@@ -16,7 +17,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png?v=c7e17059">
 <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png?v=be82e34c">
 <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=a1d1f521">
-<link rel="stylesheet" href="assets/flow.min.css?v=70218c29"></head><body class="page-account">
+<link rel="stylesheet" href="assets/flow.min.css?v=e147c884"></head><body class="page-account">
 <noscript><div class="nojs">This shop needs JavaScript for products, the bag and checkout. Please turn it on in your browser.</div></noscript>
 <div class="strip"><div class="wrap">
   <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Order by 2:00 PM for delivery today in Dubai<span data-cutoff hidden> &middot; <b></b></span></span>
@@ -27,12 +28,13 @@
   <form class="search" action="collection.html" method="get" role="search">
     <input name="q" aria-label="Search products" placeholder="Search ouds, oud, bakhoor…"><button type="submit" class="go" aria-label="Search"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/></svg></button></form>
   <div class="acts">
-    <a class="act" href="account.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg><span>Account</span></a>
-    <a class="act" href="account.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 20s-7-4.5-7-9.5A4 4 0 0 1 12 8a4 4 0 0 1 7 2.5C19 15.5 12 20 12 20z"/></svg><span>Wishlist</span></a>
-    <a class="act" href="cart.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 8h12l-1.2 12H7.2z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span>Bag</span><i class="n" data-bagcount hidden>0</i></a>
+    <button type="button" class="act act-search" data-searchtoggle aria-label="Search" aria-controls="msearch" aria-expanded="false"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/></svg></button>
+    <a class="act act-acct" href="account.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg><span>Account</span></a>
+    <a class="act act-wish" href="account.html" aria-label="Wishlist"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 20s-7-4.5-7-9.5A4 4 0 0 1 12 8a4 4 0 0 1 7 2.5C19 15.5 12 20 12 20z"/></svg><span>Wishlist</span><i class="n" data-wishcount hidden>0</i></a>
+    <a class="act act-bag" href="cart.html" aria-label="Bag"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 8h12l-1.2 12H7.2z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span>Bag</span><i class="n" data-bagcount hidden>0</i></a>
   </div>
 </div>
-<div class="msearch"><form class="search" action="collection.html" method="get" role="search"><input name="q" aria-label="Search products" placeholder="Search ouds, oud, bakhoor…"><button type="submit" class="go" aria-label="Search"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/></svg></button></form></div></div>
+<div class="msearch" id="msearch"><form class="search" action="collection.html" method="get" role="search"><input name="q" aria-label="Search products" placeholder="Search ouds, oud, bakhoor…"><button type="submit" class="go" aria-label="Search"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/></svg></button></form></div></div>
 <nav class="catnav" aria-label="Categories"><div class="wrap"><a href="collection.html?cat=attars" data-catnav="attars">Oud Attar</a><a href="collection.html?cat=bakhoor" data-catnav="bakhoor">Bakhoor</a><a href="collection.html?cat=edp" data-catnav="edp">EDP Sprays</a><a href="collection.html?cat=gift-sets" data-catnav="gift-sets">Gift Sets</a><a href="gift-box.html" data-catnav="">Build Your Gift Box</a><a href="corporate.html" data-catnav="">Corporate Gifting</a></div></nav>
 
 <section><div class="wrap">
@@ -135,4 +137,4 @@
 <span>Cards &middot; Apple Pay &middot; Tabby &middot; Tamara &middot; Cash on delivery</span></div></div></footer>
 <div class="tabbar"><a href="index.html" aria-label="Home" title="Home"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 11.5 12 5l8 6.5"/><path d="M6 10.5V19h12v-8.5"/><path d="M10 19v-5h4v5"/></svg></a><a href="collection.html" aria-label="Shop" title="Shop"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="4.5" y="4.5" width="6" height="6" rx="1"/><rect x="13.5" y="4.5" width="6" height="6" rx="1"/><rect x="4.5" y="13.5" width="6" height="6" rx="1"/><rect x="13.5" y="13.5" width="6" height="6" rx="1"/></svg></a><a href="gift-box.html" aria-label="Gifts" title="Gifts"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="3.5" y="9" width="17" height="11" rx="1"/><path d="M3.5 13h17M12 9v11"/><path d="M12 9S9.5 4 7.5 5.5 10 9 12 9zm0 0s2.5-5 4.5-3.5S14 9 12 9z"/></svg></a><a href="cart.html" aria-label="Bag" title="Bag"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 8h12l-1.2 12H7.2z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></a><a href="account.html" aria-label="Account" title="Account" class="on" aria-current="page"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></a></div>
 <script src="assets/catalogue.js?v=c03be13b"></script>
-<script src="assets/shop.js?v=97673192"></script></body></html>
+<script src="assets/shop.js?v=0669f1f9"></script></body></html>

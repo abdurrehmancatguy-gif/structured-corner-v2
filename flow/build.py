@@ -514,6 +514,7 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="only light">
 <meta name="theme-color" content="#ffffff">
+<script>document.documentElement.className+=" js"</script>
 <title>%(full_title)s</title>
 <meta name="description" content="%(desc)s">
 %(robots)s<link rel="canonical" href="%(canon)s">
@@ -534,12 +535,13 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
   <form class="search" action="collection.html" method="get" role="search">
     <input name="q" aria-label="Search products" placeholder="%(search_ph)s"><button type="submit" class="go" aria-label="Search">%(search)s</button></form>
   <div class="acts">
-    <a class="act" href="account.html">%(user)s<span>%(act_account)s</span></a>
-    <a class="act" href="account.html">%(heart)s<span>%(act_wishlist)s</span></a>
-    <a class="act" href="cart.html">%(bag)s<span>%(act_bag)s</span><i class="n" data-bagcount hidden>0</i></a>
+    <button type="button" class="act act-search" data-searchtoggle aria-label="Search" aria-controls="msearch" aria-expanded="false">%(search)s</button>
+    <a class="act act-acct" href="account.html">%(user)s<span>%(act_account)s</span></a>
+    <a class="act act-wish" href="account.html" aria-label="%(act_wishlist)s">%(heart)s<span>%(act_wishlist)s</span><i class="n" data-wishcount hidden>0</i></a>
+    <a class="act act-bag" href="cart.html" aria-label="%(act_bag)s">%(bag)s<span>%(act_bag)s</span><i class="n" data-bagcount hidden>0</i></a>
   </div>
 </div>
-<div class="msearch"><form class="search" action="collection.html" method="get" role="search"><input name="q" aria-label="Search products" placeholder="%(search_ph)s"><button type="submit" class="go" aria-label="Search">%(search)s</button></form></div></div>
+<div class="msearch" id="msearch"><form class="search" action="collection.html" method="get" role="search"><input name="q" aria-label="Search products" placeholder="%(search_ph)s"><button type="submit" class="go" aria-label="Search">%(search)s</button></form></div></div>
 %(catnav)s
 %(body)s
 <footer><div class="wrap"><div class="cols">
