@@ -8,7 +8,7 @@
                 delivery strip, the footer, and every solid button. */
   --primary:#a8791e; --secondary:#34260B;
   --ink:var(--secondary); --body:#4a423a; --mut:#6b6154; --faint:#726858;
-  --line:#e6e0d6; --hair:#f0ece4; --bg:#fff; --alt:#faf7f2;
+  --line:#e6e0d6; --hair:#f0ece4; --bg:#fff; --alt:#fff;
   --gold:var(--primary); --gold-d:#8a5a14; --gold-l:#f6efdd;
   --red:#b3261e; --green:#2e6b3e; --blue:#2b5b7a;
   --f-oud:#3E4A33; --f-amber:#94480F; --f-musk:#44555F; --f-floral:#9B3A5B;
@@ -250,28 +250,28 @@ footer a,footer p{display:block;font-size:13px;margin:0 0 9px;color:#b9b0a4;line
 
 /* ---------- placeholders: every value with no source file behind it ---------- */
 .slot{display:inline-block;font-size:11px;letter-spacing:.02em;color:#9a8f7e;
- background:repeating-linear-gradient(135deg,#f6f2ea,#f6f2ea 5px,#f1ece2 5px,#f1ece2 10px);
+ background:#fff;
  border:1px dashed #ded5c6;border-radius:var(--r-pill);padding:2px 7px;font-style:normal}
 .slot::before{content:"[ "}.slot::after{content:" ]"}
 .p .tax,.p .rev{font-size:11px;color:var(--faint)}
 .p .notes .slot{font-size:10.5px}
 
 /* image placeholders */
-.p .ph{background:#f7f4ee}
+.p .ph{background:#fff}
 .p .ph .none{color:#a89d8d;font-size:10px;letter-spacing:.14em;text-transform:uppercase;
- border:1px dashed #dcd3c4;padding:8px 12px;border-radius:var(--r-pill);background:#fffdf9}
+ border:1px dashed #dcd3c4;padding:8px 12px;border-radius:var(--r-pill);background:#fff}
 .heroimg{height:420px;background:repeating-linear-gradient(135deg,#34260B,#34260B 9px,#3b2b0d 9px,#3b2b0d 18px);
  display:flex;align-items:center;justify-content:center}
 .heroimg .none{color:#8d8375;font-size:11px;letter-spacing:.14em;text-transform:uppercase;
  border:1px dashed #4d463c;padding:10px 16px;border-radius:var(--r-pill)}
 .hero .over{background:linear-gradient(90deg,rgba(52,38,11,.86) 0%,rgba(52,38,11,.45) 60%,transparent 100%)}
-.cats .c{background:#f7f4ee;border:1px dashed #ded5c6;color:#a89d8d}
+.cats .c{background:#fff;border:1px dashed #ded5c6;color:#a89d8d}
 .cats .c .none{font-size:10px;letter-spacing:.12em;text-transform:uppercase}
-.gal .main,.gal .th div{background:#f7f4ee;border:1px dashed #ded5c6;display:flex;align-items:center;justify-content:center}
+.gal .main,.gal .th div{background:#fff;border:1px dashed #ded5c6;display:flex;align-items:center;justify-content:center}
 .gal .main .none{color:#a89d8d;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
  text-align:center;padding:20px;line-height:1.7}
 .gal .th div .none{color:#a89d8d;font-size:10px}
-.line .im{background:#f7f4ee;border:1px dashed #ded5c6;display:flex;align-items:center;justify-content:center}
+.line .im{background:#fff;border:1px dashed #ded5c6;display:flex;align-items:center;justify-content:center}
 .line .im .none{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#a89d8d}
 .p[style*="dashed"] .ph .none{color:#a89d8d}
 .logomark{display:inline-flex}
@@ -2664,3 +2664,15 @@ h2.pagetitle,.sec-h h2.pagetitle{font-size:26px}
 @media (max-width:340px){
   .usp-row > div{flex-direction:column;align-items:flex-start;gap:6px}
 }
+/* ---- no grey areas ---------------------------------------------------------
+   Every off-white and grey ground is white: --alt in the first :root (the
+   section bands, the bag's and checkout's summary panels, the gallery, the
+   phone banner's paper and the strip of dots under it, the promo tiles, hover
+   fills) and the fills written out above (the #f7f4ee grounds behind card
+   photos, the gallery and bag lines, the striped [ slot ] tag, the cream
+   around a missing picture). Sections keep apart by their own padding and
+   panels by their hairline. On the brown footer the slot tag is an outline,
+   since a white pill there would hold its light words at 2:1. A menu row
+   that used to go grey under the pointer is underlined instead. */
+footer .slot{background:transparent;border-color:rgba(255,255,255,.3)}
+.acctnav a:hover{text-decoration:underline;text-underline-offset:3px}

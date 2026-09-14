@@ -1879,10 +1879,10 @@ pathlib.Path("404.html").write_text("""<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="only light">
-<meta name="theme-color" content="#faf8f4">
+<meta name="theme-color" content="#ffffff">
 <title>%(title)s | %(suffix)s</title><meta name="robots" content="noindex">
 <style>body{margin:0;min-height:100vh;display:grid;place-items:center;text-align:center;
-background:#faf8f4;color:#34260B;font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+background:#fff;color:#34260B;font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 main{padding:24px}h1{font:600 28px/1.2 Georgia,"Times New Roman",serif;margin:0 0 10px}
 a{display:inline-block;margin-top:18px;background:#34260B;color:#fff;padding:12px 22px;text-decoration:none;border-radius:999px}</style>
 </head><body><main><h1>%(heading)s</h1><p>%(body)s</p>
