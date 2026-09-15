@@ -7,7 +7,8 @@ from .store.base import CannotStart
 from .store.jsonstore import JSONStore
 
 NO_PSYCOPG = ("This checkout uses the PostgreSQL store, which needs psycopg. Start it with admin/.venv/bin/python "
-              "admin/server.py (or add --store json to edit the files directly).")
+              "admin/server.py (or add --store json to edit the files directly; saves made that way cannot go "
+              "back to the database yet).")
 
 
 def make_store(cfg):

@@ -474,7 +474,9 @@ def use(cfg, args):
     if args.store == "json":
         config.write_store_choice(cfg.repo, "json", dsn)
         say("switched    this checkout's admin starts on the JSON files in flow/content from its next start",
-            "Files saved there meanwhile show as changed outside the admin once it starts on the database again.")
+            "Saves made on the files cannot go back to the database yet: they show as changed outside the admin "
+            "once it starts on the database again, and every save that writes them is refused. Before use postgres, "
+            "put each file you saved back (git checkout -- flow/content/<name>.json) and press Rebuild now.")
         return 0
     if not dsn:
         raise CannotStart("Give --dsn: this checkout has no database yet (dbtool migrate --apply gives it one).")

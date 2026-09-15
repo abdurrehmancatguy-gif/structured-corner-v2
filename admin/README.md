@@ -197,6 +197,8 @@ admin/.venv/bin/python admin/dbtool.py verify
 admin/.venv/bin/python admin/server.py
 
 # Back to the JSON files, which are current after every save ("use postgres" returns).
+# Saves made on the files cannot go back to the database yet: before "use postgres",
+# put each file you saved back (git checkout -- flow/content/<name>.json) and press Rebuild now.
 admin/.venv/bin/python admin/dbtool.py use json
 ```
 
