@@ -863,11 +863,10 @@ bgsRun(function () {
 });
 
 /* ---------- call banners: the drawing rises as one comes into view ----------
-   The quiz banner and every .band carry soft hills and wisps of smoke, and
-   the homepage's promo tiles the hills (from build.py), which flow.css holds
-   under the edge until the banner has .up. It gets .up once a third of it is
-   on screen, and at once without an IntersectionObserver or with reduced
-   motion. */
+   The quiz banner, every .band and the homepage's promo tiles carry the BGS
+   emblem (from build.py), which flow.css builds from the bottom up once the
+   banner has .up. It gets .up once a third of it is on screen, and at once
+   without an IntersectionObserver or with reduced motion. */
 bgsRun(function () {
   var bands = document.querySelectorAll(".quizband,.band,.promo");
   if (!bands.length) return;

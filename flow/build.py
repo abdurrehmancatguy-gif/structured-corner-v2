@@ -1899,24 +1899,25 @@ def product_preload():
             % (json.dumps(m, separators=(",", ":")), json.dumps(GALLERY_SIZES)))
 PRELOAD = product_preload()
 
-# Every call banner (the quiz banner and each .band) carries the drawing that
-# rises from its bottom edge: soft hills stretched to the banner's width and
-# three wisps of smoke; the homepage's promo tiles carry the hills alone. It
-# is decoration only; flow.css colours and moves it.
-RISE_HILLS = ('<svg class="rise rise-hills" viewBox="0 0 1200 160" preserveAspectRatio="none" aria-hidden="true" focusable="false">'
-              '<path class="h h1" d="M0 160V96C160 60 300 88 460 70S760 20 900 44S1100 70 1200 40V160Z"/>'
-              '<path class="h h2" d="M0 160V118C180 92 340 116 520 98S820 70 1000 88S1140 96 1200 84V160Z"/>'
-              '<path class="h h3" d="M0 160V140C200 124 380 142 600 128S960 112 1200 124V160Z"/></svg>')
-RISE = RISE_HILLS + ('<svg class="rise rise-wisps" viewBox="0 0 160 220" aria-hidden="true" focusable="false">'
-                     '<path class="w w1" pathLength="1" d="M64 220C48 184 86 162 66 122S44 62 70 20"/>'
-                     '<path class="w w2" pathLength="1" d="M106 220C96 192 122 170 106 132S92 84 112 52"/>'
-                     '<path class="w w3" pathLength="1" d="M22 220C16 196 38 180 26 150S14 112 30 86"/></svg>')
-_BANNER = re.compile(r'(<div class="(?:quizband|band)"[^>]*>)')
-_PROMO = re.compile(r'(<a class="promo"[^>]*>)')
+# Every call banner (the quiz banner and each .band) and each promo tile
+# carries the BGS emblem, which flow.css builds from the bottom up as it comes
+# into view: its outline draws itself while the gold fill rises behind it. The
+# emblem is the vector outline tools/trace_emblem.py traced from the logo art,
+# put once on a page that has a banner and used from there. Decoration only.
+EMBLEM_D = re.search(r' d="([^"]+)"', pathlib.Path("assets/img/logo-emblem.svg").read_text()).group(1)
+EMBLEM_SPRITE = ('<svg class="emb-sprite" aria-hidden="true" focusable="false"><defs>'
+                 '<path id="bgs-emblem" pathLength="1" vector-effect="non-scaling-stroke" fill-rule="evenodd" d="%s"/>'
+                 '<linearGradient id="bgs-gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F4D78F"/>'
+                 '<stop offset=".5" stop-color="#C9954A"/><stop offset="1" stop-color="#94602A"/></linearGradient>'
+                 '</defs></svg>' % EMBLEM_D)
+EMBLEM = ('<span class="emb" aria-hidden="true">'
+          '<svg class="emb-fill" viewBox="0 0 505 505" focusable="false"><use href="#bgs-emblem"/></svg>'
+          '<svg class="emb-line" viewBox="0 0 505 505" focusable="false"><use href="#bgs-emblem"/></svg></span>')
+_BANNER = re.compile(r'(<div class="(?:quizband|band)"[^>]*>|<a class="promo"[^>]*>)')
 
 for fn, t, b, on, tab in PAGES:
-    b = _BANNER.sub(lambda m: m.group(1) + RISE, b)
-    b = _PROMO.sub(lambda m: m.group(1) + RISE_HILLS, b)
+    if _BANNER.search(b):
+        b = EMBLEM_SPRITE + _BANNER.sub(lambda m: m.group(1) + EMBLEM, b)
     canon = (SITE_URL + "/" + fn) if SITE_URL else fn
     pathlib.Path(fn).write_text(shell(t, b, on, tab,                                       page="page-" + fn.replace(".html", ""),
                                       desc=PAGE_DESC.get(fn, SEO.get("default_description", "")),

@@ -2833,15 +2833,14 @@ code{border:1px solid var(--line)}
 .quizband .btn:hover,.quizband .btn.solid:hover{background:var(--cta-l);border-color:var(--cta-l);color:var(--cta-d)}
 .sq-all{color:var(--cta)}
 .quizband .btn:focus-visible{outline:2px solid #fff;outline-offset:3px}
-/* ---- every call banner: deep purple, with a drawing that rises -----------------
+/* ---- every call banner: deep purple, with the emblem building up--------------
    The quiz banner and every .band (the Discovery Trio on the homepage and the
    quiz page, the corporate page's quote banner) share one look: the deep
-   purple (--cta) with white words and a white button. build.py puts two drawings in each: soft
-   hills along the bottom (.rise-hills, stretched to the banner's width) and
-   three wisps of smoke (.rise-wisps). As a banner comes into view shop.js adds
-   .up: the hills slide up from under the edge one after another and the wisps
-   draw themselves upward. Without scripts or with reduced motion they are
-   simply there. The words and the button sit above the drawing. */
+   purple (--cta) with white words and a white button. build.py puts the BGS emblem in each (a vector traced from the logo
+   art). As a banner comes into view shop.js adds .up and the emblem is built
+   from the bottom up: its outline draws itself as it rises, then the gold
+   fill rises behind it. Without scripts or with reduced motion it is simply
+   there. The words and the button sit above it. */
 .band{background:var(--cta);background-image:none;border:0;color:#fff}
 .band h3{color:#fff}
 .band p{color:#F3EEFF}
@@ -2850,28 +2849,26 @@ code{border:1px solid var(--line)}
 .band .btn:hover,.band .btn.gold:hover{background:var(--cta-l);border-color:var(--cta-l);color:var(--cta-d)}
 .band .btn:focus-visible{outline:2px solid #fff;outline-offset:3px}
 .quizband,.band{position:relative;overflow:hidden;isolation:isolate}
-.quizband > :not(.rise),.band > :not(.rise){position:relative;z-index:1}
-.rise{position:absolute;bottom:0;z-index:0;pointer-events:none;overflow:hidden}
-.rise-hills{left:0;width:100%;height:62%}
-.rise-wisps{right:24%;height:100%;width:auto;aspect-ratio:160/220}
-.rise .h{transform-box:fill-box;transform-origin:50% 100%}
-.rise .h1{fill:rgba(255,255,255,.06)}
-.rise .h2{fill:rgba(255,255,255,.08)}
-.rise .h3{fill:rgba(255,255,255,.10)}
-.rise .w{fill:none;stroke:rgba(255,255,255,.42);stroke-width:1.6;stroke-linecap:round;vector-effect:non-scaling-stroke}
-.js .rise .h{transform:translateY(100%);transition:transform 1.2s cubic-bezier(.2,.75,.25,1)}
-.js .rise .h2{transition-delay:.12s}
-.js .rise .h3{transition-delay:.24s}
-.js .rise .w{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.8s ease .45s}
-.js .rise .w2{transition-delay:.65s}
-.js .rise .w3{transition-delay:.85s}
-.js .up > .rise .h{transform:none}
-.js .up > .rise .w{stroke-dashoffset:0}
-/* on a phone the banner's words fill its width, so the wisps would cross
-   them: the hills rise alone there */
-@media (max-width:900px){ .rise-hills{height:46%} .rise-wisps{display:none} }
+.quizband > :not(.emb),.band > :not(.emb){position:relative;z-index:1}
+.emb-sprite{position:absolute;width:0;height:0;overflow:hidden}
+.emb{position:absolute;z-index:0;display:block;pointer-events:none;aspect-ratio:1/1}
+.emb svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.emb-fill{fill:url(#bgs-gold)}
+.emb-line{fill:none;stroke:#F4D78F;stroke-width:1.4}
+.quizband > .emb,.band > .emb{right:24%;bottom:16px;height:calc(100% - 32px);max-height:190px}
+[dir="rtl"] .quizband > .emb,[dir="rtl"] .band > .emb{right:auto;left:24%}
+.js .emb-line{stroke-dasharray:1;stroke-dashoffset:1;clip-path:inset(100% 0 0 0);
+  transition:stroke-dashoffset 1.7s ease,clip-path 1.3s cubic-bezier(.3,.7,.2,1)}
+.js .emb-fill{clip-path:inset(100% 0 0 0);transition:clip-path 1.5s cubic-bezier(.3,.7,.2,1) .75s}
+.js .up > .emb .emb-line{stroke-dashoffset:0;clip-path:inset(0 0 0 0)}
+.js .up > .emb .emb-fill{clip-path:inset(0 0 0 0)}
+/* on a phone the banner is one column: the emblem stands small above the words */
+@media (max-width:900px){
+  .quizband > .emb,.band > .emb,[dir="rtl"] .quizband > .emb,[dir="rtl"] .band > .emb{position:relative;left:auto;right:auto;bottom:auto;
+    width:58px;height:58px;max-height:none;flex:none}
+}
 @media (prefers-reduced-motion:reduce){
-  .js .rise .h,.js .rise .w{transition:none;transform:none;stroke-dashoffset:0}
+  .js .emb-line,.js .emb-fill{transition:none;clip-path:none;stroke-dashoffset:0}
 }
 /* ---- the category shelf on white ----------------------------------------------
    The owner wants the shelf of category pictures under the banner on white
@@ -2883,13 +2880,13 @@ code{border:1px solid var(--line)}
 /* ---- the promo tiles: bigger, in a pinkish red -----------------------------------
    Build a gift box, Discovery 3 ml and Corporate gifting were small white cards
    with an empty picture box. They are larger tiles in a pinkish red now
-   (#CF3A58, white words at 4.8:1) with the call banners' hills rising from the
-   bottom edge, and a round white arrow in the corner that says each is a link.
+   (#CF3A58, white words at 4.8:1) with the BGS emblem building itself in the
+   corner, and a round white arrow in the corner that says each is a link.
    The sizes carry !important because the phone passes set them with it. */
 .promo{position:relative;overflow:hidden;isolation:isolate;display:flex;align-items:flex-start;
   min-height:180px;padding:28px 30px 70px;border:0;border-radius:var(--r);background:#CF3A58;color:#fff;text-decoration:none}
 .promo:hover{border:0;background:#C23350}
-.promo > :not(.rise){position:relative;z-index:1}
+.promo > :not(.emb){position:relative;z-index:1}
 .promo > div{display:flex;flex-direction:column;gap:8px;min-width:0}
 .promo b{margin:0;font-size:22px !important;line-height:1.2;font-weight:700;color:#fff}
 .promos .promo span{font-size:15.5px !important;line-height:1.45 !important;color:#FFF1F3 !important}
@@ -2900,7 +2897,8 @@ code{border:1px solid var(--line)}
 [dir="rtl"] .promo::after{right:auto;left:22px;transform:scaleX(-1)}
 [dir="rtl"] .promo:hover::after{transform:scaleX(-1) translateX(3px)}
 .promo:focus-visible{outline:2px solid #CF3A58;outline-offset:3px}
-.promo .rise-hills{height:54%}
+.promo > .emb{top:18px;right:18px;width:64px;height:64px}
+[dir="rtl"] .promo > .emb{right:auto;left:18px}
 @media (max-width:900px){
   .grid.g3.promos{gap:14px}
   .promo{min-height:150px;padding:24px 24px 66px}
