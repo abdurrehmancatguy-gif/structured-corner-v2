@@ -30,6 +30,26 @@ Options:
 - `--storefront-only`: the store preview alone, with no admin.
 - `--repo PATH`: serve and edit another checkout. The tests use it with a
   temporary clone.
+- `--store json` or `--store postgres`: which store holds the content.
+  Without it, this checkout's `admin/local/store.json` chooses (dbtool
+  writes it, see Database), and the JSON files are the default. `--store
+  json` always edits the files, even on a checkout switched to the database.
+- `--dsn "host=/tmp port=5432 dbname=bgs_corner user=bgs_corner_app"`: the
+  database for `--store postgres`, when it is not the one this checkout
+  already has. Never put a password in it.
+
+On a checkout switched to the database, start the admin with its own
+virtualenv, which has psycopg:
+
+```bash
+admin/.venv/bin/python admin/server.py
+```
+
+It prints which store it runs on (`store       PostgreSQL bgs_corner as
+bgs_corner_app (18.6)`). It never falls back to the files: when PostgreSQL
+is not answering it does not start (exit status 3), and it refuses to start
+(exit status 2) on a database that belongs to another checkout, is not up to
+date, or is used by another admin.
 
 ## Screens
 
@@ -152,12 +172,13 @@ this shop, and the admin never serves or edits the site's code.
 
 ## Database
 
-The admin is moving from the JSON files to PostgreSQL. So far
+The admin can keep its content in PostgreSQL instead of the JSON files.
 `admin/dbtool.py` makes the admin's tables in your database, loads
-`flow/content` into them and checks that the two agree; the admin itself
-still edits the files. dbtool needs psycopg, which the admin's own
-virtualenv has (`admin/requirements.txt` says how it is made). Run each line
-from the repository root, with the admin stopped:
+`flow/content` into them, checks that the two agree and switches this
+checkout to the database. dbtool, and the admin on the database, need
+psycopg, which the admin's own virtualenv has (`admin/requirements.txt` says
+how it is made). Run each line from the repository root, with the admin
+stopped:
 
 ```bash
 # Once, recommended, as your own superuser role: the admin's own role, which may change content and nothing else.
@@ -166,11 +187,17 @@ from the repository root, with the admin stopped:
 # A dry run: everything happens in one transaction, which is then rolled back.
 admin/.venv/bin/python admin/dbtool.py migrate --dsn "host=/tmp port=5432 dbname=bgs_corner user=bgs_corner"
 
-# The same, committed.
+# The same, committed. It also switches this checkout to the database (admin/local/store.json).
 admin/.venv/bin/python admin/dbtool.py migrate --dsn "host=/tmp port=5432 dbname=bgs_corner user=bgs_corner" --apply
 
 # Read-only, safe at any time.
-admin/.venv/bin/python admin/dbtool.py verify --dsn "host=/tmp port=5432 dbname=bgs_corner user=bgs_corner_app"
+admin/.venv/bin/python admin/dbtool.py verify
+
+# The admin, on the database.
+admin/.venv/bin/python admin/server.py
+
+# Back to the JSON files, which are current after every save ("use postgres" returns).
+admin/.venv/bin/python admin/dbtool.py use json
 ```
 
 `migrate` applies the numbered files in `admin/bgsadmin/db/migrations/` the
@@ -190,6 +217,17 @@ every check and trigger is on, whether the admin's role has exactly its
 rights, and for each content file its sha, the export's sha and its state:
 in sync, changed in the file, changed in the database, changed in both, or
 missing. Row counts and the newest revision follow.
+
+On the database, every save writes the database first and then the files,
+so `flow/content` always holds the database's export and git, History and
+the Publish screen work as before. A file changed outside the admin (by hand
+or by git) is not taken into the database yet: the home screen lists it, and
+a save that would write it answers that it was changed outside the admin
+until you put it back (`git checkout -- flow/content/<name>.json`). The admin
+runs as `bgs_corner_app` once that role exists; until then it runs as the
+database's owner and says so when it starts. If you create the role later,
+run the `--apply` line again: it applies nothing new and switches the admin
+to the role.
 
 Both exit with 0 when all is well, 1 with the list of differences or
 refusals, 2 when they refuse to run (a DSN with a password, a superuser,
@@ -234,6 +272,7 @@ ports between 4700 and 4799; 4310 is your preview.
 | `test_publish.py` | Review, commit and go live, against throwaway repositories with a temporary bare remote | `ADMIN_PUBLISH_PORT` | 4782 |
 | `test_bag_path.py` | The storefront's way to checkout: the panel after Add to bag on a phone and a desktop, and the bag page's checkout bar; needs Chrome | `ADMIN_BAG_PATH_PORT` | 4791 |
 | `test_dbschema.py` | The throwaway PostgreSQL clusters (private, no TCP, the owner's roles and database rights, nothing left after a failure, the alarm or a kill); migration 001 through `dbtool migrate` and `verify`; the writes the database refuses by itself, as the owner and as the admin's role; dump and restore; exact round trips; what the database says about a save that died while committing. Needs PostgreSQL's programs, no admin server; everything past the clusters needs psycopg (`admin/.venv/bin/python`) | `ADMIN_PG_PORT` (and the next port) | 5453 |
+| `test_pgstore.py` | The PostgreSQL store itself: reads and revs, a save's order, the database's refusals behind the admin's, busy, one admin per checkout and per database, the saves a crash cut short, files changed outside the admin, a database changed in psql, a missing file, the start refusals and start lines, dbtool use. Always PostgreSQL; needs psycopg (`admin/.venv/bin/python`) | `ADMIN_PGSTORE_PORT` (and the next port), `ADMIN_PG_PORT` | 4745 and 5453 |
 
 The three Chrome files are skipped when Chrome is not installed. Helpers:
 `box.py` (the temporary clone and its server), `cdp_pipe.py` (headless
@@ -243,7 +282,18 @@ servers and clusters it started stop and their folders go) and
 `pgcluster.py` (throwaway PostgreSQL clusters, driven through psql).
 
 `ADMIN_TEST_STORE` says which store the test servers run on: `json`, the
-default, until the PostgreSQL store arrives. The cluster tests read
+default, or `postgres`, which gives each test server a database of its own
+on a throwaway cluster, made by `dbtool migrate --apply` on its clone. Run
+PostgreSQL mode with the admin's virtualenv:
+
+```bash
+ADMIN_TEST_STORE=postgres ADMIN_TEST_PORT=4731 admin/.venv/bin/python -m unittest discover -s admin/tests -p 'test_admin.py'
+```
+
+test_admin, test_rules, test_collections, test_pages, test_translations,
+test_quiz, test_media, test_bulk and test_history run on both stores.
+test_dbschema and test_pgstore always use PostgreSQL and need psycopg. The
+cluster tests read
 `ADMIN_PG_PORT` (it only names the socket file: the clusters have no TCP),
 `ADMIN_PG_ROOT` (where the cluster folders go, the system's temporary folder
 unless set; macOS allows a socket path of 103 bytes, so keep it short) and

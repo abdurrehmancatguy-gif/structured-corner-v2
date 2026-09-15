@@ -14,14 +14,22 @@ and with an environment that holds no libpq variable (pgcluster.clean_env),
 so nothing it starts can reach the owner's database.
 
 ADMIN_TEST_STORE says which store the servers run on, for the tests only (no
-server reads it): json, the default. PostgreSQL mode, a throwaway database
-per Box, arrives with the PostgreSQL store (_store).
+server reads it): json, the default, or postgres. In PostgreSQL mode each Box
+gets a database of its own on this test process's throwaway cluster
+(pgcluster.py), and the owner's own command makes it: dbtool migrate --apply
+on the clone, which also writes the clone's admin/local/store.json. The
+server then starts with no store flags, as the owner's does. PostgreSQL mode
+needs psycopg, so its test runs use the admin's virtualenv, whose interpreter
+also runs dbtool and the servers.
 
 However a test run ends (a failure, the 110 s alarm, a kill), the server is
 stopped and the clone removed: every Box is on cleanup.py's exit nets from
 the start, and a watchdog stops its server even after a SIGKILL.
 """
+import contextlib
 import http.client
+import importlib.util
+import itertools
 import json
 import os
 import pathlib
@@ -38,6 +46,7 @@ import pgcluster
 ADMIN = pathlib.Path(__file__).resolve().parent.parent
 REPO = ADMIN.parent
 STORE = os.environ.get("ADMIN_TEST_STORE", "json")
+_seq = itertools.count()        # test_bulk_ui makes a Box per test on one port: a new database each time
 
 # What a Box's watchdog runs once the test process is gone: $1 the server's
 # pid, $2 the Box's folder. The server is stopped only if that pid is still
@@ -63,6 +72,8 @@ class Box:
         on the exit nets from the start, so it goes however the run ends."""
         self.port = int(port)
         self.store = STORE
+        self.cluster = None
+        self.db = None
         self.proc = None
         self._watch = None
         self.tmp = tempfile.mkdtemp(prefix=prefix)
@@ -75,8 +86,19 @@ class Box:
         this Box's store. The JSON store: this interpreter, as it is."""
         if self.store == "json":
             return sys.executable, [], env
-        raise RuntimeError("ADMIN_TEST_STORE=%r: the tests run on the JSON store (json) until the PostgreSQL "
-                           "store is here." % (self.store,))
+        if self.store != "postgres":
+            raise RuntimeError("ADMIN_TEST_STORE=%r: json or postgres." % (self.store,))
+        if importlib.util.find_spec("psycopg") is None:
+            raise RuntimeError("ADMIN_TEST_STORE=postgres needs psycopg: run the tests with admin/.venv/bin/python.")
+        self.cluster = pgcluster.cluster()
+        self.db = "box_%d_%d" % (self.port, next(_seq))
+        dsn = self.cluster.new_database(self.db)
+        p = subprocess.run([sys.executable, str(ADMIN / "dbtool.py"), "migrate", "--apply", "--dsn", dsn,
+                            "--repo", str(self.repo)], env=env, capture_output=True, text=True, timeout=100)
+        if p.returncode != 0:
+            raise RuntimeError("dbtool migrate --apply did not make the Box's database: %s%s"
+                               % (p.stdout[-3000:], p.stderr[-2000:]))
+        return sys.executable, [], env
 
     def _start(self, args=()):
         py, extra, env = self._store(pgcluster.clean_env())
@@ -156,6 +178,11 @@ class Box:
                 self.proc.stdout.close()
         cleanup.stop(self._watch)
         self._watch = None
+        if self.db is not None:
+            # on the exit nets the cluster may be gone already, and the database with it
+            with contextlib.suppress(Exception):
+                self.cluster.drop_database(self.db)
+            self.db = None
         shutil.rmtree(self.tmp, ignore_errors=True)
 
     def close(self):

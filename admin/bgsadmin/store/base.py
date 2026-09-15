@@ -85,8 +85,19 @@ def content_names():
 
 
 class ContentStore:
-    """What app.store offers; the module docstring has the contract."""
+    """What app.store offers; the module docstring has the contract. Beside
+    it, for server.py's start lines: describe() says what holds the
+    content, warnings() what the owner should fix, and kept lists the
+    journals recover() finished rather than rolled back (only the database
+    can have kept a save)."""
     actor = None
+    kept = ()
+
+    def describe(self):
+        return "JSON files in flow/content"
+
+    def warnings(self):
+        return []
 
     def open(self):
         raise NotImplementedError

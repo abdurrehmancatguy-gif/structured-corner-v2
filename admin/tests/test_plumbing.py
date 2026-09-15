@@ -135,7 +135,8 @@ class ImportTests(unittest.TestCase):
         # modules must stay 3.9-clean, checked here where psycopg is missing
         import py_compile
         admin = REPO / "admin"
-        files = [admin / "dbtool.py"] + sorted((admin / "bgsadmin" / "db").glob("*.py"))
+        files = ([admin / "dbtool.py", admin / "bgsadmin" / "store" / "pgstore.py"]
+                 + sorted((admin / "bgsadmin" / "db").glob("*.py")))
         with tempfile.TemporaryDirectory() as d:
             for i, f in enumerate(files):
                 py_compile.compile(str(f), cfile=os.path.join(d, "%d.pyc" % i), doraise=True)

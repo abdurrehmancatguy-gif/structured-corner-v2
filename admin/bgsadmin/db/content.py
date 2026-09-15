@@ -92,6 +92,19 @@ def lock_version(cur):
     return cur.execute("SELECT bgs.lock_content_state()").fetchone()[0]
 
 
+def _run(cur, where, sql, params):
+    """One write; a refusal is tagged with (resource, product id) it was
+    writing, so a bulk save's answer can say which product."""
+    try:
+        cur.execute(sql, params)
+    except psycopg.Error as e:
+        try:
+            e.bgs_where = where
+        except AttributeError:
+            pass
+        raise
+
+
 def write_changes(cur, state, products=None, docs=None):
     """Write what differs from state: products (the whole dict, in its new
     file order) row by row, and whole documents. The unique pos and order
@@ -101,28 +114,28 @@ def write_changes(cur, state, products=None, docs=None):
     if products is not None:
         for pid in state.products:
             if pid not in products:
-                cur.execute("DELETE FROM bgs.products WHERE id = %s", (pid,))
+                _run(cur, ("products", pid), "DELETE FROM bgs.products WHERE id = %s", (pid,))
                 n += 1
         for pos, (pid, data) in enumerate(products.items(), 1):
-            body = compact(data)
+            body, where = compact(data), ("products", pid)
             if pid not in state.products:
-                cur.execute("INSERT INTO bgs.products (id, pos, body) VALUES (%s, %s, %s::json)", (pid, pos, body))
+                _run(cur, where, "INSERT INTO bgs.products (id, pos, body) VALUES (%s, %s, %s::json)", (pid, pos, body))
                 n += 1
                 continue
             same, moved = body == compact(state.products[pid]), state.positions[pid] != pos
             if not same and moved:
-                cur.execute("UPDATE bgs.products SET pos = %s, body = %s::json WHERE id = %s", (pos, body, pid))
+                _run(cur, where, "UPDATE bgs.products SET pos = %s, body = %s::json WHERE id = %s", (pos, body, pid))
             elif not same:
-                cur.execute("UPDATE bgs.products SET body = %s::json WHERE id = %s", (body, pid))
+                _run(cur, where, "UPDATE bgs.products SET body = %s::json WHERE id = %s", (body, pid))
             elif moved:
-                cur.execute("UPDATE bgs.products SET pos = %s WHERE id = %s", (pos, pid))
+                _run(cur, where, "UPDATE bgs.products SET pos = %s WHERE id = %s", (pos, pid))
             else:
                 continue
             n += 1
     for name, data in (docs or {}).items():
         body = compact(data)
         if body != compact(state.docs[name]):
-            cur.execute("UPDATE bgs.documents SET body = %s::json WHERE key = %s", (body, name))
+            _run(cur, (name, None), "UPDATE bgs.documents SET body = %s::json WHERE key = %s", (body, name))
             n += 1
     return n
 

@@ -32,6 +32,9 @@ and the conventions every contributor follows.
   (ImageCms included). ffmpeg and ffprobe from `/opt/homebrew/bin`, probed at
   startup; a missing tool disables the matching uploads with a message.
   No third-party Python packages, no npm, no build step for the UI.
+  PostgreSQL mode runs on `admin/.venv/bin/python`, the same Python 3.9 with
+  psycopg (`admin/requirements.txt`); psycopg is loaded only in that mode.
+- Flags: `--store json|postgres` and `--dsn` choose the store (see Storage).
 
 ## Layout
 
@@ -66,6 +69,7 @@ admin/
     store/files.py     the file side of a save in every store: atomic writes, the journal and
                        its states, putting files back, before-images, audit.jsonl
     store/jsonstore.py the JSON store: flow/content/*.json are the content; reads, the lock, recovery
+    store/pgstore.py   the PostgreSQL store: the database holds the content and every save exports it
     db/                the PostgreSQL side, loaded in PostgreSQL mode only (psycopg): migrations/NNN_name.sql
                        and their runner (migrate.py), connections and their checks (connect.py), the
                        content tables (content.py)
@@ -163,6 +167,38 @@ admin/
 - **Field types without a generic control**: `forms.js` has no control for
   `dictionary` or `tags`, so a document that uses them needs its own screen,
   as Translations and the Scent quiz have.
+
+## Storage
+
+- Two stores behind one interface (`store/base.py`): the JSON files, and
+  PostgreSQL. `build.py` reads `flow/content/*.json` either way: the
+  PostgreSQL store writes those files from the database on every save,
+  before the build, so git, History, the Publish screen and the deploys see
+  the same files as before.
+- Which store: `--store` and `--dsn`, then the checkout's own
+  `admin/local/store.json` (ignored by git; `dbtool migrate --apply` and
+  `dbtool use` write it), then the JSON files. No environment variable is
+  read: test servers start from clones that inherit the environment, and must
+  never reach the owner's database. The database is also bound to one
+  checkout path.
+- The database keeps each product and document as the exact JSON its file
+  holds (a `json` column keeps the key order), with a `jsonb` copy the checks
+  read. Revs are the same content hashes in both stores.
+- A save writes the database first, in one transaction with every check made
+  at once, then the files and the build, then COMMIT. A failed build puts
+  every file back and rolls the transaction back. A crash is settled at the
+  next start: before COMMIT the files are put back; during COMMIT the
+  database says whether it kept the save.
+- One admin per checkout (the lock file) and per database (a session
+  advisory lock). The admin connects as `bgs_corner_app`, which may change
+  content, the file bases and the audit trail and nothing else; migrations
+  run as the owner, `bgs_corner`.
+- Files changed outside the admin (by hand, by git) are not taken into the
+  database yet: the home screen lists them, and a save that would write one
+  answers 409 until the file is put back. A file the database holds newer is
+  written by the next save or by Rebuild now.
+- A database that is not answering stops the start (exit status 3). Nothing
+  ever falls back to the files.
 
 ## Locked, always, enforced on the server
 

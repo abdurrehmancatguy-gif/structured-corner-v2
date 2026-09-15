@@ -3,17 +3,21 @@
 
     admin/.venv/bin/python admin/dbtool.py migrate --dsn "host=/tmp port=5432 dbname=bgs_corner user=bgs_corner"
     admin/.venv/bin/python admin/dbtool.py migrate --dsn "..." --apply
-    admin/.venv/bin/python admin/dbtool.py verify --dsn "..."
+    admin/.venv/bin/python admin/dbtool.py verify
+    admin/.venv/bin/python admin/dbtool.py use json
 
 migrate  applies the migrations this checkout has and the database lacks and,
          into an empty database, loads flow/content. On the way it proves that
          the database gives the same data back and that the site builds from
          its export to the same files. Everything happens in one transaction,
-         which a dry run (no --apply) always rolls back. Run it as the
+         which a dry run (no --apply) always rolls back. --apply also switches
+         this checkout to the database (admin/local/store.json), as the
+         admin's own role bgs_corner_app when it exists. Run it as the
          database's owner, with the admin stopped.
 verify   read-only, safe while the admin runs: the schema, the checkout it
          belongs to, the database's checks and triggers, the admin role's
          rights, and each content file against the database's export.
+use      json or postgres: the store this checkout's admin starts on.
 
 Exit status: 0 done (or nothing to do), 1 differences found or rows refused,
 2 refused to run, 3 the database is not answering. It needs psycopg, which
@@ -24,7 +28,6 @@ import argparse
 import contextlib
 import fcntl
 import getpass
-import json
 import pathlib
 import shutil
 import sys
@@ -119,16 +122,20 @@ def clean_room(cfg, exports):
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(description="The admin's PostgreSQL database: migrate and verify.")
-    sub = ap.add_subparsers(dest="cmd", metavar="migrate|verify")
+    ap = argparse.ArgumentParser(description="The admin's PostgreSQL database: migrate, verify and use.")
+    sub = ap.add_subparsers(dest="cmd", metavar="migrate|verify|use")
     sub.required = True
     m = sub.add_parser("migrate", help="apply the migrations and, into an empty database, load flow/content")
     m.add_argument("--dsn", required=True, help="the owner's DSN: host=<socket folder> port=... dbname=... user=...")
-    m.add_argument("--apply", action="store_true", help="commit; without it everything is rolled back")
-    m.add_argument("--repo", help="the checkout (the one dbtool lives in by default)")
+    m.add_argument("--apply", action="store_true",
+                   help="commit, and switch this checkout to the database; without it everything is rolled back")
     v = sub.add_parser("verify", help="read-only: does the database agree with the files and itself")
-    v.add_argument("--dsn", required=True, help="host=<socket folder> port=... dbname=... user=...")
-    v.add_argument("--repo", help="the checkout (the one dbtool lives in by default)")
+    v.add_argument("--dsn", help="host=<socket folder> port=... dbname=... user=... (this checkout's own by default)")
+    u = sub.add_parser("use", help="choose the store this checkout's admin starts on")
+    u.add_argument("store", choices=config.STORES)
+    u.add_argument("--dsn", help="for postgres: the admin's DSN (the one this checkout already has by default)")
+    for p in (m, v, u):
+        p.add_argument("--repo", help="the checkout (the one dbtool lives in by default)")
     args = ap.parse_args(argv)
     repo = pathlib.Path(args.repo).resolve() if args.repo else ADMIN.parent
     cfg = config.Config(repo)
@@ -175,6 +182,19 @@ def sentences(name, db, disk):
         return [e["text"] for e in entries] or ["the same data in another key order"]
     except Exception:
         return ["differs from the database"]
+
+
+def switch(cfg, conn, params):
+    """Point this checkout's admin at the database: admin/local/store.json,
+    as the admin's own role when it exists, else as the owner."""
+    from bgsadmin.db import connect
+    role = APP_ROLE if connect.app_role_exists(conn, APP_ROLE) else params["user"]
+    config.write_store_choice(cfg.repo, "postgres", connect.with_user(params, role))
+    line = "switched    this checkout's admin starts on the database now, as %s (admin/local/store.json)" % role
+    if role != APP_ROLE:
+        line += ("; create %s (README, Database) and run this again, so the admin runs with only the rights it "
+                 "needs" % APP_ROLE)
+    return line
 
 
 def migrate(cfg, args):
@@ -264,6 +284,7 @@ def _migrate(cfg, conn, ident, params, apply, t0):
     if ok and apply:
         conn.commit()
         say(secs, "Committed." if done or fresh else nothing)
+        say(switch(cfg, conn, params))
         return 0
     conn.rollback()
     say(secs)
@@ -351,11 +372,26 @@ def file_state(disk, mine, base):
     return "changed in both"
 
 
+def own_dsn(cfg, args):
+    """--dsn, else the DSN this checkout's admin starts on."""
+    if args.dsn:
+        return args.dsn
+    try:
+        local = config.read_store_choice(cfg.repo)
+    except ValueError as e:
+        raise CannotStart(str(e))
+    if not local or not local.get("dsn"):
+        raise CannotStart("Give --dsn: this checkout has no database of its own yet (dbtool migrate --apply gives "
+                          "it one).")
+    return local["dsn"]
+
+
 def verify(cfg, args):
     import psycopg
     from bgsadmin.db import connect, content, migrate as runner
-    params = connect.check_dsn(args.dsn)
-    conn = connect.open_checked(args.dsn, params, app="bgs-dbtool", read_only=True)
+    dsn = own_dsn(cfg, args)
+    params = connect.check_dsn(dsn)
+    conn = connect.open_checked(dsn, params, app="bgs-dbtool", read_only=True)
     try:
         ident = connect.check_identity(conn, params)
         cur = conn.cursor()
@@ -425,7 +461,37 @@ def verify(cfg, args):
         conn.close()
 
 
-COMMANDS = {"migrate": migrate, "verify": verify}
+# ---- use ------------------------------------------------------------------------------
+
+def use(cfg, args):
+    """Write admin/local/store.json. For postgres, the database is checked
+    first: this checkout's, up to date, and answering."""
+    from bgsadmin.db import connect, migrate as runner
+    try:
+        dsn = args.dsn or (config.read_store_choice(cfg.repo) or {}).get("dsn")
+    except ValueError as e:
+        raise CannotStart(str(e))
+    if args.store == "json":
+        config.write_store_choice(cfg.repo, "json", dsn)
+        say("switched    this checkout's admin starts on the JSON files in flow/content from its next start",
+            "Files saved there meanwhile show as changed outside the admin once it starts on the database again.")
+        return 0
+    if not dsn:
+        raise CannotStart("Give --dsn: this checkout has no database yet (dbtool migrate --apply gives it one).")
+    params = connect.check_dsn(dsn)
+    conn = connect.open_checked(dsn, params, autocommit=True, app="bgs-dbtool", read_only=True)
+    try:
+        connect.check_identity(conn, params)
+        runner.check_current(conn.cursor(), cfg.repo)
+    finally:
+        conn.close()
+    config.write_store_choice(cfg.repo, "postgres", dsn)
+    say("switched    this checkout's admin starts on the database %s as %s from its next start"
+        % (params["dbname"], params["user"]))
+    return 0
+
+
+COMMANDS = {"migrate": migrate, "verify": verify, "use": use}
 
 if __name__ == "__main__":
     sys.exit(main())
