@@ -2793,3 +2793,36 @@ code{border:1px solid var(--line)}
   .sq-m{font-size:13px}
   .sq-p{font-size:14.5px}
 }
+/* ---- the category bar on phones and tablets: one line of words -----------------
+   Up to 900px the bar's links were outlined pills that wrapped onto two rows.
+   They are one line on the dark band now, as on a desktop: plain white words
+   with room between them, the current category underlined in white. When the
+   line is wider than the screen it slides sideways, and the words fade out at
+   its end (its start in Arabic) to show there is more. */
+@media (max-width:900px){
+  .catnav .wrap{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;justify-content:flex-start;justify-content:safe center;
+    gap:0 24px;padding-top:0;padding-bottom:0;scrollbar-width:none;
+    padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));
+    -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);
+    mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent)}
+  [dir="rtl"] .catnav .wrap{-webkit-mask-image:linear-gradient(270deg,#000 calc(100% - 28px),transparent);
+    mask-image:linear-gradient(270deg,#000 calc(100% - 28px),transparent)}
+  .catnav a,.catnav a:hover,.catnav a.on{flex:none;min-height:46px;padding:0;border:0;border-bottom:2px solid transparent;
+    border-radius:0;background:none;font-size:15px;line-height:1.2}
+  .catnav a{color:rgba(255,255,255,.84);font-weight:500}
+  .catnav a:hover{color:#fff}
+  .catnav a.on{color:#fff;border-bottom-color:#fff;font-weight:600}
+  .catnav a + a::before{content:none}
+}
+/* ---- the quiz banner: bluish purple --------------------------------------------
+   The whole banner is in the call's colour now, not only its button: #5B4FD9
+   with white words (5.9:1), the line above the heading in pale lavender
+   (4.8:1), and the button turned white with deep purple words (7.5:1) so it
+   still stands out, pale lavender on hover. */
+.quizband{background:#5B4FD9;background-image:none;border:0;color:#fff}
+.quizband h3{color:#fff}
+.quizband p{color:#F1EFFF}
+.quizband .eyebrow,.quizband .eyebrow.gold{color:#E6E3FF}
+.quizband .btn,.quizband .btn.solid{background:#fff;border-color:#fff;color:#4A3FC4}
+.quizband .btn:hover,.quizband .btn.solid:hover{background:#ECEAFF;border-color:#ECEAFF;color:#3B31A8}
+.quizband .btn:focus-visible{outline:2px solid #fff;outline-offset:3px}
