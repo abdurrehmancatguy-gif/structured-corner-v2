@@ -130,6 +130,16 @@ class ImportTests(unittest.TestCase):
         p = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, timeout=60)
         self.assertEqual((p.returncode, p.stdout.strip()), (0, "[]"), p.stderr)
 
+    def test_the_postgresql_code_compiles_under_this_python(self):
+        # PostgreSQL mode runs on the admin's virtualenv, Python 3.9 too: its
+        # modules must stay 3.9-clean, checked here where psycopg is missing
+        import py_compile
+        admin = REPO / "admin"
+        files = [admin / "dbtool.py"] + sorted((admin / "bgsadmin" / "db").glob("*.py"))
+        with tempfile.TemporaryDirectory() as d:
+            for i, f in enumerate(files):
+                py_compile.compile(str(f), cfile=os.path.join(d, "%d.pyc" % i), doraise=True)
+
 
 def git(*args):
     return subprocess.run(["git", "-C", str(REPO)] + list(args), capture_output=True, text=True)

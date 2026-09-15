@@ -130,6 +130,18 @@ class Failed(Exception):
         self.problems = problems
 
 
+class CannotStart(Exception):
+    """A store, or dbtool, will not start: one plain sentence for the terminal
+    and the exit status, 2 when it refuses (a bad setting, the wrong
+    database, another admin running) and 3 when the database is not
+    answering. Nothing has been changed when it is raised."""
+
+    def __init__(self, message, status=2):
+        super().__init__(message)
+        self.message = message
+        self.status = status
+
+
 # "<product id>/<field>", the form the database's never_discount guard reads
 CONFIRMED = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*/[a-z_]+")
 

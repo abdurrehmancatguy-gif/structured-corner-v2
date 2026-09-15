@@ -150,6 +150,54 @@ server as its host, so a web page open in another tab cannot use the admin
 behind your back. Text cannot contain page code, links must point at pages of
 this shop, and the admin never serves or edits the site's code.
 
+## Database
+
+The admin is moving from the JSON files to PostgreSQL. So far
+`admin/dbtool.py` makes the admin's tables in your database, loads
+`flow/content` into them and checks that the two agree; the admin itself
+still edits the files. dbtool needs psycopg, which the admin's own
+virtualenv has (`admin/requirements.txt` says how it is made). Run each line
+from the repository root, with the admin stopped:
+
+```bash
+# Once, recommended, as your own superuser role: the admin's own role, which may change content and nothing else.
+/opt/homebrew/bin/psql -X -h /tmp -p 5432 -U ajoomama -d postgres -v ON_ERROR_STOP=1 -c "CREATE ROLE bgs_corner_app LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS CONNECTION LIMIT 10"
+
+# A dry run: everything happens in one transaction, which is then rolled back.
+admin/.venv/bin/python admin/dbtool.py migrate --dsn "host=/tmp port=5432 dbname=bgs_corner user=bgs_corner"
+
+# The same, committed.
+admin/.venv/bin/python admin/dbtool.py migrate --dsn "host=/tmp port=5432 dbname=bgs_corner user=bgs_corner" --apply
+
+# Read-only, safe at any time.
+admin/.venv/bin/python admin/dbtool.py verify --dsn "host=/tmp port=5432 dbname=bgs_corner user=bgs_corner_app"
+```
+
+`migrate` applies the numbered files in `admin/bgsadmin/db/migrations/` the
+database lacks, each with its row in `bgs.schema_migrations`, and binds the
+database to this checkout: dbtool and the admin refuse any other. Into an
+empty database it loads every content file one row at a time, listing every
+row the database refuses and why. Then it compares what the database gives
+back with the files: the same data for every file, and the same bytes for
+every file already in canonical form (`home.json` is written by hand today,
+so it shows as "formatting only"). It builds the site from the database's
+export in a copy of `flow/` and compares every generated file. It commits
+only with `--apply`, and only when nothing was refused or different. Run
+again once the content is in, it has nothing to do.
+
+`verify` prints the schema, the checkout the database belongs to, whether
+every check and trigger is on, whether the admin's role has exactly its
+rights, and for each content file its sha, the export's sha and its state:
+in sync, changed in the file, changed in the database, changed in both, or
+missing. Row counts and the newest revision follow.
+
+Both exit with 0 when all is well, 1 with the list of differences or
+refusals, 2 when they refuse to run (a DSN with a password, a superuser,
+another checkout's database, an admin running) and 3 when PostgreSQL is not
+answering. A DSN names the socket folder, the port, the database and the
+user, and never a password: the server trusts its own socket, and a
+password belongs in `~/.pgpass`.
+
 ## Tests
 
 Each test file starts its own admin on a temporary clone of the repository,
@@ -185,7 +233,7 @@ ports between 4700 and 4799; 4310 is your preview.
 | `test_history.py` | History, the sentences that describe a change, and restore | `ADMIN_HISTORY_PORT` | 4781 |
 | `test_publish.py` | Review, commit and go live, against throwaway repositories with a temporary bare remote | `ADMIN_PUBLISH_PORT` | 4782 |
 | `test_bag_path.py` | The storefront's way to checkout: the panel after Add to bag on a phone and a desktop, and the bag page's checkout bar; needs Chrome | `ADMIN_BAG_PATH_PORT` | 4791 |
-| `test_dbschema.py` | The throwaway PostgreSQL clusters: private, no TCP, the owner's roles and database rights, and nothing left after a failure, the alarm or a kill; needs PostgreSQL's programs, no admin server | `ADMIN_PG_PORT` (and the next port) | 5453 |
+| `test_dbschema.py` | The throwaway PostgreSQL clusters (private, no TCP, the owner's roles and database rights, nothing left after a failure, the alarm or a kill); migration 001 through `dbtool migrate` and `verify`; the writes the database refuses by itself, as the owner and as the admin's role; dump and restore; exact round trips; what the database says about a save that died while committing. Needs PostgreSQL's programs, no admin server; everything past the clusters needs psycopg (`admin/.venv/bin/python`) | `ADMIN_PG_PORT` (and the next port) | 5453 |
 
 The three Chrome files are skipped when Chrome is not installed. Helpers:
 `box.py` (the temporary clone and its server), `cdp_pipe.py` (headless

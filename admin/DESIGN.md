@@ -38,6 +38,8 @@ and the conventions every contributor follows.
 ```
 admin/
   server.py            entry point: flags, startup checks, recovery, token, serve
+  dbtool.py            the owner's tool for the PostgreSQL database: migrate, verify
+  requirements.txt     psycopg for the PostgreSQL mode's virtualenv, pinned
   DESIGN.md            this file
   README.md            how to run it, every screen, every test file
   docs/                PLAN.md, HARDCODED.md, CONTENT-MODEL.md
@@ -64,6 +66,9 @@ admin/
     store/files.py     the file side of a save in every store: atomic writes, the journal and
                        its states, putting files back, before-images, audit.jsonl
     store/jsonstore.py the JSON store: flow/content/*.json are the content; reads, the lock, recovery
+    db/                the PostgreSQL side, loaded in PostgreSQL mode only (psycopg): migrations/NNN_name.sql
+                       and their runner (migrate.py), connections and their checks (connect.py), the
+                       content tables (content.py)
     tools.py           allow-listed subprocess runner with the expected-output check
     media.py, video.py upload checks and pipelines per kind
     medialib.py        the media library: published files, where each is used, copies, trash
@@ -238,6 +243,11 @@ AED 89 price, meta line, See it link and a stale note sentence.
 - Mutating tests run against a temporary clone (`--repo`), never against the
   real `flow/content`. Use ports 4700 to 4799 for test servers; 4310 is the
   owner's preview.
+- Tests never use the shared PostgreSQL server or its `bgs_corner` database:
+  they start throwaway clusters of their own (`tests/pgcluster.py`).
+- Never edit a migration once it is applied: every change to the database is
+  a new numbered file in `admin/bgsadmin/db/migrations/`. The runner refuses
+  a database whose applied files differ from the checkout's.
 - No em dash characters anywhere, code comments included. No attribution or
   "generated with" text. No invented numbers or claims in copy or UI.
 - Images come from content data, never hardcoded in templates or scripts.
