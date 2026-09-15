@@ -121,6 +121,47 @@ def craft(cfg, jid, state, snaps, **more):
     return d
 
 
+@unittest.skipUnless(psycopg is not None, "needs psycopg (run it with admin/.venv/bin/python)")
+class OutcomeTests(unittest.TestCase):
+    """How a save that was committing when the admin stopped is settled, from
+    the database's two answers: the save's ok audit row, read with the
+    statement's snapshot, and its transaction's status, read at call time."""
+
+    def decide(self, answers):
+        from bgsadmin.store import pgstore
+        rows = iter(answers)
+
+        class Conn:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                return False
+
+            def execute(self, sql, args):
+                return self
+
+            def fetchone(self):
+                return next(rows)
+
+        real = pgstore.connect.connect
+        pgstore.connect.connect = lambda dsn, autocommit=False: Conn()
+        self.addCleanup(setattr, pgstore.connect, "connect", real)
+        store = PGStore.__new__(PGStore)
+        store.dsn, store.params = "", {}
+        return store._outcome({"txn": "t1", "xid": "7"})
+
+    def test_a_commit_that_lands_between_the_two_reads_was_kept(self):
+        # no row yet in the snapshot, but committed by the time the status is read
+        self.assertTrue(self.decide([(False, "committed")]))
+
+    def test_the_row_or_the_status_decides(self):
+        self.assertTrue(self.decide([(True, "committed")]))
+        self.assertTrue(self.decide([(False, "in progress"), (False, "committed")]))
+        self.assertFalse(self.decide([(False, "aborted")]))
+        self.assertFalse(self.decide([(False, None)]))
+
+
 @needs_db
 class StoreTests(unittest.TestCase):
     """The store in this process, with no server."""

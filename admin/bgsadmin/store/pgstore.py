@@ -199,7 +199,11 @@ class PGStore(ContentStore):
 
     def _outcome(self, man):
         """Whether the database committed a journal's save: its ok audit_log
-        row is there. While its transaction is still in progress (the server
+        row is there, or its transaction's status is committed. The row is
+        read with the statement's snapshot and the status at call time, so a
+        COMMIT that lands between the two reads shows as (no row, committed):
+        that save was kept, with its row. Only aborted (or no status) means
+        it was not. While its transaction is still in progress (the server
         has not seen the client go yet), wait up to 5 s. CannotStart (3) when
         the database does not answer, or cannot say."""
         txn, xid = man.get("txn"), man.get("xid")
@@ -211,7 +215,7 @@ class PGStore(ContentStore):
                     kept, status = c.execute(
                         "SELECT EXISTS (SELECT 1 FROM bgs.audit_log WHERE txn = %s AND ok), pg_xact_status(%s::xid8)",
                         (txn, xid)).fetchone()
-                    if kept:
+                    if kept or status == "committed":
                         return True
                     if status != "in progress":
                         return False
