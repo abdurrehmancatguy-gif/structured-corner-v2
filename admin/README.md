@@ -171,7 +171,7 @@ ports between 4700 and 4799; 4310 is your preview.
 | File | What it covers | Port variable | Default |
 |---|---|---|---|
 | `test_admin.py` | The server end to end: the security gate, products, documents, saves and rollback | `ADMIN_TEST_PORT` | 4731 |
-| `test_plumbing.py` | Raw-body uploads, non-JSON responses and background jobs, on a bare server; nothing secret in git; JSON mode loads no database driver | `ADMIN_PLUMBING_PORT` | 4732 |
+| `test_plumbing.py` | Raw-body uploads, non-JSON responses and background jobs, on a bare server; nothing secret in git; JSON mode loads no database driver; a test run that dies of the alarm or a kill leaves no server behind | `ADMIN_PLUMBING_PORT` and `ADMIN_PLUMBING_BOX_PORT` | 4732 and 4733 |
 | `test_store.py` | The JSON store on a copy of the content, no server: the export, one rev function, the journal and recovery after a crash, the admin lock, busy, confirmed guarded changes | none | none |
 | `test_rules.py` | The store rules reach the page text and `BGS_RULES`, bad rules are refused, COD and VAT stay locked | `ADMIN_RULES_PORT` | 4741 |
 | `test_collections.py` | Collections: category text, homepage shelves, one save across three files | `ADMIN_COLLECTIONS_PORT` | 4742 |
@@ -185,10 +185,22 @@ ports between 4700 and 4799; 4310 is your preview.
 | `test_history.py` | History, the sentences that describe a change, and restore | `ADMIN_HISTORY_PORT` | 4781 |
 | `test_publish.py` | Review, commit and go live, against throwaway repositories with a temporary bare remote | `ADMIN_PUBLISH_PORT` | 4782 |
 | `test_bag_path.py` | The storefront's way to checkout: the panel after Add to bag on a phone and a desktop, and the bag page's checkout bar; needs Chrome | `ADMIN_BAG_PATH_PORT` | 4791 |
+| `test_dbschema.py` | The throwaway PostgreSQL clusters: private, no TCP, the owner's roles and database rights, and nothing left after a failure, the alarm or a kill; needs PostgreSQL's programs, no admin server | `ADMIN_PG_PORT` (and the next port) | 5453 |
 
 The three Chrome files are skipped when Chrome is not installed. Helpers:
-`box.py` (the temporary clone and its server) and `cdp_pipe.py` (headless
-Chrome over its DevTools pipe, standard library only).
+`box.py` (the temporary clone and its server), `cdp_pipe.py` (headless
+Chrome over its DevTools pipe, standard library only), `cleanup.py` (the
+exit nets: however a run ends, the 110 s alarm and a kill included, the
+servers and clusters it started stop and their folders go) and
+`pgcluster.py` (throwaway PostgreSQL clusters, driven through psql).
+
+`ADMIN_TEST_STORE` says which store the test servers run on: `json`, the
+default, until the PostgreSQL store arrives. The cluster tests read
+`ADMIN_PG_PORT` (it only names the socket file: the clusters have no TCP),
+`ADMIN_PG_ROOT` (where the cluster folders go, the system's temporary folder
+unless set; macOS allows a socket path of 103 bytes, so keep it short) and
+`ADMIN_PG_BIN` (`/opt/homebrew/bin`). No test uses the shared server or its
+`bgs_corner` database.
 
 ## Developer tools
 

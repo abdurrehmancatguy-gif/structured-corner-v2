@@ -77,7 +77,8 @@ admin/
     components/        crop.js, media-grid.js, upload-field.js
     screens/           one module per screen
     css/               one stylesheet per screen that needs its own
-  tests/               stdlib unittest, one port per file (README.md lists them), box.py, cdp_pipe.py
+  tests/               stdlib unittest, one port per file (README.md lists them); helpers box.py,
+                       cdp_pipe.py, cleanup.py (exit nets) and pgcluster.py (throwaway PostgreSQL clusters)
   devtools/            compare_build.py, dom_diff.py
 ```
 

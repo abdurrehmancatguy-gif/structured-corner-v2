@@ -5,6 +5,7 @@ import http.client
 import json
 import os
 import pathlib
+import signal
 import subprocess
 import sys
 import tempfile
@@ -21,6 +22,19 @@ from bgsadmin.httpd import Handler, Server  # noqa: E402
 from bgsadmin.routes import Raw, Route  # noqa: E402
 
 PORT = int(os.environ.get("ADMIN_PLUMBING_PORT", "4732"))
+BOX_PORT = int(os.environ.get("ADMIN_PLUMBING_BOX_PORT", "4733"))
+TESTS = pathlib.Path(__file__).resolve().parent
+
+# A test run that starts a Box and then ends as `end` makes it end.
+BOX_RUN = """
+import os, signal, sys, time
+sys.path.insert(0, %(tests)r)
+from box import Box
+b = Box(%(port)d, overlay=False)
+print(b.proc.pid, b.tmp, flush=True)
+%(end)s
+time.sleep(60)
+"""
 
 
 def upload(req):
@@ -138,6 +152,52 @@ class RepositoryTests(unittest.TestCase):
         for rx in (r"postgres(ql)?://[^[:space:]/:@]+:[^@[:space:]]+@", r"\bpassword[[:space:]]*="):
             found = git("grep", "-n", "-I", "-i", "-E", rx)
             self.assertEqual(found.returncode, 1, found.stdout[:2000])   # 1: no line matches
+
+
+def alive(pid):
+    try:
+        os.kill(pid, 0)
+        return True
+    except ProcessLookupError:
+        return False
+
+
+class ExitNetTests(unittest.TestCase):
+    """However a test run ends, the admin server its Box started stops and
+    the clone goes (cleanup.py). Each test starts a Box in a child run on
+    ADMIN_PLUMBING_BOX_PORT and ends that run."""
+
+    def run_box(self, end):
+        p = subprocess.Popen([sys.executable, "-c", BOX_RUN % {"tests": str(TESTS), "port": BOX_PORT, "end": end}],
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        line = p.stdout.readline().split()
+        if len(line) != 2:
+            p.kill()
+            p.wait(10)
+            self.fail("the child run did not start its Box: %s" % p.stderr.read())
+        return p, int(line[0]), pathlib.Path(line[1])
+
+    def gone(self, pid, tmp, seconds):
+        for _ in range(seconds * 10):
+            if not alive(pid) and not tmp.exists():
+                return True
+            time.sleep(0.1)
+        return False
+
+    def test_a_run_that_dies_of_the_alarm_stops_its_server(self):
+        # SIGALRM is what the 110 s limit on a test command sends, and Python
+        # dies of it without running atexit
+        p, pid, tmp = self.run_box("signal.alarm(1)")
+        p.wait(60)
+        self.assertEqual(p.returncode, -signal.SIGALRM, p.stderr.read())
+        self.assertTrue(self.gone(pid, tmp, 2))
+
+    def test_a_killed_run_stops_its_server(self):
+        # nothing catches SIGKILL: the Box's watchdog stops the server
+        p, pid, tmp = self.run_box("os.kill(os.getpid(), signal.SIGKILL)")
+        p.wait(60)
+        self.assertEqual(p.returncode, -signal.SIGKILL)
+        self.assertTrue(self.gone(pid, tmp, 15))
 
 
 if __name__ == "__main__":
