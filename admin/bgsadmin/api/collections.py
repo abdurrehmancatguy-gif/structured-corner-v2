@@ -20,7 +20,7 @@ from ..routes import Route
 from ..schema.copy import COLLECTIONS
 from ..schema.home import SHELVES
 from ..service import changed, enforce, field_for, flatten, precondition, saved
-from ..store.jsonstore import rev_of
+from ..store.base import rev_of
 from .meta import schemas
 
 KEY = r"(?P<key>%s)" % "|".join(k for k, _ in COLLECTIONS)

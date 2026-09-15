@@ -99,6 +99,18 @@ def refusals(fields, old, new, confirmed=()):
                 del trial[key]
 
 
+def confirm(txn, pid, fields, old, new, confirmed):
+    """Tell the transaction which guarded fields of product pid this save
+    changes with the owner's confirmation. enforce() and refusals() have
+    already refused a change to one that was not confirmed; the PostgreSQL
+    store passes the list on to the database, which guards never_discount
+    itself as well."""
+    for ptr in changed(old, new):
+        f, _ = field_for(fields, ptr)
+        if f is not None and f.get("guarded") and f["path"].strip("/") in confirmed:
+            txn.confirm(pid, f["path"].strip("/"))
+
+
 def precondition(req, current_rev, current):
     want = req.if_match()
     if not want:

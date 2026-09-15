@@ -59,8 +59,11 @@ admin/
                        the locked and read-only checks, the save response
     validate.py        types, bounds, text and href rules, cross-field and referential checks
     lint.py            warnings that never block a save
-    store/base.py      the ContentStore interface (docs/PLAN.md, storage_layer)
-    store/jsonstore.py the JSON implementation: revs, transactions, snapshots, atomic writes, recovery
+    store/base.py      the store interface as the admin uses it, rev_of, and what every store's
+                       transaction shares: staging, the media calls, confirm, the build step
+    store/files.py     the file side of a save in every store: atomic writes, the journal and
+                       its states, putting files back, before-images, audit.jsonl
+    store/jsonstore.py the JSON store: flow/content/*.json are the content; reads, the lock, recovery
     tools.py           allow-listed subprocess runner with the expected-output check
     media.py, video.py upload checks and pipelines per kind
     medialib.py        the media library: published files, where each is used, copies, trash

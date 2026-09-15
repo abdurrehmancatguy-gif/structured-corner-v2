@@ -105,6 +105,18 @@ class PlumbingTests(unittest.TestCase):
         self.assertIs(jobs.get(ok.id), ok)
 
 
+class ImportTests(unittest.TestCase):
+    def test_json_mode_loads_no_database_driver(self):
+        # PostgreSQL mode needs psycopg and the admin's venv; JSON mode runs on
+        # the standard library, so starting the admin, loading every API
+        # module and the JSON store must not import the driver
+        code = ("import sys; sys.path.insert(0, %r); import bgsadmin.app, bgsadmin.routes as r, "
+                "bgsadmin.store.jsonstore; r.load(); "
+                "print(sorted(m for m in sys.modules if m.split('.')[0].startswith('psycopg')))") % str(REPO / "admin")
+        p = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, timeout=60)
+        self.assertEqual((p.returncode, p.stdout.strip()), (0, "[]"), p.stderr)
+
+
 def git(*args):
     return subprocess.run(["git", "-C", str(REPO)] + list(args), capture_output=True, text=True)
 

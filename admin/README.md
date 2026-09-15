@@ -171,7 +171,8 @@ ports between 4700 and 4799; 4310 is your preview.
 | File | What it covers | Port variable | Default |
 |---|---|---|---|
 | `test_admin.py` | The server end to end: the security gate, products, documents, saves and rollback | `ADMIN_TEST_PORT` | 4731 |
-| `test_plumbing.py` | Raw-body uploads, non-JSON responses and background jobs, on a bare server | `ADMIN_PLUMBING_PORT` | 4732 |
+| `test_plumbing.py` | Raw-body uploads, non-JSON responses and background jobs, on a bare server; nothing secret in git; JSON mode loads no database driver | `ADMIN_PLUMBING_PORT` | 4732 |
+| `test_store.py` | The JSON store on a copy of the content, no server: the export, one rev function, the journal and recovery after a crash, the admin lock, busy, confirmed guarded changes | none | none |
 | `test_rules.py` | The store rules reach the page text and `BGS_RULES`, bad rules are refused, COD and VAT stay locked | `ADMIN_RULES_PORT` | 4741 |
 | `test_collections.py` | Collections: category text, homepage shelves, one save across three files | `ADMIN_COLLECTIONS_PORT` | 4742 |
 | `test_pages.py` | Page text reaches the pages and `BGS_COPY`, and bad text is refused | `ADMIN_PAGES_PORT` and `ADMIN_PAGES2_PORT` | 4743 and 4744 |
