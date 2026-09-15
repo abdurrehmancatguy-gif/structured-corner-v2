@@ -2870,3 +2870,10 @@ code{border:1px solid var(--line)}
 @media (prefers-reduced-motion:reduce){
   .js .rise .h,.js .rise .w{transition:none;transform:none;stroke-dashoffset:0}
 }
+/* ---- the category shelf on white ----------------------------------------------
+   The owner wants the shelf of category pictures under the banner on white
+   instead of the dark band: the pictures stand on the page itself, the names
+   are in the dark brown, and the keyboard ring is dark to match. */
+.catstrip{background:#fff}
+.cs a span:not(.circle){color:var(--ink)}
+.cs a:focus-visible{outline-color:var(--ink)}
