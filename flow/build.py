@@ -843,9 +843,10 @@ def discovery_band():
             "db_href": page_href("index.discovery_band.cta_href")}
 
 def promos():
-    """The promo tiles. Their pictures are still the Banner placeholder."""
+    """The promo tiles: their words and links. flow.css colours them, and the
+       hills that rise from their bottom edge are added with the banners'."""
     return "\n    ".join(
-        '<a class="promo" href="%s"><span class="none">Banner</span><div><b>%s</b><span>%s</span></div></a>' % (href, t, s)
+        '<a class="promo" href="%s"><div><b>%s</b><span>%s</span></div></a>' % (href, t, s)
         for t, s, href in page_rows("index.promos", ("title", "sub", "href")))
 
 # The scent family tiles' links, colours and drawings are code; their words
@@ -1900,19 +1901,22 @@ PRELOAD = product_preload()
 
 # Every call banner (the quiz banner and each .band) carries the drawing that
 # rises from its bottom edge: soft hills stretched to the banner's width and
-# three wisps of smoke. It is decoration only; flow.css colours and moves it.
-RISE = ('<svg class="rise rise-hills" viewBox="0 0 1200 160" preserveAspectRatio="none" aria-hidden="true" focusable="false">'
-        '<path class="h h1" d="M0 160V96C160 60 300 88 460 70S760 20 900 44S1100 70 1200 40V160Z"/>'
-        '<path class="h h2" d="M0 160V118C180 92 340 116 520 98S820 70 1000 88S1140 96 1200 84V160Z"/>'
-        '<path class="h h3" d="M0 160V140C200 124 380 142 600 128S960 112 1200 124V160Z"/></svg>'
-        '<svg class="rise rise-wisps" viewBox="0 0 160 220" aria-hidden="true" focusable="false">'
-        '<path class="w w1" pathLength="1" d="M64 220C48 184 86 162 66 122S44 62 70 20"/>'
-        '<path class="w w2" pathLength="1" d="M106 220C96 192 122 170 106 132S92 84 112 52"/>'
-        '<path class="w w3" pathLength="1" d="M22 220C16 196 38 180 26 150S14 112 30 86"/></svg>')
+# three wisps of smoke; the homepage's promo tiles carry the hills alone. It
+# is decoration only; flow.css colours and moves it.
+RISE_HILLS = ('<svg class="rise rise-hills" viewBox="0 0 1200 160" preserveAspectRatio="none" aria-hidden="true" focusable="false">'
+              '<path class="h h1" d="M0 160V96C160 60 300 88 460 70S760 20 900 44S1100 70 1200 40V160Z"/>'
+              '<path class="h h2" d="M0 160V118C180 92 340 116 520 98S820 70 1000 88S1140 96 1200 84V160Z"/>'
+              '<path class="h h3" d="M0 160V140C200 124 380 142 600 128S960 112 1200 124V160Z"/></svg>')
+RISE = RISE_HILLS + ('<svg class="rise rise-wisps" viewBox="0 0 160 220" aria-hidden="true" focusable="false">'
+                     '<path class="w w1" pathLength="1" d="M64 220C48 184 86 162 66 122S44 62 70 20"/>'
+                     '<path class="w w2" pathLength="1" d="M106 220C96 192 122 170 106 132S92 84 112 52"/>'
+                     '<path class="w w3" pathLength="1" d="M22 220C16 196 38 180 26 150S14 112 30 86"/></svg>')
 _BANNER = re.compile(r'(<div class="(?:quizband|band)"[^>]*>)')
+_PROMO = re.compile(r'(<a class="promo"[^>]*>)')
 
 for fn, t, b, on, tab in PAGES:
     b = _BANNER.sub(lambda m: m.group(1) + RISE, b)
+    b = _PROMO.sub(lambda m: m.group(1) + RISE_HILLS, b)
     canon = (SITE_URL + "/" + fn) if SITE_URL else fn
     pathlib.Path(fn).write_text(shell(t, b, on, tab,                                       page="page-" + fn.replace(".html", ""),
                                       desc=PAGE_DESC.get(fn, SEO.get("default_description", "")),
