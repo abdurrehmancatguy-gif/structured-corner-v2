@@ -10,6 +10,7 @@ outside https address. Warnings (claim words) are returned but never block a
 save.
 """
 import html
+import json
 import re
 
 from .config import PAGES
@@ -286,12 +287,16 @@ def claim_warnings(texts, prefix=""):
 
 
 def product(pid, data, products, fields, ctx):
-    """Errors and warnings for one product, on top of the schema checks."""
+    """Errors and warnings for one product, on top of the schema checks. A
+    value of the wrong type (a number for the name, a story that is not a
+    list) is a type error the schema checks report on its field: nothing
+    below may fail on one, or the save would answer 500 instead of 422."""
     errors, warnings = [], []
     if not isinstance(data, dict):
         return [err("", "type", "A product is a set of fields.")], []
     cur = products.get(pid)
-    known = [n for n in (cur.get("images") or []) if isinstance(n, str)] if isinstance(cur, dict) else []
+    stored = cur.get("images") if isinstance(cur, dict) else None
+    known = [n for n in stored if isinstance(n, str)] if isinstance(stored, list) else []
     check(fields, data, "", errors, dict(ctx, products=products, known_images=known))
     cat = data.get("category")
     if cat == "attars":
@@ -299,7 +304,9 @@ def product(pid, data, products, fields, ctx):
         if not isinstance(sizes, list) or not sizes:
             errors.append(err("/sizes", "required", "An attar needs at least one size with its price."))
         else:
-            labels = [s.get("label") for s in sizes if isinstance(s, dict)]
+            # compared as JSON text, so a label that is a list or an object
+            # (a type error above) cannot fail the comparison
+            labels = [json.dumps(s.get("label"), sort_keys=True) for s in sizes if isinstance(s, dict)]
             if len(labels) != len(set(labels)):
                 errors.append(err("/sizes", "duplicate", "Two sizes have the same label."))
             if data.get("price") not in [s.get("price") for s in sizes if isinstance(s, dict)]:
@@ -314,10 +321,14 @@ def product(pid, data, products, fields, ctx):
     elif cat == "gift-sets":
         if not data.get("contents"):
             errors.append(err("/contents", "required", "Say what is in the set."))
-    rel = data.get("related") or []
-    if pid in rel:
+    rel = data.get("related")
+    if isinstance(rel, list) and pid in rel:
         errors.append(err("/related", "self", "A product cannot be related to itself."))
-    texts = [("/name", data.get("name", ""))] + [("/story/%d" % i, s) for i, s in enumerate(data.get("story") or []) if isinstance(s, str)]
+    # claim words are looked for in text only
+    texts = [("/name", data["name"])] if isinstance(data.get("name"), str) else []
+    story = data.get("story")
+    if isinstance(story, list):
+        texts += [("/story/%d" % i, s) for i, s in enumerate(story) if isinstance(s, str)]
     warnings += claim_warnings(texts)
     return errors, warnings
 

@@ -14,10 +14,13 @@ import sys
 import tempfile
 import unittest
 
-from box import Box
+from box import ADMIN, REPO, Box
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "devtools"))
 import dom_diff  # noqa: E402
+
+sys.path.insert(0, str(ADMIN))
+from bgsadmin import schema, validate  # noqa: E402
 
 PORT = int(os.environ.get("ADMIN_TEST_PORT", "4731"))
 
@@ -117,6 +120,21 @@ class AdminTests(unittest.TestCase):
         self.assertEqual(st, 422)
         st, res = b.api("PUT", "products/vibe", {"data": dict(d["data"], name="Vibe " + chr(0x2014) + " new")}, rev=d["rev"])
         self.assertEqual(st, 422)
+
+    def test_a_name_or_story_that_is_not_text_is_refused(self):
+        # validate.product reads the name and the story for claim words: a
+        # value that is not text is a type error on its field, not a 500
+        b = self.b
+        d = self._product("vibe")
+        for change, want in (({"name": 5}, [("/name", "type")]), ({"story": [5]}, [("/story/0", "type")]),
+                             ({"story": 5}, [("/story", "type")])):
+            st, res = b.api("PUT", "products/vibe", {"data": dict(d["data"], **change)}, rev=d["rev"])
+            self.assertEqual(st, 422, (change, res))
+            self.assertEqual([(e["path"], e["code"]) for e in res["error"]["details"]], want, change)
+        st, res = b.api("POST", "products/bulk", {"changes": [{"id": "vibe", "rev": d["rev"], "data": dict(d["data"], name=5)}]})
+        self.assertEqual(st, 422, res)
+        self.assertEqual([(e["path"], e["code"]) for e in res["error"]["details"]["errors"]["vibe"]], [("/name", "type")])
+        self.assertEqual(self._product("vibe")["rev"], d["rev"])
 
     def test_markup_written_as_entities_is_refused(self):
         # build.py decodes entities when it writes catalogue.js, so text that
@@ -263,6 +281,36 @@ class AdminTests(unittest.TestCase):
         st, res = b.api("PUT", "documents/navigation", {"data": data}, rev=d["rev"])
         self.assertEqual(st, 200, res)
         self.assertIn(">Perfume oils</a>", (b.repo / "flow" / "index.html").read_text())
+
+
+class ProductRuleTests(unittest.TestCase):
+    """validate.product on values of the wrong type, without a server: each
+    is a type error on its own field, and nothing fails on one."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.products = json.loads((REPO / "flow" / "content" / "products.json").read_text(encoding="utf-8"))
+        cls.fields = schema.load()["products"]["fields"]
+
+    def problems(self, pid, change, stored=None):
+        products = dict(self.products, **({pid: stored} if stored is not None else {}))
+        errors, _ = validate.product(pid, dict(self.products[pid], **change), products, self.fields, {})
+        return [(e["path"], e["code"]) for e in errors]
+
+    def test_values_of_the_wrong_type_are_type_errors(self):
+        attar = next(p for p, d in self.products.items() if d["category"] == "attars")
+        price = self.products[attar]["price"]
+        for pid, change, want in (("vibe", {"name": 5}, [("/name", "type")]),
+                                  ("vibe", {"story": 5}, [("/story", "type")]),
+                                  ("vibe", {"story": [5]}, [("/story/0", "type")]),
+                                  ("vibe", {"related": 5}, [("/related", "type")]),
+                                  ("vibe", {"related": "vibe"}, [("/related", "type")]),
+                                  (attar, {"sizes": [{"label": ["3 ml"], "price": price}]}, [("/sizes/0/label", "type")]),
+                                  (attar, {"sizes": [{"label": "3 ml", "price": price}, {"label": "3 ml", "price": 1}]},
+                                   [("/sizes", "duplicate")])):
+            self.assertEqual(self.problems(pid, change), want, (pid, change))
+        # a stored product whose photos are not a list does not stop an edit
+        self.assertEqual(self.problems("vibe", {}, stored=dict(self.products["vibe"], images=5)), [])
 
 
 class UiSourceTests(unittest.TestCase):
