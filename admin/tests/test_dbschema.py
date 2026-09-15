@@ -142,7 +142,9 @@ class ClusterTests(unittest.TestCase):
         p, root, pid = self.child("os.kill(os.getpid(), signal.SIGKILL)")
         p.wait(30)
         self.assertEqual(p.returncode, -signal.SIGKILL)
-        for _ in range(100):
+        # the watchdog looks every second, then stops the cluster and deletes
+        # its folder; with other suites running at once that took over 10 s
+        for _ in range(300):
             if not alive(pid) and not root.exists():
                 break
             time.sleep(0.1)
