@@ -5,12 +5,14 @@ import http.client
 import json
 import os
 import pathlib
+import subprocess
 import sys
 import tempfile
 import threading
 import time
 import unittest
 
+REPO = pathlib.Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 from bgsadmin import jobs  # noqa: E402
 from bgsadmin.config import Config  # noqa: E402
@@ -101,6 +103,29 @@ class PlumbingTests(unittest.TestCase):
         self.assertEqual(bad.view()["state"], "failed")
         self.assertEqual(bad.view()["error"]["code"], "nope")
         self.assertIs(jobs.get(ok.id), ok)
+
+
+def git(*args):
+    return subprocess.run(["git", "-C", str(REPO)] + list(args), capture_output=True, text=True)
+
+
+class RepositoryTests(unittest.TestCase):
+    """What this public repository may hold: no dumps, no password files, no
+    local choice of database and no connection string with a password."""
+
+    def test_git_ignores_the_venv_local_settings_dumps_and_pgpass(self):
+        for path in ("admin/.venv/bin/python", "admin/local/store.json", "bgs_corner-20260914-120000.dump",
+                     "admin/tests/x.dump", ".pgpass", "admin/.pgpass"):
+            self.assertEqual(git("check-ignore", "-q", "--no-index", path).returncode, 0, path)
+
+    def test_nothing_secret_is_tracked(self):
+        tracked = git("ls-files", "-z").stdout.split("\0")
+        bad = [p for p in tracked if p.endswith(".dump") or p.split("/")[-1] in (".pgpass", ".env")
+               or p.startswith(("admin/local/", "admin/.venv/"))]
+        self.assertEqual(bad, [])
+        for rx in (r"postgres(ql)?://[^[:space:]/:@]+:[^@[:space:]]+@", r"\bpassword[[:space:]]*="):
+            found = git("grep", "-n", "-I", "-i", "-E", rx)
+            self.assertEqual(found.returncode, 1, found.stdout[:2000])   # 1: no line matches
 
 
 if __name__ == "__main__":

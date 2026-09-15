@@ -16,10 +16,12 @@ next-env.d.ts
 .env.*
 !.env.example
 
-# local databases
+# local databases, database dumps and their passwords
 *.db
 *.db-shm
 *.db-wal
+*.dump
+.pgpass
 
 # logs
 *.log
@@ -45,3 +47,6 @@ flow/content/.backups/
 # admin
 admin/**/__pycache__/
 flow/content/.*.tmp
+# the PostgreSQL mode's virtualenv, and this checkout's own choice of store
+admin/.venv/
+admin/local/
