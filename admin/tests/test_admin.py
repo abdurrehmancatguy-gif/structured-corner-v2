@@ -268,6 +268,25 @@ class AdminTests(unittest.TestCase):
         self.assertEqual([(e["path"], e["code"]) for e in res["error"]["details"]], [("/barcode", "format")])
         self.assertEqual(self._product("vibe")["rev"], d["rev"])
 
+    def test_active_and_never_discounted_are_required(self):
+        b = self.b
+        d = self._product("vibe")
+        data = dict(d["data"])
+        del data["published"]
+        st, res = b.api("PUT", "products/vibe", {"data": data}, rev=d["rev"])
+        self.assertEqual(st, 422, res)
+        self.assertEqual([(e["path"], e["code"]) for e in res["error"]["details"]], [("/published", "required")])
+        st, res = b.api("POST", "products/bulk", {"changes": [{"id": "vibe", "rev": d["rev"], "data": data}]})
+        self.assertEqual(st, 422, res)
+        self.assertEqual([(e["path"], e["code"]) for e in res["error"]["details"]["errors"]["vibe"]], [("/published", "required")])
+        data = dict(d["data"])
+        del data["never_discount"]
+        self.assertEqual(b.api("PUT", "products/vibe", {"data": data}, rev=d["rev"])[0], 428)     # guarded: asked first
+        st, res = b.api("PUT", "products/vibe", {"data": data, "confirm_guarded": ["never_discount"]}, rev=d["rev"])
+        self.assertEqual(st, 422, res)
+        self.assertEqual([(e["path"], e["code"]) for e in res["error"]["details"]], [("/never_discount", "required")])
+        self.assertEqual(self._product("vibe")["rev"], d["rev"])
+
     def test_delete_refuses_a_referenced_product(self):
         d = self._product("platinum-musk-oud")      # a homepage banner links to it
         st, res = self.b.api("DELETE", "products/platinum-musk-oud", rev=d["rev"])

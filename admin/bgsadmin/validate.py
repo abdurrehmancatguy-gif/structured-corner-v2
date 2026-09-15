@@ -86,6 +86,13 @@ def href_problem(s, social=False):
     return None
 
 
+def linked_products(s):
+    """The products a link of this shop names with p=, such as vibe in
+    product.html?p=vibe&tab=apply: each must be a product that exists, like
+    the id in a product-ref field (the database reads links the same way)."""
+    return re.findall(r"[?&]p=([^&#]+)", s)
+
+
 def get(data, path):
     cur = data
     for part in [p for p in path.split("/") if p != ""]:
@@ -127,6 +134,10 @@ def check(fields, data, prefix, errors, ctx):
                 p = href_problem(v, social=f.get("social", False))
                 if p:
                     errors.append(err(ptr, *p))
+                elif not f.get("social"):
+                    for x in linked_products(v):
+                        if x not in ctx.get("products", {}):
+                            errors.append(err(ptr, "unknown_product", "There is no product with the id %s." % x))
             if t in ("image", "video") and f.get("upload") and v and ctx.get("flow_dir") is not None:
                 p = media_problem(v, t, None if v in ctx.get("known_media", ()) else ctx["flow_dir"])
                 if p:
