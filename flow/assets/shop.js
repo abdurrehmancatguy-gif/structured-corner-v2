@@ -862,6 +862,27 @@ bgsRun(function () {
   });
 });
 
+/* ---------- call banners: the drawing rises as one comes into view ----------
+   The quiz banner and every .band carry soft hills and wisps of smoke (from
+   build.py) that flow.css holds under the edge until the banner has .up. It
+   gets .up once a third of it is on screen, and at once without an
+   IntersectionObserver or with reduced motion. */
+bgsRun(function () {
+  var bands = document.querySelectorAll(".quizband,.band");
+  if (!bands.length) return;
+  var still = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (still || !("IntersectionObserver" in window)) {
+    bands.forEach(function (b) { b.classList.add("up"); });
+    return;
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add("up"); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.33 });
+  bands.forEach(function (b) { io.observe(b); });
+});
+
 /* ---------- mobile filter drawer + sticky buy bar ---------- */
 bgsRun(function () {
   "use strict";
