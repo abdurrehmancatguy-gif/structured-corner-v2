@@ -11,7 +11,7 @@ ALL = ["attars", "edp", "bakhoor", "gift-sets"]
 # A product photo is <id>-<n>.jpg. Never a banner, and never a name a sized
 # copy also has (-600, -card-360): make_derivatives and build.py would take
 # one for the other.
-FRAME = r"(?!banner-)(?!.*-card-360\.jpg$)[a-z0-9]+(?:-[a-z0-9]+)*-(?!600\.jpg$)\d+\.jpg"
+FRAME = r"(?!banner-)(?!.*-card-360\.jpg$)[a-z0-9]+(?:-[a-z0-9]+)*-(?!600\.jpg$)[0-9]+\.jpg"
 
 FIELDS = [
     {"path": "/name", "type": "text", "label": "Title", "required": True, "maxLength": 60},
@@ -43,7 +43,7 @@ FIELDS = [
     {"path": "/heart", "type": "text", "label": "Heart notes", "visibleWhen": {"category": ["edp", "attars"]}, "maxLength": 120},
     {"path": "/base", "type": "text", "label": "Base notes", "visibleWhen": {"category": ["edp", "attars"]}, "maxLength": 120, "nullable": True},
     {"path": "/ingredients", "type": "textarea", "label": "Declared ingredients", "maxLength": 600},
-    {"path": "/barcode", "type": "text", "label": "Barcode", "pattern": r"\d{8,14}", "patternHelp": "8 to 14 digits."},
+    {"path": "/barcode", "type": "text", "label": "Barcode", "pattern": r"[0-9]{8,14}", "patternHelp": "8 to 14 digits."},
     {"path": "/images", "type": "images", "label": "Photos", "itemPattern": FRAME,
      "patternHelp": "Use a photo from the library, named like vibe-3.jpg.",
      "copies": ["", "-card", "-600", "-card-360", "-thumb"],

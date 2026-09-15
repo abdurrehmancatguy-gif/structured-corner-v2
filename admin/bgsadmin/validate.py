@@ -80,8 +80,8 @@ def href_problem(s, social=False):
     if s == "":
         return None
     if social:
-        return None if SOCIAL.match(s) else ("href", "Use a full https link on instagram.com, wa.me or tiktok.com.")
-    if not HREF.match(s) or any(p not in PARAMS for p in re.findall(r"[?&]([a-z]+)=", s)):
+        return None if SOCIAL.fullmatch(s) else ("href","Use a full https link on instagram.com, wa.me or tiktok.com.")
+    if not HREF.fullmatch(s) or any(p not in PARAMS for p in re.findall(r"[?&]([a-z]+)=", s)):
         return "href", "Link to a page of this shop, such as collection.html?cat=attars or product.html?p=vibe."
     return None
 
@@ -234,7 +234,7 @@ def tags(f, v, ptr, errors):
         errors.append(err(ptr, "too_many", "Keep this to %d." % f["max"]))
     most = f.get("maxRepeat", 1)
     for i, x in enumerate(v):
-        if not TAG.match(x) or len(x) > f.get("itemMaxLength", 40):
+        if not TAG.fullmatch(x) or len(x) > f.get("itemMaxLength", 40):
             errors.append(err("%s/%d" % (ptr, i), "format",
                               "Use one lower-case word, or words joined by hyphens, like citrus or white-floral."))
         elif v.index(x) == i and v.count(x) > most:
@@ -334,8 +334,10 @@ def product(pid, data, products, fields, ctx):
 
 
 def cutoff_minutes(text):
-    """'2:00 PM' as minutes after midnight, or None when it does not read as a time."""
-    m = re.fullmatch(r"(1[0-2]|[1-9]):([0-5]\d) (AM|PM)", text) if isinstance(text, str) else None
+    """'2:00 PM' as minutes after midnight, or None when it does not read as a
+    time. Digits are 0 to 9 only: Python's \\d and int() also take other
+    scripts' digits, which the shop's pages would not read as a time."""
+    m = re.fullmatch(r"(1[0-2]|[1-9]):([0-5][0-9]) (AM|PM)", text) if isinstance(text, str) else None
     if not m:
         return None
     return (int(m.group(1)) % 12 + (12 if m.group(3) == "PM" else 0)) * 60 + int(m.group(2))
@@ -383,7 +385,8 @@ def document(name, data, fields, ctx):
 
 
 def product_id_problem(pid, products):
-    if not isinstance(pid, str) or not ID.match(pid) or len(pid) > 64:
+    # fullmatch: with match, the $ in ID would let a line break after the id through
+    if not isinstance(pid, str) or not ID.fullmatch(pid) or len(pid) > 64:
         return "Use lower-case letters, digits and single hyphens, like royal-amber."
     if pid.replace("-", "") in RESERVED_IDS:
         return "That id is reserved. Pick another."

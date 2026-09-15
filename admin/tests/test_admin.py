@@ -250,6 +250,24 @@ class AdminTests(unittest.TestCase):
             self.assertEqual(b.api("DELETE", "products/" + pid, rev=d["rev"])[0], 200)
         self.assertNotIn("test-scent", b.content("products"))
 
+    def test_ids_and_barcodes_are_matched_as_a_whole(self):
+        # a line break after an id is not an id, and a barcode is the digits
+        # 0 to 9 only (Python's \d also takes an Arabic-Indic two)
+        b = self.b
+        new = {"name": "Test scent", "category": "bakhoor", "price": 40, "size": "30 g"}
+        st, res = b.api("POST", "products", {"id": "vibe-2\n", "data": new})
+        self.assertEqual(st, 422, res)
+        self.assertEqual([(e["path"], e["code"]) for e in res["error"]["details"]], [("/id", "id")])
+        st, res = b.api("POST", "products/vibe/duplicate", {"new_id": "vibe-2\n"})
+        self.assertEqual(st, 422, res)
+        self.assertEqual([(e["path"], e["code"]) for e in res["error"]["details"]], [("/new_id", "id")])
+        self.assertEqual([p for p in b.content("products") if p.startswith("vibe-2")], [])
+        d = self._product("vibe")
+        st, res = b.api("PUT", "products/vibe", {"data": dict(d["data"], barcode="629700019773" + chr(0x0662))}, rev=d["rev"])
+        self.assertEqual(st, 422, res)
+        self.assertEqual([(e["path"], e["code"]) for e in res["error"]["details"]], [("/barcode", "format")])
+        self.assertEqual(self._product("vibe")["rev"], d["rev"])
+
     def test_delete_refuses_a_referenced_product(self):
         d = self._product("platinum-musk-oud")      # a homepage banner links to it
         st, res = self.b.api("DELETE", "products/platinum-musk-oud", rev=d["rev"])

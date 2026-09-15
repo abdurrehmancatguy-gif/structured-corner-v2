@@ -172,6 +172,16 @@ class RulesTests(unittest.TestCase):
         self.assertEqual(st, 422)
         self.assertEqual(rules_in(self.flow)["volume_ladder"], [{"units": 3, "percent": 10}, {"units": 6, "percent": 15}])
 
+    def test_the_cutoff_takes_only_ascii_digits(self):
+        # Python's \d also matches the Arabic-Indic digits (and int() reads
+        # them), so 2:0 followed by an Arabic-Indic two would have been read
+        # as 2:02 PM; the cutoff is written with the digits 0 to 9 only
+        before = self.b.content("settings")
+        st, res = self.put_settings(lambda s: s.update(sameday_cutoff="2:0" + chr(0x0662) + " PM"))
+        self.assertEqual(st, 422, res)
+        self.assertEqual([(d["path"], d["code"]) for d in res["error"]["details"]], [("/store/sameday_cutoff", "format")])
+        self.assertEqual(self.b.content("settings"), before)
+
     def test_box_discount_threshold_cannot_exceed_the_box(self):
         before, _ = self.settings()
         try:
