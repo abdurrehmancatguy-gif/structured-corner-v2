@@ -2760,3 +2760,34 @@ code{border:1px solid var(--line)}
   .sec-h:has(> h2 + a:last-child) > h2{flex:1 1 auto;min-width:0}
   .sec-h:has(> h2 + a:last-child) > a{flex:none;white-space:nowrap}
 }
+/* ---- instant search: the list under the search boxes --------------------------
+   shop.js places it under the box being typed in (position:fixed, so the
+   box's rounded clip does not cut it) and sets its width and height. White,
+   a hairline and a soft brown shadow; the row in focus is marked by a dark
+   bar at its start and an underlined name, never a grey fill; the typed
+   letters are bold, not highlighted. */
+.sq{position:fixed;z-index:35;background:#fff;border:1px solid var(--line);border-radius:var(--r-sm);
+  box-shadow:0 14px 34px rgba(52,38,11,.14),0 2px 6px rgba(52,38,11,.06);overflow-y:auto;
+  overscroll-behavior:contain;padding:6px 0;text-align:start}
+.sq-o{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:12px;align-items:center;min-height:60px;
+  padding:6px 14px 6px 11px;border-inline-start:3px solid transparent;color:var(--ink);text-decoration:none}
+.sq-o.on{border-inline-start-color:var(--ink)}
+.sq-o.on .sq-n,.sq-all.on{text-decoration:underline;text-underline-offset:3px}
+@media (hover:hover){ .sq-o:hover .sq-n,.sq-all:hover{text-decoration:underline;text-underline-offset:3px} }
+.sq-im{width:48px;height:48px;border-radius:10px;overflow:hidden;background:#fff;border:1px solid var(--hair)}
+.sq-im img{display:block;width:100%;height:100%;object-fit:cover}
+.sq-t{display:flex;flex-direction:column;gap:2px;min-width:0}
+.sq-n{font-size:14.5px;font-weight:500;line-height:1.3;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sq-n b{font-weight:700}
+.sq-m{font-size:12.5px;line-height:1.3;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sq-p{font-size:14px;font-weight:700;color:var(--ink);white-space:nowrap}
+.sq-all{display:flex;align-items:center;justify-content:center;min-height:48px;margin:4px 14px 2px;
+  border-top:1px solid var(--hair);font-size:14px;font-weight:700;color:#5B4FD9;text-decoration:none}
+.sq-none{margin:0;padding:14px 16px;font-size:14px;line-height:1.45;color:var(--body)}
+.sq-live{position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;
+  clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+@media (max-width:900px){
+  .sq-n{font-size:15px}
+  .sq-m{font-size:13px}
+  .sq-p{font-size:14.5px}
+}

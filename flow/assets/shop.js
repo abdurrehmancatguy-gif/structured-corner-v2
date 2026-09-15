@@ -587,6 +587,281 @@ bgsRun(function () {
   });
 });
 
+/* ---------- search: what the words find -------------------------------------
+   bgsSearch("oudd") is the ids of the products the words find, best first.
+   Every word but "for", "the" and the like must start a word in a product's
+   name, category, scent family, notes or size line, so "her" finds Her but
+   not leatHER, and a plural finds its singular. A word that starts no word
+   anywhere in the shop is read as a typo: one mistake is forgiven in a word
+   of 4 to 7 letters and two in a longer one (a letter missing, added or
+   changed, or two swapped), so "oudd" finds the ouds and "rsoe" the roses,
+   while a real word such as "rose" never finds "nose". Accents and
+   Arabic-Indic digits count as their plain forms, and a name, category or
+   family with Arabic in BGS_AR is found by its Arabic too. A match in the
+   name ranks above one in the category or family, and those above the
+   notes; equal matches keep the catalogue's order. The list under the
+   search boxes and the collection page's results both come from here, so
+   they always agree. */
+var bgsSearch = (function () {
+  var SKIP = ["a", "an", "and", "for", "in", "of", "the", "to", "with"];
+  var ch = String.fromCharCode;
+  var MARKS = new RegExp("[" + ch(0x300) + "-" + ch(0x36f) + "]", "g");
+  var SPLIT = new RegExp("[^a-z0-9" + ch(0x600) + "-" + ch(0x6ff) + "]+");
+  var index = null, vocab = null;
+  function norm(s) {
+    var t = String(s == null ? "" : s).normalize("NFD").replace(MARKS, "").toLowerCase(), o = "";
+    for (var i = 0; i < t.length; i++) {
+      var c = t.charCodeAt(i);
+      o += c >= 0x660 && c <= 0x669 ? ch(48 + c - 0x660) : c >= 0x6f0 && c <= 0x6f9 ? ch(48 + c - 0x6f0) : t.charAt(i);
+    }
+    return o;
+  }
+  function words(s) { return norm(s).split(SPLIT).filter(Boolean); }
+  /* the word and, for a plural, its singular: "ouds" oud, "lilies" lily */
+  function stems(w) {
+    var o = [w];
+    if (w.length > 3) {
+      if (/ies$/.test(w)) o.push(w.slice(0, -3) + "y");
+      if (/es$/.test(w)) o.push(w.slice(0, -2));
+      if (/s$/.test(w)) o.push(w.slice(0, -1));
+    }
+    return o;
+  }
+  /* Damerau-Levenshtein distance (optimal string alignment), given up as
+     soon as it passes max */
+  function dist(a, b, max) {
+    if (Math.abs(a.length - b.length) > max) return max + 1;
+    var d = [], i, j;
+    for (i = 0; i <= a.length; i++) d.push([i]);
+    for (j = 1; j <= b.length; j++) d[0][j] = j;
+    for (i = 1; i <= a.length; i++) {
+      var low = max + 1;
+      for (j = 1; j <= b.length; j++) {
+        var v = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+        if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) v = Math.min(v, d[i - 2][j - 2] + 1);
+        d[i][j] = v;
+        if (v < low) low = v;
+      }
+      if (low > max) return max + 1;
+    }
+    return d[a.length][b.length];
+  }
+  function build() {
+    var CAT = window.BGS_CATALOGUE || {}, AR = window.BGS_AR || {}, seen = {};
+    var withAr = function (t) { return typeof t === "string" && typeof AR[t] === "string" ? t + " " + AR[t] : t || ""; };
+    index = []; vocab = [];
+    Object.keys(CAT).forEach(function (k) {
+      var p = CAT[k];
+      var fields = [
+        [words(withAr(p.name)), 3],
+        [words([withAr(p.crumb), withAr(p.family), p.gender].join(" ")), 2],
+        [words([p.top, p.heart, p.base, p.meta].join(" ")), 1]
+      ];
+      fields.forEach(function (f) {
+        f[0].forEach(function (w) { if (!seen[w]) { seen[w] = 1; vocab.push(w); } });
+      });
+      index.push({ id: k, fields: fields });
+    });
+  }
+  function startsAny(list, forms) {
+    return list.some(function (x) { return forms.some(function (s) { return x.indexOf(s) === 0; }); });
+  }
+  /* how well one typed word meets a field's words: 3 a whole word, 2 the
+     start of one; when typos are allowed, 1.5 a whole word with a typo
+     ("ambr" amber) and 1 the start of one with a typo ("ambr" amore), so
+     the nearer word ranks first; 0 none */
+  function meet(w, forms, list, typo) {
+    var best = 0;
+    for (var i = 0; i < list.length && best < 3; i++) {
+      var x = list[i];
+      if (forms.indexOf(x) >= 0) best = 3;
+      else if (best < 2 && forms.some(function (s) { return x.indexOf(s) === 0; })) best = 2;
+      else if (best < 1.5 && typo) {
+        if (dist(w, x, typo) <= typo) best = 1.5;
+        else if (!best && x.length > w.length && dist(w, x.slice(0, w.length), typo) <= typo) best = 1;
+      }
+    }
+    return best;
+  }
+  function search(q) {
+    if (!index) build();
+    var ask = words(q), need = ask.filter(function (w) { return SKIP.indexOf(w) < 0; });
+    if (need.length) ask = need;
+    if (!ask.length) return [];
+    var plan = ask.map(function (w) {
+      var forms = stems(w);
+      return { w: w, forms: forms, typo: w.length < 4 || startsAny(vocab, forms) ? 0 : w.length > 7 ? 2 : 1 };
+    });
+    var hits = [];
+    index.forEach(function (e, n) {
+      var total = 0;
+      for (var i = 0; i < plan.length; i++) {
+        var got = 0;
+        for (var f = 0; f < e.fields.length; f++)
+          got = Math.max(got, meet(plan[i].w, plan[i].forms, e.fields[f][0], plan[i].typo) * e.fields[f][1]);
+        if (!got) return;
+        total += got;
+      }
+      hits.push([e.id, total, n]);
+    });
+    hits.sort(function (a, b) { return b[1] - a[1] || a[2] - b[2]; });
+    return hits.map(function (h) { return h[0]; });
+  }
+  search.norm = norm;
+  search.words = words;
+  return search;
+})();
+
+/* ---------- instant search: products as the shopper types -------------------
+   Under either search box (the masthead's and, on phones, the search row's)
+   a list of up to six products opens as the shopper types, from bgsSearch:
+   each row is the product's picture, name, size line and price, with the
+   typed start of each word in bold. The box is an ARIA combobox: Down and Up
+   move through the list, Enter opens the product in focus (with none in
+   focus the form sends the words to the collection page, as before),
+   Escape closes the list and keeps the words, and a tap outside closes it.
+   The last row opens the collection page with everything the words find,
+   and a screen reader hears how many products that is. The list hangs from
+   the page (position: fixed, placed under the box) so the box's rounded
+   clip does not cut it, it never runs wider than the screen, and it stops
+   above a phone's tab bar and buy bar. */
+bgsRun(function () {
+  "use strict";
+  var CAT = window.BGS_CATALOGUE || {};
+  if (!Object.keys(CAT).length) return;
+  var MAX = 6, count = 0;
+  function esc(t) {
+    return String(t).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; });
+  }
+  /* the name, with the start of each word the shopper typed in bold */
+  function marked(name, typed) {
+    return String(name).split(/(\s+)/).map(function (part) {
+      var w = bgsSearch.norm(part), len = 0;
+      typed.forEach(function (t) { if (t.length > len && w.indexOf(t) === 0) len = t.length; });
+      return len && len <= part.length ? "<b>" + esc(part.slice(0, len)) + "</b>" + esc(part.slice(len)) : esc(part);
+    }).join("");
+  }
+  document.querySelectorAll("form.search").forEach(function (form) {
+    var input = form.querySelector('input[name="q"]');
+    if (!input) return;
+    var id = "sq" + (++count), list = document.createElement("div"), live = document.createElement("div");
+    var opts = [], active = -1, timer = 0;
+    list.className = "sq"; list.id = id; list.hidden = true;
+    list.setAttribute("role", "listbox");
+    list.setAttribute("aria-label", input.getAttribute("aria-label") || "Search products");
+    live.className = "sq-live"; live.setAttribute("role", "status"); live.setAttribute("aria-live", "polite");
+    document.body.appendChild(list);
+    document.body.appendChild(live);
+    input.setAttribute("role", "combobox");
+    input.setAttribute("aria-autocomplete", "list");
+    input.setAttribute("aria-controls", id);
+    input.setAttribute("aria-expanded", "false");
+    input.setAttribute("autocomplete", "off");
+
+    function place() {
+      var r = form.getBoundingClientRect(), de = document.documentElement;
+      if (!r.width || r.bottom < 0) { close(); return; }
+      var vw = de.clientWidth, w = Math.min(Math.max(r.width, 340), vw - 24);
+      var left = getComputedStyle(de).direction === "rtl" ? r.right - w : r.left;
+      left = Math.max(12, Math.min(left, vw - 12 - w));
+      var top = r.bottom + 6, vv = window.visualViewport;
+      var bottom = (vv ? vv.height + vv.offsetTop : window.innerHeight) - 8;
+      document.querySelectorAll(".tabbar,.stickybuy").forEach(function (b) {
+        var t = b.getBoundingClientRect();
+        if (t.height && t.top > top && getComputedStyle(b).display !== "none") bottom = Math.min(bottom, t.top - 8);
+      });
+      list.style.left = left + "px";
+      list.style.top = top + "px";
+      list.style.width = w + "px";
+      list.style.maxHeight = Math.max(160, bottom - top) + "px";
+    }
+    function setActive(i) {
+      if (opts[active]) { opts[active].classList.remove("on"); opts[active].setAttribute("aria-selected", "false"); }
+      active = opts[i] ? i : -1;
+      if (active < 0) { input.removeAttribute("aria-activedescendant"); return; }
+      opts[i].classList.add("on");
+      opts[i].setAttribute("aria-selected", "true");
+      input.setAttribute("aria-activedescendant", opts[i].id);
+      opts[i].scrollIntoView({ block: "nearest" });
+    }
+    function open() {
+      list.hidden = false;
+      input.setAttribute("aria-expanded", "true");
+      place();
+    }
+    function close() {
+      clearTimeout(timer);
+      if (list.hidden) return;
+      setActive(-1);
+      list.hidden = true;
+      input.setAttribute("aria-expanded", "false");
+    }
+    function render() {
+      var q = input.value.trim();
+      if (!q) { close(); live.textContent = ""; return; }
+      var ids = bgsSearch(q), typed = bgsSearch.words(q), html = "";
+      ids.slice(0, MAX).forEach(function (k, i) {
+        var p = CAT[k], im = (p.images || [])[0];
+        html += '<a class="sq-o" role="option" aria-selected="false" tabindex="-1" id="' + id + "-" + i +
+          '" href="product.html?p=' + encodeURIComponent(k) + '"><span class="sq-im">' +
+          (im ? '<img src="' + bgsImg(im, "-card-360") + '" alt="" width="48" height="48" decoding="async">' : "") +
+          '</span><span class="sq-t"><span class="sq-n">' + marked(p.name, typed) + '</span><span class="sq-m">' +
+          esc(p.meta || "") + '</span></span><span class="sq-p">AED ' + esc(p.price) + "</span></a>";
+      });
+      if (ids.length) {
+        html += '<a class="sq-all" role="option" aria-selected="false" tabindex="-1" id="' + id + '-all" href="collection.html?q=' +
+          encodeURIComponent(q) + '">' + esc(bgsAr(bgsCopy("shell.search.see_all", "See all results"))) + "</a>";
+      } else {
+        html += '<p class="sq-none">' + esc(bgsAr(bgsCopy("shell.search.none", "No products match that search."))) + "</p>";
+      }
+      list.innerHTML = html;
+      opts = Array.prototype.slice.call(list.querySelectorAll('[role="option"]'));
+      active = -1;
+      input.removeAttribute("aria-activedescendant");
+      live.textContent = !ids.length ? bgsAr(bgsCopy("shell.search.none", "No products match that search."))
+        : bgsFill(bgsAr(ids.length === 1 ? bgsCopy("shell.search.count_one", "{n} result")
+                                          : bgsCopy("shell.search.count_many", "{n} results")), { n: ids.length });
+      open();
+    }
+
+    input.addEventListener("input", function () {
+      clearTimeout(timer);
+      timer = setTimeout(render, 60);
+    });
+    input.addEventListener("focus", function () { if (list.hidden && input.value.trim()) render(); });
+    input.addEventListener("keydown", function (e) {
+      if (e.isComposing) return;
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        if (list.hidden) { render(); return; }
+        var next = active + (e.key === "ArrowDown" ? 1 : -1);
+        if (next >= opts.length) next = -1;
+        if (next < -1) next = opts.length - 1;
+        setActive(next);
+      } else if (e.key === "Enter") {
+        if (!list.hidden && opts[active]) { e.preventDefault(); location.href = opts[active].href; }
+      } else if (e.key === "Escape") {
+        if (!list.hidden) { e.preventDefault(); e.stopPropagation(); close(); }
+      } else if (e.key === "Tab") {
+        close();
+      }
+    });
+    input.addEventListener("blur", function () {
+      setTimeout(function () { if (document.activeElement !== input) close(); }, 150);
+    });
+    /* a press on the list keeps the focus in the box, so the tap lands */
+    list.addEventListener("mousedown", function (e) { e.preventDefault(); });
+    document.addEventListener("pointerdown", function (e) {
+      if (!list.hidden && !list.contains(e.target) && e.target !== input) close();
+    });
+    var again = function () { if (!list.hidden) place(); };
+    window.addEventListener("resize", again);
+    window.addEventListener("scroll", again, { passive: true });
+    if (window.visualViewport) window.visualViewport.addEventListener("resize", again);
+  });
+});
+
 /* ---------- mobile filter drawer + sticky buy bar ---------- */
 bgsRun(function () {
   "use strict";
@@ -980,30 +1255,12 @@ bgsRun(function () {
     history.replaceState(null, "", location.pathname + (q.toString() ? "?" + q : ""));
   }
   function inBand(pn, band) { var p = band.split("-"); return pn >= +p[0] && pn <= +p[1]; }
-  var SKIP = ["a", "an", "and", "for", "in", "of", "the", "to", "with"];
+  /* the filters; the words are bgsSearch's, in render */
   function match(pr, st) {
     if (st.cat.length && st.cat.indexOf(pr.cat) < 0) return false;
     if (st.gender.length && (!pr.gender || st.gender.indexOf(pr.gender) < 0)) return false;
     if (st.price.length && !st.price.some(function (b) { return inBand(pr.pn, b); })) return false;
     if (st.ready && !(pr.stock > 0)) return false;
-    if (st.q) {
-      /* every word must start a word in the name, category or notes, so
-         "her" finds Her and Hers but not leatHER; a plural also matches its
-         singular ("ouds", "lilies"), and "for", "the" and the like are not
-         required, so "for her" works */
-      var words = [pr.name, pr.crumb, pr.meta, pr.top, pr.heart, pr.base].join(" ")
-        .toLowerCase().split(/[^a-z0-9؀-ۿ]+/);
-      var starts = function (w) { return words.some(function (x) { return x.indexOf(w) === 0; }); };
-      var has = function (w) {
-        return starts(w) || (w.length > 3 && (
-          (/ies$/.test(w) && starts(w.slice(0, -3) + "y")) ||
-          (/es$/.test(w) && starts(w.slice(0, -2))) ||
-          (/s$/.test(w) && starts(w.slice(0, -1)))));
-      };
-      var ask = st.q.toLowerCase().split(/[^a-z0-9؀-ۿ]+/).filter(Boolean);
-      var need = ask.filter(function (w) { return SKIP.indexOf(w) < 0; });
-      if (!(need.length ? need : ask).every(has)) return false;
-    }
     return true;
   }
   function esc(t) {
@@ -1060,7 +1317,10 @@ bgsRun(function () {
     document.querySelectorAll('form.search input[name="q"]').forEach(function (i) {
       if (document.activeElement !== i) i.value = st.q || "";
     });
-    var keys = Object.keys(CAT).filter(function (k) { return match(CAT[k], st); });
+    /* the words, when there are any, find products as the list under the
+       search box does (bgsSearch), so a typo such as "oudd" finds the ouds
+       here too; best match first unless another order is chosen */
+    var keys = (st.q ? bgsSearch(st.q) : Object.keys(CAT)).filter(function (k) { return match(CAT[k], st); });
     if (st.sort === "price-asc")  keys.sort(function (a, b) { return CAT[a].pn - CAT[b].pn; });
     if (st.sort === "price-desc") keys.sort(function (a, b) { return CAT[b].pn - CAT[a].pn; });
     if (st.sort === "name")       keys.sort(function (a, b) { return CAT[a].name.localeCompare(CAT[b].name); });
