@@ -1802,21 +1802,64 @@ bgsRun(function () {
       '<div class="lprice"><span data-lineprice>' + bgsCopyHtml("cart.summary.free", "Free") + "</span></div></div>";
   }
 
+  /* Checkout's summary lists what is being bought, read-only: the photo,
+     name, detail line, quantity and line price of each bag line (and the
+     gift line), carrying the same data-line figures as the bag page's lines,
+     so recalc() prices checkout with the one engine the bag uses. */
+  function qtyHtml(n) {
+    var words = bgsAr(bgsCopy("cart.added.qty", "Qty {n}")).split("{n}");
+    return escText(words[0] || "") + '<i data-qty>' + n + '</i>' + escText(words.slice(1).join("{n}"));
+  }
+  function coLineHtml(l, p) {
+    var img = (p.images && p.images[0])
+      ? '<img src="' + bgsImg(p.images[0], "-thumb") + '" alt="" width="160" height="160" loading="lazy" decoding="async">'
+      : '<span class="none">' + bgsCopyHtml("cart.line.no_image", "Image") + "</span>";
+    return '<div class="coline" data-line data-id="' + l.id + '" data-unit="' + p.pn +
+      '" data-halo="' + (p.halo ? "1" : "0") + '" data-gift="0">' +
+      '<span class="coim">' + img + '</span>' +
+      '<span class="cot"><span class="coname">' + escText(p.name) + '</span>' +
+      '<span class="cometa">' + escText(p.meta || "") + '</span>' +
+      '<span class="coqty">' + qtyHtml(l.qty) + '</span></span>' +
+      '<span class="coprice" data-lineprice>' + money(p.pn * l.qty) + '</span></div>';
+  }
+  function coGiftHtml() {
+    return '<div class="coline" data-line data-unit="0" data-halo="0" data-gift="1">' +
+      '<span class="coim"><span class="none">' + bgsCopyHtml("cart.gift_line.placeholder", "Gift") + '</span></span>' +
+      '<span class="cot"><span class="coname">' + escText(GIFT_LABEL) + '</span>' +
+      '<span class="cometa">' + bgsFill(bgsCopyHtml("cart.gift_line.meta", "Gift with purchase over {amount}"), { amount: money(GIFT_AT) }) + '</span></span>' +
+      '<span class="coprice" data-lineprice>' + bgsCopyHtml("cart.summary.free", "Free") + '</span></div>';
+  }
+
   function render() {
     var host = document.querySelector("[data-cartlines]");
-    if (!host) return;                       // not the cart page
+    var co = document.querySelector("[data-colines]");
+    if (!host && !co) return;                // neither the bag nor checkout
 
     var lines = read().filter(function (l) { return cat(l.id); });
     var sub = lines.reduce(function (n, l) { return n + cat(l.id).pn * l.qty; }, 0);
-
-    host.innerHTML = lines.map(function (l) { return lineHtml(l, cat(l.id)); }).join("") +
-      (sub >= GIFT_AT ? giftHtml() : "");
 
     var empty = lines.length === 0;
     var toggle = function (sel, hide) {
       var el = document.querySelector(sel);
       if (el) el.hidden = hide;
     };
+
+    if (co) {
+      co.innerHTML = lines.map(function (l) { return coLineHtml(l, cat(l.id)); }).join("") +
+        (sub >= GIFT_AT ? coGiftHtml() : "");
+      var n = lines.reduce(function (k, l) { return k + l.qty; }, 0);
+      var items = document.querySelector("[data-coitems]");
+      if (items) items.textContent = bgsFill(bgsAr(n === 1 ? bgsCopy("cart.items.one", "{n} item")
+                                                           : bgsCopy("cart.items.many", "{n} items")), { n: n });
+      toggle("[data-coempty]", !empty);
+      toggle("[data-cosummary]", empty);
+      if (typeof window.BGS_RECALC === "function") window.BGS_RECALC();
+      return;
+    }
+
+    host.innerHTML = lines.map(function (l) { return lineHtml(l, cat(l.id)); }).join("") +
+      (sub >= GIFT_AT ? giftHtml() : "");
+
     toggle("[data-cartempty]", !empty);
     toggle("[data-cartsummary]", empty);
     toggle("[data-cartprogress]", empty);

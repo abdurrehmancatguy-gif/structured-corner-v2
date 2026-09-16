@@ -1493,17 +1493,23 @@ checkout = """
       <div class="pay" data-paypick style="margin:10px 0 14px"><button type="button" class="on">Card</button><button type="button">Apple Pay</button><button type="button">Tabby</button><button type="button">Tamara</button><button type="button" data-codbtn>Cash on delivery</button></div>
       <div class="note">COD is withheld here because the bag is over AED 300. Under that it carries an AED 8 fee, waived when paid online. It is also withheld on QR-video orders and from customers with a prior refusal.</div>
     </div>
-    <div><div class="sum">
-      <div class="r"><span>4 items</span><span data-subtotal>AED 845</span></div>
-      <div class="r" style="color:var(--green)" data-tierrow><span>Volume discount &middot; <b data-tierpct>10</b>%</span><span data-tieramt>&minus; AED 19.50</span></div>
-      <div class="r"><span>Delivery</span><span data-delivery style="color:var(--green)">Free</span></div>
-      <div class="r vat" data-vatrow><span>Includes VAT at 5%</span><span data-vat>AED 39.31</span></div>
-      <div class="r t"><span>Total</span><span data-total>AED 825.50</span></div>
+    <div>
+      <div data-coempty class="empty" hidden>
+        <p style="margin-bottom:16px">%(c_empty)s</p>
+        <a class="btn solid" href="%(c_empty_href)s">%(c_empty_cta)s</a>
+      </div>
+      <div class="sum" data-cosummary>
+      <div class="colines" data-colines></div>
+      <div class="r"><span data-coitems></span><span data-subtotal>AED 0</span></div>
+      <div class="r" style="color:var(--green);display:none" data-tierrow><span>Volume discount &middot; <b data-tierpct>0</b>%%</span><span data-tieramt>&minus; AED 0</span></div>
+      <div class="r"><span>Delivery</span><span data-delivery>AED 0</span></div>
+      <div class="r vat" data-vatrow><span>Includes VAT at 5%%</span><span data-vat>AED 0</span></div>
+      <div class="r t"><span>Total</span><span data-total>AED 0</span></div>
       <a class="btn solid block" href="confirmed.html" style="margin-top:12px">Place order</a>
     </div></div>
   </div>
 </div></section>
-"""
+""" % CART_TEXT
 confirmed = """
 <section><div class="wrap" style="max-width:760px">
   <div style="text-align:center;padding:20px 0 34px">

@@ -3052,3 +3052,18 @@ code{border:1px solid var(--line)}
 .strip-msg svg{flex:none}
 html:not(.js) .strip-msg:not(.on){display:none}
 @media (prefers-reduced-motion:reduce){ .strip-msg{transition:none;transform:none} }
+
+/* ---------- checkout: what is being bought ----------
+   The summary lists the bag's lines above the sums (shop.js fills
+   [data-colines] from the bag): photo, name, detail line, quantity and the
+   line's price. */
+.colines{display:grid;gap:12px;margin:0 0 14px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.coline{display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:12px;align-items:center}
+.coim{width:56px;height:56px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid var(--hair);border-radius:var(--r-sm);background:#fff}
+.coim img{width:100%;height:100%;object-fit:cover;display:block}
+.coim .none{font-size:11px;color:var(--faint)}
+.cot{display:flex;flex-direction:column;gap:2px;min-width:0}
+.coname{font-size:14px;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
+.cometa,.coqty{font-size:12.5px;line-height:1.35;color:var(--mut);overflow-wrap:anywhere}
+.coqty i{font-style:normal}
+.coprice{font-size:14px;font-weight:600;white-space:nowrap}
