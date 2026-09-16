@@ -551,6 +551,8 @@ EXTRA_GLOBALS.append(("BGS_AUTH", lambda: AUTH))
 # The bag, checkout, confirmation, account and tracking pages are for someone
 # mid-purchase, not for search results.
 NOINDEX = {"page-cart", "page-checkout", "page-confirmed", "page-account", "page-track-order"}
+# The pages whose phone design is the one in phone/*.css (see PHONE_CSS).
+PHONE_PAGES = {"page-index"}
 
 def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
     """No category strip here. The circles are a homepage shelf now - the sticky
@@ -572,7 +574,7 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
 <meta property="og:image" content="%(ogimg)s">
 <meta name="twitter:card" content="summary_large_image">
 %(icons)s
-%(preload)s<link rel="stylesheet" href="%(css)s"></head><body class="%(page)s">
+%(preload)s%(stylesheets)s</head><body class="%(page)s">
 <noscript><div class="nojs">%(noscript)s</div></noscript>
 <div class="strip"><div class="wrap">
   <span>%(clock)s %(countdown)s<span data-cutoff hidden> &middot; <b></b></span></span>
@@ -602,7 +604,11 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
 <div class="tabbar">%(tabs)s</div>
 <script src="%(catjs)s"></script>
 <script src="%(shopjs)s"></script></body></html>
-""" % dict(SHELL_TEXT, title=title, body=body, page=page, css=V("assets/flow.min.css"),
+""" % dict(SHELL_TEXT, title=title, body=body, page=page,
+   stylesheets=('<link rel="stylesheet" href="%s" media="(min-width:901px)">\n'
+                '<link rel="stylesheet" href="%s" media="(max-width:900px)">'
+                % (V("assets/flow.min.css"), V("assets/phone.min.css"))) if page in PHONE_PAGES
+               else '<link rel="stylesheet" href="%s">' % V("assets/flow.min.css"),
    full_title=(title + " | " + SHELL_TEXT["title_suffix"]) if title else SHELL_TEXT["title_suffix"],
    catjs=V("assets/catalogue.js"), shopjs=V("assets/shop.js"),
    preload=PRELOAD if page == "page-product" else "",
@@ -1902,6 +1908,12 @@ def minify_css(css):
     css = re.sub(r"\s*([{};,>])\s*", r"\1", css).replace(";}", "}")
     return re.sub("\x00(\\d+)\x00", lambda m: keep[int(m.group(1))], css).strip() + "\n"
 pathlib.Path("assets/flow.min.css").write_text(minify_css(pathlib.Path("assets/flow.css").read_text()))
+# Phones and tablets (up to 900px) have a design of their own, written from
+# scratch in phone/*.css and joined in name order into assets/phone.min.css. A
+# page on PHONE_PAGES loads flow.min.css only above 900px and phone.min.css
+# only up to it, so no rule of the desktop design reaches a phone.
+PHONE_CSS = sorted(pathlib.Path("phone").glob("*.css"))
+pathlib.Path("assets/phone.min.css").write_text(minify_css("\n".join(p.read_text() for p in PHONE_CSS)))
 
 def product_preload():
     """product.html is one template for every product, and its main photo only

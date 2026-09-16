@@ -88,23 +88,23 @@
   "shelves": {
     "house_ouds": {
       "limit": 5,
-      "link_label": "All {n}"
+      "link_label": "View all"
     },
     "reserve": {
       "limit": null,
-      "link_label": "All attars"
+      "link_label": "View all"
     },
     "gift_sets": {
       "limit": 5,
-      "link_label": "All sets"
+      "link_label": "View all"
     },
     "bakhoor": {
       "limit": null,
-      "link_label": "Shop bakhoor"
+      "link_label": "View all"
     },
     "edp": {
       "limit": 5,
-      "link_label": "All {n}"
+      "link_label": "View all"
     }
   },
   "reels": {

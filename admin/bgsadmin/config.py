@@ -52,6 +52,6 @@ class Config:
         transaction so a failed build can put them back byte for byte."""
         out = [self.flow / p for p in PAGES]
         out += [self.flow / "404.html", self.flow / "robots.txt",
-                self.assets / "catalogue.js", self.assets / "flow.min.css",
+                self.assets / "catalogue.js", self.assets / "flow.min.css", self.assets / "phone.min.css",
                 self.flow / "tools" / "derivatives.json"]
         return out

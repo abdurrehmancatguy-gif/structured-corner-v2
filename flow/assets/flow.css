@@ -2988,3 +2988,39 @@ code{border:1px solid var(--line)}
   .catnav{position:static !important}
   .galcount{display:none !important}
 }
+
+/* ---------- lighter top, quieter logo (desktop; phones read phone/*.css) ----------
+   The category bar under the masthead is white with brown words and a gold
+   underline on the current category. The delivery line above the masthead is
+   a lighter shade of the brand brown (#735C38: white 6.3:1, the cream 5.3:1),
+   so the top of the page is no longer two dark bars. The masthead logo and the
+   BGS emblem in the call banners and promo tiles are dimmed a little. */
+.strip{background:#735C38;color:#F1EADF}
+.strip .r,.strip .r a{color:#F1EADF}
+.strip b{color:#fff}
+.catnav{background:#fff;border-bottom:1px solid var(--line)}
+.catnav a{color:var(--secondary)}
+.catnav a:hover{color:var(--secondary);border-bottom-color:var(--line)}
+.catnav a.on{color:var(--secondary);border-bottom-color:var(--gold);font-weight:600}
+.catnav a:focus-visible{outline-color:var(--gold-d)}
+@media (min-width:901px){ .catnav a + a::before{background:var(--line)} }
+.logo .brandmark{opacity:.8}
+.emb{opacity:.55}
+@media (max-width:900px){
+  .catnav a,.catnav a:hover,.catnav a.on{border-top-color:var(--line);border-inline-start-color:var(--line)}
+  .catnav a.on{box-shadow:inset 0 -2px 0 var(--gold)}
+}
+
+/* ---------- the call banners in a darker gold ----------
+   The quiz banner and the Discovery band take a deep gold (#86621F: white
+   5.5:1, the cream 4.7:1) instead of the purple. Their emblem is a cream mark
+   on it, and their button is white with the deep brown. */
+:root{--banner:#86621F;--banner-d:#6F5019;--banner-t:#F6EBD5}
+.quizband,.band{background:var(--banner);background-image:radial-gradient(120% 140% at 100% 0%,rgba(255,236,190,.16),rgba(255,236,190,0) 55%);border:0;color:#fff}
+.quizband h3,.band h3{color:#fff}
+.quizband p,.band p{color:var(--banner-t)}
+.quizband .eyebrow,.quizband .eyebrow.gold,.band .eyebrow,.band .eyebrow.gold-d{color:var(--banner-t)}
+.quizband .btn,.quizband .btn.solid,.band .btn,.band .btn.gold{background:#fff;border-color:#fff;color:var(--secondary)}
+.quizband .btn:hover,.quizband .btn.solid:hover,.band .btn:hover,.band .btn.gold:hover{background:var(--banner-t);border-color:var(--banner-t);color:var(--secondary)}
+.quizband .emb-fill,.band .emb-fill{fill:#F6E7C1}
+.quizband .emb-line,.band .emb-line{stroke:#FFF4DC}

@@ -25,9 +25,11 @@ from .service import field_for
 GROUPS = ("content", "media", "generated", "code", "other")
 ADMIN_GROUPS = ("content", "media", "generated")
 CODE = {"flow/build.py", "flow/assets/shop.js", "flow/assets/flow.css", "flow/edp_data.json"}
+# the phone design's stylesheets, which build.py joins into assets/phone.min.css
+PHONE_CSS = re.compile(r"^flow/phone/[a-z0-9_-]+\.css$")
 GENERATED = ({"flow/" + p for p in PAGES}
              | {"flow/404.html", "flow/robots.txt", "flow/favicon.ico", "flow/assets/catalogue.js",
-                "flow/assets/flow.min.css", "flow/tools/derivatives.json"}
+                "flow/assets/flow.min.css", "flow/assets/phone.min.css", "flow/tools/derivatives.json"}
              # make_favicon.py writes these beside the photos, from the emblem,
              # so they are listed with what the tools make, not as new photos
              | {"flow/assets/img/favicon-32.png", "flow/assets/img/favicon-16.png",
@@ -44,7 +46,7 @@ _FETCHED = {}          # repo path -> {"remote_sha", "at"} of this run's last fe
 
 def group_of(path):
     """Which of the five groups a repo-relative path belongs to."""
-    if path in CODE:
+    if path in CODE or PHONE_CSS.match(path):
         return "code"
     if path in GENERATED:
         return "generated"
@@ -413,7 +415,7 @@ def _riding(path):
         return "Admin code"
     if path.startswith("flow/tools/"):
         return "Tools"
-    if path in CODE:
+    if path in CODE or PHONE_CSS.match(path):
         return "Site code (the published copy is rebuilt from it)"
     if path.lower().endswith(".md"):
         return "Notes and documents"

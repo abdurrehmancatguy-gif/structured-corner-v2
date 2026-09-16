@@ -1,0 +1,60 @@
+/* ---------- section headings, product grids, swipe rows, the product card ---------- */
+
+.sec-h{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:0 0 16px}
+.sec-h h2{font:700 25px/1.12 var(--font-d);letter-spacing:-.024em;margin:0;min-width:0;text-wrap:balance}
+.sec-h > a{flex:none;display:inline-flex;align-items:center;gap:4px;min-height:36px;padding:0 14px;border-radius:var(--r-pill);
+  background:var(--soft);box-shadow:inset 0 0 0 1px var(--line);font:600 14px/1 var(--font);color:var(--ink);white-space:nowrap;position:relative}
+.sec-h > a::after{content:"";position:absolute;inset:-5px -2px}
+.sec-h > a:active{background:var(--hair)}
+
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 12px}
+@media (min-width:600px){ .grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:28px 16px} }
+
+/* A swipe row: two cards and the edge of the third, snapping card by card,
+   running to the screen's edges. */
+.rail,.shelf-attars .grid,.shelf-edp .grid{display:grid;grid-template-columns:none;grid-auto-flow:column;
+  grid-auto-columns:calc((100% - 12px) / 2.18);gap:12px;overflow-x:auto;overscroll-behavior-x:contain;
+  scroll-snap-type:x mandatory;scroll-padding-inline:var(--gut);scrollbar-width:none;
+  margin-inline:calc(-1 * var(--gut));padding:0 var(--gut) 4px}
+.rail::-webkit-scrollbar,.shelf-attars .grid::-webkit-scrollbar,.shelf-edp .grid::-webkit-scrollbar{display:none}
+.rail > *,.shelf-attars .grid > .p,.shelf-edp .grid > .p{scroll-snap-align:start;min-width:0}
+@media (min-width:600px){ .rail,.shelf-attars .grid,.shelf-edp .grid{grid-auto-columns:calc((100% - 32px) / 3.3);gap:16px} }
+
+/* the card: photograph on a pale tile, name, one line of detail, price and a
+   round add button. Sizes and notes are left to the product page. */
+.p{position:relative;display:flex;flex-direction:column;min-width:0;color:var(--ink)}
+.p .ph{position:relative;aspect-ratio:1 / 1;border-radius:var(--r);background:var(--tile);overflow:hidden;isolation:isolate}
+.p .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;mix-blend-mode:multiply;transition:transform .5s var(--ease)}
+.p:active .ph img{transform:scale(1.03)}
+.p .ph .ph-b{display:none}
+.p .ph .none{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--faint)}
+.p .badge{position:absolute;z-index:2;top:10px;left:10px}
+[dir="rtl"] .p .badge{left:auto;right:10px}
+.p .heart{position:absolute;z-index:2;top:6px;right:6px;width:38px;height:38px;padding:0;border:0;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.86);color:var(--ink);cursor:pointer;
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 1px 3px rgba(23,15,5,.08)}
+.p .heart::after{content:"";position:absolute;inset:-3px}
+.p .heart svg{width:17px;height:17px}
+.p .heart[aria-pressed="true"]{color:var(--rose)}
+.p .heart[aria-pressed="true"] svg{fill:currentColor}
+[dir="rtl"] .p .heart{right:auto;left:6px}
+.p .b{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"nm nm" "meta meta" "pr add";
+  column-gap:8px;padding:10px 2px 0;flex:1 1 auto;align-content:start}
+.p .nm{grid-area:nm;font:600 15.5px/1.28 var(--font);letter-spacing:-.01em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.p .meta{grid-area:meta;margin-top:2px;font-size:13px;line-height:1.35;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p .sizes,.p .notes,.p .norm,.p .tax,.p .rev{display:none}
+.p .pr{grid-area:pr;align-self:center;margin-top:8px;display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.p .pr b{font:700 16px/1.2 var(--font);letter-spacing:-.01em;white-space:nowrap}
+.p .pr s,.p .pr del{font-size:13px;color:var(--faint)}
+/* the add button: a round purple button with a plus, its words kept for
+   screen readers (and for the moment it says Added) */
+.p [data-add]{grid-area:add;align-self:center;position:relative;margin:8px 0 0 !important;width:42px;min-width:0;height:42px;min-height:0;padding:0;
+  border:0;border-radius:50%;background:var(--cta);color:transparent;font-size:0;line-height:0;overflow:hidden;
+  box-shadow:0 4px 12px rgba(91,33,182,.28)}
+.p [data-add]::before,.p [data-add]::after{content:"";position:absolute;left:50%;top:50%;background:#fff;border-radius:2px;
+  transform:translate(-50%,-50%);transition:transform .25s var(--ease)}
+.p [data-add]::before{width:16px;height:2.2px}
+.p [data-add]::after{width:2.2px;height:16px}
+.p [data-add]:active{transform:scale(.92);background:var(--cta-d)}
+.p [data-add][disabled]{background:var(--line);box-shadow:none}
+@media (min-width:600px){ .p .nm{font-size:16px} }

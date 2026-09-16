@@ -10,7 +10,8 @@ content/navigation.json ("image"), not in the stylesheet.
   amber.jpg   Pexels photos/9127154            Shop by Occasion
   corporate.png  skyscraper cut-out, supplied in chat   (was Corporate Gifting, no longer shown)
   gift-box.png  cut out of img/banner-4.jpg (the Amore, Vibe and Be Mine trio in its box)   Build Your Gift Box
-  corporate-gifts.jpg  Pexels photos/33629670 (3D Render: black gift boxes, gold ribbons)   Corporate Gifting (its -216 copy is shown)
+  corporate-gifts.jpg  Pexels photos/33629670 (3D Render: black gift boxes, gold ribbons)   (the photo corporate-gifts.png is cut from)
+  corporate-gifts.png  corporate-gifts.jpg with its background removed   Corporate Gifting
 
 bak.png arrived with a checkerboard painted into the pixels: an RGB image with
 no alpha channel, so it only looked transparent. The checkerboard was keyed
@@ -44,3 +45,10 @@ with enclosed pockets of checkerboard removed and the edges closed and opened
 by a few pixels. The two boxes are a wide group, so it is not normalised to
 204x240: it is cropped tight (300x154) and marked "cutout": "wide", which draws
 it across its circle instead of rising out of it. 256 colours.
+
+corporate-gifts.png (2026-09-16) is corporate-gifts.jpg with its dark dotted
+ground removed: the subject was lifted with the macOS Vision foreground mask
+(on the machine, nothing downloaded), then the dotted strip the mask kept along
+the big box's sides was painted to the box's black and the dots caught under
+the bow above its lid were cut. Cropped to the boxes and scaled to 333x360.
+It stands in front of its tile ("cutout": true in navigation.json).

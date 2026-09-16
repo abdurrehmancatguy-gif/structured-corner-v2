@@ -1,0 +1,141 @@
+/* BGS Corner on phones and tablets (up to 900px). This stylesheet is the whole
+   phone design: no rule of flow.css reaches a phone, so everything a phone
+   shows is styled from here. The files in phone/ are joined in name order.
+
+   The look: a night brown top (the brand's dark, deepened) with the gold
+   logo, then white shopping space with product photographs on a pale tile,
+   bold tight headings, one action colour (deep purple) for every button that
+   buys or moves forward, deep rose for the promo tiles, gold only in small
+   details. Floating glass bars (header and tab bar), mixed-size tiles for
+   categories and promos, rows that swipe with the next card peeking. */
+
+:root{
+  --strip:#735C38; --on-strip:#F1EADF;
+  --night:#170F05; --night-2:#241908; --night-3:#33250E;
+  --on-night:#F4ECDD; --on-night-2:#C9BCA6; --on-night-3:#9C8F79;
+  --ink:#1D1509; --body:#4B4336; --mut:#756B5C; --faint:#8C8272;
+  --line:#E6E2DA; --hair:#F0EDE7; --bg:#fff; --tile:#F3F2EF; --soft:#F8F7F4;
+  --gold:#B8914A; --gold-t:#D8B775; --gold-d:#8A5A14;
+  --cta:#5B21B6; --cta-d:#4C1D95; --cta-l:#F1EAFE; --cta-t:#6D3CC8;
+  --rose:#8B2E48; --rose-d:#74263C;
+  --banner:#86621F; --banner-t:#F6EBD5;
+  --red:#B3261E; --green:#2E6B3E; --blue:#2B5B7A;
+  --f-oud:#3E4A33; --f-amber:#94480F; --f-musk:#44555F; --f-floral:#9B3A5B;
+  --f-fresh:#4B6B1C; --f-sweet:#6D2F5C; --f-res:#34260B; --f-bak:#5A3A1A;
+  --r-xs:8px; --r-sm:12px; --r:16px; --r-lg:22px; --r-xl:28px; --r-pill:999px;
+  --gut:16px;
+  --tabbar-h:62px; --tabbar-gap:10px;
+  --tabbar-top:calc(var(--tabbar-h) + var(--tabbar-gap) + env(safe-area-inset-bottom,0px));
+  --shadow-1:0 1px 2px rgba(23,15,5,.06),0 2px 8px rgba(23,15,5,.05);
+  --shadow-2:0 10px 30px rgba(23,15,5,.14),0 2px 6px rgba(23,15,5,.06);
+  --glass:rgba(255,255,255,.74); --glass-night:rgba(23,15,5,.78);
+  --ease:cubic-bezier(.2,.7,.2,1);
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans Arabic",sans-serif;
+  --font-d:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans Arabic",sans-serif;
+}
+@media (min-width:600px){ :root{ --gut:24px } }
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-padding-top:72px}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:400 15px/1.5 var(--font);-webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;overflow-x:clip;padding-bottom:calc(var(--tabbar-top) + 8px)}
+body:has(> footer){padding-bottom:0}
+a{color:inherit;text-decoration:none;-webkit-tap-highlight-color:transparent}
+button{-webkit-tap-highlight-color:transparent}
+img,video,svg{display:block;max-width:100%}
+img{height:auto}
+p{margin:0}
+h1,h2,h3,h4,h5{margin:0;font-family:var(--font-d);color:inherit}
+[hidden]{display:none !important}
+:focus-visible{outline:2px solid var(--cta);outline-offset:2px;border-radius:6px}
+::selection{background:var(--cta-l);color:var(--ink)}
+
+.wrap{width:100%;max-width:760px;margin:0 auto;padding-inline:var(--gut)}
+section{padding-block:36px}
+.alt{background:transparent}
+.ser{font-family:inherit}
+.slot{display:none}
+.eyebrow{display:block;font-size:13px;font-weight:600;color:var(--mut);letter-spacing:0;text-transform:none}
+.eyebrow.gold,.eyebrow.gold-d{color:var(--gold-d)}
+.meta{font-size:13px;color:var(--mut)}
+.mini,.note{font-size:13px;color:var(--mut);line-height:1.45}
+.soon{color:var(--faint)}
+.nojs{background:var(--night);color:var(--on-night);text-align:center;padding:10px var(--gut);font-size:14px}
+.sr,.sq-live{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+.sq-live{position:fixed;left:0;top:0;margin:0}
+
+/* ---------- buttons ----------
+   Rounded rectangles, 50px tall. Solid purple moves a purchase forward; ink
+   is the neutral solid; ghost is an outline in the text colour; gold is the
+   light button on the night ground. */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:0 22px;
+  border:1.5px solid transparent;border-radius:var(--r-sm);background:var(--ink);color:#fff;
+  font:600 15px/1.2 var(--font);letter-spacing:-.005em;text-align:center;cursor:pointer;white-space:nowrap;
+  -webkit-appearance:none;appearance:none;transition:transform .15s var(--ease),background-color .2s,border-color .2s,color .2s}
+.btn:active{transform:scale(.98)}
+.btn.solid{background:var(--cta);color:#fff}
+.btn.solid:active{background:var(--cta-d)}
+.btn.gold{background:var(--on-night);color:var(--night)}
+.btn.ghost{background:transparent;color:inherit;border-color:currentColor}
+.btn.line,.btn.outline{background:#fff;color:var(--ink);border-color:var(--line)}
+.btn.sm{min-height:42px;padding:0 16px;font-size:14px;border-radius:10px}
+.btn.block,.btn.full{display:flex;width:100%}
+.btn[disabled],.btn[aria-disabled="true"],.btn.off{opacity:.45;cursor:not-allowed;transform:none}
+.linkbtn{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0;border:0;background:none;
+  font:600 14px/1.2 var(--font);color:var(--cta);cursor:pointer}
+
+/* ---------- form controls ---------- */
+input,select,textarea{font:inherit;color:inherit}
+input[type=text],input[type=email],input[type=tel],input[type=search],input[type=number],input[type=password],
+input:not([type]),select,textarea{width:100%;min-height:50px;padding:12px 14px;border:1.5px solid var(--line);
+  border-radius:var(--r-sm);background:#fff;font-size:16px;line-height:1.3;color:var(--ink);outline:none;
+  -webkit-appearance:none;appearance:none;transition:border-color .2s,box-shadow .2s}
+textarea{min-height:110px;resize:vertical}
+select{padding-inline-end:40px;background-image:linear-gradient(45deg,transparent 50%,var(--mut) 50%),linear-gradient(135deg,var(--mut) 50%,transparent 50%);
+  background-position:calc(100% - 20px) 50%,calc(100% - 15px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+[dir="rtl"] select{background-position:20px 50%,15px 50%}
+input:focus,select:focus,textarea:focus{border-color:var(--cta);box-shadow:0 0 0 3px var(--cta-l)}
+input::placeholder,textarea::placeholder{color:var(--faint)}
+input[type=checkbox],input[type=radio]{width:20px;height:20px;margin:0;accent-color:var(--cta);flex:none}
+label{cursor:pointer}
+
+/* ---------- chips ---------- */
+.pill,.chip{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 14px;border:1.5px solid var(--line);
+  border-radius:var(--r-pill);background:#fff;color:var(--ink);font:500 14px/1.2 var(--font);white-space:nowrap;cursor:pointer}
+.pill.on,.chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+
+/* ---------- badges ---------- */
+.badge{display:inline-flex;align-items:center;min-height:24px;padding:0 9px;border-radius:var(--r-pill);
+  background:var(--night);color:var(--gold-t);font:600 12px/1 var(--font);letter-spacing:0;text-transform:none}
+.badge.low{background:#fff;color:var(--red);box-shadow:inset 0 0 0 1px rgba(179,38,30,.3)}
+
+/* ---------- the BGS emblem on the call banners ----------
+   The gold mark, dimmed to half, whose outline draws itself from the bottom
+   up when the banner comes into view. It always has a place of its own in
+   the layout, never under words. */
+.emb-sprite{position:absolute;width:0;height:0;overflow:hidden}
+.emb{position:relative;display:block;width:64px;height:64px;flex:none;pointer-events:none}
+.emb svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.emb{opacity:.5}
+.emb-fill{fill:url(#bgs-gold)}
+.emb-line{fill:none;stroke:#E2C889;stroke-width:1.1px;stroke-linejoin:round}
+.js .emb-line{stroke-dasharray:1;stroke-dashoffset:1;clip-path:inset(100% 0 0 0);
+  transition:stroke-dashoffset 1.8s var(--ease),clip-path 1.8s var(--ease)}
+.js .emb-fill{clip-path:inset(100% 0 0 0);transition:clip-path 1.6s .5s var(--ease)}
+.js .up > .emb .emb-line,.js .up .emb .emb-line{stroke-dashoffset:0;clip-path:inset(0)}
+.js .up > .emb .emb-fill,.js .up .emb .emb-fill{clip-path:inset(0)}
+
+/* ---------- scroll-in ----------
+   Sections and cards ease up a little as they enter, where the browser can
+   tie it to the scroll itself; elsewhere they simply are there. */
+@supports (animation-timeline: view()){
+  @keyframes bgs-rise{from{opacity:.001;transform:translateY(18px)}to{opacity:1;transform:none}}
+  .page-index main > section .sec-h,.page-index > section .sec-h,.catstrip .cs > a,.fam > a,.promos > a,.usp-row > div{
+    animation:bgs-rise linear both;animation-timeline:view();animation-range:entry 0% entry 55%}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none !important;transition-duration:.01ms !important;scroll-behavior:auto !important}
+  .js .emb-line,.js .emb-fill{clip-path:none;stroke-dashoffset:0}
+}
