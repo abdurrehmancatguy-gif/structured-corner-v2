@@ -278,6 +278,13 @@ class PagesTests(_Pages, unittest.TestCase):
 
     # ---- what is refused ------------------------------------------------------------
 
+    def test_a_link_to_a_product_that_does_not_exist_is_refused(self):
+        st, res = self.put(lambda d: d["index"]["promos"][0].update(href="product.html?p=ghost"))
+        self.assertEqual(st, 422, res)
+        self.assertEqual([(e["path"], e["code"]) for e in res["error"]["details"]], [("/index/promos/0/href", "unknown_product")])
+        self.refused([("unknown_product", lambda d: d["index"]["discovery_band"].update(cta_href="product.html?p=ghost&tab=apply"))],
+                     "index.html")
+
     def test_markup_long_dashes_and_stray_tokens_are_refused(self):
         stored = (self.flow / "content" / "pages.json").read_bytes()
         home = self.page("index.html")

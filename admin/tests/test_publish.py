@@ -12,12 +12,10 @@ bare remote. Nothing is pushed anywhere else.
 import json
 import os
 import pathlib
-import re
 import shutil
 import subprocess
 import sys
 import tempfile
-import time
 import types
 import unittest
 
@@ -48,33 +46,17 @@ class Fixture(Box):
     """Box's helpers on a clone whose origin is a local bare repository."""
 
     def __init__(self, port):
-        self.port = int(port)
-        self.tmp = tempfile.mkdtemp(prefix="bgsadmin-publish-")
+        # Box's clone, exit nets, store and server; only the remote differs
+        self._clone(port, prefix="bgsadmin-publish-")
         self.remote = pathlib.Path(self.tmp) / "remote.git"
-        self.repo = pathlib.Path(self.tmp) / "repo"
         subprocess.run(["git", "init", "-q", "--bare", str(self.remote)], check=True)
-        subprocess.run(["git", "clone", "-q", str(REPO), str(self.repo)], check=True)
         git(self.repo, "checkout", "-q", "-B", "main")
         identity(self.repo)
         git(self.repo, "remote", "set-url", "origin", str(self.remote))
         git(self.repo, "push", "-q", "origin", "main")        # seeds the throwaway bare repository
         git(self.repo, "fetch", "-q", "--prune", "origin")
         self.base = git(self.repo, "rev-parse", "HEAD")
-        self.proc = subprocess.Popen([sys.executable, str(ADMIN / "server.py"), "--port", str(self.port),
-                                      "--repo", str(self.repo), "--no-push"],
-                                     stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        for _ in range(150):
-            try:
-                if self.raw("GET", "/")[0] == 200:
-                    break
-            except OSError:
-                time.sleep(0.1)
-        else:
-            self.proc.terminate()
-            raise RuntimeError("the admin server did not start: %s" % self.proc.stdout.read(4000).decode("utf-8", "replace"))
-        st, _, body = self.raw("GET", "/admin/", headers={"Sec-Fetch-Mode": "navigate", "Sec-Fetch-Dest": "document",
-                                                         "Sec-Fetch-Site": "none"})
-        self.token = re.search(rb'name="admin-token" content="([^"]+)"', body).group(1).decode()
+        self._start()
 
 
 class PublishServerTests(unittest.TestCase):

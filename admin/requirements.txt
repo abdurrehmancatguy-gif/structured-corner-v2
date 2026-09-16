@@ -1,0 +1,14 @@
+# The admin in PostgreSQL mode. JSON mode needs none of this: it runs on
+# /usr/bin/python3 (3.9.6) and its standard library, plus Pillow.
+#
+# PostgreSQL mode runs on its own virtualenv, which sees the system packages
+# (Pillow) as well. Making it and installing these downloads from PyPI:
+#
+#   /usr/bin/python3 -m venv --system-site-packages admin/.venv
+#   admin/.venv/bin/pip install -r admin/requirements.txt
+#
+# Exact versions, no hashes. psycopg-binary bundles its own libpq.
+# typing_extensions is what psycopg needs on Python 3.9.
+psycopg==3.2.13
+psycopg-binary==3.2.13
+typing_extensions==4.16.0

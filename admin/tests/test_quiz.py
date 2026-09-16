@@ -49,6 +49,13 @@ class RuleTests(unittest.TestCase):
                                        ("/profiles/0/facets/0", "repeated"), ("/profiles/1/facets", "too_few"),
                                        ("/profiles/2/product", "unknown_product")])
 
+    def test_a_facet_is_matched_as_a_whole_word(self):
+        # a line break after a word is not a word: $ alone would let it through
+        d = content()
+        d["answers"][0]["facets"] = ["citrus\n"]
+        d["profiles"][0]["facets"] = ["woody", "citrus\n"]
+        self.assertEqual(problems(d), [("/answers/0/facets/0", "format"), ("/profiles/0/facets/1", "format")])
+
     def test_the_step_line_and_score_keep_their_placeholders(self):
         d = content()
         d["page"]["step_label"], d["result"]["score"] = "Question of {total}", "{shared} of {all}"
@@ -150,6 +157,17 @@ class QuizApiTests(unittest.TestCase):
         self.assertEqual(st, 422, res)
         self.assertEqual([(e["path"], e["code"]) for e in res["error"]["details"]],
                          [("/profiles/0/product", "unknown_product")])
+        self.assertEqual(self.b.content("quiz"), d["data"])
+        self.assertEqual(self.page(), before)
+
+    def test_a_facet_with_a_line_break_is_refused_and_nothing_changes(self):
+        d = self.doc()
+        before = self.page()
+        data = copy.deepcopy(d["data"])
+        data["answers"][0]["facets"] = ["citrus\n"]
+        st, res = self.put(data, d["rev"])
+        self.assertEqual(st, 422, res)
+        self.assertEqual([(e["path"], e["code"]) for e in res["error"]["details"]], [("/answers/0/facets/0", "format")])
         self.assertEqual(self.b.content("quiz"), d["data"])
         self.assertEqual(self.page(), before)
 

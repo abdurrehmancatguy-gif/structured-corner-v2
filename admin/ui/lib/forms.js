@@ -179,8 +179,9 @@ export function field(f, target, ptr, ctx) {
   const labelEl = ["rows", "images", "lines", "product-refs"].includes(f.type) || control.classList.contains("media-field")
     ? h("span", { class: "f-label", id: id + "-label" }, f.label)
     : h("label", { class: "f-label", for: id }, f.label);
+  // An on/off switch always holds a value, so it never says Required.
   const wrap = h("div", { class: "field t-" + f.type + (disabled ? " is-disabled" : ""), dataset: { ptr } },
-    h("div", { class: "f-head" }, labelEl, f.required ? h("span", { class: "req" }, "Required") : null, ...badges(f), counter),
+    h("div", { class: "f-head" }, labelEl, f.required && f.type !== "bool" ? h("span", { class: "req" }, "Required") : null, ...badges(f), counter),
     control,
     help.length ? h("p", { class: "help", id: id + "-help" }, help.join(" ")) : null,
     err);

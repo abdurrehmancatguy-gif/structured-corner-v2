@@ -11,7 +11,7 @@ ALL = ["attars", "edp", "bakhoor", "gift-sets"]
 # A product photo is <id>-<n>.jpg. Never a banner, and never a name a sized
 # copy also has (-600, -card-360): make_derivatives and build.py would take
 # one for the other.
-FRAME = r"(?!banner-)(?!.*-card-360\.jpg$)[a-z0-9]+(?:-[a-z0-9]+)*-(?!600\.jpg$)\d+\.jpg"
+FRAME = r"(?!banner-)(?!.*-card-360\.jpg$)[a-z0-9]+(?:-[a-z0-9]+)*-(?!600\.jpg$)[0-9]+\.jpg"
 
 FIELDS = [
     {"path": "/name", "type": "text", "label": "Title", "required": True, "maxLength": 60},
@@ -19,7 +19,7 @@ FIELDS = [
      # the names the shop shows today (navigation.json); the stored keys stay as they are
      "enumLabels": ["Oud Attar", "EDP Sprays", "Bakhoor", "Gift Sets"],
      "help": "The category decides which fields the card and the product page use."},
-    {"path": "/published", "type": "bool", "label": "Active",
+    {"path": "/published", "type": "bool", "label": "Active", "required": True,
      "help": "Off is a draft: gone from the shop at the next save. It is still readable in the public GitHub repository."},
     {"path": "/price", "type": "money", "label": "Price (AED)", "required": True, "max": 100000,
      "help": "For attars this is the size the card shows first, and must match one of the sizes below."},
@@ -36,7 +36,7 @@ FIELDS = [
     {"path": "/gender", "type": "enum", "label": "Worn by", "visibleWhen": {"category": ["edp"]}, "enum": ["Him", "Her", "Unisex"]},
     {"path": "/stock", "type": "int", "label": "Stock", "nullable": True, "min": 0, "max": 100000,
      "help": "Leave empty to not track stock. At 5 or fewer the card shows how many are left."},
-    {"path": "/never_discount", "type": "bool", "label": "Never discounted", "guarded": True,
+    {"path": "/never_discount", "type": "bool", "label": "Never discounted", "guarded": True, "required": True,
      "help": "Shows the Reserve badge and keeps the product out of every volume discount."},
     {"path": "/story", "type": "lines", "label": "Story", "max": 6, "itemMaxLength": 140,
      "help": "Up to six short lines, shown on the product page."},
@@ -44,7 +44,7 @@ FIELDS = [
     {"path": "/heart", "type": "text", "label": "Heart notes", "visibleWhen": {"category": ["edp", "attars"]}, "maxLength": 120},
     {"path": "/base", "type": "text", "label": "Base notes", "visibleWhen": {"category": ["edp", "attars"]}, "maxLength": 120, "nullable": True},
     {"path": "/ingredients", "type": "textarea", "label": "Declared ingredients", "maxLength": 600},
-    {"path": "/barcode", "type": "text", "label": "Barcode", "pattern": r"\d{8,14}", "patternHelp": "8 to 14 digits."},
+    {"path": "/barcode", "type": "text", "label": "Barcode", "pattern": r"[0-9]{8,14}", "patternHelp": "8 to 14 digits."},
     {"path": "/images", "type": "images", "label": "Photos", "itemPattern": FRAME,
      "patternHelp": "Use a photo from the library, named like vibe-3.jpg.",
      "copies": ["", "-card", "-600", "-card-360", "-thumb"],

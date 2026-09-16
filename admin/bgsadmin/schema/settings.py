@@ -41,7 +41,7 @@ FIELDS = [
      "help": "Charged on a bag below the free delivery amount."},
     {"path": "/store/sameday_fee", "type": "int", "label": "Same-day fee (AED)", "required": True, "min": 0, "max": 500, "group": "Shipping and delivery"},
     {"path": "/store/sameday_cutoff", "type": "text", "label": "Same-day cutoff (Dubai time)", "required": True, "group": "Shipping and delivery",
-     "pattern": r"(1[0-2]|[1-9]):[0-5]\d (AM|PM)", "patternHelp": "Like 2:00 PM.",
+     "pattern": r"(1[0-2]|[1-9]):[0-5][0-9] (AM|PM)", "patternHelp": "Like 2:00 PM.",
      "help": "Between 6:00 AM and 10:00 PM. The top strip counts down to it."},
     {"path": "/store/giftbox_fee", "type": "int", "label": "Gift box fee (AED)", "required": True, "min": 0, "max": 500, "group": "Gift box"},
     {"path": "/store/giftbox_volume_discount_at", "type": "int", "label": "Box discount from this many scents", "required": True, "min": 1, "max": 6, "group": "Gift box",

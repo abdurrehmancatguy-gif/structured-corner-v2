@@ -10,6 +10,7 @@ outside https address. Warnings (claim words) are returned but never block a
 save.
 """
 import html
+import json
 import re
 
 from .config import PAGES
@@ -79,10 +80,17 @@ def href_problem(s, social=False):
     if s == "":
         return None
     if social:
-        return None if SOCIAL.match(s) else ("href", "Use a full https link on instagram.com, wa.me or tiktok.com.")
-    if not HREF.match(s) or any(p not in PARAMS for p in re.findall(r"[?&]([a-z]+)=", s)):
+        return None if SOCIAL.fullmatch(s) else ("href","Use a full https link on instagram.com, wa.me or tiktok.com.")
+    if not HREF.fullmatch(s) or any(p not in PARAMS for p in re.findall(r"[?&]([a-z]+)=", s)):
         return "href", "Link to a page of this shop, such as collection.html?cat=attars or product.html?p=vibe."
     return None
+
+
+def linked_products(s):
+    """The products a link of this shop names with p=, such as vibe in
+    product.html?p=vibe&tab=apply: each must be a product that exists, like
+    the id in a product-ref field (the database reads links the same way)."""
+    return re.findall(r"[?&]p=([^&#]+)", s)
 
 
 def get(data, path):
@@ -126,6 +134,10 @@ def check(fields, data, prefix, errors, ctx):
                 p = href_problem(v, social=f.get("social", False))
                 if p:
                     errors.append(err(ptr, *p))
+                elif not f.get("social"):
+                    for x in linked_products(v):
+                        if x not in ctx.get("products", {}):
+                            errors.append(err(ptr, "unknown_product", "There is no product with the id %s." % x))
             if t in ("image", "video") and f.get("upload") and v and ctx.get("flow_dir") is not None:
                 p = media_problem(v, t, None if v in ctx.get("known_media", ()) else ctx["flow_dir"])
                 if p:
@@ -233,7 +245,7 @@ def tags(f, v, ptr, errors):
         errors.append(err(ptr, "too_many", "Keep this to %d." % f["max"]))
     most = f.get("maxRepeat", 1)
     for i, x in enumerate(v):
-        if not TAG.match(x) or len(x) > f.get("itemMaxLength", 40):
+        if not TAG.fullmatch(x) or len(x) > f.get("itemMaxLength", 40):
             errors.append(err("%s/%d" % (ptr, i), "format",
                               "Use one lower-case word, or words joined by hyphens, like citrus or white-floral."))
         elif v.index(x) == i and v.count(x) > most:
@@ -286,12 +298,16 @@ def claim_warnings(texts, prefix=""):
 
 
 def product(pid, data, products, fields, ctx):
-    """Errors and warnings for one product, on top of the schema checks."""
+    """Errors and warnings for one product, on top of the schema checks. A
+    value of the wrong type (a number for the name, a story that is not a
+    list) is a type error the schema checks report on its field: nothing
+    below may fail on one, or the save would answer 500 instead of 422."""
     errors, warnings = [], []
     if not isinstance(data, dict):
         return [err("", "type", "A product is a set of fields.")], []
     cur = products.get(pid)
-    known = [n for n in (cur.get("images") or []) if isinstance(n, str)] if isinstance(cur, dict) else []
+    stored = cur.get("images") if isinstance(cur, dict) else None
+    known = [n for n in stored if isinstance(n, str)] if isinstance(stored, list) else []
     check(fields, data, "", errors, dict(ctx, products=products, known_images=known))
     cat = data.get("category")
     if cat == "attars":
@@ -299,7 +315,9 @@ def product(pid, data, products, fields, ctx):
         if not isinstance(sizes, list) or not sizes:
             errors.append(err("/sizes", "required", "An attar needs at least one size with its price."))
         else:
-            labels = [s.get("label") for s in sizes if isinstance(s, dict)]
+            # compared as JSON text, so a label that is a list or an object
+            # (a type error above) cannot fail the comparison
+            labels = [json.dumps(s.get("label"), sort_keys=True) for s in sizes if isinstance(s, dict)]
             if len(labels) != len(set(labels)):
                 errors.append(err("/sizes", "duplicate", "Two sizes have the same label."))
             if data.get("price") not in [s.get("price") for s in sizes if isinstance(s, dict)]:
@@ -314,17 +332,23 @@ def product(pid, data, products, fields, ctx):
     elif cat == "gift-sets":
         if not data.get("contents"):
             errors.append(err("/contents", "required", "Say what is in the set."))
-    rel = data.get("related") or []
-    if pid in rel:
+    rel = data.get("related")
+    if isinstance(rel, list) and pid in rel:
         errors.append(err("/related", "self", "A product cannot be related to itself."))
-    texts = [("/name", data.get("name", ""))] + [("/story/%d" % i, s) for i, s in enumerate(data.get("story") or []) if isinstance(s, str)]
+    # claim words are looked for in text only
+    texts = [("/name", data["name"])] if isinstance(data.get("name"), str) else []
+    story = data.get("story")
+    if isinstance(story, list):
+        texts += [("/story/%d" % i, s) for i, s in enumerate(story) if isinstance(s, str)]
     warnings += claim_warnings(texts)
     return errors, warnings
 
 
 def cutoff_minutes(text):
-    """'2:00 PM' as minutes after midnight, or None when it does not read as a time."""
-    m = re.fullmatch(r"(1[0-2]|[1-9]):([0-5]\d) (AM|PM)", text) if isinstance(text, str) else None
+    """'2:00 PM' as minutes after midnight, or None when it does not read as a
+    time. Digits are 0 to 9 only: Python's \\d and int() also take other
+    scripts' digits, which the shop's pages would not read as a time."""
+    m = re.fullmatch(r"(1[0-2]|[1-9]):([0-5][0-9]) (AM|PM)", text) if isinstance(text, str) else None
     if not m:
         return None
     return (int(m.group(1)) % 12 + (12 if m.group(3) == "PM" else 0)) * 60 + int(m.group(2))
@@ -379,7 +403,8 @@ def document(name, data, fields, ctx):
 
 
 def product_id_problem(pid, products):
-    if not isinstance(pid, str) or not ID.match(pid) or len(pid) > 64:
+    # fullmatch: with match, the $ in ID would let a line break after the id through
+    if not isinstance(pid, str) or not ID.fullmatch(pid) or len(pid) > 64:
         return "Use lower-case letters, digits and single hyphens, like royal-amber."
     if pid.replace("-", "") in RESERVED_IDS:
         return "That id is reserved. Pick another."

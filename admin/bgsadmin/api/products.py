@@ -11,8 +11,8 @@ from .. import schema as schema_mod
 from .. import validate
 from ..errors import ApiError
 from ..routes import ID, Route
-from ..service import enforce, ordered_like, precondition, saved
-from ..store.jsonstore import rev_of
+from ..service import confirm, enforce, ordered_like, precondition, saved
+from ..store.base import rev_of
 from .meta import schemas
 
 # The key order the file already uses, so a new product reads like the others.
@@ -115,6 +115,7 @@ def put_product(req):
         if errors:
             raise ApiError(422, "validation", "Some fields need attention.", errors)
         new = ordered_like(cur, data)
+        confirm(txn, pid, _fields(), cur, new, confirmed)
         products[pid] = new
         txn.put("products", products)
     return saved(req.app, txn, id=pid, rev=rev_of(new), data=new, warnings=warnings)

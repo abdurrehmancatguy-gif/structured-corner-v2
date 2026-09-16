@@ -16,8 +16,8 @@ import time
 from .. import csvio, validate
 from ..errors import ApiError
 from ..routes import Raw, Route
-from ..service import ordered_like, refusals, saved
-from ..store.jsonstore import rev_of
+from ..service import confirm, ordered_like, refusals, saved
+from ..store.base import rev_of
 from .products import _ctx, _fields
 
 PLAN_TTL = 30 * 60
@@ -75,7 +75,9 @@ def bulk(req):
         if needs:
             raise _guarded(needs)
         for c in changes:
-            products[c["id"]] = ordered_like(products[c["id"]], c["data"])
+            new = ordered_like(products[c["id"]], c["data"])
+            confirm(txn, c["id"], fields, products[c["id"]], new, confirmed.get(c["id"], []))
+            products[c["id"]] = new
         txn.put("products", products)
     return saved(req.app, txn, revs={pid: rev_of(products[pid]) for pid in ids}, warnings=warnings)
 
@@ -146,8 +148,11 @@ def _apply(req, body):
         if current != plan["base_rev"]:
             raise ApiError(412, "stale_rev", "Products changed since the file was checked. Check it again.",
                            {"current_rev": current})
+        fields = _fields()
         for p, (action, new) in plan["planned"].items():
-            products[p] = ordered_like(products[p], new) if action == "update" else new
+            merged = ordered_like(products[p], new) if action == "update" else new
+            confirm(txn, p, fields, products.get(p) or {}, merged, confirmed.get(p, []))
+            products[p] = merged
         txn.put("products", products)
     with _plans_lock:
         _plans.pop(plan["id"], None)

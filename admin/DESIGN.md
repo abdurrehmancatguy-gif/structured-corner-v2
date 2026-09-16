@@ -32,12 +32,17 @@ and the conventions every contributor follows.
   (ImageCms included). ffmpeg and ffprobe from `/opt/homebrew/bin`, probed at
   startup; a missing tool disables the matching uploads with a message.
   No third-party Python packages, no npm, no build step for the UI.
+  PostgreSQL mode runs on `admin/.venv/bin/python`, the same Python 3.9 with
+  psycopg (`admin/requirements.txt`); psycopg is loaded only in that mode.
+- Flags: `--store json|postgres` and `--dsn` choose the store (see Storage).
 
 ## Layout
 
 ```
 admin/
   server.py            entry point: flags, startup checks, recovery, token, serve
+  dbtool.py            the owner's tool for the PostgreSQL database: migrate, verify
+  requirements.txt     psycopg for the PostgreSQL mode's virtualenv, pinned
   DESIGN.md            this file
   README.md            how to run it, every screen, every test file
   docs/                PLAN.md, HARDCODED.md, CONTENT-MODEL.md
@@ -59,8 +64,15 @@ admin/
                        the locked and read-only checks, the save response
     validate.py        types, bounds, text and href rules, cross-field and referential checks
     lint.py            warnings that never block a save
-    store/base.py      the ContentStore interface (docs/PLAN.md, storage_layer)
-    store/jsonstore.py the JSON implementation: revs, transactions, snapshots, atomic writes, recovery
+    store/base.py      the store interface as the admin uses it, rev_of, and what every store's
+                       transaction shares: staging, the media calls, confirm, the build step
+    store/files.py     the file side of a save in every store: atomic writes, the journal and
+                       its states, putting files back, before-images, audit.jsonl
+    store/jsonstore.py the JSON store: flow/content/*.json are the content; reads, the lock, recovery
+    store/pgstore.py   the PostgreSQL store: the database holds the content and every save exports it
+    db/                the PostgreSQL side, loaded in PostgreSQL mode only (psycopg): migrations/NNN_name.sql
+                       and their runner (migrate.py), connections and their checks (connect.py), the
+                       content tables (content.py)
     tools.py           allow-listed subprocess runner with the expected-output check
     media.py, video.py upload checks and pipelines per kind
     medialib.py        the media library: published files, where each is used, copies, trash
@@ -74,7 +86,8 @@ admin/
     components/        crop.js, media-grid.js, upload-field.js
     screens/           one module per screen
     css/               one stylesheet per screen that needs its own
-  tests/               stdlib unittest, one port per file (README.md lists them), box.py, cdp_pipe.py
+  tests/               stdlib unittest, one port per file (README.md lists them); helpers box.py,
+                       cdp_pipe.py, cleanup.py (exit nets) and pgcluster.py (throwaway PostgreSQL clusters)
   devtools/            compare_build.py, dom_diff.py
 ```
 
@@ -155,6 +168,38 @@ admin/
   `dictionary` or `tags`, so a document that uses them needs its own screen,
   as Translations and the Scent quiz have.
 
+## Storage
+
+- Two stores behind one interface (`store/base.py`): the JSON files, and
+  PostgreSQL. `build.py` reads `flow/content/*.json` either way: the
+  PostgreSQL store writes those files from the database on every save,
+  before the build, so git, History, the Publish screen and the deploys see
+  the same files as before.
+- Which store: `--store` and `--dsn`, then the checkout's own
+  `admin/local/store.json` (ignored by git; `dbtool migrate --apply` and
+  `dbtool use` write it), then the JSON files. No environment variable is
+  read: test servers start from clones that inherit the environment, and must
+  never reach the owner's database. The database is also bound to one
+  checkout path.
+- The database keeps each product and document as the exact JSON its file
+  holds (a `json` column keeps the key order), with a `jsonb` copy the checks
+  read. Revs are the same content hashes in both stores.
+- A save writes the database first, in one transaction with every check made
+  at once, then the files and the build, then COMMIT. A failed build puts
+  every file back and rolls the transaction back. A crash is settled at the
+  next start: before COMMIT the files are put back; during COMMIT the
+  database says whether it kept the save.
+- One admin per checkout (the lock file) and per database (a session
+  advisory lock). The admin connects as `bgs_corner_app`, which may change
+  content, the file bases and the audit trail and nothing else; migrations
+  run as the owner, `bgs_corner`.
+- Files changed outside the admin (by hand, by git) are not taken into the
+  database yet: the home screen lists them, and a save that would write one
+  answers 409 until the file is put back. A file the database holds newer is
+  written by the next save or by Rebuild now.
+- A database that is not answering stops the start (exit status 3). Nothing
+  ever falls back to the files.
+
 ## Locked, always, enforced on the server
 
 - `settings.payments`, VAT (`settings.store.vat_rate_percent`,
@@ -234,6 +279,11 @@ AED 89 price, meta line, See it link and a stale note sentence.
 - Mutating tests run against a temporary clone (`--repo`), never against the
   real `flow/content`. Use ports 4700 to 4799 for test servers; 4310 is the
   owner's preview.
+- Tests never use the shared PostgreSQL server or its `bgs_corner` database:
+  they start throwaway clusters of their own (`tests/pgcluster.py`).
+- Never edit a migration once it is applied: every change to the database is
+  a new numbered file in `admin/bgsadmin/db/migrations/`. The runner refuses
+  a database whose applied files differ from the checkout's.
 - No em dash characters anywhere, code comments included. No attribution or
   "generated with" text. No invented numbers or claims in copy or UI.
 - Images come from content data, never hardcoded in templates or scripts.

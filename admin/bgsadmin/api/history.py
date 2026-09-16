@@ -28,8 +28,8 @@ from .. import diff, gitops, validate
 from .. import schema as schema_mod
 from ..errors import ApiError
 from ..routes import Route
-from ..service import changed, enforce, field_for, flatten, ordered_like, precondition, saved
-from ..store.jsonstore import rev_of
+from ..service import changed, confirm, enforce, field_for, flatten, ordered_like, precondition, saved
+from ..store.base import rev_of
 from ..validate import MISSING, get
 from .meta import schemas
 from .products import DEFAULTS
@@ -403,6 +403,7 @@ def restore(req):
                 e["label"] = diff.pointer_label(res.fields, e["path"])
             raise ApiError(422, "validation", "This version does not pass today's checks, so it was not restored.", errors)
         if res.product:
+            confirm(txn, res.key, res.fields, cur, new, [c for c in confirmed if isinstance(c, str)])
             products[res.key] = new
             txn.put("products", products)
         else:

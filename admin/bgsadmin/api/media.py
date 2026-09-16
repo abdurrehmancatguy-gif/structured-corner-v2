@@ -16,7 +16,7 @@ from .. import validate
 from ..errors import ApiError
 from ..routes import Route
 from ..service import saved
-from ..store.jsonstore import rev_of
+from ..store.base import rev_of
 from .meta import schemas
 
 MAX_REELS = 12

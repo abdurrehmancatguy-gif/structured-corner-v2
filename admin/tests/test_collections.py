@@ -285,6 +285,23 @@ class CollectionsTests(unittest.TestCase):
             self.assertEqual((st, res["error"]["code"]), (422, "validation"), (path, res))
             self.assertIn((path, code), [(e["path"], e["code"]) for e in res["error"]["details"]])
 
+    def test_a_link_to_a_product_that_does_not_exist_is_refused(self):
+        # a link that names a product with p= must name one that exists, as a
+        # product-ref field must: here a footer link and a banner button
+        for doc, change, path in (
+                ("navigation", lambda d: d["footer"][1]["links"][0].update(href="product.html?p=ghost&tab=delivery"),
+                 "/footer/1/links/0/href"),
+                ("home", lambda d: d["hero_slides"][1]["primary"].update(href="product.html?p=ghost"),
+                 "/hero_slides/1/primary/href")):
+            st, d = self.b.api("GET", "documents/" + doc)
+            self.assertEqual(st, 200, d)
+            data = copy.deepcopy(d["data"])
+            change(data)
+            st, res = self.b.api("PUT", "documents/" + doc, {"data": data}, rev=d["rev"])
+            self.assertEqual((st, res["error"]["code"]), (422, "validation"), (doc, res))
+            self.assertEqual([(e["path"], e["code"]) for e in res["error"]["details"]], [(path, "unknown_product")])
+            self.assertEqual(self.b.content(doc), d["data"])
+
     def test_unknown_collection_is_not_found(self):
         self.assertEqual(self.b.api("GET", "collections/reserve")[0], 404)
         self.assertEqual(self.b.api("PUT", "collections/reserve", {"data": {}}, rev="x")[0], 404)
