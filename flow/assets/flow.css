@@ -2940,3 +2940,45 @@ code{border:1px solid var(--line)}
   .hero .box h1,.hero .box h2,.hero .box p{text-shadow:0 1px 14px rgba(20,14,4,.55)}
 }
 .heroimg .none.corner{display:none !important}
+/* ==================================================================================
+   Phones and tablets (up to 900px): the mobile redesign. Desktop is untouched.
+   ----------------------------------------------------------------------------------
+   What was wrong on a phone: product cards about 430px tall (two stacked size
+   pills and a heavy dark button in every card), a fifth card left alone on its
+   row in three shelves, Never discounted as one full-width column, the same
+   two-column grid for every shelf, and a placeholder in the footer.
+   What it is now:
+   - cards: the photograph, the type line, the name, the price and one outline
+     Add to bag; sizes are chosen on the product page, notes are read there too;
+   - shelves: Oud Attar and EDP sprays are swipeable rows that show two cards and
+     the edge of the next, Bakhoor shows four in two columns, Never discounted
+     and Gift sets are two columns;
+   - the duplicate "All attars" link under Never discounted is gone (Oud Attar
+     has it), and so is the address placeholder in the footer. */
+@media (max-width:900px){
+  /* the card */
+  .p .sizes,.p .notes{display:none !important}
+  .p .b{padding:10px 2px 0 !important;gap:4px !important}
+  .p .meta{font-size:12.5px !important;color:var(--mut) !important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .p .nm{font-size:15.5px !important;line-height:1.3 !important;font-weight:600;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .p .pr{margin-top:2px}
+  .p .pr b{font-size:15.5px !important}
+  .p .norm{font-size:12.5px !important}
+  .p .btn.sm,.p .btn.sm.solid{margin-top:8px !important;min-height:42px !important;width:100%;
+    background:#fff !important;color:var(--ink) !important;border:1.5px solid var(--ink) !important;font-size:14.5px !important}
+  .p .btn.sm:active{background:var(--ink) !important;color:#fff !important}
+  /* swipeable rows: two cards and the edge of the next, snapping to a card */
+  .shelf-attars .grid,.shelf-edp .grid{display:grid !important;grid-template-columns:none !important;grid-auto-flow:column;
+    grid-auto-columns:calc((100vw - 32px - 24px) / 2.15);gap:12px !important;overflow-x:auto;overscroll-behavior-x:contain;
+    scroll-snap-type:x mandatory;scroll-padding-inline:16px;scrollbar-width:none;
+    width:100vw;margin-left:calc(50% - 50vw);padding:0 16px 6px}
+  .shelf-attars .grid::-webkit-scrollbar,.shelf-edp .grid::-webkit-scrollbar{display:none}
+  .shelf-attars .grid > .p,.shelf-edp .grid > .p{scroll-snap-align:start;min-width:0}
+  /* four bakhoor, two columns; Never discounted and Gift sets two columns */
+  .shelf-bakhoor .grid > .p:nth-child(n+5){display:none}
+  .shelf-reserve .grid.feat,.shelf-sets .grid{grid-template-columns:1fr 1fr !important;gap:14px 12px !important}
+  .shelf-reserve .sec-h > a{display:none}
+  /* the footer's address placeholder is for the owner, not for shoppers */
+  footer p:has(> .slot:only-child),footer .slot{display:none !important}
+}

@@ -979,7 +979,7 @@ home = """
   </div>
 </div></section>
 
-<section class="alt"><div class="wrap">
+<section class="alt shelf-attars"><div class="wrap">
   %(attars_h)s
   <div class="grid g5">%(attars)s</div>
 </div></section>
@@ -991,12 +991,12 @@ home = """
   <a class="btn gold" href="%(db_href)s">%(db_cta)s</a>
 </div></div></section>
 
-<section><div class="wrap">
+<section class="shelf-reserve"><div class="wrap">
   %(oud_h)s
   <div class="grid feat">%(oud)s</div>
 </div></section>
 
-<section class="alt"><div class="wrap">
+<section class="alt shelf-sets"><div class="wrap">
   %(sets_h)s
   <div class="grid g5">%(sets)s</div>
 </div></section>
@@ -1014,12 +1014,12 @@ home = """
   </div>
 </div></section>
 
-<section class="alt"><div class="wrap">
+<section class="alt shelf-bakhoor"><div class="wrap">
   %(bakhoor_h)s
   <div class="grid g5">%(bakhoor)s</div>
 </div></section>
 
-<section><div class="wrap">
+<section class="shelf-edp"><div class="wrap">
   %(edp_h)s
   <div class="grid g5">%(edp)s</div>
 </div></section>""" % dict(discovery_band(), promos=promos(), reels=reels(), catstrip=catstrip(), usp=usp_strip(),
