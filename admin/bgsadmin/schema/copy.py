@@ -46,6 +46,9 @@ FIELDS = [
     {"path": "/strip/countdown_line", "type": "text", "label": "Top strip line", "required": True, "maxLength": 80, "group": "Top strip",
      "pattern": tokens(*RULES), "patternHelp": RULE_PATTERN_HELP,
      "help": "At the top of every page, before the time left to the same-day cutoff. " + RULE_HELP},
+    {"path": "/strip/second_line", "type": "text", "label": "Top strip second line", "maxLength": 80, "group": "Top strip",
+     "pattern": tokens(*RULES), "patternHelp": RULE_PATTERN_HELP,
+     "help": "Takes turns with the top strip line every few seconds, in the same place. Leave it empty to show the first line only. " + RULE_HELP},
     {"path": "/strip/right_links", "type": "rows", "label": "Top strip links", "max": 4, "itemLabel": "label", "canAdd": True,
      "group": "Top strip", "help": "On the right of the strip. The switch to Arabic after them is code.", "fields": [
          {"path": "/label", "type": "text", "label": "Text", "required": True, "maxLength": 40,

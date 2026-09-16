@@ -17,14 +17,16 @@
 <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png?v=71543173">
 <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png?v=562024a5">
 <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=34f91733">
-<link rel="stylesheet" href="assets/flow.min.css?v=b562cebb"></head><body class="page-cart">
+<link rel="preload" href="assets/fonts/cormorant-garamond-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/flow.min.css?v=01d623d8" media="(min-width:901px)">
+<link rel="stylesheet" href="assets/phone.min.css?v=d81def5b" media="(max-width:900px)"></head><body class="page-cart">
 <noscript><div class="nojs">This shop needs JavaScript for products, the bag and checkout. Please turn it on in your browser.</div></noscript>
 <div class="strip"><div class="wrap">
-  <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Order by 2:00 PM for delivery today in Dubai<span data-cutoff hidden> &middot; <b></b></span></span>
-  <span class="r"><span>Free UAE delivery over AED 150</span><span>Cash on delivery</span><a href="track-order.html">Track order</a><a href="#" data-langtoggle>العربية</a></span>
+  <span class="strip-msgs" data-stripmsgs><span class="strip-msg on"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Order by 2:00 PM for delivery today in Dubai<span data-cutoff hidden> &middot; <b></b></span></span><span class="strip-msg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7h11v9H3z"/><path d="M14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg> Free UAE delivery over AED 150</span></span>
+  <span class="r"><span>Cash on delivery</span><a href="track-order.html">Track order</a><a href="#" data-langtoggle>العربية</a></span>
 </div></div>
 <div class="mast"><div class="wrap">
-  <a class="logo" href="index.html"><img class="brandmark" src="assets/img/logo-gold-486.png?v=88b40131" alt="BGS Corner" width="486" height="78"></a>
+  <a class="logo logo-type" href="index.html" aria-label="BGS Corner"><img class="logo-emb" src="assets/img/logo-emblem.png?v=f43805f3" alt="" width="256" height="256"><span class="logo-wm" aria-hidden="true">BGS CORNER</span></a>
   <form class="search" action="collection.html" method="get" role="search">
     <input name="q" aria-label="Search products" placeholder="Search ouds, oud, bakhoor…"><button type="submit" class="go" aria-label="Search"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/></svg></button></form>
   <div class="acts">
@@ -67,7 +69,7 @@
 <div class="bagbar" data-bagbar aria-hidden="true"><div class="bb-t"><span>Total</span><b data-bagbartotal>AED 0</b></div><a class="btn solid" href="checkout.html">Checkout</a></div>
 
 <footer><div class="wrap"><div class="cols">
-  <div><img class="foot-logo" src="assets/img/logo-gold-light-486.png?v=88b40131" alt="BGS Corner" width="486" height="78" loading="lazy" decoding="async">
+  <div><div class="foot-brand"><img class="foot-emb" src="assets/img/logo-emblem.png?v=f43805f3" alt="" width="256" height="256" loading="lazy" decoding="async"><span class="foot-wm">BGS CORNER</span></div>
     <p>BGS Corner General Trading LLC &middot; Dubai, UAE</p>
     <p><span class="slot">address, hours, phone</span></p><div class="nl"><span class="field">Your email</span><span class="btn">Join</span></div></div>
   <div><h5>Shop</h5><a href="collection.html?cat=attars">Oud Attar</a><a href="collection.html?cat=bakhoor">Bakhoor</a><a href="collection.html?cat=edp">EDP sprays</a><a href="collection.html?cat=gift-sets">Gift sets</a></div>
@@ -78,4 +80,4 @@
 <span>Cards &middot; Apple Pay &middot; Tabby &middot; Tamara &middot; Cash on delivery</span></div></div></footer>
 <div class="tabbar"><a href="index.html" aria-label="Home" title="Home"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 11.5 12 5l8 6.5"/><path d="M6 10.5V19h12v-8.5"/><path d="M10 19v-5h4v5"/></svg></a><a href="collection.html" aria-label="Shop" title="Shop"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="4.5" y="4.5" width="6" height="6" rx="1"/><rect x="13.5" y="4.5" width="6" height="6" rx="1"/><rect x="4.5" y="13.5" width="6" height="6" rx="1"/><rect x="13.5" y="13.5" width="6" height="6" rx="1"/></svg></a><a href="gift-box.html" aria-label="Gifts" title="Gifts"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="3.5" y="9" width="17" height="11" rx="1"/><path d="M3.5 13h17M12 9v11"/><path d="M12 9S9.5 4 7.5 5.5 10 9 12 9zm0 0s2.5-5 4.5-3.5S14 9 12 9z"/></svg></a><a href="cart.html" aria-label="Bag" title="Bag" class="on" aria-current="page"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 8h12l-1.2 12H7.2z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></a><a href="account.html" aria-label="Account" title="Account"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></a></div>
 <script src="assets/catalogue.js?v=c8ae0a6e"></script>
-<script src="assets/shop.js?v=177ec92e"></script></body></html>
+<script src="assets/shop.js?v=8b5838d4"></script></body></html>

@@ -1,0 +1,314 @@
+/* ---------- the product page: product.html for every ?p= product (an attar
+   with sizes, a never discounted oud, an EDP spray, a gift set), the
+   delivery tab address (?tab=delivery) and the not-found state ----------
+
+   The photograph runs edge to edge under the categories, rounded off at its
+   foot, with a glass counter and arrows in its lower corners and a row of
+   thumbnails under it. Then the words on white: the path, a bold name, the
+   price, a segmented size control, quantity and the purple Add. Notes, the
+   specs and the trust facts sit in soft filled cards; the tabs below are a
+   swiping row of pills over filled panels; the related products swipe too.
+   The buy bar rises onto the tab bar once the Add has left the screen.
+   From 700px wide, and on a phone turned sideways, the gallery and the
+   words stand side by side. */
+
+/* ---------- the product block ----------
+   On a phone held upright the decision (name, price, size, quantity, Add)
+   is on the first screen under the picture, so the buy bar stays down
+   until the page is scrolled. */
+.page-product > section:first-of-type{padding-block:0 28px}
+.page-product > section:first-of-type > .wrap{display:flex;flex-direction:column}
+.page-product .pdp{display:contents}
+.page-product .gal{order:1}
+.page-product > section:first-of-type > .wrap > .eyebrow{order:2}
+.page-product .buy{order:3;position:relative;min-width:0}
+.page-product .notfound{order:3}
+
+/* the path to this product, one quiet line over the name */
+.page-product > section:first-of-type > .wrap > .eyebrow{margin:14px 0 0;padding-inline-end:56px;font-size:13px;font-weight:500;line-height:1.35;
+  color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ---------- gallery ----------
+   The slides are stacked and cross-fade (shop.js moves .on, and swipes on
+   touch). The frame runs to both edges of the screen, rounded at its foot;
+   its height gives way on a shorter screen so the Add stays in sight. */
+.page-product .gal{position:relative;display:flex;flex-direction:column;min-width:0;
+  margin-left:calc(-1 * max(var(--gut),env(safe-area-inset-left,0px)));
+  margin-right:calc(-1 * max(var(--gut),env(safe-area-inset-right,0px)))}
+.page-product .galmain{position:relative;width:100%;height:min(100vw,max(280px,calc(100svh - 524px)));overflow:hidden;isolation:isolate;
+  background:var(--tile);border-radius:0 0 var(--r-xl) var(--r-xl)}
+.page-product .galslide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  opacity:0;visibility:hidden;transition:opacity .4s var(--ease),visibility 0s linear .4s}
+.page-product .galslide.on{opacity:1;visibility:visible;transition-delay:0s}
+.page-product .galslide img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;
+  transform:scale(1.03);transition:transform .7s var(--ease)}
+.page-product .galslide.on img{transform:none}
+.page-product .galslide .none{font-size:13px;color:var(--faint)}
+
+/* the arrows: two glass circles together in the lower end corner (shown
+   beside the words; upright on a phone the thumbnails do their work) */
+.page-product .galnav{position:absolute;z-index:2;bottom:14px;display:none;align-items:center;justify-content:center;
+  width:42px;height:42px;padding:0;border:0;border-radius:50%;color:var(--ink);cursor:pointer;
+  background:rgba(255,255,255,.8);-webkit-backdrop-filter:saturate(180%) blur(14px);backdrop-filter:saturate(180%) blur(14px);
+  box-shadow:0 2px 10px rgba(23,15,5,.12),inset 0 0 0 1px rgba(255,255,255,.7);transition:transform .15s var(--ease),background-color .2s}
+.page-product .galnav::after{content:"";position:absolute;inset:-3px}
+.page-product .galnav svg{width:18px;height:18px}
+.page-product .galnav:active{transform:scale(.92);background:#fff}
+.page-product .galnav.next{inset-inline-end:14px}
+.page-product .galnav.prev{inset-inline-end:64px}
+[dir="rtl"] .page-product .galnav svg{transform:scaleX(-1)}
+
+/* where you are: a glass pill in the lower start corner */
+.page-product .galcount{position:absolute;z-index:2;bottom:20px;left:14px;display:none;align-items:center;
+  min-height:30px;padding:0 12px;border-radius:var(--r-pill);direction:ltr;unicode-bidi:isolate;
+  background:rgba(255,255,255,.8);-webkit-backdrop-filter:saturate(180%) blur(14px);backdrop-filter:saturate(180%) blur(14px);
+  box-shadow:0 2px 10px rgba(23,15,5,.1);font:500 13px/1 var(--font);color:var(--mut);font-variant-numeric:tabular-nums}
+.page-product .galcount b{font-weight:700;color:var(--ink)}
+/* the count reads left to right in Arabic too, so its place is set by the page's side */
+[dir="rtl"] .page-product .galcount{left:auto;right:14px}
+
+/* thumbnails: small rounded tiles on a glass tray standing at the start
+   edge of the picture, clear of the product in the middle, the one on show
+   ringed in ink; the tray scrolls if it is ever taller than the frame */
+.page-product .galthumbs{position:absolute;z-index:2;top:50%;inset-inline-start:12px;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;
+  max-height:calc(100% - 24px);padding:5px;border-radius:17px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;
+  background:rgba(255,255,255,.72);-webkit-backdrop-filter:saturate(180%) blur(16px);backdrop-filter:saturate(180%) blur(16px);
+  box-shadow:0 6px 20px rgba(23,15,5,.14),inset 0 0 0 1px rgba(255,255,255,.6)}
+.page-product .galthumbs::-webkit-scrollbar{display:none}
+.page-product .galthumb{position:relative;flex:0 0 42px;width:42px;height:42px;padding:0;border:0;border-radius:12px;overflow:hidden;
+  background:var(--tile);color:var(--mut);font:500 12px/1 var(--font);cursor:pointer;isolation:isolate;
+  transition:transform .15s var(--ease)}
+.page-product .galthumb img{width:100%;height:100%;object-fit:cover;mix-blend-mode:multiply;opacity:.7;transition:opacity .2s}
+.page-product .galthumb::after{content:"";position:absolute;inset:0;z-index:1;border-radius:inherit;pointer-events:none;
+  box-shadow:inset 0 0 0 1px rgba(23,15,5,.05);transition:box-shadow .2s var(--ease)}
+.page-product .galthumb.on img{opacity:1}
+.page-product .galthumb.on::after{box-shadow:inset 0 0 0 2px var(--ink),inset 0 0 0 3.5px #fff}
+.page-product .galthumb:active{transform:scale(.94)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .page-product .galnav,.page-product .galcount,.page-product .galthumbs{background:rgba(255,255,255,.95)} }
+
+/* ---------- name, price, share ---------- */
+.page-product .buy h1{margin:4px 0 0;padding-inline-end:56px;font:800 30px/1.06 var(--font-d);letter-spacing:-.03em;color:var(--ink);
+  text-wrap:balance;overflow-wrap:anywhere}
+.page-product .buy .pricerow{display:flex;align-items:baseline;flex-wrap:wrap;gap:2px 10px;margin-top:8px}
+.page-product .buy .pricerow .amt{font:700 24px/1.15 var(--font-d);letter-spacing:-.02em;color:var(--ink);white-space:nowrap;font-variant-numeric:tabular-nums}
+.page-product .buy .pricerow .permeta{font-size:14px;line-height:1.3;color:var(--mut)}
+
+/* share: a round soft button at the end of the name; once pressed, what
+   happened shows in a small dark bubble under it */
+.page-product .sharebtn{position:absolute;top:-8px;inset-inline-end:0;display:flex;align-items:center;justify-content:center;
+  width:44px;height:44px;padding:0;border:0;border-radius:50%;background:var(--soft);
+  box-shadow:inset 0 0 0 1px var(--line);color:var(--ink);cursor:pointer;
+  transition:transform .15s var(--ease),background-color .2s,color .2s}
+.page-product .sharebtn svg{width:18px;height:18px;flex:none}
+.page-product .sharebtn [data-sharelabel]{display:none}
+.page-product .sharebtn:active{transform:scale(.94);background:var(--hair)}
+.page-product .sharebtn.done{background:#EAF3EC;box-shadow:none;color:var(--green)}
+.page-product .sharebtn.done [data-sharelabel]{position:absolute;z-index:3;top:calc(100% + 8px);inset-inline-end:0;display:block;
+  padding:8px 12px;border-radius:10px;background:var(--ink);color:#fff;font:600 13px/1.2 var(--font);white-space:nowrap;
+  box-shadow:var(--shadow-2);pointer-events:none}
+
+/* ---------- size: a segmented control ---------- */
+.page-product .buy .sizeblock{margin-top:14px}
+.page-product .buy .sizeblock{position:relative}
+.page-product .buy .sizeblock > .eyebrow{position:absolute;top:0;left:0;width:1px;height:1px;margin:0;overflow:hidden;white-space:nowrap;opacity:0;pointer-events:none}
+.page-product .buy .sizes{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:4px !important;padding:4px;
+  border-radius:14px;background:var(--tile)}
+.page-product .buy .sizes button{position:relative;min-width:0;min-height:44px;padding:6px 8px;border:0;border-radius:10px;background:transparent;
+  color:var(--body);font:600 15px/1.2 var(--font);letter-spacing:-.005em;text-align:center;text-wrap:balance;cursor:pointer;
+  transition:background-color .2s var(--ease),color .2s,box-shadow .2s,transform .15s var(--ease)}
+.page-product .buy .sizes button:active{transform:scale(.98)}
+.page-product .buy .sizes button.on{background:#fff;color:var(--ink);
+  box-shadow:0 1px 2px rgba(23,15,5,.08),0 3px 10px rgba(23,15,5,.07)}
+
+/* ---------- quantity and Add ---------- */
+.page-product .buy .atcrow{display:flex;align-items:stretch;gap:10px;margin-top:12px}
+.page-product .stepper{flex:none;display:inline-flex;align-items:center;min-height:52px;border-radius:var(--r-sm);background:var(--tile)}
+.page-product .stepper button{display:flex;align-items:center;justify-content:center;width:44px;height:52px;padding:0;border:0;
+  border-radius:var(--r-sm);background:transparent;color:var(--ink);font:400 22px/1 var(--font);cursor:pointer;transition:background-color .2s,transform .15s var(--ease)}
+.page-product .stepper button:active{background:rgba(23,15,5,.06);transform:scale(.94)}
+.page-product .stepper button:disabled{color:var(--faint);cursor:default;transform:none;background:transparent}
+.page-product .stepper i{min-width:26px;font:600 16px/1 var(--font);font-style:normal;text-align:center;font-variant-numeric:tabular-nums}
+.page-product .buy .atcrow .btn.solid{flex:1 1 auto;min-width:0;min-height:52px;padding:6px 16px;font-size:15px;white-space:normal;line-height:1.2;
+  box-shadow:0 8px 20px rgba(91,33,182,.24)}
+.page-product .buy .atcrow .btn.solid[data-was],.page-product .stickybuy .btn[data-was]{background:var(--cta-d)}
+
+/* a gift: the quiet second button */
+.page-product .buy > a.btn.block{margin-top:10px;white-space:normal;line-height:1.2;padding-block:6px;background:#fff;color:var(--ink);border-color:var(--line)}
+.page-product .buy > a.btn.block:active{background:var(--soft)}
+
+/* ---------- scent notes under the buttons: one soft card, a row each ---------- */
+.page-product .notestop{margin-top:20px;padding:4px 16px;border-radius:var(--r-lg);background:var(--soft)}
+.page-product .notestop > div{display:grid;grid-template-columns:36px minmax(0,1fr);column-gap:12px;align-items:center;padding:12px 0}
+.page-product .notestop > div:not([hidden]) ~ div{border-top:1px solid var(--hair)}
+.page-product .notestop .ni{grid-column:1;grid-row:1 / span 2;display:flex;align-items:center;justify-content:center;width:36px;height:36px;
+  border-radius:50%;background:#fff;color:var(--gold-d);box-shadow:var(--shadow-1)}
+.page-product .notestop .ni svg{width:17px;height:17px}
+.page-product .notestop b{grid-column:2;font-size:13px;font-weight:500;line-height:1.3;color:var(--mut)}
+.page-product .notestop p{grid-column:2;margin:1px 0 0;font-size:15px;font-weight:500;line-height:1.4;color:var(--ink)}
+
+/* ---------- the story, the notes, the specs and the trust facts ---------- */
+.page-product .belowbuy{margin-top:22px}
+.page-product .belowbuy .story{display:flex;flex-direction:column;gap:6px;margin:0 0 4px}
+.page-product .belowbuy .story span{font-size:16px;line-height:1.55;color:var(--body)}
+.page-product .belowbuy .story span:first-child{margin-bottom:4px;font:700 21px/1.22 var(--font-d);letter-spacing:-.02em;color:var(--ink);text-wrap:balance}
+.page-product .belowbuy .story-slot:empty{display:none}
+.page-product .belowbuy > .note{margin:14px 0 0;padding:14px 16px;border-radius:var(--r);background:#FBF6EC;
+  font-size:14px;line-height:1.5;color:var(--body)}
+.page-product .belowbuy > :first-child:is(.note,.kv){margin-top:0 !important}
+
+.page-product .buy .kv{display:flex;flex-direction:column;margin-top:12px !important;padding:2px 16px;border-radius:var(--r-lg);background:var(--soft)}
+.page-product .buy .kv > div{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:48px;padding:11px 0;
+  font-size:14px;line-height:1.4}
+.page-product .buy .kv > div:not([hidden]) ~ div{border-top:1px solid var(--hair)}
+.page-product .buy .kv[data-specs] > div > span:first-child{flex:none;color:var(--mut)}
+.page-product .buy .kv[data-specs] > div > span:last-child{min-width:0;font-weight:600;color:var(--ink);text-align:end;overflow-wrap:anywhere}
+
+/* the trust facts: an icon in a white disc beside what it promises */
+.page-product .buy .kv.facts{padding:4px 16px}
+.page-product .buy .kv.facts > div{display:grid;grid-template-columns:38px minmax(0,1fr);column-gap:12px;row-gap:1px;
+  align-items:center;justify-content:stretch;padding:12px 0;font-weight:600;color:var(--ink)}
+.page-product .buy .kv.facts > div > span:first-child{display:contents}
+.page-product .buy .kv.facts svg{grid-column:1;grid-row:1 / span 2;width:38px;height:38px;padding:10px;border-radius:50%;
+  background:#fff;color:var(--gold-d);box-shadow:var(--shadow-1)}
+.page-product .buy .kv.facts > div > span:last-child{grid-column:2;font-weight:400;color:var(--mut);overflow-wrap:anywhere;text-wrap:pretty}
+
+/* ---------- details: pills that wrap, so the one open (a footer link
+   can open Delivery or How to apply) is always in sight, over filled panels ---------- */
+.page-product > section.alt{padding-block:8px 12px}
+.page-product .tabs2{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px;padding:0}
+.page-product .tabs2 button{position:relative;flex:none;display:inline-flex;align-items:center;min-height:40px;padding:0 16px;border:0;border-radius:var(--r-pill);
+  background:var(--soft);box-shadow:inset 0 0 0 1px var(--line);color:var(--ink);font:500 14px/1.2 var(--font);white-space:nowrap;cursor:pointer;
+  -webkit-appearance:none;appearance:none;transition:background-color .2s var(--ease),color .2s,transform .15s var(--ease)}
+.page-product .tabs2 button::after{content:"";position:absolute;inset:-4px -2px}
+.page-product .tabs2 button:active{transform:scale(.97)}
+.page-product .tabs2 button.on{background:var(--ink);box-shadow:none;color:#fff;font-weight:600}
+
+/* each panel's three points: filled cards */
+.page-product [data-panel] .grid{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+.page-product [data-panel] .grid > div{padding:16px 18px;border-radius:var(--r-lg);background:var(--soft)}
+.page-product [data-panel] .eyebrow{font:600 15px/1.3 var(--font);color:var(--ink)}
+.page-product [data-panel] .grid p{margin:6px 0 0 !important;font-size:15px;line-height:1.5;color:var(--body)}
+.page-product [data-panel] > .note{margin-top:12px !important;padding:14px 16px;border-radius:var(--r);background:#FBF6EC;
+  font-size:14px;line-height:1.5;color:var(--body)}
+
+/* the scent pyramid: top, heart and base on one card, joined by a line
+   whose dots deepen from light gold to dark */
+.page-product [data-panel="pyramid"] .grid{gap:0;padding:6px 0;border-radius:var(--r-lg);background:var(--soft)}
+.page-product [data-panel="pyramid"] .grid > div{position:relative;padding:14px 18px 14px 52px;border-radius:0;background:none}
+[dir="rtl"] .page-product [data-panel="pyramid"] .grid > div{padding:14px 52px 14px 18px}
+.page-product [data-panel="pyramid"] .grid > div::before{content:"";position:absolute;z-index:1;top:19px;inset-inline-start:20px;width:14px;height:14px;
+  border-radius:50%;background:#fff;box-shadow:inset 0 0 0 3px var(--gold-t)}
+.page-product [data-panel="pyramid"] .grid > div:nth-child(2)::before{box-shadow:inset 0 0 0 3px var(--gold)}
+.page-product [data-panel="pyramid"] .grid > div:nth-child(3)::before{background:var(--gold-d);box-shadow:inset 0 0 0 3px var(--gold-d)}
+.page-product [data-panel="pyramid"] .grid > div:not(:last-child)::after{content:"";position:absolute;top:33px;bottom:-19px;inset-inline-start:26px;
+  width:2px;border-radius:2px;background:var(--line)}
+
+/* ingredients: the list, or the line saying it is coming */
+.page-product [data-ingpanel]{padding:16px 18px;border-radius:var(--r-lg);background:var(--soft)}
+.page-product [data-ingpanel] p{margin:6px 0 0;font-size:15px;line-height:1.55;color:var(--body)}
+.page-product [data-ingpanel] > p:only-child{margin:0 !important;color:var(--body) !important}
+
+/* reviews: the empty state, a card of its own */
+.page-product [data-panel="reviews"] .emptystate{padding:22px 20px !important;border-radius:var(--r-lg);background:var(--soft)}
+.page-product [data-panel="reviews"] .emptystate b{display:block;font:700 19px/1.25 var(--font-d);letter-spacing:-.015em;color:var(--ink)}
+.page-product [data-panel="reviews"] .emptystate .emptybody{margin:6px 0 0;font-size:15px;line-height:1.5;color:var(--body)}
+
+/* ---------- related products: a swipe row of cards ---------- */
+.page-product > section:has(> .wrap > .grid.g4){padding-block:28px 34px}
+.page-product .grid.g4{display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:calc((100% - 12px) / 2.18);gap:12px;
+  overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scrollbar-width:none;
+  margin-left:calc(-1 * max(var(--gut),env(safe-area-inset-left,0px)));margin-right:calc(-1 * max(var(--gut),env(safe-area-inset-right,0px)));
+  padding:0 max(var(--gut),env(safe-area-inset-right,0px)) 14px max(var(--gut),env(safe-area-inset-left,0px));margin-bottom:-10px;scroll-padding-inline:var(--gut)}
+.page-product .grid.g4::-webkit-scrollbar{display:none}
+.page-product .grid.g4 > .p{scroll-snap-align:start;min-width:0}
+@media (max-width:374px){ .page-product .grid.g4{grid-auto-columns:calc((100% - 12px) / 1.92)} }
+@media (min-width:600px){ .page-product .grid.g4{grid-auto-columns:calc((100% - 32px) / 3.3);gap:16px} }
+
+/* ---------- the buy bar ----------
+   Rests on the floating tab bar, its white running on under it, and slides
+   down behind it while the page's own Add is in sight (shop.js sets
+   .hidden). The words and the button keep to a centred column on a wide
+   screen, so the edges keep their 14px (or the notch's inset). */
+.page-product .stickybuy{position:fixed;z-index:35;left:0;right:0;bottom:var(--tabbar-top);display:grid;
+  grid-template-columns:minmax(0,440px) auto;justify-content:center;align-items:center;gap:12px;
+  padding:9px max(14px,env(safe-area-inset-right,0px)) 9px max(14px,env(safe-area-inset-left,0px));
+  background:#fff;color:var(--ink);border-radius:var(--r-lg) var(--r-lg) 0 0;
+  box-shadow:0 -10px 30px rgba(23,15,5,.1),0 -1px 0 rgba(23,15,5,.04),0 48px 0 0 #fff,0 96px 0 0 #fff,0 144px 0 0 #fff;
+  transition:transform .3s var(--ease),opacity .25s var(--ease),visibility 0s linear 0s}
+.page-product .stickybuy.hidden{transform:translateY(calc(100% + var(--tabbar-top)));opacity:0;visibility:hidden;pointer-events:none;
+  transition:transform .3s var(--ease),opacity .25s var(--ease),visibility 0s linear .3s}
+.page-product .stickybuy > div{display:flex;flex-direction:column;justify-content:center;gap:1px;min-width:0}
+.page-product .stickybuy b{display:block;font:700 16px/1.25 var(--font-d);letter-spacing:-.012em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.page-product .stickybuy span{display:block;font-size:14px;line-height:1.3;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-variant-numeric:tabular-nums}
+.page-product .stickybuy .btn{min-height:46px;padding:0 22px;border-radius:var(--r-sm);font-size:15px;box-shadow:0 6px 16px rgba(91,33,182,.24)}
+/* the sheet opened from this bar rests on it: its white foot would lie over
+   the bar, so while the bar shows the bar's own white does that job */
+.page-product:has(.stickybuy:not(.hidden)) .added{box-shadow:0 -12px 40px rgba(23,15,5,.16)}
+.page-product.has-sticky footer{padding-bottom:calc(var(--tabbar-top) + 96px)}
+
+/* ---------- not found ---------- */
+.page-product .notfound{display:flex;flex-direction:column;align-items:center;margin-top:16px;padding:36px 22px 28px;
+  border-radius:var(--r-xl);background:var(--soft);text-align:center}
+.page-product .notfound::before{content:"";display:block;width:76px;height:76px;margin-bottom:18px;border-radius:50%;box-shadow:var(--shadow-1);
+  background:
+    linear-gradient(45deg,transparent calc(50% - 1.6px),var(--ink) calc(50% - 1.6px),var(--ink) calc(50% + 1.6px),transparent calc(50% + 1.6px)) 42px 42px / 13px 13px no-repeat,
+    radial-gradient(circle at 34px 34px,transparent 10.5px,var(--ink) 11px,var(--ink) 13.5px,transparent 14px),
+    #fff}
+.page-product .notfound h1{max-width:18ch;margin:0;font:800 27px/1.1 var(--font-d);letter-spacing:-.028em;color:var(--ink);text-wrap:balance}
+.page-product .notfound p{width:100%;margin:22px 0 0}
+.page-product .notfound .btn{width:100%;max-width:320px}
+.page-product > section:first-of-type:has(.notfound){padding-block:0 40px}
+
+/* the narrowest phones stack the delivery line and the categories higher,
+   so the picture gives up that much more */
+@media (max-width:374px){
+  .page-product .galmain{height:min(100vw,max(250px,calc(100svh - 590px)))}
+  .page-product .buy h1{font-size:28px}
+}
+
+/* ---------- a tablet, and a phone turned sideways: side by side ---------- */
+@media (min-width:600px){
+  .page-product .buy h1{font-size:34px}
+  .page-product [data-panel]:not([data-panel="pyramid"]) .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (min-width:700px), (orientation:landscape) and (min-width:520px){
+  .page-product > section:first-of-type{padding-top:18px}
+  .page-product > section:first-of-type > .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);
+    grid-template-rows:auto 1fr;column-gap:clamp(20px,4vw,36px);align-items:start}
+  .page-product .gal{grid-column:1;grid-row:1 / span 2;margin:0}
+  .page-product > section:first-of-type > .wrap > .eyebrow{grid-column:2;grid-row:1;margin-top:2px}
+  .page-product .buy{grid-column:2;grid-row:2}
+  .page-product > section:first-of-type > .wrap:has(> .pdp > .notfound){display:flex;align-items:stretch}
+  .page-product .notfound{padding-block:48px 40px}
+  .page-product .galmain{height:auto;aspect-ratio:1 / 1;border-radius:var(--r-xl)}
+  .page-product .galslide img{object-fit:contain}
+  .page-product .galnav{display:flex}
+  .page-product .galcount{display:inline-flex}
+  .page-product .galthumbs{position:static;transform:none;flex-direction:row;max-height:none;overflow-x:auto;overflow-y:hidden;gap:8px;padding:10px 0 2px;border-radius:0;
+    background:none;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none}
+  .page-product .galthumb{flex-basis:56px;width:56px;height:56px;border-radius:14px}
+  .page-product .galthumb.on::after{box-shadow:inset 0 0 0 2px var(--ink),inset 0 0 0 4px #fff}
+}
+/* a tall tablet: the pictures stay in view beside the words */
+@media (min-width:700px) and (min-height:700px){
+  .page-product .gal{position:sticky;top:74px}
+}
+/* a short landscape screen: the pictures and bars a little tighter */
+@media (orientation:landscape) and (max-height:500px){
+  .page-product .buy h1{font-size:27px}
+  .page-product .stickybuy{padding-top:7px;padding-bottom:7px}
+  .page-product .stickybuy .btn{min-height:44px}
+}
+
+/* ---------- Arabic ----------
+   The page turns right to left, but a product's own words (its name, sizes,
+   story and notes) stay in English: each runs in its own direction, so a
+   full stop or a number does not jump to the wrong end of the line, and
+   the paragraphs still line up on the right. */
+[dir="rtl"] .page-product :is(.buy h1,.pricerow .permeta,.stickybuy b,.stickybuy span,.kv span,.sizes button){unicode-bidi:plaintext}
+[dir="rtl"] .page-product :is(.buy h1,.stickybuy b,.stickybuy span,.story span,.notestop p,.notestop b,[data-panel] p,[data-panel] .eyebrow,[data-ingpanel] p,
+  .emptystate b,.belowbuy > .note,[data-panel] > .note,.kv.facts > div > span:last-child){unicode-bidi:plaintext;text-align:right}
+[dir="rtl"] .page-product > section:first-of-type > .wrap > .eyebrow{unicode-bidi:plaintext;text-align:right}
+[dir="rtl"] .page-product .notfound::before{transform:scaleX(-1)}

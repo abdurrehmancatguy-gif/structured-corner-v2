@@ -35,10 +35,13 @@
 }
 @media (min-width:600px){ :root{ --gut:24px } }
 
+/* the wordmark's face (assets/fonts, see SOURCES.txt there) */
+@font-face{font-family:"Cormorant Garamond";src:url(fonts/cormorant-garamond-700.woff2) format("woff2");font-weight:700;font-style:normal;font-display:swap}
+
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-padding-top:72px}
 html,body{margin:0;padding:0}
-body{background:var(--bg);color:var(--ink);font:400 15px/1.5 var(--font);-webkit-font-smoothing:antialiased;
+body{background:var(--bg);color:var(--ink);font:400 16px/1.5 var(--font);-webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;overflow-x:clip;padding-bottom:calc(var(--tabbar-top) + 8px)}
 body:has(> footer){padding-bottom:0}
 a{color:inherit;text-decoration:none;-webkit-tap-highlight-color:transparent}

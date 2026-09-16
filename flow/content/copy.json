@@ -1,11 +1,8 @@
 {
   "strip": {
     "countdown_line": "Order by {cutoff} for delivery today in Dubai",
+    "second_line": "Free UAE delivery over {free_over}",
     "right_links": [
-      {
-        "label": "Free UAE delivery over {free_over}",
-        "href": ""
-      },
       {
         "label": "Cash on delivery",
         "href": ""

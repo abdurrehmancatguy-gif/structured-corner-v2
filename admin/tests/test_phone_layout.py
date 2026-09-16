@@ -221,8 +221,8 @@ class PhoneLayout(unittest.TestCase):
     # ---- the phone masthead ------------------------------------------------------
     MAST = """(() => { const acts = [...document.querySelectorAll('.mast .acts .act')].filter((a) => a.getBoundingClientRect().width > 0)
         .map((a) => { const r = a.getBoundingClientRect(); return [r.width, r.height, r.left, r.right]; });
-      const img = document.querySelector('.mast .logo .brandmark'), r = img.getBoundingClientRect();
-      return {acts, logo: [r.left, r.right, r.width / r.height, img.naturalWidth / img.naturalHeight],
+      const logo = document.querySelector('.mast .logo'), img = logo.querySelector('img'), r = logo.getBoundingClientRect(), i = img.getBoundingClientRect();
+      return {acts, logo: [r.left, r.right, i.width / i.height, img.naturalWidth / img.naturalHeight],
               wide: document.documentElement.scrollWidth}; })()"""
 
     def test_the_masthead_icons_are_44px_at_every_phone_width(self):

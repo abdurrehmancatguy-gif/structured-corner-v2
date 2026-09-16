@@ -3024,3 +3024,31 @@ code{border:1px solid var(--line)}
 .quizband .btn:hover,.quizband .btn.solid:hover,.band .btn:hover,.band .btn.gold:hover{background:var(--banner-t);border-color:var(--banner-t);color:var(--secondary)}
 .quizband .emb-fill,.band .emb-fill{fill:#F6E7C1}
 .quizband .emb-line,.band .emb-line{stroke:#FFF4DC}
+
+/* ---------- the wordmark in Cormorant Garamond ----------
+   The header and footer show the emblem picture with the wordmark beside it as
+   text (settings.brand emblem and wordmark), set in Cormorant Garamond Bold,
+   and the header's is dimmed a little as the logo was. */
+@font-face{font-family:"Cormorant Garamond";src:url(fonts/cormorant-garamond-700.woff2) format("woff2");font-weight:700;font-style:normal;font-display:swap}
+.logo.logo-type{display:flex;align-items:center;gap:10px;color:var(--primary);opacity:.8;flex-shrink:0}
+.logo-emb{display:block;width:36px;height:36px}
+.logo-wm{font:700 31px/1 "Cormorant Garamond",Georgia,"Times New Roman",serif;letter-spacing:.02em;white-space:nowrap;padding-top:2px}
+.foot-brand{display:flex;align-items:center;gap:9px;margin-bottom:14px;color:var(--primary)}
+.foot-emb{display:block;width:30px;height:30px}
+.foot-wm{font:700 26px/1 "Cormorant Garamond",Georgia,"Times New Roman",serif;letter-spacing:.02em;white-space:nowrap;padding-top:2px}
+@media (max-width:900px){
+  .logo-emb{width:28px;height:28px}
+  .logo-wm{font-size:24px}
+}
+
+/* ---------- the strip's two lines take turns ----------
+   The same-day line and the free delivery line share one place on the left
+   of the strip; shop.js moves "on" between them every five seconds and each
+   slides up into view. Without script only the first shows. */
+.strip-msgs{display:grid;min-width:0}
+.strip-msg{grid-area:1 / 1;display:flex;align-items:center;gap:6px;min-width:0;opacity:0;transform:translateY(8px);
+  transition:opacity .45s ease,transform .45s ease;pointer-events:none}
+.strip-msg.on{opacity:1;transform:none;pointer-events:auto}
+.strip-msg svg{flex:none}
+html:not(.js) .strip-msg:not(.on){display:none}
+@media (prefers-reduced-motion:reduce){ .strip-msg{transition:none;transform:none} }

@@ -1,0 +1,266 @@
+/* ---------- the bag, checkout and the order confirmation ----------
+   Styles cart.html (.page-cart), checkout.html (.page-checkout) and
+   confirmed.html (.page-confirmed), nothing else.
+
+   The bag: a big title with its count in a lighter voice, the offers as a
+   soft card of progress rows, the lines on white (photograph on a pale tile,
+   name and price on one line, a pill stepper and Remove underneath), the
+   summary as a soft card, and a frosted bar with the total and Checkout that
+   rests on the tab bar until the summary's own Checkout is in sight.
+   Checkout: numbered steps as headings over quiet fields, delivery as a
+   grouped list, payment as selectable tiles, the summary card last.
+   Confirmed: a green tick with a soft halo, the title, the details as a
+   grouped list, then the two ways on. */
+
+/* ---------- the page heading: title, count, and the way back ---------- */
+:is(.page-cart,.page-checkout,.page-confirmed) > section{padding-block:24px 44px}
+:is(.page-cart,.page-checkout) .sec-h{flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;margin:0 0 20px}
+:is(.page-cart,.page-checkout) .sec-h h2.pagetitle{flex:0 1 auto;margin:0;font:800 32px/1.08 var(--font-d);letter-spacing:-.032em;text-wrap:balance}
+.page-cart [data-bagitems]{font:500 17px/1.2 var(--font);color:var(--mut);white-space:nowrap}
+.page-cart .sec-h > a{min-height:40px;padding:0 16px;font-size:14px;background:var(--soft);box-shadow:inset 0 0 0 1px var(--line)}
+.page-cart .sec-h > a:active{transform:scale(.98)}
+.page-checkout .sec-h .aside{display:inline-flex;align-items:center;gap:8px;min-height:32px;padding:0 12px;border-radius:var(--r-pill);
+  background:var(--soft);color:var(--body);font-size:14px;line-height:1.3}
+.page-checkout .sec-h .aside::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:var(--green)}
+
+/* ---------- the offers: free delivery, the free gift and the volume ladder ---------- */
+.page-cart .sum[data-cartprogress]{display:grid;gap:16px;margin:0 0 8px !important;padding:18px 18px 20px;border:0;
+  border-radius:var(--r-lg);background:var(--soft) !important}
+.page-cart .prog{margin:0 !important}
+.page-cart .prog .lb{display:flex;align-items:baseline;justify-content:space-between;column-gap:12px;margin:0 0 9px;
+  font-size:14px;line-height:1.35;color:var(--body)}
+.page-cart .prog .lb > :first-child{min-width:0}
+.page-cart .prog .lb > :last-child{flex:none;white-space:nowrap;font-size:14px;font-weight:700;color:var(--ink) !important}
+.page-cart .prog .tr{position:relative;height:6px;border-radius:var(--r-pill);background:#E8E4DC;overflow:hidden}
+.page-cart .prog .tr i{display:block;height:100%;min-width:6px;border-radius:inherit;background:var(--cta);
+  transition:width .5s var(--ease),background-color .3s}
+/* a finished row turns green, its status with it */
+.page-cart .prog:has(.tr i[style*="100%"]) .tr i{background:var(--green)}
+.page-cart .prog:has(.tr i[style*="100%"]) .lb > :last-child{color:var(--green) !important}
+.page-cart .prog:has(.tr i[style*="100%"]) .lb > :last-child::before{content:"";display:inline-block;width:5px;height:9px;
+  margin-inline-end:7px;border:solid currentColor;border-width:0 2px 2px 0;transform:translateY(-1px) rotate(45deg)}
+[dir="rtl"] .page-cart :is([data-p1lb],[data-p2lb],[data-p3lb],[data-codnote]){unicode-bidi:plaintext}
+[dir="rtl"] .page-cart .prog:has(.tr i[style*="100%"]) .lb > :last-child::before{margin-inline:5px}
+
+/* ---------- the lines ----------
+   Photograph on the left; name and price share the first line, the size
+   line under them, and the stepper with Remove at the foot. The info box
+   steps aside (display:contents) so each part takes its own place. */
+.page-cart [data-cartlines]{display:grid}
+.page-cart .line{display:grid;grid-template-columns:96px minmax(0,1fr) auto;grid-template-rows:auto auto auto 1fr;
+  column-gap:14px;align-items:start;padding:18px 0;border-bottom:1px solid var(--hair)}
+.page-cart .line:last-child{border-bottom:0}
+.page-cart .line .im{grid-column:1;grid-row:1 / -1;align-self:start;position:relative;display:flex;align-items:center;justify-content:center;
+  width:96px;aspect-ratio:1 / 1;border-radius:var(--r);background:var(--tile);overflow:hidden;isolation:isolate;border:0}
+.page-cart .line .im img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;mix-blend-mode:multiply}
+.page-cart .line a.im:active img{transform:scale(1.03)}
+.page-cart .line .im .none{font-size:13px;color:var(--faint)}
+.page-cart .line .linfo{display:contents}
+.page-cart .lname{grid-column:2;grid-row:1;align-self:start;min-width:0;padding-top:1px;
+  font:600 16px/1.3 var(--font);color:var(--ink);overflow-wrap:anywhere}
+.page-cart .lprice{grid-column:3;grid-row:1;align-self:start;padding-top:1px;font:700 16px/1.3 var(--font);
+  color:var(--ink);white-space:nowrap;text-align:end}
+.page-cart .lmeta{grid-column:2 / -1;grid-row:2;margin:3px 0 0;font-size:14px;line-height:1.4;color:var(--mut);overflow-wrap:anywhere}
+.page-cart .line .norm{grid-column:2 / -1;grid-row:3;justify-self:start;display:inline-flex;align-items:center;min-height:26px;
+  margin:8px 0 0 !important;padding:0 10px;border-radius:var(--r-pill);background:var(--banner-t);color:var(--gold-d);
+  font-size:13px;font-weight:600;line-height:1.2}
+.page-cart .stepper{grid-column:2 / -1;grid-row:4;justify-self:start;align-self:end;display:inline-flex;align-items:center;margin-top:12px;
+  height:44px;padding:0;border:0;border-radius:var(--r-pill);background:var(--soft);box-shadow:inset 0 0 0 1px var(--line)}
+.page-cart .stepper button{position:relative;display:flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;
+  border:0;border-radius:50%;background:transparent;color:var(--ink);font:500 20px/1 var(--font);cursor:pointer;
+  -webkit-appearance:none;appearance:none;transition:background-color .15s,transform .15s var(--ease)}
+.page-cart .stepper button:active{background:var(--hair);transform:scale(.92)}
+.page-cart .stepper button:disabled{color:var(--faint);cursor:default;transform:none;background:transparent}
+.page-cart .stepper i{min-width:26px;font:700 16px/1 var(--font);font-style:normal;text-align:center;font-variant-numeric:tabular-nums;color:var(--ink)}
+.page-cart .line .lrem{grid-column:2 / -1;grid-row:4;justify-self:end;align-self:end;position:relative;display:inline-flex;align-items:center;
+  min-height:44px;margin:12px 0 0;padding:0 2px;border:0;background:none;color:var(--mut);font:500 14px/1.2 var(--font);
+  text-decoration:underline;text-decoration-color:var(--line);text-decoration-thickness:1.5px;text-underline-offset:4px;cursor:pointer}
+.page-cart .line .lrem::after{content:"";position:absolute;inset:0 -8px}
+.page-cart .line .lrem:active{color:var(--red);text-decoration-color:currentColor}
+/* the free gift over AED 300: a warm tile and a green Free */
+.page-cart .line[data-gift="1"] .im{background:var(--banner-t)}
+.page-cart .line[data-gift="1"] .im .none{font:700 15px/1 var(--font-d);color:var(--gold-d)}
+.page-cart .line[data-gift="1"] .lprice{color:var(--green)}
+.page-cart [data-cartnote].note{margin-top:8px !important;padding:14px 16px;border-radius:var(--r);background:var(--soft);
+  font-size:14px;line-height:1.5;color:var(--body)}
+@media (max-width:359px){
+  .page-cart .line{grid-template-columns:80px minmax(0,1fr) auto;column-gap:12px}
+  .page-cart .line .im{width:80px}
+}
+
+/* ---------- the bag's two parts: one column, side by side on a tablet ---------- */
+:is(.page-cart,.page-checkout) .two{display:grid;grid-template-columns:minmax(0,1fr);gap:26px;align-items:start}
+:is(.page-cart,.page-checkout) .two > div{min-width:0}
+
+/* ---------- the summary card, on the bag and at checkout ---------- */
+:is(.page-cart,.page-checkout) .two .sum:not([data-cartprogress]){padding:18px 20px 22px;border:0;border-radius:var(--r-xl);background:var(--soft)}
+:is(.page-cart,.page-checkout) .sum .r{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:7px 0;
+  font-size:15px;line-height:1.4;color:var(--body)}
+:is(.page-cart,.page-checkout) .sum .r > span:first-child{min-width:0}
+:is(.page-cart,.page-checkout) .sum .r > span:last-child{flex:none;white-space:nowrap;text-align:end;font-weight:600;color:var(--ink)}
+:is(.page-cart,.page-checkout) .sum .r[data-tierrow] > span{color:var(--green)}
+:is(.page-cart,.page-checkout) .sum .r[data-tierrow] b{font-weight:700}
+:is(.page-cart,.page-checkout) .sum .r.vat{padding-top:2px;font-size:14px;color:var(--mut)}
+:is(.page-cart,.page-checkout) .sum .r.vat > span:last-child{font-weight:500;color:var(--mut)}
+:is(.page-cart,.page-checkout) .sum .r.t{align-items:center;margin-top:10px;padding:16px 0 4px;border-top:1px solid var(--line);
+  font:700 17px/1.2 var(--font-d);color:var(--ink)}
+:is(.page-cart,.page-checkout) .sum .r.t > span:last-child{font:800 24px/1.1 var(--font-d);letter-spacing:-.025em}
+:is(.page-cart,.page-checkout) .sum .btn.solid.block{min-height:54px;margin-top:16px !important;border-radius:14px;font-size:16px;
+  box-shadow:0 8px 20px rgba(91,33,182,.24)}
+
+/* the ways to pay, a row of quiet chips; cash on delivery greys out over AED 300 */
+.page-cart .pay[data-pay]{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:16px !important}
+.page-cart .pay[data-pay] span{display:inline-flex;align-items:center;min-height:30px;padding:0 11px;border-radius:var(--r-pill);
+  background:#fff;box-shadow:inset 0 0 0 1px var(--line);color:var(--body);font-size:13px;font-weight:600;line-height:1}
+.page-cart .pay[data-pay] span.off{background:transparent;color:var(--faint);text-decoration:line-through;text-decoration-thickness:1.5px}
+.page-cart .codnote{margin:10px 0 0;font-size:14px;line-height:1.45;color:var(--mut);text-align:center}
+
+/* ---------- the empty bag: a drawn bag in a soft circle, the line, the way on ---------- */
+.page-cart [data-cartempty].empty{display:flex;flex-direction:column;align-items:center;margin:4px 0 0;padding:40px 24px 30px;border:0;
+  border-radius:var(--r-xl);background:var(--soft);text-align:center;position:relative}
+.page-cart [data-cartempty].empty[hidden]{display:none !important}
+.page-cart [data-cartempty].empty::before{content:"";display:block;width:92px;height:92px;margin:0 0 20px;border-radius:50%;
+  background:
+    linear-gradient(var(--cta),var(--cta)) 50% 38px / 34px 2.5px no-repeat,
+    linear-gradient(var(--cta),var(--cta)) 50% 66px / 38px 2.5px no-repeat,
+    linear-gradient(var(--cta),var(--cta)) calc(50% - 17px) 38px / 2.5px 30px no-repeat,
+    linear-gradient(var(--cta),var(--cta)) calc(50% + 17px) 38px / 2.5px 30px no-repeat,
+    var(--cta-l);
+  box-shadow:0 0 0 10px rgba(91,33,182,.04)}
+.page-cart [data-cartempty].empty::after{content:"";position:absolute;left:50%;top:65px;width:16px;height:12px;margin-left:-8px;
+  border:2.5px solid var(--cta);border-bottom:0;border-radius:9px 9px 0 0}
+.page-cart [data-cartempty].empty p{margin:0 0 20px !important;font:700 22px/1.2 var(--font-d);letter-spacing:-.02em;color:var(--ink);text-wrap:balance}
+.page-cart [data-cartempty].empty .btn{min-width:min(100%,260px);min-height:52px}
+
+/* ---------- the bag bar ----------
+   Frosted glass on the tab bar with the total and Checkout. Its glass runs on
+   under the tab bar to the screen's foot, so nothing shows through the gap.
+   It rises in while the summary's Checkout is out of sight. */
+.page-cart .bagbar{position:fixed;z-index:35;left:0;right:0;bottom:var(--tabbar-top);display:flex;align-items:center;gap:14px;
+  padding:12px max(var(--gut),env(safe-area-inset-right,0px),calc((100% - 560px) / 2)) 12px max(var(--gut),env(safe-area-inset-left,0px),calc((100% - 560px) / 2));
+  background:transparent;color:var(--ink);isolation:isolate;
+  transform:translateY(calc(100% + var(--tabbar-top) + 24px));visibility:hidden;
+  transition:transform .28s var(--ease),visibility 0s linear .28s}
+.page-cart .bagbar::before{content:"";position:absolute;z-index:-1;left:0;right:0;top:0;bottom:-140px;border-radius:var(--r-xl) var(--r-xl) 0 0;
+  background:rgba(255,255,255,.86);-webkit-backdrop-filter:saturate(180%) blur(22px);backdrop-filter:saturate(180%) blur(22px);
+  box-shadow:0 -10px 30px rgba(23,15,5,.10),inset 0 1px 0 rgba(255,255,255,.9)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){ .page-cart .bagbar::before{background:#fff} }
+.page-cart .bagbar.on{transform:none;visibility:visible;transition:transform .28s var(--ease),visibility 0s}
+.page-cart .bagbar .bb-t{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:1px}
+.page-cart .bagbar .bb-t span{font-size:14px;line-height:1.2;color:var(--mut)}
+.page-cart .bagbar .bb-t b{display:block;font:800 21px/1.15 var(--font-d);letter-spacing:-.02em;color:var(--ink);
+  white-space:normal;overflow-wrap:anywhere}
+.page-cart .bagbar .btn{flex:0 0 auto;min-width:48%;min-height:50px;padding:0 22px;border-radius:14px;font-size:16px;
+  box-shadow:0 6px 16px rgba(91,33,182,.24)}
+/* the foot of the page keeps clear of the bar */
+.page-cart:has([data-cartsummary]:not([hidden])) footer{padding-bottom:calc(var(--tabbar-top) + 104px)}
+@media (prefers-reduced-motion:reduce){ .page-cart .bagbar,.page-cart .bagbar.on{transition:none} }
+
+/* ---------- checkout ----------
+   The steps read as headings with a hairline between them; fields are quiet
+   white boxes, delivery a grouped list, payment a grid of tiles with a radio
+   dot, the summary card last with Place order. */
+.page-checkout .two > div:first-child{display:flex;flex-direction:column}
+.page-checkout .two > div:first-child > .eyebrow{display:block;margin:0;padding-top:26px;border-top:1px solid var(--hair);
+  font:700 20px/1.2 var(--font-d);letter-spacing:-.018em;color:var(--ink)}
+.page-checkout .two > div:first-child > .eyebrow:first-child{padding-top:4px;border-top:0}
+.page-checkout .two .grid.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0 14px !important}
+.page-checkout .two .field{display:flex;align-items:center;min-width:0;min-height:54px;padding:0 16px;border:1.5px solid var(--line);
+  border-radius:var(--r-sm);background:#fff;color:var(--faint);font-size:16px;line-height:1.25;overflow-wrap:anywhere}
+/* the WhatsApp opt-in: a soft card, the whole card the target, a drawn box */
+.page-checkout .two .optin{position:relative;display:block;min-height:56px;margin:0 0 26px !important;padding:15px 16px;
+  padding-inline-start:54px;border-radius:var(--r);background:var(--soft);color:var(--ink);font-size:15px;line-height:1.45;cursor:pointer}
+.page-checkout .two .optin input[type=checkbox]{position:absolute;top:6px;inset-inline-start:5px;width:44px;height:44px;margin:0;
+  border:0;border-radius:12px;background:transparent;box-shadow:none;cursor:pointer;-webkit-appearance:none;appearance:none}
+.page-checkout .two .optin input[type=checkbox]::before{content:"";position:absolute;left:11px;top:11px;width:22px;height:22px;
+  border-radius:7px;background:#fff;box-shadow:inset 0 0 0 1.5px #BDB6A9;transition:background-color .15s,box-shadow .15s}
+.page-checkout .two .optin input[type=checkbox]::after{content:"";position:absolute;left:19px;top:15px;width:5px;height:10px;
+  border:solid #fff;border-width:0 2.2px 2.2px 0;transform:rotate(45deg);opacity:0;transition:opacity .15s}
+.page-checkout .two .optin input[type=checkbox]:checked::before{background:var(--cta);box-shadow:none}
+.page-checkout .two .optin input[type=checkbox]:checked::after{opacity:1}
+.page-checkout .two .optin input[type=checkbox]:focus-visible{outline:none}
+.page-checkout .two .optin input[type=checkbox]:focus-visible::before{box-shadow:inset 0 0 0 1.5px var(--cta),0 0 0 3px var(--cta-l)}
+.page-checkout .two .optin:active{background:var(--hair)}
+.page-checkout .two .optin .norm{color:var(--mut);font-size:14px}
+
+/* delivery: a grouped list, the name and its detail on the left, the price on the right */
+.page-checkout .two .kv{display:flex;flex-direction:column;margin:14px 0 26px !important;padding:2px 0;border:0;border-radius:var(--r-lg);background:var(--soft)}
+.page-checkout .two .kv > div{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:2px 12px;min-height:60px;margin:0 16px;padding:12px 0;
+  border:0;border-bottom:1px solid var(--line);font-size:15px;line-height:1.4}
+.page-checkout .two .kv > div:last-child{border-bottom:0}
+.page-checkout .two .kv > div > span:first-child{flex:1 1 35%;min-width:0;color:var(--mut)}
+.page-checkout .two .kv > div > span:first-child b{font-weight:600;color:var(--ink)}
+.page-checkout .two .kv > div > span:last-child{flex:0 1 auto;margin-inline-start:auto;text-align:end;font-size:14px;font-weight:600;color:var(--ink)}
+
+/* payment: tiles two to a row, the chosen one ringed in purple with a filled dot */
+.page-checkout .pay[data-paypick]{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0 12px !important}
+.page-checkout .pay[data-paypick] button{position:relative;display:flex;align-items:center;gap:10px;min-width:0;min-height:56px;padding:8px 14px;
+  border:0;border-radius:var(--r);background:#fff;box-shadow:inset 0 0 0 1.5px var(--line);color:var(--ink);
+  font:600 15px/1.2 var(--font);text-align:start;cursor:pointer;-webkit-appearance:none;appearance:none;
+  transition:box-shadow .2s,background-color .2s,transform .15s var(--ease)}
+.page-checkout .pay[data-paypick] button::before{content:"";flex:none;width:20px;height:20px;border-radius:50%;box-shadow:inset 0 0 0 1.5px #CFC9BE;
+  background:#fff;transition:box-shadow .2s}
+.page-checkout .pay[data-paypick] button:active{transform:scale(.98)}
+.page-checkout .pay[data-paypick] button.on{background:var(--cta-l);box-shadow:inset 0 0 0 2px var(--cta)}
+.page-checkout .pay[data-paypick] button.on::before{background:#fff;box-shadow:inset 0 0 0 6px var(--cta)}
+.page-checkout .pay[data-paypick] button:last-child:nth-child(odd){grid-column:1 / -1}
+.page-checkout .pay[data-paypick] + .note{padding:14px 16px;border-radius:var(--r);background:var(--soft);font-size:14px;line-height:1.5;color:var(--body)}
+.page-checkout .two > div:last-child{padding-top:4px}
+
+/* ---------- the order confirmation ---------- */
+.page-confirmed > section > .wrap{max-width:560px !important}
+.page-confirmed > section .wrap > div:first-child{display:flex;flex-direction:column;align-items:center;padding:28px 0 30px !important}
+.page-confirmed > section .tick{display:flex;align-items:center;justify-content:center;width:76px;height:76px;margin:0 0 22px;border-radius:50%;
+  background:var(--green);color:#fff;box-shadow:0 0 0 10px rgba(46,107,62,.10),0 0 0 22px rgba(46,107,62,.05),0 10px 24px rgba(46,107,62,.28);
+  animation:bag-pop .6s var(--ease) both}
+.page-confirmed > section .tick svg{width:32px;height:32px}
+@keyframes bag-pop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+.page-confirmed > section .pagetitle{margin:0 0 10px !important;font:800 34px/1.06 var(--font-d);letter-spacing:-.034em;text-wrap:balance}
+.page-confirmed > section .wrap > div:first-child > p{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 8px;
+  font-size:16px;line-height:1.4;color:var(--mut) !important}
+.page-confirmed > section .wrap > div:first-child > p .slot{display:inline-flex;align-items:center;min-height:30px;padding:0 12px;border-radius:var(--r-pill);
+  background:var(--soft);box-shadow:inset 0 0 0 1px var(--line);color:var(--body);font-size:14px;font-weight:600}
+/* the details: a grouped list, each label over its value */
+.page-confirmed > section .kv{display:flex;flex-direction:column;padding:4px 0;border:0;border-radius:var(--r-xl);background:var(--soft)}
+.page-confirmed > section .kv > div{display:grid;gap:3px;margin:0 20px;padding:14px 0;border:0;border-bottom:1px solid var(--line)}
+.page-confirmed > section .kv > div:last-child{border-bottom:0}
+.page-confirmed > section .kv > div:has(> span:last-child > .slot:only-child){display:none}
+.page-confirmed > section .kv > div:has(+ div:last-child > span:last-child > .slot:only-child){border-bottom:0}
+.page-confirmed > section .kv > div > span:first-child{font-size:14px;line-height:1.35;color:var(--mut)}
+.page-confirmed > section .kv > div > span:last-child{font-size:16px;font-weight:500;line-height:1.4;color:var(--ink);overflow-wrap:anywhere}
+.page-confirmed > section div:has(> .btn){display:grid !important;grid-template-columns:minmax(0,1fr);gap:10px !important;margin-top:22px !important}
+.page-confirmed > section div:has(> .btn) .btn{width:100%;min-height:54px;padding:0 16px;border-radius:14px;font-size:16px;white-space:normal;line-height:1.2}
+.page-confirmed > section div:has(> .btn) .btn.solid{box-shadow:0 8px 20px rgba(91,33,182,.24)}
+.page-confirmed > section div:has(> .btn) .btn:not(.solid){background:#fff;color:var(--ink);border-color:var(--line)}
+@media (min-width:430px){ .page-confirmed > section div:has(> .btn){grid-template-columns:repeat(2,minmax(0,1fr))} }
+
+/* ---------- tablets: the summary stays in sight beside the lines and the form ---------- */
+@media (min-width:720px) and (min-height:600px){
+  :is(.page-cart,.page-checkout) .two{grid-template-columns:minmax(0,1fr) 320px;gap:28px}
+  .page-cart [data-cartsummary],.page-checkout .two > div:last-child{position:sticky;top:76px;padding-top:0}
+  .page-cart .pay[data-pay]{gap:5px}
+  .page-cart .pay[data-pay] span{padding:0 9px}
+}
+@media (min-width:600px){
+  .page-confirmed > section .kv > div{grid-template-columns:36% minmax(0,1fr);gap:16px;align-items:baseline}
+}
+
+/* ---------- landscape phones: a slimmer bar, clear of the notch ---------- */
+@media (max-height:500px) and (orientation:landscape){
+  .page-cart .bagbar{padding-top:8px;padding-bottom:8px}
+  .page-cart .bagbar .bb-t{flex-direction:row;align-items:baseline;gap:10px}
+  .page-cart .bagbar .bb-t b{font-size:19px}
+  .page-cart .bagbar .btn{min-width:240px;min-height:46px}
+  .page-cart:has([data-cartsummary]:not([hidden])) footer{padding-bottom:calc(var(--tabbar-top) + 84px)}
+}
+
+/* ---------- Arabic ----------
+   The grid, flex rows and logical sides mirror on their own. Words that are
+   still English inside the Arabic page keep their own reading order (a
+   price, a count, a sentence's full stop), aligned to the right. */
+[dir="rtl"] :is(.page-cart,.page-checkout,.page-confirmed) :is(.sum .r > span,.kv > div > span,.lname,.lprice,.prog .lb > span,.note,
+  .codnote,.two > div > .eyebrow,.pay button,.optin,.aside,.field,.bb-t b,.bb-t span,.empty p,.line .norm,.line .lrem,.wrap > div:first-child > p){unicode-bidi:plaintext}
+[dir="rtl"] :is(.page-cart,.page-checkout) :is(.note,.two > div > .eyebrow,.optin,.empty p,.lname,.lmeta){text-align:right}
+[dir="rtl"] .page-cart [data-cartempty].empty p{text-align:center}
+[dir="rtl"] .page-checkout .two .kv > div > span:last-child{text-align:left}
+[dir="rtl"] .page-confirmed > section .kv > div > span{text-align:right}

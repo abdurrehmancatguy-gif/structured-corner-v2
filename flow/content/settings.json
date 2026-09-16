@@ -3,6 +3,8 @@
     "logo": "assets/img/logo-gold-486.png",
     "logo_light": "assets/img/logo-gold-light-486.png",
     "logo_alt": "BGS Corner",
+    "wordmark": "BGS CORNER",
+    "emblem": "assets/img/logo-emblem.png",
     "suffix": "CORNER",
     "icons": {
       "ico": "favicon.ico",

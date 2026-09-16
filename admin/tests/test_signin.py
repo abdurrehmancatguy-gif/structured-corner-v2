@@ -173,7 +173,7 @@ class Browser(cdp_pipe.Chrome):
              "https://bgscorner.com": ("/", False), "https://www.bgscorner.com": ("/", False)}
     TYPES = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8",
              ".css": "text/css; charset=utf-8", ".png": "image/png", ".jpg": "image/jpeg",
-             ".ico": "image/x-icon", ".txt": "text/plain; charset=utf-8"}
+             ".ico": "image/x-icon", ".txt": "text/plain; charset=utf-8", ".woff2": "font/woff2"}
     QUIET = 1 << 30
 
     def __init__(self, w, h, phone, flow):

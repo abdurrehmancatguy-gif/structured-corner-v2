@@ -10,6 +10,9 @@ NOT_SHOWN = "Saved, but the shop does not use this yet: the site still has it wr
 CHECKOUT = "Part of checkout and payments, which a developer changes in code."
 UPLOAD = "Not changeable from the admin yet: there is no upload for the link preview picture."
 LOGO = "A PNG with a transparent background, at least 486 px wide; the pages show a copy 486 px wide. The logo it replaces goes to the trash."
+LOGO_UNUSED = ("Saved, but the header and the footer now show the emblem and the wordmark as text; "
+               "this picture comes back only if the wordmark is left empty.")
+EMBLEM = "The emblem is replaced with the Favicon upload below, which makes the site icons from it too."
 ICON = "Made from the emblem: upload a new one at Favicon above."
 LOGIN = "Arrives with login: a tracking ID adds a third-party script to every page."
 # Shopper sign-in runs on Auth0. Both values come from the "bgs-corner"
@@ -66,8 +69,13 @@ FIELDS = [
     {"path": "/payments/tamara", "type": "bool", "label": "Tamara", "group": "Payments and tax", "locked": CHECKOUT},
     {"path": "/payments/cod", "type": "bool", "label": "Cash on delivery", "group": "Payments and tax", "locked": CHECKOUT},
     {"path": "/brand/logo_alt", "type": "text", "label": "Logo description (alt text)", "maxLength": 60, "group": "Brand"},
-    {"path": "/brand/logo", "type": "image", "label": "Logo", "group": "Brand", "upload": "logo-dark", "help": LOGO + " This one is on the header."},
-    {"path": "/brand/logo_light", "type": "image", "label": "Logo on dark", "group": "Brand", "upload": "logo-light", "help": LOGO + " This one is on the footer."},
+    {"path": "/brand/wordmark", "type": "text", "label": "Wordmark", "group": "Brand", "maxLength": 30,
+     "help": "The words beside the emblem in the header and the footer, set in Cormorant Garamond Bold."},
+    {"path": "/brand/emblem", "type": "image", "label": "Emblem beside the wordmark", "group": "Brand", "readonly": EMBLEM},
+    {"path": "/brand/logo", "type": "image", "label": "Logo", "group": "Brand", "upload": "logo-dark", "rendered": False, "notShown": LOGO_UNUSED,
+     "help": LOGO + " This one was on the header."},
+    {"path": "/brand/logo_light", "type": "image", "label": "Logo on dark", "group": "Brand", "upload": "logo-light", "rendered": False, "notShown": LOGO_UNUSED,
+     "help": LOGO + " This one was on the footer."},
     {"path": "/brand/suffix", "type": "text", "label": "Wordmark suffix", "group": "Brand", "rendered": False, "notShown": NOT_SHOWN, "maxLength": 20},
     {"path": "/brand/icons/ico", "type": "image", "label": "Favicon", "group": "Brand", "upload": "emblem",
      "help": "The site icons are all made from one emblem: a PNG with a transparent background, at least 180 px on its long side. "

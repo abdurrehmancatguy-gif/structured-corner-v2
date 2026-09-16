@@ -1,0 +1,235 @@
+/* ---------- the scent quiz: quiz.html (the question steps and the result) ----------
+   A native onboarding flow. A slim progress bar in five segments, the step
+   line with Back beside it, one big question, and answers as large soft tiles,
+   each with a colour swatch of its own: the mood of the answer, drawn in the
+   scent family colours. A tap moves on. The result opens on a rare dark sheet
+   (the profile), then the closest blend on a soft card, the trio banner and
+   the send-to-yourself card. */
+
+.page-quiz > section{position:relative;padding-block:14px 32px;isolation:isolate}
+.page-quiz > section::before{content:"";position:absolute;z-index:-1;inset:0 0 auto;height:420px;pointer-events:none;
+  background:radial-gradient(70% 60% at 100% 0%,rgba(91,33,182,.07) 0%,rgba(91,33,182,0) 70%),
+    radial-gradient(60% 50% at 0% 0%,rgba(184,145,74,.09) 0%,rgba(184,145,74,0) 70%)}
+.page-quiz > section > .wrap > .eyebrow{display:flex;align-items:center;min-height:32px;font-size:13px;font-weight:500;color:var(--mut)}
+
+/* ---------- the steps ---------- */
+.page-quiz .quiz{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"prog prog" "step back" "card card";
+  align-items:center;column-gap:12px;margin-top:6px}
+.page-quiz .quiz > .qprog{grid-area:prog}
+.page-quiz .quiz > .qstep{grid-area:step}
+.page-quiz .quiz > .qback{grid-area:back}
+.page-quiz .quiz > .qcard{grid-area:card;min-width:0}
+
+/* the progress bar: one fill under a mask of five segments */
+.page-quiz .qprog{position:relative;height:6px;margin:8px 0 0;border-radius:var(--r-pill);background:var(--line);overflow:hidden;
+  -webkit-mask:repeating-linear-gradient(90deg,#000 0 calc(20% - 4px),transparent calc(20% - 4px) 20%);
+  mask:repeating-linear-gradient(90deg,#000 0 calc(20% - 4px),transparent calc(20% - 4px) 20%);
+  width:calc(100% + 4px);margin-inline-end:-4px}
+[dir="rtl"] .page-quiz .qprog{-webkit-mask:repeating-linear-gradient(270deg,#000 0 calc(20% - 4px),transparent calc(20% - 4px) 20%);
+  mask:repeating-linear-gradient(270deg,#000 0 calc(20% - 4px),transparent calc(20% - 4px) 20%)}
+.page-quiz .qprog i{display:block;height:100%;max-width:100%;border-radius:inherit;
+  background:linear-gradient(90deg,var(--cta-t),var(--cta));transition:width .5s var(--ease)}
+[dir="rtl"] .page-quiz .qprog i{margin-inline-start:0;background:linear-gradient(270deg,var(--cta-t),var(--cta))}
+
+/* the step line and Back */
+.page-quiz .qstep{display:block;min-height:44px;padding-block:12px 0;font-size:14px;line-height:1.4;color:var(--mut)}
+.page-quiz .qstep b{font-weight:700;color:var(--ink)}
+.page-quiz .qback{position:relative;justify-self:end;align-self:end;display:inline-flex;align-items:center;gap:6px;min-height:36px;margin:8px 0 0;
+  padding:0 14px;border:0;border-radius:var(--r-pill);background:var(--soft);box-shadow:inset 0 0 0 1px var(--line);
+  color:var(--ink);font:600 14px/1 var(--font);white-space:nowrap;cursor:pointer;-webkit-appearance:none;appearance:none;
+  transition:transform .15s var(--ease),background-color .2s}
+.page-quiz .qback::after{content:"";position:absolute;inset:-5px -2px}
+.page-quiz .qback:active{transform:scale(.96);background:var(--hair)}
+/* the narrowest phones: the step line a touch smaller so it stays on one line beside Back */
+@media (max-width:374px){
+  .page-quiz .quiz{column-gap:8px}
+  .page-quiz .qstep{font-size:13px}
+  .page-quiz .qback{padding:0 12px}
+}
+
+/* the question */
+.page-quiz .qcard h2{margin:22px 0 22px;font:800 31px/1.07 var(--font-d);letter-spacing:-.034em;color:var(--ink);text-wrap:balance}
+
+/* the answers: large soft tiles, a swatch at the start, a round mark at the end */
+.page-quiz .qopts{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+.page-quiz .qopts button{--orb:linear-gradient(145deg,#E6CF9E,var(--gold));
+  position:relative;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;width:100%;min-width:0;min-height:78px;
+  margin:0;padding:14px 56px 14px 74px;border:0;border-radius:var(--r-lg);background:var(--soft);box-shadow:inset 0 0 0 1px var(--hair);
+  color:var(--ink);font:650 17px/1.25 var(--font-d);letter-spacing:-.014em;text-align:start;overflow-wrap:anywhere;cursor:pointer;
+  -webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent;
+  transition:transform .16s var(--ease),background-color .2s,box-shadow .2s}
+[dir="rtl"] .page-quiz .qopts button{padding:14px 74px 14px 56px}
+.page-quiz .qopts button > span{display:block;margin-top:3px;font:400 14px/1.35 var(--font);letter-spacing:0;color:var(--mut);text-wrap:pretty}
+.page-quiz .qopts button::before{content:"";position:absolute;top:50%;inset-inline-start:14px;width:46px;height:46px;margin-top:-23px;
+  border-radius:50%;background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.42) 0,rgba(255,255,255,0) 48%),var(--orb);
+  box-shadow:inset 0 0 0 1px rgba(23,15,5,.06),0 6px 14px -6px rgba(23,15,5,.35)}
+.page-quiz .qopts button::after{content:"";position:absolute;top:50%;inset-inline-end:18px;width:22px;height:22px;margin-top:-11px;
+  border-radius:50%;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line);transition:box-shadow .2s,background-color .2s}
+.page-quiz .qopts button:active{transform:scale(.98);background:var(--cta-l);box-shadow:inset 0 0 0 1.5px var(--cta)}
+.page-quiz .qopts button:active::after{background:#fff;box-shadow:inset 0 0 0 7px var(--cta)}
+.page-quiz .qopts button:focus-visible{outline:2px solid var(--cta);outline-offset:2px;border-radius:var(--r-lg)}
+@media (hover:hover){
+  .page-quiz .qopts button:hover{background:#fff;box-shadow:inset 0 0 0 1.5px var(--ink),var(--shadow-1)}
+  .page-quiz .qback:hover{background:#fff}
+}
+
+/* two columns of tiles (the notes question): the swatch on top, the mark in the corner */
+.page-quiz .qopts-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.page-quiz .qopts-2 button{justify-content:flex-end;min-height:136px;padding:74px 16px 16px;font-size:16px;line-height:1.24}
+[dir="rtl"] .page-quiz .qopts-2 button{padding:74px 16px 16px}
+.page-quiz .qopts-2 button::before{top:16px;inset-inline-start:16px;margin-top:0;width:44px;height:44px}
+.page-quiz .qopts-2 button::after{top:16px;inset-inline-end:16px;margin-top:0}
+@media (max-width:339px){
+  .page-quiz .qopts-2 button{min-height:124px;padding:66px 14px 14px;font-size:15.5px}
+  [dir="rtl"] .page-quiz .qopts-2 button{padding:66px 14px 14px}
+  .page-quiz .qopts-2 button::before{top:14px;inset-inline-start:14px;width:40px;height:40px}
+  .page-quiz .qopts-2 button::after{top:14px;inset-inline-end:14px}
+}
+
+/* the swatches: the mood of each answer in the scent family colours */
+.page-quiz .qopts [data-a="daily"]{--orb:linear-gradient(145deg,#F1DDAE,#C99A4B)}
+.page-quiz .qopts [data-a="office"]{--orb:linear-gradient(145deg,#A9B8BF,var(--f-musk))}
+.page-quiz .qopts [data-a="evening"]{--orb:linear-gradient(145deg,#A5578F,var(--f-sweet) 55%,#33142B)}
+.page-quiz .qopts [data-a="majlis"]{--orb:linear-gradient(145deg,#B07A45,var(--f-bak) 60%,#2E1C0B)}
+.page-quiz .qopts [data-a="bold"]{--orb:linear-gradient(145deg,#C75D7B,var(--rose) 60%,#5A1B2E)}
+.page-quiz .qopts [data-a="soft"]{--orb:linear-gradient(145deg,#F4ECEE,#D9C4CC)}
+.page-quiz .qopts [data-a="warm"]{--orb:linear-gradient(145deg,#E09A56,var(--f-amber))}
+.page-quiz .qopts [data-a="fresh"]{--orb:linear-gradient(145deg,#C9DB8E,var(--f-fresh))}
+.page-quiz .qopts [data-a="citrus"]{--orb:linear-gradient(145deg,#F6E48A,#D6A62C)}
+.page-quiz .qopts [data-a="rose"]{--orb:linear-gradient(145deg,#E7A3B8,var(--f-floral))}
+.page-quiz .qopts [data-a="spice"]{--orb:linear-gradient(145deg,#D9824A,#8E3A12)}
+.page-quiz .qopts [data-a="sweet"]{--orb:linear-gradient(145deg,#FBF1DC,#D9B98A)}
+.page-quiz .qopts [data-a="violet"]{--orb:linear-gradient(145deg,#D6CCE6,#8A7AA8)}
+.page-quiz .qopts [data-a="wood"]{--orb:linear-gradient(145deg,#8A6A3E,var(--f-res))}
+/* how far it carries: a drop of scent and the rings it throws */
+.page-quiz .qopts [data-a="intimate"],.page-quiz .qopts [data-a="noticeable"],.page-quiz .qopts [data-a="room"]{--ring:rgba(138,90,20,.5)}
+.page-quiz .qopts [data-a="intimate"]{--orb:radial-gradient(circle,var(--gold-d) 0 6px,transparent 6.5px),#fff}
+.page-quiz .qopts [data-a="noticeable"]{--orb:radial-gradient(circle,var(--gold-d) 0 6px,transparent 6.5px 11px,var(--ring) 11.5px 13px,transparent 13.5px),#fff}
+.page-quiz .qopts [data-a="room"]{--orb:radial-gradient(circle,var(--gold-d) 0 6px,transparent 6.5px 11px,var(--ring) 11.5px 13px,transparent 13.5px 17.5px,rgba(138,90,20,.28) 18px 19.5px,transparent 20px),#fff}
+.page-quiz .qopts :is([data-a="intimate"],[data-a="noticeable"],[data-a="room"])::before{background:var(--orb);box-shadow:inset 0 0 0 1px var(--line)}
+/* the half of the year: sun, the cooler blue, or both halves */
+.page-quiz .qopts [data-a="summer"]{--orb:radial-gradient(circle at 50% 50%,#F7D98B 0 30%,#E3A53A 70%,#C9821E)}
+.page-quiz .qopts [data-a="winter"]{--orb:linear-gradient(145deg,#A9C4D6,var(--blue) 60%,#173A52)}
+.page-quiz .qopts [data-a="both"]{--orb:linear-gradient(135deg,#F2C766 0 50%,#4D7B99 50% 100%)}
+
+/* each question arrives with a small lift; its tiles follow one by one */
+@keyframes bgs-q-in{from{opacity:.001;transform:translateY(12px)}to{opacity:1;transform:none}}
+.js .page-quiz .qcard:not([hidden]) h2{animation:bgs-q-in .42s var(--ease) both}
+.js .page-quiz .qcard:not([hidden]) .qopts button{animation:bgs-q-in .46s var(--ease) both}
+.js .page-quiz .qcard:not([hidden]) .qopts button:nth-child(1){animation-delay:.05s}
+.js .page-quiz .qcard:not([hidden]) .qopts button:nth-child(2){animation-delay:.09s}
+.js .page-quiz .qcard:not([hidden]) .qopts button:nth-child(3){animation-delay:.13s}
+.js .page-quiz .qcard:not([hidden]) .qopts button:nth-child(4){animation-delay:.17s}
+.js .page-quiz .qcard:not([hidden]) .qopts button:nth-child(5){animation-delay:.21s}
+.js .page-quiz .qcard:not([hidden]) .qopts button:nth-child(n+6){animation-delay:.25s}
+
+/* tablets: a centred column, answers in two (the notes in three) */
+@media (min-width:600px){
+  .page-quiz > section{padding-block:22px 40px}
+  .page-quiz > section > .wrap > .eyebrow{max-width:640px;margin-inline:auto}
+  .page-quiz .quiz{max-width:640px;margin-inline:auto;margin-top:18px}
+  .page-quiz .qcard h2{margin:30px 0 28px;font-size:40px}
+  .page-quiz .qopts{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .page-quiz .qopts button{min-height:96px}
+  .page-quiz .qopts-2{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .page-quiz .qopts-2 button{min-height:150px}
+}
+
+/* ---------- the result ---------- */
+.page-quiz .qresult{position:relative;display:grid;grid-template-columns:minmax(0,1fr);margin-top:10px;isolation:isolate}
+
+/* the profile on a dark sheet: the eyebrow, the title and the pills share it.
+   The sheet and its rings are drawn behind the first three rows. */
+.page-quiz .qresult::before,.page-quiz .qresult::after{content:"";grid-column:1;grid-row:1 / 4;border-radius:var(--r-xl);pointer-events:none}
+.page-quiz .qresult::before{z-index:-2;
+  background:radial-gradient(90% 80% at 100% 0%,rgba(216,183,117,.24) 0%,rgba(216,183,117,0) 62%),
+    radial-gradient(80% 70% at 0% 100%,rgba(109,60,200,.3) 0%,rgba(109,60,200,0) 70%),var(--night)}
+.page-quiz .qresult::after{z-index:-1;
+  background:repeating-radial-gradient(circle at 100% 0%,rgba(216,183,117,0) 0 30px,rgba(216,183,117,.2) 30.5px 31.5px,rgba(216,183,117,0) 32px 44px);
+  -webkit-mask:radial-gradient(circle at 100% 0%,#000 0,rgba(0,0,0,.5) 90px,transparent 210px);
+  mask:radial-gradient(circle at 100% 0%,#000 0,rgba(0,0,0,.5) 90px,transparent 210px)}
+[dir="rtl"] .page-quiz .qresult::after{
+  background:repeating-radial-gradient(circle at 0% 0%,rgba(216,183,117,0) 0 30px,rgba(216,183,117,.2) 30.5px 31.5px,rgba(216,183,117,0) 32px 44px);
+  -webkit-mask:radial-gradient(circle at 0% 0%,#000 0,rgba(0,0,0,.5) 90px,transparent 210px);
+  mask:radial-gradient(circle at 0% 0%,#000 0,rgba(0,0,0,.5) 90px,transparent 210px)}
+.page-quiz .qresult > .eyebrow:first-child{grid-column:1;grid-row:1;padding:28px 22px 0;font-size:14px;font-weight:600;color:var(--gold-t)}
+.page-quiz .qresult > .qtitle{grid-column:1;grid-row:2;margin:0;padding:6px 22px 0;font:800 34px/1.04 var(--font-d);letter-spacing:-.036em;
+  color:#fff;text-wrap:wrap;overflow-wrap:anywhere}
+.page-quiz .qresult > .pills{grid-column:1;grid-row:3;display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 0 !important;padding:0 22px 26px}
+.page-quiz .qresult > .pills .pill{min-height:34px;padding:0 13px;border:0;border-radius:var(--r-pill);cursor:default;
+  background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16);color:var(--on-night);font:600 14px/1.2 var(--font)}
+.page-quiz .qresult > .pills .pill:first-child{background:var(--gold-t);box-shadow:none;color:var(--night)}
+
+/* the closest blend */
+.page-quiz .qresult > .sec-h{margin:32px 0 14px}
+.page-quiz .qresult .sec-h h2.subhead{font:700 23px/1.15 var(--font-d);letter-spacing:-.024em}
+.page-quiz .qresult > .sum{margin:0 0 14px !important;padding:20px;border-radius:var(--r-xl);background:var(--soft) !important;box-shadow:inset 0 0 0 1px var(--hair)}
+.page-quiz .qresult > .sum > div:first-child{align-items:center !important;gap:12px 16px !important}
+.page-quiz .qresult .rname{font:700 22px/1.18 var(--font-d);letter-spacing:-.022em;color:var(--ink);overflow-wrap:anywhere}
+.page-quiz .qresult .rmeta{margin-top:4px;font-size:14px;line-height:1.4;color:var(--mut)}
+.page-quiz .qresult .rprice{display:inline-flex;align-items:center;min-height:38px;padding:0 14px;border-radius:var(--r-pill);background:#fff;
+  box-shadow:var(--shadow-1);font:750 17px/1 var(--font);letter-spacing:-.01em;white-space:nowrap;color:var(--ink)}
+.page-quiz .qresult .rprice:empty{display:none}
+.page-quiz .qresult .kv{display:grid;margin-top:16px !important;padding:2px 16px;border-radius:var(--r);background:#fff;box-shadow:inset 0 0 0 1px var(--hair)}
+.page-quiz .qresult .kv > div{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:13px 0;font-size:14px;line-height:1.4}
+.page-quiz .qresult .kv > div + div{border-top:1px solid var(--hair)}
+/* the facets are a sentence: they read under their label, not squeezed beside it */
+.page-quiz .qresult .kv > div:first-child{display:grid;gap:4px}
+.page-quiz .qresult .kv > div:first-child > span:last-child{max-width:none !important;text-align:start !important;font-weight:500;line-height:1.45}
+.page-quiz .qresult .kv > div > span:first-child{flex:0 1 auto;min-width:0;color:var(--mut)}
+.page-quiz .qresult .kv > div > span:last-child{flex:0 1 auto;min-width:0;color:var(--ink);font-weight:500;text-align:end !important;overflow-wrap:anywhere;
+  font-variant-numeric:tabular-nums}
+.page-quiz .qresult .kv > div > span:last-child:empty::before{content:"";display:inline-block;width:24px;height:2px;border-radius:2px;background:var(--line);vertical-align:middle}
+.page-quiz .qresult > .sum:first-of-type > div:last-child{gap:10px !important;margin-top:16px !important}
+.page-quiz .qresult [data-rsee],.page-quiz .qresult [data-qretake]{flex:1 1 140px;min-width:0;padding:0 16px;white-space:normal;line-height:1.2}
+.page-quiz .qresult [data-qretake]{background:#fff;color:var(--ink);border-color:var(--line)}
+.page-quiz .qresult [data-qretake]:active{background:var(--hair)}
+.page-quiz .qresult > .note{margin:0 0 28px !important;padding-inline:4px;font-size:13px;line-height:1.5;color:var(--mut)}
+
+/* the trio banner keeps the shared banner look; only its spacing is set here */
+.page-quiz .qresult > .band{margin:0 0 14px !important}
+
+/* send it to yourself */
+.page-quiz .qresult > .sum:last-child{padding:22px 20px 20px}
+.page-quiz .qresult > .sum:last-child > .eyebrow{display:block;font:700 21px/1.2 var(--font-d);letter-spacing:-.022em;color:var(--ink)}
+.page-quiz .qresult .sendnote{margin:6px 0 16px;font-size:15px;line-height:1.5;color:var(--body)}
+.page-quiz .qresult .grid.g2{grid-template-columns:minmax(0,1fr);gap:10px;margin-bottom:10px !important}
+.page-quiz .qresult .field{display:block;min-width:0;min-height:52px;padding:14px 16px;border-radius:var(--r-sm);background:#fff;
+  box-shadow:inset 0 0 0 1.5px var(--line);font-size:16px;line-height:24px;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.page-quiz .qresult .consent{display:flex;align-items:center;gap:12px;min-height:56px;padding:12px 16px;border-radius:var(--r);background:#fff;
+  box-shadow:inset 0 0 0 1px var(--hair);font-size:15px;line-height:1.4;color:var(--ink)}
+/* the tick box: a 24px box drawn inside a 44px target */
+.page-quiz .qresult .consent input[type=checkbox]{position:relative;flex:none;width:44px;height:44px;margin:-10px;margin-inline-end:-6px;
+  border:10px solid transparent;border-radius:17px;background:#fff padding-box;box-shadow:inset 0 0 0 1.5px var(--faint);
+  -webkit-appearance:none;appearance:none;cursor:pointer;transition:background-color .15s,box-shadow .15s}
+.page-quiz .qresult .consent input[type=checkbox]:checked{background:var(--cta) padding-box;box-shadow:none}
+.page-quiz .qresult .consent input[type=checkbox]:checked::after{content:"";position:absolute;left:50%;top:45%;width:6px;height:11px;
+  border:solid #fff;border-width:0 2.5px 2.5px 0;transform:translate(-50%,-50%) rotate(45deg)}
+.page-quiz .qresult .consent input[type=checkbox]:focus-visible{outline:2px solid var(--cta);outline-offset:-8px;border-radius:17px}
+.page-quiz .qresult .consent + .mini{margin-top:10px;padding-inline:4px;font-size:13px;line-height:1.5;color:var(--mut)}
+.page-quiz .qresult > .sum:last-child .btn.block{margin-top:16px !important}
+
+/* the result rises in, block by block */
+.js .page-quiz .qresult:not([hidden]) > *{animation:bgs-q-in .5s var(--ease) both}
+.js .page-quiz .qresult:not([hidden])::before,.js .page-quiz .qresult:not([hidden])::after{animation:bgs-q-in .5s var(--ease) both}
+.js .page-quiz .qresult:not([hidden]) > .qtitle{animation-delay:.06s}
+.js .page-quiz .qresult:not([hidden]) > .pills{animation-delay:.12s}
+.js .page-quiz .qresult:not([hidden]) > :nth-child(n+4){animation-delay:.18s}
+
+@media (min-width:600px){
+  .page-quiz .qresult{max-width:640px;margin-inline:auto;margin-top:18px}
+  .page-quiz .qresult > .eyebrow:first-child{padding:36px 32px 0}
+  .page-quiz .qresult > .qtitle{padding:8px 32px 0;font-size:44px}
+  .page-quiz .qresult > .pills{padding:0 32px 34px}
+  .page-quiz .qresult > .sum{padding:26px}
+  .page-quiz .qresult .grid.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+/* Arabic: the page turns right to left. Words that stay in English keep their
+   own order (so a question mark or a number lands where it belongs), while the
+   blocks still line up with the page's reading side. */
+[dir="rtl"] .page-quiz :is(.qstep,.qback,.qcard h2,.qopts button,.qtitle,.pill,.sec-h h2,.rname,.rmeta,.rprice,.kv span,.note,.sendnote,.field,.consent,.mini,.sum > .eyebrow){unicode-bidi:plaintext}
+[dir="rtl"] .page-quiz :is(.qstep,.qcard h2,.qopts button,.qtitle,.sec-h h2,.rname,.rmeta,.note,.sendnote,.sum > .eyebrow,.mini,.field){text-align:right}
+[dir="rtl"] .page-quiz .qresult .kv > div > span:last-child{text-align:left !important}
+[dir="rtl"] .page-quiz .qresult .kv > div:first-child > span:last-child{text-align:right !important}
+[dir="rtl"] .page-quiz .qresult .kv > div:first-child > span:first-child{text-align:right}

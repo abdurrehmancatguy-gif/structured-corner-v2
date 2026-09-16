@@ -1,0 +1,253 @@
+/* ---------- gifting: the gift box builder (gift-box.html, body.page-gift-box)
+   and corporate gifting (corporate.html, body.page-corporate) ----------
+
+   Gift box: a big heading, a segmented switch for the box size, the box
+   itself as a tray of compartments that fill with a gold bottle as scents are
+   picked (the next compartment to fill is ringed in purple), the scent
+   cards, a receipt, and a floating glass bar with the total and the button.
+   The button fills with light purple as the box fills and turns solid when
+   the box is full. The bar floats on the tab bar while the builder is on
+   screen and settles under the receipt at the end.
+
+   Corporate: a dark sheet holding the title and the four volume tiers (each
+   with a small rising meter), the gold call banner, then the enquiry form on
+   a soft card. */
+
+/* ======================= gift box ======================= */
+
+.page-gift-box > section{padding-block:14px 30px}
+.page-gift-box section > .wrap > .eyebrow{font-size:13px;line-height:1.4;color:var(--mut)}
+.page-gift-box section > .wrap > .sec-h{display:block;margin:12px 0 22px !important}
+.page-gift-box section > .wrap > .sec-h > div{min-width:0}
+.page-gift-box .pagetitle{font:800 34px/1.04 var(--font-d);letter-spacing:-.034em;margin:0 0 10px;text-wrap:balance}
+.page-gift-box .intro{margin:0;max-width:44ch;font-size:16px;line-height:1.5;color:var(--body);text-wrap:pretty}
+@media (min-width:600px){ .page-gift-box .pagetitle{font-size:42px} }
+
+/* the builder: one grid, so the receipt and the bar can share a row and the
+   bar can float over everything above it */
+.page-gift-box .two{--frac:0;display:grid;grid-template-columns:[full-start bar-start] minmax(0,1fr) auto [bar-end full-end];
+  align-items:start}
+.page-gift-box .two > div,.page-gift-box .two > div > .sum:first-child{display:contents}
+.page-gift-box .two > :where(div) > *,.page-gift-box .two > :where(div) > :where(.sum:first-child) > *{grid-column:full;min-width:0}
+
+/* ---------- box size: a segmented switch with a sliding white thumb ---------- */
+.page-gift-box .two .pills{grid-row:1;position:relative;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;
+  padding:4px;margin:0 0 14px !important;border-radius:16px;background:var(--tile);isolation:isolate}
+.page-gift-box .two .pills::before{content:"";position:absolute;z-index:-1;top:4px;bottom:4px;left:4px;width:calc(50% - 6px);
+  border-radius:12px;background:#fff;box-shadow:0 1px 2px rgba(23,15,5,.08),0 4px 12px rgba(23,15,5,.08);
+  transition:transform .32s var(--ease)}
+.page-gift-box .two .pills:has(> .pill.on:last-child)::before{transform:translateX(calc(100% + 4px))}
+[dir="rtl"] .page-gift-box .two .pills::before{left:auto;right:4px}
+[dir="rtl"] .page-gift-box .two .pills:has(> .pill.on:last-child)::before{transform:translateX(calc(-100% - 4px))}
+.page-gift-box .two .pills .pill{position:relative;justify-content:center;min-width:0;min-height:46px;padding:0 10px;border:0;
+  border-radius:12px;background:transparent;color:var(--mut);font:600 15px/1.2 var(--font);white-space:normal;text-align:center;
+  transition:color .2s,transform .15s var(--ease)}
+.page-gift-box .two .pills .pill.on{background:transparent;color:var(--ink)}
+.page-gift-box .two .pills .pill:active{transform:scale(.97)}
+
+/* ---------- the box: a tray of compartments ---------- */
+.page-gift-box [data-slots]{--alt:#fff;grid-row:2;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 8px;
+  margin:0 0 34px !important;padding:12px 12px 14px;border-radius:var(--r-xl);background:var(--tile)}
+.page-gift-box [data-slots] > .p{position:relative;display:block;width:100%;min-width:0;margin:0;padding:0;border-width:0;border-radius:0;
+  background:none;color:var(--ink);font:inherit;text-align:start;-webkit-appearance:none;appearance:none}
+.page-gift-box [data-slots] .ph{aspect-ratio:1 / 1;border-radius:14px;overflow:hidden;container-type:size}
+.page-gift-box [data-slots] .ph .none{inset:auto 2px 7px;display:block;font-size:12px;line-height:1.25;text-align:center;color:var(--mut)}
+.page-gift-box [data-slots] .b{display:block;padding:8px 2px 0}
+.page-gift-box [data-slots] .nm{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  font:600 13.5px/1.25 var(--font);overflow-wrap:anywhere}
+.page-gift-box [data-slots] .notes{display:block;margin-top:2px;font-size:12px;line-height:1.3;color:var(--mut);overflow-wrap:anywhere}
+
+/* an empty compartment: dashed, with a plus */
+.page-gift-box [data-slots] > .p:not(.slot-filled) .ph{border:1.5px dashed rgba(29,21,9,.2)}
+.page-gift-box [data-slots] > .p:not(.slot-filled) .ph::before{content:"";position:absolute;left:50%;top:36%;width:min(34%,34px);aspect-ratio:1 / 1;
+  border-radius:50%;transform:translate(-50%,-50%);color:var(--mut);
+  background:linear-gradient(currentColor,currentColor) center / 12px 2px no-repeat,
+    linear-gradient(currentColor,currentColor) center / 2px 12px no-repeat,var(--soft)}
+.page-gift-box [data-slots] > .p:not(.slot-filled) .notes{display:none}
+/* the next one to fill: ringed in purple, its words in full */
+.page-gift-box [data-slots] > .p:not(.slot-filled):first-child .ph,
+.page-gift-box [data-slots] > .slot-filled + .p:not(.slot-filled) .ph{border:2px solid var(--cta);box-shadow:0 0 0 4px var(--cta-l)}
+.page-gift-box [data-slots] > .p:not(.slot-filled):first-child .ph::before,
+.page-gift-box [data-slots] > .slot-filled + .p:not(.slot-filled) .ph::before{color:#fff;
+  background:linear-gradient(currentColor,currentColor) center / 12px 2px no-repeat,
+    linear-gradient(currentColor,currentColor) center / 2px 12px no-repeat,var(--cta)}
+.page-gift-box [data-slots] > .p:not(.slot-filled):first-child .ph .none,
+.page-gift-box [data-slots] > .slot-filled + .p:not(.slot-filled) .ph .none{color:var(--cta)}
+.page-gift-box [data-slots] > .p:not(.slot-filled):first-child .nm,
+.page-gift-box [data-slots] > .slot-filled + .p:not(.slot-filled) .nm{color:var(--ink) !important}
+.page-gift-box [data-slots] > .p:not(.slot-filled):first-child .notes,
+.page-gift-box [data-slots] > .slot-filled + .p:not(.slot-filled) .notes{display:block}
+
+/* a filled compartment: night, a gold bottle, a small cross to take it out */
+.page-gift-box .slot-filled{cursor:pointer;transition:transform .15s var(--ease)}
+.page-gift-box .slot-filled:active{transform:scale(.96)}
+.page-gift-box .slot-filled .ph{background:radial-gradient(80% 60% at 50% 38%,rgba(216,183,117,.3),rgba(216,183,117,0) 70%),var(--night)}
+.page-gift-box .slot-filled .ph::before{content:"";position:absolute;left:50%;top:15%;width:15cqh;height:12%;border-radius:3px 3px 1px 1px;
+  transform:translateX(-50%);background:linear-gradient(90deg,#8A5A14,#F4D78F 45%,#B8914A)}
+.page-gift-box .slot-filled .ph::after{content:"";position:absolute;left:50%;top:28%;width:30cqh;height:40%;border-radius:18% / 12%;
+  transform:translateX(-50%);box-shadow:inset 0 0 0 1px rgba(255,244,220,.35);
+  background:linear-gradient(90deg,rgba(138,90,20,.95),rgba(244,215,143,.95) 42%,rgba(184,145,74,.95) 72%,rgba(138,90,20,.95))}
+.page-gift-box .slot-filled .ph .none{color:var(--gold-t);font-weight:600}
+.page-gift-box .slot-filled::after{content:"";position:absolute;z-index:2;top:6px;inset-inline-end:6px;width:22px;height:22px;border-radius:50%;
+  background:linear-gradient(#fff,#fff) center / 10px 1.8px no-repeat,linear-gradient(#fff,#fff) center / 1.8px 10px no-repeat,rgba(255,255,255,.18);
+  transform:rotate(45deg)}
+.page-gift-box .slot-filled .nm{color:var(--ink)}
+
+/* on a tablet the compartments grow wide rather than tall: six across, or
+   three wide ones */
+@media (min-width:600px){
+  .page-gift-box [data-slots]{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 12px;padding:14px 14px 16px}
+  .page-gift-box [data-slots] .ph{aspect-ratio:16 / 10}
+  .page-gift-box [data-slots]:has(> :nth-child(4)){grid-template-columns:repeat(6,minmax(0,1fr))}
+  .page-gift-box [data-slots]:has(> :nth-child(4)) .ph{aspect-ratio:1 / 1}
+}
+
+@media (min-width:600px) and (max-height:500px){
+  .page-gift-box [data-slots] .ph{aspect-ratio:2 / 1}
+}
+
+/* ---------- the scents to pick from ---------- */
+.page-gift-box .two .sec-h{grid-row:3;margin:0 0 14px}
+.page-gift-box .two .sec-h h2.subhead{font:700 24px/1.12 var(--font-d);letter-spacing:-.024em;text-wrap:balance}
+.page-gift-box .two .grid.g4{grid-row:4}
+
+/* ---------- the receipt: three lines on a soft card ---------- */
+.page-gift-box .two .sum > .r{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:7px 18px;
+  background:var(--soft);font-size:15px;line-height:1.35;color:var(--body)}
+.page-gift-box .two .sum > .r > span:first-child{min-width:0}
+.page-gift-box .two .sum > .r > span:last-child{flex:none;color:var(--ink);font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
+.page-gift-box .two .sum > .r:nth-child(1){grid-row:5;margin-top:36px;padding-top:18px;border-radius:var(--r-lg) var(--r-lg) 0 0}
+.page-gift-box .two .sum > .r:nth-child(2){grid-row:6}
+.page-gift-box .two .sum > [data-boxdisc]{grid-row:7;align-items:center;margin-bottom:12px;padding-bottom:18px;border-radius:0 0 var(--r-lg) var(--r-lg)}
+/* the discount: a quiet pill until the box earns it, then green */
+.page-gift-box .two .sum > [data-boxdisc] > span:first-child{color:var(--mut)}
+.page-gift-box .two .sum > [data-boxdisc] > span:last-child{display:inline-flex;align-items:center;min-height:28px;padding:0 10px;
+  border-radius:var(--r-pill);background:var(--tile);color:var(--mut);font-size:14px}
+.page-gift-box .two .sum > [data-boxdisc][style*="green"] > span:first-child{color:var(--green)}
+.page-gift-box .two .sum > [data-boxdisc][style*="green"] > span:last-child{background:rgba(46,107,62,.1);color:var(--green)}
+
+/* ---------- the bar: total and the button on floating glass ---------- */
+.page-gift-box .two::after{content:"";grid-row:8;grid-column:bar;align-self:stretch;position:relative;z-index:34;margin-inline:-4px;
+  border-radius:var(--r-lg);background:rgba(255,255,255,.86);-webkit-backdrop-filter:saturate(180%) blur(22px);backdrop-filter:saturate(180%) blur(22px);
+  box-shadow:0 8px 28px rgba(23,15,5,.14),0 1px 2px rgba(23,15,5,.08),inset 0 0 0 1px rgba(23,15,5,.05)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){ .page-gift-box .two::after{background:rgba(255,255,255,.97)} }
+.page-gift-box .two .sum > .r.t{grid-row:8;grid-column:1;align-self:stretch;position:relative;z-index:35;display:flex;flex-direction:column;
+  align-items:flex-start;justify-content:center;gap:1px;margin:9px 0;padding-block:0;padding-inline:14px 10px;background:none;color:var(--mut)}
+.page-gift-box .two .sum > .r.t > span:first-child{font-size:13px;line-height:1.2}
+.page-gift-box .two .sum > .r.t > span:last-child{font:800 20px/1.15 var(--font-d);letter-spacing:-.02em;color:var(--ink)}
+.page-gift-box .two [data-boxcta]{grid-row:8;grid-column:2;position:relative;z-index:35;display:flex;width:auto;min-width:0;max-width:calc(100vw - 150px);
+  min-height:50px;margin:9px 5px 9px 0 !important;padding:6px 18px;border-radius:13px;white-space:normal;line-height:1.2;font-size:15px}
+[dir="rtl"] .page-gift-box .two [data-boxcta]{margin:9px 0 9px 5px !important}
+/* while the box fills, the button fills with it */
+.page-gift-box .two:has([data-slots] > .slot-filled:nth-child(1)){--frac:.3333}
+.page-gift-box .two:has([data-slots] > .slot-filled:nth-child(2)){--frac:.6667}
+.page-gift-box .two:has([data-slots] > :nth-child(4)):has([data-slots] > .slot-filled:nth-child(1)){--frac:.1667}
+.page-gift-box .two:has([data-slots] > :nth-child(4)):has([data-slots] > .slot-filled:nth-child(2)){--frac:.3333}
+.page-gift-box .two:has([data-slots] > :nth-child(4)):has([data-slots] > .slot-filled:nth-child(3)){--frac:.5}
+.page-gift-box .two:has([data-slots] > :nth-child(4)):has([data-slots] > .slot-filled:nth-child(4)){--frac:.6667}
+.page-gift-box .two:has([data-slots] > :nth-child(4)):has([data-slots] > .slot-filled:nth-child(5)){--frac:.8333}
+.page-gift-box .two [data-boxcta].ghost{border-color:rgba(91,33,182,.3);color:var(--cta-d);
+  background:linear-gradient(rgba(91,33,182,.14),rgba(91,33,182,.14)) 0 0 / calc(var(--frac) * 100%) 100% no-repeat,#fff;
+  transition:background-size .45s var(--ease),transform .15s var(--ease)}
+[dir="rtl"] .page-gift-box .two [data-boxcta].ghost{background-position:100% 0}
+.page-gift-box .two [data-boxcta].solid{box-shadow:0 6px 16px rgba(91,33,182,.3)}
+
+/* floating: once a scent is in the box the bar rises onto the tab bar and
+   stays there while the builder is in view; it settles under the receipt
+   when the page reaches it. Short landscape screens keep it in its place. */
+@keyframes gb-bar-in{from{opacity:0;translate:0 14px}to{opacity:1;translate:none}}
+@media (min-height:501px){
+  .page-gift-box .two:has([data-slots] > .slot-filled)::after,
+  .page-gift-box .two:has([data-slots] > .slot-filled) .sum > .r.t,
+  .page-gift-box .two:has([data-slots] > .slot-filled) [data-boxcta]{position:sticky;animation:gb-bar-in .38s var(--ease) backwards}
+  .page-gift-box .two:has([data-slots] > .slot-filled)::after{bottom:calc(var(--tabbar-top) + 8px)}
+  .page-gift-box .two:has([data-slots] > .slot-filled) .sum > .r.t,
+  .page-gift-box .two:has([data-slots] > .slot-filled) [data-boxcta]{bottom:calc(var(--tabbar-top) + 17px)}
+}
+
+/* A full-page capture pins sticky boxes with an inline position:relative;
+   the offsets would then only push the bar out of its row, so they go. */
+.page-gift-box .two .sum > .r.t[style*="relative"],.page-gift-box .two [data-boxcta][style*="relative"]{bottom:auto !important}
+.page-gift-box .two:has([data-boxcta][style*="relative"])::after{position:relative !important;bottom:auto !important}
+
+/* ---------- gift options: a white card with ruled lines ---------- */
+.page-gift-box .two > div > .sum:last-child{grid-row:9;margin-top:16px !important;padding:18px 18px 4px;border-radius:var(--r-lg);
+  background:#fff;box-shadow:inset 0 0 0 1.5px var(--hair),0 1px 2px rgba(23,15,5,.04)}
+.page-gift-box .two > div > .sum:last-child > .eyebrow{font:700 19px/1.2 var(--font-d);letter-spacing:-.018em;color:var(--ink)}
+.page-gift-box .two .kv{display:flex;flex-direction:column;margin-top:6px !important}
+.page-gift-box .two .kv > div{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:13px 0;
+  border-top:1px solid var(--hair);font-size:15px;line-height:1.35}
+.page-gift-box .two .kv > div:first-child{border-top:0}
+.page-gift-box .two .kv > div > span:first-child{min-width:0;color:var(--body)}
+.page-gift-box .two .kv > div > span:last-child{flex:none;max-width:48%;color:var(--ink);font-weight:600;text-align:end}
+
+/* ======================= corporate gifting ======================= */
+
+.page-corporate > section{padding-block:16px 30px}
+
+/* the hero: a night sheet with a soft gold glow, the title, the line under
+   it, and the tiers inside the same sheet */
+.page-corporate section > .wrap > .sec-h{display:block;margin:0;padding:34px 22px 24px;border-radius:var(--r-xl) var(--r-xl) 0 0;
+  color:var(--on-night);
+  background:radial-gradient(100% 80% at 100% 0%,rgba(216,183,117,.26) 0%,rgba(216,183,117,0) 64%),var(--night)}
+[dir="rtl"] .page-corporate section > .wrap > .sec-h{background:radial-gradient(100% 80% at 0% 0%,rgba(216,183,117,.26) 0%,rgba(216,183,117,0) 64%),var(--night)}
+.page-corporate section > .wrap > .sec-h > div{min-width:0}
+.page-corporate .pagetitle{font:800 38px/1.02 var(--font-d);letter-spacing:-.036em;margin:0 0 12px;color:#fff;text-wrap:balance}
+.page-corporate .intro{margin:0;max-width:34ch;font-size:16px;line-height:1.5;color:var(--on-night-2);text-wrap:pretty}
+
+/* the tiers: four cards, each with a small meter that rises with the volume */
+.page-corporate section > .wrap > .grid.g4{--on:var(--gold-t);--off:rgba(244,236,221,.16);
+  grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 14px !important;padding:0 12px 12px;
+  border-radius:0 0 var(--r-xl) var(--r-xl);background:var(--night)}
+.page-corporate .grid.g4 > .sum{position:relative;display:flex;flex-direction:column;min-width:0;padding:16px 14px 15px;border-radius:18px;
+  background:var(--night-2) !important;box-shadow:inset 0 0 0 1px rgba(216,183,117,.12);color:var(--on-night)}
+.page-corporate .grid.g4 > .sum::before{content:"";display:block;width:26px;height:18px;margin-bottom:16px;
+  background:linear-gradient(var(--b1,var(--off)),var(--b1,var(--off))) 0 100% / 4px 6px no-repeat,
+    linear-gradient(var(--b2,var(--off)),var(--b2,var(--off))) 7px 100% / 4px 10px no-repeat,
+    linear-gradient(var(--b3,var(--off)),var(--b3,var(--off))) 14px 100% / 4px 14px no-repeat,
+    linear-gradient(var(--b4,var(--off)),var(--b4,var(--off))) 21px 100% / 4px 18px no-repeat}
+[dir="rtl"] .page-corporate .grid.g4 > .sum::before{transform:scaleX(-1)}
+.page-corporate .grid.g4 > .sum:nth-child(n+1){--b1:var(--on)}
+.page-corporate .grid.g4 > .sum:nth-child(n+2){--b2:var(--on)}
+.page-corporate .grid.g4 > .sum:nth-child(n+3){--b3:var(--on)}
+.page-corporate .grid.g4 > .sum:nth-child(n+4){--b4:var(--on)}
+.page-corporate .grid.g4 > .sum > .eyebrow{font:800 22px/1.08 var(--font-d);letter-spacing:-.028em;color:#fff;overflow-wrap:anywhere}
+.page-corporate .grid.g4 > .sum > .tier{margin:8px 0 2px;font:600 15px/1.3 var(--font);color:var(--gold-t)}
+.page-corporate .grid.g4 > .sum > .tiernote{margin:0;font-size:13px;line-height:1.4;color:var(--on-night-3)}
+/* the largest tier stands out a little */
+.page-corporate .grid.g4 > .sum:last-child:not(:first-child){background:linear-gradient(160deg,rgba(216,183,117,.24),rgba(216,183,117,.06) 70%),var(--night-3) !important;
+  box-shadow:inset 0 0 0 1px rgba(216,183,117,.42)}
+.page-corporate .grid.g4 > .sum:last-child:not(:first-child) > .tiernote{color:var(--on-night-2)}
+
+/* the call banner (its look comes from the homepage band) */
+.page-corporate section > .wrap > .band{margin:0}
+.page-corporate .band h3{text-wrap:balance}
+.page-corporate .band .btn:active{background:var(--banner-t)}
+
+/* the enquiry: a soft card, the fields stacked, the purple send button */
+.page-corporate #corporate-form{margin-top:14px !important;max-width:none !important;padding:20px 16px 16px;border-radius:var(--r-xl);background:var(--soft)}
+.page-corporate #corporate-form .grid.g2{grid-template-columns:minmax(0,1fr);gap:10px;margin-bottom:10px !important}
+.page-corporate #corporate-form input{min-height:52px;padding-inline:16px;border-color:var(--line);background:#fff}
+.page-corporate #corporate-form input:focus{border-color:var(--cta)}
+.page-corporate [data-cqsend]{display:flex;width:100%;min-height:52px;margin-top:6px}
+.page-corporate [data-cqresult]{margin:12px 0 0 !important;padding:12px 14px;border-radius:14px;background:#fff;
+  box-shadow:inset 0 0 0 1.5px var(--hair);font-size:15px;line-height:1.45;color:var(--ink)}
+/* after a send, a work email the browser cannot read as an address is ringed red */
+.page-corporate #corporate-form:has([data-cqresult]:not([hidden])) [data-cq="email"]:invalid{border-color:var(--red);box-shadow:0 0 0 3px rgba(179,38,30,.1)}
+
+@media (min-width:600px){
+  .page-corporate .pagetitle{font-size:46px}
+  .page-corporate section > .wrap > .sec-h{padding:42px 30px 28px}
+  .page-corporate section > .wrap > .grid.g4{grid-template-columns:repeat(4,minmax(0,1fr));padding:0 16px 16px}
+  .page-corporate #corporate-form .grid.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .page-corporate .band .btn{justify-self:start;min-width:260px}
+}
+
+/* ======================= Arabic ======================= */
+/* The words here stay English in Arabic; each line keeps its own reading
+   order (so "3 slots" and "-10%" do not turn around) while it sits on the
+   right. */
+[dir="rtl"] .page-gift-box :is(.intro,.eyebrow,.pill,[data-slots] .none,[data-slots] .nm,[data-slots] .notes,.sum .r > span,.kv span,[data-boxcta]),
+[dir="rtl"] .page-corporate :is(.intro,.sum > .eyebrow,.tier,.tiernote,.band h3,.band p,[data-cqresult]){unicode-bidi:plaintext}
+[dir="rtl"] .page-gift-box :is(.intro,.eyebrow,[data-slots] .nm,[data-slots] .notes),
+[dir="rtl"] .page-corporate :is(.intro,.sum > .eyebrow,.tier,.tiernote,.band h3,.band p,[data-cqresult]){text-align:right}

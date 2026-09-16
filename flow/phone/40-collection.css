@@ -1,0 +1,206 @@
+/* ---------- the shop listing: collection.html ----------
+   All products, a category (?cat=attars), a scent family (?family=reserve),
+   a search (?q=oud) and a search that finds nothing (?q=zzqxv).
+
+   The page opens with the breadcrumb, a large tight title and one line of
+   intro. Under it a toolbar of frosted glass sticks below the header: the
+   Filters button with its count leads a row of chips that swipes sideways
+   (the filters in force, each removable, and Ready today), and under them the
+   product count and the sort. The grid is the shared card grid. The filters
+   open as a bottom sheet that rises onto the tab bar: each facet a wrapping
+   row of chips, Clear all and Show N products held at its foot. When nothing
+   matches, a soft card says so and offers to clear. */
+
+.page-collection{
+  --mast-h:58px;
+  /* how far a bar must reach past the page gutter to touch the screen edge,
+     including the notch in landscape and the margin a tablet puts round .wrap */
+  --bleed-l:calc(max(var(--gut),env(safe-area-inset-left,0px)) + max(0px,(100vw - 760px) / 2));
+  --bleed-r:calc(max(var(--gut),env(safe-area-inset-right,0px)) + max(0px,(100vw - 760px) / 2));
+}
+.page-collection.filters-open{overflow:hidden}
+
+/* words kept for screen readers only (the Sort label, "remove filter") */
+.page-collection .none-visual{position:absolute !important;width:1px;height:1px;padding:0;margin:-1px;overflow:clip;
+  clip-path:inset(50%);white-space:nowrap;border:0;font-size:1px;line-height:1px}
+
+/* ---------- the head of the page ---------- */
+.page-collection > section:has(.plp){padding-block:20px 44px}
+.page-collection [data-crumb]{font-size:14px;font-weight:500;line-height:1.35;color:var(--mut)}
+.page-collection .sec-h{display:block;margin:6px 0 20px !important}
+.page-collection .sec-h > div{min-width:0}
+.page-collection .pagetitle{margin:0;font:800 34px/1.05 var(--font-d);letter-spacing:-.032em;color:var(--ink);text-wrap:balance}
+.page-collection .intro{margin-top:10px;max-width:38ch !important;font-size:16px;line-height:1.5;color:var(--body);text-wrap:pretty}
+@media (min-width:600px){ .page-collection .pagetitle{font-size:42px} }
+
+.page-collection .plp{display:block}
+.page-collection .plp > div:last-child{min-width:0}
+
+/* ---------- the sticky toolbar ----------
+   Two rows on a phone: the Filters button and the chip row, then the count
+   and the sort. It runs to the screen's edges, frosted like the header, and
+   sticks right under it. */
+.page-collection .toolbar:has(> .filterbtn){position:sticky;top:var(--mast-h);z-index:20;
+  display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:6px 4px;
+  margin:0 calc(-1 * var(--bleed-r)) 18px calc(-1 * var(--bleed-l));
+  padding:8px var(--bleed-r) 6px var(--bleed-l);
+  background:var(--glass);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);
+  box-shadow:0 1px 0 var(--line)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .page-collection .toolbar:has(> .filterbtn){background:rgba(255,255,255,.97)} }
+
+/* Filters: a soft capsule with the lines icon, its count a purple dot */
+.page-collection .filterbtn{position:relative;display:inline-flex;align-items:center;gap:8px;min-height:40px;margin:0;
+  padding:0 14px 0 12px;border:0;border-radius:var(--r-pill);background:var(--tile);color:var(--ink);
+  font:600 15px/1.1 var(--font);white-space:nowrap;cursor:pointer;
+  -webkit-appearance:none;appearance:none;transition:transform .15s var(--ease),background-color .2s}
+.page-collection .filterbtn::after{content:"";position:absolute;inset:-2px -2px}
+.page-collection .filterbtn svg{flex:none;width:18px;height:18px}
+.page-collection .filterbtn:active{transform:scale(.97);background:var(--line)}
+.page-collection .fcount{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;
+  margin-inline-start:1px;border-radius:var(--r-pill);background:var(--cta);color:#fff;font:700 12.5px/1 var(--font);
+  font-style:normal;font-variant-numeric:tabular-nums}
+/* the count follows the filters in force (the URL), so a search or a
+   category opened from a link shows it as well */
+.page-collection .fcount:not([hidden]){display:inline-flex !important}
+
+/* the chips: they swipe sideways and run off the screen's edge */
+.page-collection .toolbar .pills{display:flex;flex-wrap:nowrap;align-items:center;gap:8px;min-width:0;
+  margin-right:calc(-1 * var(--bleed-r));padding:2px var(--bleed-r) 2px 10px;
+  overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;
+  -webkit-mask-image:linear-gradient(to right,transparent 0,#000 10px);mask-image:linear-gradient(to right,transparent 0,#000 10px)}
+.page-collection .toolbar .pills::-webkit-scrollbar{display:none}
+[dir="rtl"] .page-collection .toolbar .pills{margin-right:0;margin-left:calc(-1 * var(--bleed-l));padding:2px 10px 2px var(--bleed-l);
+  -webkit-mask-image:linear-gradient(to left,transparent 0,#000 10px);mask-image:linear-gradient(to left,transparent 0,#000 10px)}
+.page-collection .pills .pill{position:relative;flex:none;display:inline-flex;align-items:center;gap:8px;min-height:40px;margin:0;
+  padding:0 16px;border:0;border-radius:var(--r-pill);background:#fff;box-shadow:inset 0 0 0 1.5px var(--line);color:var(--ink);
+  font:500 14.5px/1.1 var(--font);white-space:nowrap;cursor:pointer;-webkit-appearance:none;appearance:none;
+  transition:transform .15s var(--ease),background-color .2s,color .2s}
+.page-collection .pills .pill:active{transform:scale(.97)}
+.page-collection .pills .pill.on{background:var(--ink);box-shadow:none;color:#fff}
+.page-collection .pills .pill[data-rm]{padding-inline-end:8px}
+.page-collection .pills .pill > span[aria-hidden]{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;
+  border-radius:50%;background:rgba(255,255,255,.18);font-size:17px;font-weight:400;line-height:1}
+.page-collection .pills .pill:focus-visible{outline:2px solid var(--cta);outline-offset:-2px;border-radius:var(--r-pill)}
+
+/* the count and the sort share the second row */
+.page-collection .toolbar:has(> .filterbtn) > div:has(> .sel){grid-column:1 / -1;display:flex;flex-wrap:wrap;align-items:center;
+  justify-content:space-between;row-gap:4px;min-width:0;max-width:100%}
+.page-collection .toolbar .count{min-width:0;font-size:14.5px;line-height:1.3;color:var(--mut);white-space:nowrap;
+  font-variant-numeric:tabular-nums;padding-inline-start:2px}
+.page-collection .toolbar .count [data-count]{font-weight:700;color:var(--ink)}
+.page-collection .toolbar .sel{position:relative;display:inline-flex;align-items:center;min-width:0;max-width:100%;margin-inline-start:auto;
+  padding:0;border:0;background:none}
+.page-collection .toolbar .sel select{width:auto;min-width:0;max-width:100%;min-height:44px;margin:0;padding:0 38px 0 16px;border:0;
+  border-radius:var(--r-pill);background:var(--soft);background-image:none;box-shadow:inset 0 0 0 1px var(--line);
+  font:600 16px/1.2 var(--font);color:var(--ink);text-overflow:ellipsis;cursor:pointer;
+  transition:background-color .2s}
+.page-collection .toolbar .sel select:active{background:var(--hair)}
+.page-collection .toolbar .sel select:focus{box-shadow:inset 0 0 0 1px var(--line)}
+.page-collection .toolbar .sel select:focus-visible{box-shadow:inset 0 0 0 1.5px var(--cta),0 0 0 3px var(--cta-l)}
+.page-collection .toolbar .sel svg{position:absolute;top:50%;right:15px;width:14px;height:14px;margin-top:-7px;color:var(--ink);pointer-events:none}
+[dir="rtl"] .page-collection .toolbar .sel select{padding:0 16px 0 38px}
+[dir="rtl"] .page-collection .toolbar .sel svg{right:auto;left:15px}
+
+/* a phone on its side: two rows would take half the screen, so one row
+   (Filters, the count and the sort, then the chips running to the edge) */
+@media (orientation:landscape) and (max-height:500px){
+  .page-collection .toolbar:has(> .filterbtn){grid-template-columns:auto auto minmax(0,1fr);gap:0 12px;padding-block:7px}
+  .page-collection .toolbar:has(> .filterbtn) > div:has(> .sel){order:1;grid-column:auto;flex-wrap:nowrap}
+  .page-collection .toolbar .pills{order:2}
+}
+
+/* ---------- the grid ---------- */
+.page-collection .plp .grid{margin-top:4px}
+/* cards in a row share one height, so the price and the add button sit on
+   one line across the row even when a name or a detail takes two lines */
+.page-collection .plp .grid > .p .b{grid-template-rows:auto auto minmax(0,1fr)}
+.page-collection .plp .grid > .p .pr{align-self:end;align-items:center;min-height:42px}
+.page-collection .plp .grid > .p [data-add]{align-self:end}
+/* the narrowest phones: the detail line wraps rather than running under the
+   next card */
+@media (max-width:359px){ .page-collection .plp .grid > .p .meta{white-space:normal;text-overflow:clip} }
+
+/* ---------- the filters: a bottom sheet ----------
+   It rises onto the tab bar (its white carried on underneath, as the
+   added-to-bag sheet does) over a dimmed page. The title and the close button
+   stay at its top; Clear all and Show N products stay at its foot while the
+   facets scroll between them. */
+.page-collection .scrim{position:fixed;inset:0;z-index:34;background:rgba(23,15,5,.42);opacity:0;visibility:hidden;
+  -webkit-tap-highlight-color:transparent;transition:opacity .3s var(--ease),visibility 0s linear .3s}
+.page-collection.filters-open .scrim{opacity:1;visibility:visible;transition:opacity .3s var(--ease),visibility 0s}
+
+.page-collection .side{position:fixed;z-index:35;left:0;right:0;bottom:var(--tabbar-top);max-width:640px;margin:0 auto;
+  max-height:calc(100vh - var(--tabbar-top) - 16px);max-height:calc(100dvh - var(--tabbar-top) - 16px);
+  display:grid;grid-template-columns:auto minmax(0,1fr);align-content:start;
+  overflow-y:auto;overscroll-behavior:contain;background:#fff;color:var(--ink);
+  border-radius:var(--r-xl) var(--r-xl) 0 0;box-shadow:0 -12px 40px rgba(23,15,5,.16),0 120px 0 0 #fff;
+  transform:translateY(calc(100% + var(--tabbar-top) + 140px));visibility:hidden;
+  transition:transform .36s var(--ease),visibility 0s linear .36s}
+.page-collection.filters-open .side{transform:none;visibility:visible;transition:transform .36s var(--ease),visibility 0s}
+
+.page-collection .drawerhead{grid-column:1 / -1;position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;
+  gap:12px;min-height:68px;padding-block:14px 6px;padding-inline:20px 12px;background:#fff}
+.page-collection .drawerhead b{min-width:0;font:700 24px/1.15 var(--font-d);letter-spacing:-.025em}
+.page-collection .closex{flex:none;display:flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;border:0;
+  border-radius:50%;background:var(--soft);color:var(--ink);font:400 26px/1 var(--font);cursor:pointer;transition:transform .15s var(--ease)}
+.page-collection .closex:active{transform:scale(.92);background:var(--hair)}
+
+/* one facet: its name, then its choices as chips that wrap */
+.page-collection .fbox{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:8px;min-width:0;padding-block:16px 20px;padding-inline:20px;
+  border-top:1px solid var(--hair)}
+.page-collection .drawerhead + .toolbar + .fbox{border-top:0;padding-top:8px}
+.page-collection .fbox h4{flex:0 0 100%;margin:0 0 4px;font:700 17px/1.25 var(--font-d);letter-spacing:-.012em;color:var(--ink)}
+.page-collection .fbox label{position:relative;display:inline-block;min-height:44px;max-width:100%;padding:max(4px,calc((44px - 1.3em) / 2)) 18px;
+  border-radius:var(--r-pill);background:var(--soft);box-shadow:inset 0 0 0 1px var(--line);color:var(--ink);
+  font:500 15px/1.3 var(--font);cursor:pointer;-webkit-tap-highlight-color:transparent;
+  transition:transform .15s var(--ease),background-color .2s,color .2s,box-shadow .2s}
+.page-collection .fbox label input{position:absolute;inset:0;width:100%;height:100%;margin:0;border-radius:inherit;opacity:0;cursor:pointer;
+  -webkit-appearance:none;appearance:none}
+.page-collection .fbox label:active{transform:scale(.97)}
+.page-collection .fbox label:has(input:checked){background:var(--ink);box-shadow:none;color:#fff;font-weight:600}
+.page-collection .fbox label:has(input:focus-visible){outline:2px solid var(--cta);outline-offset:2px}
+
+/* the foot: Clear all beside Show N products */
+.page-collection .side > .toolbar{order:1;grid-column:1;position:sticky;bottom:0;z-index:2;display:flex;align-items:center;
+  margin:0 !important;padding-block:12px !important;padding-inline:12px 0 !important;background:#fff;box-shadow:0 -1px 0 var(--hair)}
+.page-collection .side .fhead{display:none}
+.page-collection .side .toolbar [data-clearall]{min-height:52px;padding:0 10px;border-radius:var(--r-sm);color:var(--ink);
+  font:600 15px/1.2 var(--font);text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:4px;white-space:nowrap}
+.page-collection .side .toolbar [data-clearall]:active{background:var(--soft)}
+.page-collection .draweractions{order:2;grid-column:2;position:sticky;bottom:0;z-index:2;min-width:0;padding-block:12px;padding-inline:10px 20px;
+  background:#fff;box-shadow:0 -1px 0 var(--hair)}
+.page-collection .draweractions .btn{display:block;width:100%;min-height:52px;padding:max(6px,calc((52px - 1.25em) / 2)) 16px;
+  font-size:16px;line-height:1.25;white-space:normal;text-align:center}
+.page-collection .draweractions [data-count]{font-variant-numeric:tabular-nums}
+
+/* a phone on its side: a shorter head and foot leave room for the choices */
+@media (orientation:landscape) and (max-height:500px){
+  .page-collection .side{max-height:calc(100vh - var(--tabbar-top) - 8px);max-height:calc(100dvh - var(--tabbar-top) - 8px)}
+  .page-collection .drawerhead{min-height:56px;padding-block:6px}
+  .page-collection .drawerhead b{font-size:21px}
+  .page-collection .fbox{padding-block:10px 14px}
+  .page-collection .side > .toolbar,.page-collection .draweractions{padding-block:8px !important}
+  .page-collection .draweractions .btn,.page-collection .side .toolbar [data-clearall]{min-height:48px}
+}
+
+/* ---------- nothing found ----------
+   A soft card with a drawn magnifier, the message, and the way back. */
+.page-collection .emptystate{display:flex;flex-direction:column;align-items:center;margin:4px 0 8px;padding:40px 22px 28px;
+  border-radius:var(--r-xl);background:var(--soft);text-align:center}
+.page-collection .emptystate::before{content:"";flex:none;width:76px;height:76px;margin-bottom:20px;border-radius:50%;
+  background:
+    linear-gradient(45deg,transparent calc(50% - 1.7px),var(--cta) calc(50% - 1.7px),var(--cta) calc(50% + 1.7px),transparent calc(50% + 1.7px)) 42px 42px / 13px 13px no-repeat,
+    radial-gradient(circle at 34px 34px,transparent 0 10.5px,var(--cta) 11px 14px,transparent 14.5px) 0 0 / 100% 100% no-repeat,
+    var(--cta-l)}
+.page-collection .emptystate b{display:block;max-width:22ch;font:700 23px/1.18 var(--font-d);letter-spacing:-.022em;color:var(--ink);text-wrap:balance}
+.page-collection .emptystate .emptybody{margin:8px 0 22px !important;max-width:32ch;font-size:16px;line-height:1.5;color:var(--mut);text-wrap:pretty}
+.page-collection .emptystate .btn{min-width:min(100%,220px);background:var(--cta);border-color:var(--cta);color:#fff}
+.page-collection .emptystate .btn:active{background:var(--cta-d)}
+
+/* ---------- Arabic ----------
+   Words the translation leaves in English (the count, the intro, the empty
+   state, "Show 29 products", "AED 200+") keep their own reading order inside
+   the right-to-left page, and still sit to the right. */
+.page-collection :is([data-crumb],.pagetitle,.intro,.toolbar .count,.fbox label,.draweractions .btn,.emptystate b,.emptybody){unicode-bidi:plaintext}
+[dir="rtl"] .page-collection :is([data-crumb],.pagetitle,.intro,.toolbar .count){text-align:right}

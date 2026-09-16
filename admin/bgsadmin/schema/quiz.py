@@ -68,8 +68,6 @@ FIELDS = [
      "help": "{shared} becomes the number of facets the answers and the match have in common, {total} the number the answers asked for."},
     {"path": "/result/see_label", "type": "text", "label": "Button to the product", "required": True, "maxLength": 30, "group": "Result"},
     {"path": "/result/retake_label", "type": "text", "label": "Retake button", "required": True, "maxLength": 30, "group": "Result"},
-    {"path": "/result/note", "type": "textarea", "label": "Note under the match", "required": True, "maxLength": 400,
-     "group": "Result", "help": "Says where the facets come from."},
     {"path": "/result/unnamed", "type": "text", "label": "Name when no profile's product is on sale", "required": True,
      "maxLength": 40, "group": "Result"},
     {"path": "/result/unnamed_slot", "type": "text", "label": "Note beside that name", "maxLength": 60, "group": "Result"},

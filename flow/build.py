@@ -366,6 +366,9 @@ SHELL_TEXT = {
     "title_suffix": page_text("seo.default_title_suffix", doc="settings"),
     "noscript": page_text("shell.noscript"),
     "countdown": page_text("strip.countdown_line", RULE_TOKENS, doc="copy"),
+    # a second line that takes turns with the first (shop.js), in the same place
+    "strip_second": ('<span class="strip-msg">%s %s</span>' % (sv("truck", 13, 2), page_text("strip.second_line", RULE_TOKENS, doc="copy", empty_ok=True))
+                     if isinstance(_value("strip.second_line", "copy"), str) and _value("strip.second_line", "copy").strip() else ""),
     "strip_links": "".join(
         ('<a href="%s">%s</a>' % (esc(l.get("href")), page_text("strip.right_links.%d.label" % i, RULE_TOKENS, doc="copy"))
          if isinstance(l, dict) and l.get("href") else
@@ -413,15 +416,31 @@ def slot(label):
     return '<span class="slot">%s</span>' % label
 
 BRAND = C["settings"].get("brand", {})
+# The wordmark's face (flow.css and phone/10-shell.css name it in @font-face).
+LOGO_FONT = "assets/fonts/cormorant-garamond-700.woff2"
 
 def _brand_alt():
     return esc(BRAND.get("logo_alt") or SETTINGS.get("name") or "BGS Corner")
 
+def _emblem_wordmark():
+    """settings.brand's emblem (the file the admin's emblem upload replaces)
+    and wordmark, when both are set: the header and footer show the emblem
+    picture with the wordmark beside it as text, in Cormorant Garamond Bold."""
+    emb, word = BRAND.get("emblem"), BRAND.get("wordmark")
+    if isinstance(emb, str) and emb and isinstance(word, str) and word.strip():
+        w, h = png_size(emb)
+        return emb, word.strip(), (' width="%d" height="%d"' % (w, h) if w else "")
+    return None
+
 def header_logo():
-    """Masthead brand: the logo image when set in settings.brand, else the
-    wordmark fallback. Content-driven - the admin swaps the file, not the code.
-    The art carries the whole lockup, CORNER included (tools/make_gold_logo.py),
-    so there is nothing to set beside it."""
+    """Masthead brand: the emblem and the wordmark as text when settings.brand
+    has both, else the logo image, else the wordmark fallback. Content-driven:
+    the admin swaps the file and the words, not the code."""
+    ew = _emblem_wordmark()
+    if ew:
+        emb, word, size = ew
+        return ('<a class="logo logo-type" href="index.html" aria-label="%s"><img class="logo-emb" src="%s" alt=""%s>'
+                '<span class="logo-wm" aria-hidden="true">%s</span></a>' % (_brand_alt(), esc(V(emb)), size, esc(word)))
     logo = BRAND.get("logo")
     if logo:
         w, h = png_size(logo)
@@ -447,7 +466,13 @@ def favicon_links():
     return "\n".join(tags)
 
 def footer_logo():
-    """Footer brand: the lifted logo on the dark ground, else wordmark."""
+    """Footer brand: the emblem and the wordmark as text, else the lifted logo
+    on the dark ground, else the plain wordmark."""
+    ew = _emblem_wordmark()
+    if ew:
+        emb, word, size = ew
+        return ('<div class="foot-brand"><img class="foot-emb" src="%s" alt=""%s loading="lazy" decoding="async">'
+                '<span class="foot-wm">%s</span></div>' % (esc(V(emb)), size, esc(word)))
     logo = BRAND.get("logo_light") or BRAND.get("logo")
     if logo:
         w, h = png_size(logo)
@@ -552,7 +577,8 @@ EXTRA_GLOBALS.append(("BGS_AUTH", lambda: AUTH))
 # mid-purchase, not for search results.
 NOINDEX = {"page-cart", "page-checkout", "page-confirmed", "page-account", "page-track-order"}
 # The pages whose phone design is the one in phone/*.css (see PHONE_CSS).
-PHONE_PAGES = {"page-index"}
+PHONE_PAGES = {"page-index", "page-collection", "page-product", "page-cart", "page-checkout", "page-confirmed",
+               "page-account", "page-track-order", "page-quiz", "page-gift-box", "page-corporate"}
 
 def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
     """No category strip here. The circles are a homepage shelf now - the sticky
@@ -574,10 +600,10 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
 <meta property="og:image" content="%(ogimg)s">
 <meta name="twitter:card" content="summary_large_image">
 %(icons)s
-%(preload)s%(stylesheets)s</head><body class="%(page)s">
+%(preload)s%(fontload)s%(stylesheets)s</head><body class="%(page)s">
 <noscript><div class="nojs">%(noscript)s</div></noscript>
 <div class="strip"><div class="wrap">
-  <span>%(clock)s %(countdown)s<span data-cutoff hidden> &middot; <b></b></span></span>
+  <span class="strip-msgs" data-stripmsgs><span class="strip-msg on">%(clock)s %(countdown)s<span data-cutoff hidden> &middot; <b></b></span></span>%(strip_second)s</span>
   <span class="r">%(strip_links)s<a href="#" data-langtoggle>العربية</a></span>
 </div></div>
 <div class="mast"><div class="wrap">
@@ -605,6 +631,10 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
 <script src="%(catjs)s"></script>
 <script src="%(shopjs)s"></script></body></html>
 """ % dict(SHELL_TEXT, title=title, body=body, page=page,
+   # the wordmark's face, fetched early since the masthead shows it at once
+   # (no ?v= here: the preload has to be the very URL the stylesheets' @font-face asks for)
+   fontload=('<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin>\n' % LOGO_FONT)
+            if _emblem_wordmark() else "",
    stylesheets=('<link rel="stylesheet" href="%s" media="(min-width:901px)">\n'
                 '<link rel="stylesheet" href="%s" media="(max-width:900px)">'
                 % (V("assets/flow.min.css"), V("assets/phone.min.css"))) if page in PHONE_PAGES
@@ -1786,8 +1816,6 @@ quiz = """
       </div>
     </div>
 
-    <div class="note" style="margin-bottom:26px">%(r_note)s</div>
-
     <div class="band" style="margin-bottom:26px">
       <div><span class="eyebrow gold-d">Not ready to commit</span>
         <h3>Discovery Trio, AED 129</h3>
@@ -1800,8 +1828,6 @@ quiz = """
       <p class="sendnote">We can send this profile to your phone so you have it when you visit the kiosk.</p>
       <div class="grid g2" style="margin-bottom:12px"><span class="field">Your name</span><span class="field">+971 5X XXX XXXX</span></div>
       <label class="consent"><input type="checkbox">Send my scent profile and offers on WhatsApp</label>
-      <p class="mini">Unticked on purpose. Nothing is sent unless you tick it, and the time, source and language of the
-      consent are stored with it.</p>
       <button type="button" class="btn solid block" style="margin-top:12px">WhatsApp me my profile</button>
     </div>
   </div>

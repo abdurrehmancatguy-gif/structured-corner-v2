@@ -2465,6 +2465,30 @@ bgsRun(function () {
   tick(); setInterval(tick, 30000);
 });
 
+/* ---------- the strip's two lines take turns -------------------------------
+   The same-day line and the second line (copy.json strip.second_line) share
+   one place and swap every five seconds. The swap waits while a pointer rests
+   on the strip or focus is in it, and while the tab is hidden.
+--------------------------------------------------------------------------- */
+bgsRun(function () {
+  "use strict";
+  var box = document.querySelector("[data-stripmsgs]");
+  var msgs = box ? box.querySelectorAll(".strip-msg") : [];
+  if (msgs.length < 2) return;
+  var i = 0, hold = false;
+  var strip = box.closest(".strip") || box;
+  strip.addEventListener("mouseenter", function () { hold = true; });
+  strip.addEventListener("mouseleave", function () { hold = false; });
+  strip.addEventListener("focusin", function () { hold = true; });
+  strip.addEventListener("focusout", function () { hold = false; });
+  setInterval(function () {
+    if (hold || document.hidden) return;
+    msgs[i].classList.remove("on");
+    i = (i + 1) % msgs.length;
+    msgs[i].classList.add("on");
+  }, 5000);
+});
+
 /* ---------- product films on the homepage ----------------------------------
    Each card starts as a still. A film is requested only once its card is on
    screen, plays muted and looped while it stays there, and pauses when it

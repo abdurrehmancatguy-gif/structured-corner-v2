@@ -366,7 +366,7 @@ def review(app, sentences=True):
 # ---- Not live ---------------------------------------------------------------------------
 
 TEXT_TYPES = (".html", ".js", ".css", ".txt", ".json", ".xml", ".svg", ".webmanifest")
-ASSET_TYPES = (".jpg", ".png", ".mp4", ".js", ".css", ".ico", ".txt")
+ASSET_TYPES = (".jpg", ".png", ".mp4", ".js", ".css", ".ico", ".txt", ".woff2")
 DASH_SWEEP = re.compile(r"^(?:[^/]+\.html|assets/[^/]+\.js|assets/flow\.min\.css)$")
 LOCAL_REFS = (b"/admin", b"localhost", b":4310")
 MAX_BYTES = 25 * 1024 * 1024

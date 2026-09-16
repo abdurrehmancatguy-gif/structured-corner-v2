@@ -6,8 +6,13 @@
 /* delivery line: a lighter shade of the brand brown */
 .strip{background:var(--strip);color:var(--on-strip);font-size:13px;line-height:1.35}
 .strip .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:34px;padding-block:6px}
-.strip .wrap > span:first-child{display:flex;align-items:center;gap:7px;min-width:0}
-.strip .wrap > span:first-child svg{flex:none;width:14px;height:14px}
+/* the same-day line and the free delivery line take turns in one place (shop.js) */
+.strip-msgs{display:grid;min-width:0}
+.strip-msg{grid-area:1 / 1;display:flex;align-items:center;gap:7px;min-width:0;opacity:0;transform:translateY(8px);
+  transition:opacity .45s var(--ease),transform .45s var(--ease);pointer-events:none}
+.strip-msg.on{opacity:1;transform:none;pointer-events:auto}
+.strip-msg svg{flex:none;width:14px;height:14px}
+html:not(.js) .strip-msg:not(.on){display:none}
 .strip b{color:#fff;font-weight:600}
 .strip .r{display:flex;align-items:center;flex:none}
 .strip .r > :not([data-langtoggle]){display:none}
@@ -26,6 +31,15 @@
 .logo{display:flex;align-items:center;flex:0 1 auto;min-width:0;margin-inline-end:auto;min-height:44px}
 .logo .brandmark{display:block;width:140px;max-width:100%;height:auto;aspect-ratio:486 / 78;opacity:.8}
 .logo .wm{font:700 17px/1 var(--font-d);letter-spacing:.08em;color:var(--gold-d);white-space:nowrap}
+/* the emblem and the wordmark in Cormorant Garamond Bold, dimmed a little; the
+   type shrinks with the screen so the logo always clears the three icons */
+.logo.logo-type{gap:.32em;color:#A8791E;opacity:.82;font-size:min(25px,calc((100vw - 176px) / 6.6))}
+.logo-emb{display:block;flex:none;width:1.12em;height:1.12em}
+.logo-wm{font:700 1em/1 "Cormorant Garamond",Georgia,"Times New Roman",serif;letter-spacing:.02em;white-space:nowrap;padding-top:.08em}
+/* the wordmark is the brand's mark, not reading text: a phone's larger text
+   setting leaves it at its size, and it can never push the icons off */
+.logo.logo-type{min-width:0;overflow:hidden}
+.logo-wm,.foot-wm{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .logo .logomark{display:none}
 .acts{display:flex;align-items:center;gap:0;flex:none}
 .act{position:relative;display:flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;padding:0;
@@ -85,6 +99,9 @@ footer{background:var(--night);color:var(--on-night-2);margin-top:24px;padding:4
 footer .cols{display:grid;grid-template-columns:1fr 1fr;gap:28px 16px}
 footer .cols > div:first-child{grid-column:1 / -1}
 .foot-logo{display:block;width:150px;height:auto;margin-bottom:14px;opacity:.9}
+.foot-brand{display:flex;align-items:center;gap:9px;margin-bottom:14px;color:#C29A4E}
+.foot-emb{display:block;width:30px;height:30px}
+.foot-wm{font:700 26px/1 "Cormorant Garamond",Georgia,"Times New Roman",serif;letter-spacing:.02em;white-space:nowrap;padding-top:2px}
 .wm.foot-wm{color:var(--gold-t);font:700 18px/1 var(--font-d);letter-spacing:.08em;margin-bottom:14px}
 footer p{font-size:14px;line-height:1.5;margin:0 0 6px;color:var(--on-night-3)}
 footer p:has(> .slot:only-child){display:none}
@@ -145,6 +162,7 @@ footer .bot{display:flex;flex-direction:column;gap:6px;margin-top:28px;padding-t
 .added-b{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .added-b .btn{min-height:50px;padding:0 12px;font-size:15px;white-space:nowrap}
 .added-b .btn:not(.solid){background:#fff;color:var(--ink);border-color:var(--line)}
+@media (orientation:landscape) and (max-height:500px){ .added-hd{font-size:14px} }
 
 /* shared page furniture */
 .crumb,.crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;font-size:13px;color:var(--mut);padding-top:14px}

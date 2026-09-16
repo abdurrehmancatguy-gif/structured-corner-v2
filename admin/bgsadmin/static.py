@@ -17,6 +17,7 @@ MIME = {
     ".js": "text/javascript; charset=utf-8", ".json": "application/json; charset=utf-8",
     ".txt": "text/plain; charset=utf-8", ".png": "image/png", ".jpg": "image/jpeg",
     ".jpeg": "image/jpeg", ".webp": "image/webp", ".ico": "image/x-icon", ".mp4": "video/mp4",
+    ".woff2": "font/woff2",
 }
 UI_TYPES = {".js", ".css", ".png", ".ico"}
 CHUNK = 64 * 1024

@@ -1,0 +1,7 @@
+Web fonts. Which face the logo uses is set in flow.css and phone/10-shell.css.
+
+  cormorant-garamond-700.woff2  Cormorant Garamond Bold, Latin, by the Cormorant
+      Project Authors (Christian Thalmann, github.com/CatharsisFonts/Cormorant),
+      version 4.001, under the SIL Open Font License 1.1
+      (https://openfontlicense.org). The owner chose it for the BGS CORNER
+      wordmark (2026-09-16); the copy is the one already on the owner's Mac.
