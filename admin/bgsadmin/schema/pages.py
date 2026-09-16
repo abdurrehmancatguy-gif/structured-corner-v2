@@ -169,7 +169,11 @@ _HOME = [
      ]},
 ] + [f for slug, name in FAMILIES for f in (
     text("/index/families/%s/label" % slug, name + " tile", HOME, 30, section="Scent families",
-         help="The tile opens the collection page, which does not filter by family yet, so it shows every product."),
+         help="The tile opens the collection page showing this family's products."),
+    text("/index/families/%s/words" % slug, name + " words", HOME, 200, section="Scent families", required=False,
+         help="Words, separated by commas, that put a product in this family when its name, category, size line "
+              "or notes contain one (oud finds every Oud Attar). A product whose Scent family field names this "
+              "family is in it too, and Reserve also holds every never-discounted product."),
     {"path": "/index/families/%s/image" % slug, "type": "image", "label": name + " photo", "required": True,
      "upload": "family", "group": HOME, "section": "Scent families",
      "help": "Behind the tile's name, under a dark overlay so the white words stay readable. It is cropped to the "

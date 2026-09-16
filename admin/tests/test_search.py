@@ -216,5 +216,30 @@ class InstantSearch(unittest.TestCase):
         self.assertTrue(s["ids"])
 
 
+    # ---- scent families ------------------------------------------------------
+    def test_a_scent_family_shows_its_own_products(self):
+        self.view(1440, 900)
+        self.open("collection.html?family=reserve")
+        cat = self.catalogue()
+        shown = "[...document.querySelectorAll('[data-grid] a.p')].map(a => new URL(a.href).searchParams.get('p'))"
+        for slug, belongs in (("reserve", lambda p: p.get("halo")),
+                              ("bakhoor-and-home", lambda p: p.get("cat") == "bakhoor"),
+                              ("fresh-and-citrus", lambda p: "citrus" in json.dumps(p).lower() or "lemon" in json.dumps(p).lower())):
+            self.open("collection.html?family=" + slug)
+            ids = self.c.js(shown)
+            self.assertTrue(ids, slug)
+            self.assertLess(len(ids), len(cat), "%s shows every product" % slug)
+            self.assertTrue(all(belongs(cat[k]) for k in ids), (slug, ids))
+        self.open("collection.html?family=oud-and-woods")
+        ids = self.c.js(shown)
+        self.assertTrue(all(k in ids for k, p in cat.items() if p.get("cat") == "attars"), ids)
+        self.assertEqual(self.c.js("document.querySelector('[data-title]').textContent"), "Oud & Woods")
+        # its pill takes the family off again
+        self.c.js("document.querySelector('[data-rm=\"family\"]').click()")
+        self.assertEqual(len(self.c.js(shown)), len(cat))
+        self.assertIsNone(self.c.js("new URLSearchParams(location.search).get('family')"))
+        self.assertEqual(self.c.errors(), [])
+
+
 if __name__ == "__main__":
     unittest.main()

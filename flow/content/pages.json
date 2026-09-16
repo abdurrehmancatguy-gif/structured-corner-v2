@@ -56,35 +56,43 @@
     "families": {
       "oud-and-woods": {
         "label": "Oud & Woods",
-        "image": "assets/fam/oud-and-woods.jpg"
+        "image": "assets/fam/oud-and-woods.jpg",
+        "words": "oud, wood, agarwood, sandalwood, cedar, vetiver"
       },
       "amber-and-spice": {
         "label": "Amber & Spice",
-        "image": "assets/fam/amber-and-spice.jpg"
+        "image": "assets/fam/amber-and-spice.jpg",
+        "words": "amber, spice, spicy, clove, cinnamon, saffron, cardamom, balsamic"
       },
       "musk-and-clean": {
         "label": "Musk & Clean",
-        "image": "assets/fam/musk-and-clean.jpg"
+        "image": "assets/fam/musk-and-clean.jpg",
+        "words": "musk, clean, powdery, cotton"
       },
       "floral-veil": {
         "label": "Floral Veil",
-        "image": "assets/fam/floral-veil.jpg"
+        "image": "assets/fam/floral-veil.jpg",
+        "words": "floral, rose, jasmine, violet, lily, lavender, magnolia, iris, peony"
       },
       "fresh-and-citrus": {
         "label": "Fresh & Citrus",
-        "image": "assets/fam/fresh-and-citrus.jpg"
+        "image": "assets/fam/fresh-and-citrus.jpg",
+        "words": "citrus, lemon, lime, bergamot, orange, grapefruit, fresh"
       },
       "sweet-and-gourmand": {
         "label": "Sweet & Gourmand",
-        "image": "assets/fam/sweet-and-gourmand.jpg"
+        "image": "assets/fam/sweet-and-gourmand.jpg",
+        "words": "sweet, tonka, vanilla, honey, caramel, praline"
       },
       "reserve": {
         "label": "Reserve",
-        "image": "assets/fam/reserve.jpg"
+        "image": "assets/fam/reserve.jpg",
+        "words": ""
       },
       "bakhoor-and-home": {
         "label": "Bakhoor & Home",
-        "image": "assets/fam/bakhoor-and-home.jpg"
+        "image": "assets/fam/bakhoor-and-home.jpg",
+        "words": "bakhoor, incense"
       }
     },
     "reels_link": {

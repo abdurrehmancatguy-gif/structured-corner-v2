@@ -891,6 +891,22 @@ def family_tiles():
                    '%s</svg><b>%s</b></a>' % (s, colour, pic, art, page_text("index.families.%s.label" % s)))
     return "\n    ".join(out)
 
+def families_global():
+    """The scent families for the collection page's filter (shop.js): each
+    slug's label and the words, from pages.json index.families.<slug>.words
+    (separated by commas), that put a product in the family when its name,
+    category, size line or notes hold one. shop.js also counts a product whose
+    Scent family field names the family, and every never-discounted product
+    as Reserve."""
+    out = {}
+    for s in FAMILY_SLUGS:
+        words = _value("index.families.%s.words" % s)
+        out[s] = {"label": _value("index.families.%s.label" % s) or s,
+                  "words": [" ".join(re.findall(r"[a-z0-9]+", w.lower())) for w in
+                            (words if isinstance(words, str) else "").split(",") if re.search(r"[a-z0-9]", w.lower())]}
+    return out
+EXTRA_GLOBALS.append(("BGS_FAMILIES", families_global))
+
 def hero_images():
     """One photograph per slide, so the carousel changes picture and not only
        words. Driven from home.json's hero_slides, like the copy is - a slide

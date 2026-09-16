@@ -1258,13 +1258,14 @@ bgsRun(function () {
 
   function params() {
     var q = new URLSearchParams(location.search),
-        st = { cat: [], price: [], gender: [], ready: false, sort: "featured", q: "" };
+        st = { cat: [], price: [], gender: [], ready: false, sort: "featured", q: "", family: "" };
     ["cat", "price", "gender"].forEach(function (k) {
       var v = q.get(k); if (v) st[k] = v.split(",").filter(Boolean);
     });
     if (q.get("ready") === "1") st.ready = true;
     if (q.get("sort")) st.sort = q.get("sort");
     if (q.get("q")) st.q = q.get("q").trim();
+    if (q.get("family")) st.family = q.get("family");
     return st;
   }
   function write(st) {
@@ -1273,11 +1274,29 @@ bgsRun(function () {
     if (st.ready) q.set("ready", "1");
     if (st.sort !== "featured") q.set("sort", st.sort);
     if (st.q) q.set("q", st.q);
+    if (st.family) q.set("family", st.family);
     history.replaceState(null, "", location.pathname + (q.toString() ? "?" + q : ""));
   }
   function inBand(pn, band) { var p = band.split("-"); return pn >= +p[0] && pn <= +p[1]; }
+  /* A scent family (BGS_FAMILIES, from pages.json) holds the products whose
+     Scent family field names it, whose name, category, size line or notes
+     hold one of its words at the start of a word (so "wood" finds woody),
+     and, for Reserve, every never-discounted product. An unknown family
+     filters nothing. */
+  var FAMS = window.BGS_FAMILIES || {};
+  function famOf(slug) { return Object.prototype.hasOwnProperty.call(FAMS, slug) ? FAMS[slug] : null; }
+  function inFamily(pr, slug) {
+    var f = famOf(slug), own = String(pr.family || "").toLowerCase();
+    if (!f) return true;
+    if (own && (own === slug || own === String(f.label || "").toLowerCase())) return true;
+    if (slug === "reserve" && pr.halo) return true;
+    var text = " " + [pr.name, pr.crumb, pr.meta, pr.top, pr.heart, pr.base].join(" ").toLowerCase()
+      .replace(/[^a-z0-9]+/g, " ");
+    return (f.words || []).some(function (w) { return w && text.indexOf(" " + w) >= 0; });
+  }
   /* the filters; the words are bgsSearch's, in render */
   function match(pr, st) {
+    if (st.family && !inFamily(pr, st.family)) return false;
     if (st.cat.length && st.cat.indexOf(pr.cat) < 0) return false;
     if (st.gender.length && (!pr.gender || st.gender.indexOf(pr.gender) < 0)) return false;
     if (st.price.length && !st.price.some(function (b) { return inBand(pr.pn, b); })) return false;
@@ -1329,6 +1348,7 @@ bgsRun(function () {
     st.price.forEach(function (b) { var p = b.split("-");
       out.push(["price", b, +p[1] > 99998 ? "AED " + p[0] + "+" : "AED " + p[0] + " to " + p[1]]); });
     if (st.q) out.push(["q", st.q, '"' + st.q + '"']);
+    if (st.family && famOf(st.family)) out.push(["family", st.family, famOf(st.family).label]);
     return out;
   }
   function render() {
@@ -1351,14 +1371,14 @@ bgsRun(function () {
     grid.hidden = keys.length === 0;
     document.querySelectorAll("[data-count]").forEach(function (n) { n.textContent = keys.length; });
 
-    var one = st.cat.length === 1 ? st.cat[0] : null;
-    var title = catText(one || "all", "label");
+    var one = st.cat.length === 1 ? st.cat[0] : null, fam = !one && famOf(st.family);
+    var title = fam ? fam.label : catText(one || "all", "label");
     var t = document.querySelector("[data-title]"), intro = document.querySelector("[data-intro]"),
         cr = document.querySelector("[data-crumb]");
     if (t) t.textContent = title;
     if (intro) intro.textContent = catText(one || "all", "intro");
-    if (cr) cr.textContent = bgsCopy("crumb_home", "Home") + " / " +
-      (one ? bgsCopy("collection.crumb_categories", "Categories") + " / " : "") + catText(one || "all", "crumb");
+    if (cr) cr.textContent = bgsCopy("crumb_home", "Home") + " / " + (fam ? fam.label :
+      (one ? bgsCopy("collection.crumb_categories", "Categories") + " / " : "") + catText(one || "all", "crumb"));
     document.title = title + bgsTitleSuffix();
 
     document.querySelectorAll("[data-facet]").forEach(function (cb) {
@@ -1383,11 +1403,12 @@ bgsRun(function () {
     var rm = e.target.closest("[data-rm]");
     if (rm) {
       var k = rm.getAttribute("data-rm"), v = rm.getAttribute("data-val");
-      if (k === "q") st.q = ""; else st[k] = st[k].filter(function (x) { return x !== v; });
+      if (k === "q") st.q = ""; else if (k === "family") st.family = "";
+      else st[k] = st[k].filter(function (x) { return x !== v; });
       touched = true;
     }
     if (e.target.closest("[data-toggle]")) { st.ready = !st.ready; touched = true; }
-    if (e.target.closest("[data-clearall]")) { st = { cat: [], price: [], gender: [], ready: false, sort: st.sort, q: "" }; touched = true; }
+    if (e.target.closest("[data-clearall]")) { st = { cat: [], price: [], gender: [], ready: false, sort: st.sort, q: "", family: "" }; touched = true; }
     if (touched) { e.preventDefault(); write(st); render(); }
   });
   document.addEventListener("change", function (e) {
