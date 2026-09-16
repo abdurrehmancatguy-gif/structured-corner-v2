@@ -4,6 +4,10 @@
 [build]
   publish = "_site"
   command = 'cd flow && python3 build.py && s=$(git status --porcelain -- .) && { test -z "$s" || { echo "$s"; echo "flow/ is stale: run build.py and commit its output"; exit 1; }; } && cd .. && rm -rf _site && mkdir _site && cp flow/*.html flow/favicon.ico flow/robots.txt _site/ && cp -R flow/assets _site/assets && rm -f _site/assets/cat/SOURCES.txt _site/assets/flow.css'
+  # The owner does not deploy to Netlify for now: an ignore command that exits 0
+  # cancels the build, so Netlify skips every push and main goes live on GitHub
+  # Pages only. Delete this line to deploy to Netlify again.
+  ignore = "exit 0"
 
 [build.environment]
   PYTHON_VERSION = "3.12"
