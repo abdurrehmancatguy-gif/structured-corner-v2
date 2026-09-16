@@ -2905,3 +2905,24 @@ code{border:1px solid var(--line)}
   .promo b{font-size:20px !important}
 }
 @media (prefers-reduced-motion:reduce){ .promo::after{transition:none} }
+/* ---- no small capital-letter titles anywhere -------------------------------------
+   The owner wants the small, spaced-out capital-letter titles gone from the whole
+   site, not only on phones. The decorative lines over the banner, quiz and
+   Discovery headings are gone at every size; every other label that carries
+   information (breadcrumbs, checkout steps, a card's type and sizes, badges,
+   section and filter labels, the quiz step, footer headings, empty picture slots)
+   reads as ordinary text. !important, as in the phone block this extends. */
+.hero .eyebrow,.quizband .eyebrow,.band .eyebrow{display:none !important}
+.eyebrow,.meta,.badge,.qstep,.qstep b,footer h5,.fbox h4,.heroimg .none.corner,.notestop b,.none{
+  text-transform:none !important;letter-spacing:0 !important}
+@media (min-width:901px){
+  .eyebrow{font-size:13.5px !important;font-weight:600 !important}
+  .meta{font-size:12.5px !important}
+  .badge{font-size:11.5px !important}
+  .qstep{font-size:14px !important}
+  footer h5{font-size:15px !important}
+  .fbox h4{font-size:15px !important}
+  .heroimg .none.corner{font-size:12px !important}
+  .none{font-size:13px !important}
+}
+@media (max-width:900px){ .none{font-size:13px !important} }
