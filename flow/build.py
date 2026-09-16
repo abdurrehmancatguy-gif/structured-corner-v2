@@ -1907,7 +1907,7 @@ PRELOAD = product_preload()
 # into view: its outline draws itself while the gold fill rises behind it. The
 # emblem is the vector outline tools/trace_emblem.py traced from the logo art,
 # put once on a page that has a banner and used from there. Decoration only.
-EMBLEM_D = re.search(r' d="([^"]+)"', pathlib.Path("assets/img/logo-emblem.svg").read_text()).group(1)
+EMBLEM_D = re.search(r' d="([^"]+)"', pathlib.Path("tools/logo-emblem.svg").read_text()).group(1)
 EMBLEM_SPRITE = ('<svg class="emb-sprite" aria-hidden="true" focusable="false"><defs>'
                  '<path id="bgs-emblem" pathLength="1" vector-effect="non-scaling-stroke" fill-rule="evenodd" d="%s"/>'
                  '<linearGradient id="bgs-gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F4D78F"/>'

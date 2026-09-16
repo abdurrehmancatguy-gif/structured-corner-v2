@@ -1,10 +1,11 @@
-"""Trace the BGS emblem into a vector outline: assets/img/logo-emblem.svg.
+"""Trace the BGS emblem into a vector outline: tools/logo-emblem.svg.
 
 The emblem exists only as pictures. This follows the edge of its shape in the
 supplied art (assets/img/logo.png, where the emblem is the left 505 x 505), at
 twice that size for smoother edges, joins the edge into closed outlines, drops
 every point a straight line can stand in for (within a fifth of a pixel at the
-art's own size) and writes one even-odd path, so the holes stay holes. build.py
+art's own size) and writes one even-odd path, so the holes stay holes. It stays with the
+tools, off the published assets (the admin publishes no .svg there); build.py
 puts that path in the call banners and the promo tiles, where flow.css builds
 the emblem from the bottom up.
 
@@ -16,7 +17,7 @@ import numpy as np
 from PIL import Image
 
 SRC = "assets/img/logo.png"
-OUT = "assets/img/logo-emblem.svg"
+OUT = "tools/logo-emblem.svg"
 BOX = (0, 0, 505, 505)
 UP = 2
 EPS = 0.8    # in the traced (doubled) pixels: 0.4 of a pixel of the art
