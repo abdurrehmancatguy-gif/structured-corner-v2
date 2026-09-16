@@ -72,6 +72,10 @@ class CollectionsTests(unittest.TestCase):
 
     # ---- what the shop reads -------------------------------------------------
 
+    def shelf_link(self, key, n):
+        """A homepage shelf's link words as the pages print them: home.json's label, {n} the count."""
+        return self.b.content("home")["shelves"][key]["link_label"].replace("{n}", str(n))
+
     def test_list_counts_products(self):
         st, d = self.b.api("GET", "collections")
         self.assertEqual(st, 200, d)
@@ -83,7 +87,7 @@ class CollectionsTests(unittest.TestCase):
             live = len([p for p in rows if p.get("published", True)])
             self.assertEqual((it["published"], it["drafts"]), (live, len(rows) - live), key)
         attars = d["items"][0]
-        self.assertEqual(attars["shelf_shows"], {"cards": 5, "link": "All %d" % attars["published"]})
+        self.assertEqual(attars["shelf_shows"], {"cards": 5, "link": self.shelf_link("house_ouds", attars["published"])})
         self.assertIsNone(d["items"][-1]["shelf_shows"])
         self.assertIsNone(d["items"][-1]["data"]["circle"])
 
@@ -111,12 +115,13 @@ class CollectionsTests(unittest.TestCase):
         home = self.page("index.html")
         sec = home_doc["sections"]
         n = {c: len(self.published(c)) for c in ("attars", "edp")}
-        self.assertIn('<h2>%s</h2><a href="collection.html?cat=attars">All %d &rarr;</a>' % (sec["house_ouds"], n["attars"]), home)
-        self.assertIn('<h2>%s</h2><a href="collection.html?cat=attars">All attars &rarr;</a>' % sec["reserve"], home)
-        self.assertIn('<h2>%s</h2><a href="collection.html?cat=gift-sets">All sets &rarr;</a>' % sec["gift_sets"], home)
+        link = lambda key, count=0: html.escape(self.shelf_link(key, count))
+        self.assertIn('<h2>%s</h2><a href="collection.html?cat=attars">%s &rarr;</a>' % (sec["house_ouds"], link("house_ouds", n["attars"])), home)
+        self.assertIn('<h2>%s</h2><a href="collection.html?cat=attars">%s &rarr;</a>' % (sec["reserve"], link("reserve")), home)
+        self.assertIn('<h2>%s</h2><a href="collection.html?cat=gift-sets">%s &rarr;</a>' % (sec["gift_sets"], link("gift_sets")), home)
         self.assertIn('<h2>%s</h2></div>' % sec["scent_family"], home)
-        self.assertIn('<h2>%s</h2><a href="collection.html?cat=bakhoor">Shop bakhoor &rarr;</a>' % html.escape(sec["bakhoor"]), home)
-        self.assertIn('<h2>%s</h2><a href="collection.html?cat=edp">All %d &rarr;</a>' % (sec["edp"], n["edp"]), home)
+        self.assertIn('<h2>%s</h2><a href="collection.html?cat=bakhoor">%s &rarr;</a>' % (html.escape(sec["bakhoor"]), link("bakhoor")), home)
+        self.assertIn('<h2>%s</h2><a href="collection.html?cat=edp">%s &rarr;</a>' % (sec["edp"], link("edp", n["edp"])), home)
         self.assertEqual(shelf_html(home, "attars").count("data-add="), 5)
         self.assertEqual(shelf_html(home, "bakhoor").count("data-add="), len(self.published("bakhoor")))
 
@@ -164,7 +169,7 @@ class CollectionsTests(unittest.TestCase):
             self.assertEqual([c["label"] for c in nav if c["href"] == "collection.html?cat=attars"], ["Oils and attars"])
         finally:
             self.restore("attars", before)
-        self.assertIn('<a href="collection.html?cat=attars">All %d &rarr;</a>' % n, self.page("index.html"))
+        self.assertIn('<a href="collection.html?cat=attars">%s &rarr;</a>' % html.escape(self.shelf_link("house_ouds", n)), self.page("index.html"))
 
     def test_no_limit_shows_every_product(self):
         before = self.one("attars")["data"]
@@ -183,14 +188,14 @@ class CollectionsTests(unittest.TestCase):
         st, res = self.b.api("PUT", "products/" + pid, {"data": dict(p["data"], published=False)}, rev=p["rev"])
         self.assertEqual(st, 200, res)
         try:
-            self.assertIn('<a href="collection.html?cat=attars">All %d &rarr;</a>' % (n - 1), self.page("index.html"))
+            self.assertIn('<a href="collection.html?cat=attars">%s &rarr;</a>' % html.escape(self.shelf_link("house_ouds", n - 1)), self.page("index.html"))
             item = [i for i in self.b.api("GET", "collections")[1]["items"] if i["key"] == "attars"][0]
-            self.assertEqual((item["published"], item["shelf_shows"]["link"]), (n - 1, "All %d" % (n - 1)))
+            self.assertEqual((item["published"], item["shelf_shows"]["link"]), (n - 1, self.shelf_link("house_ouds", n - 1)))
         finally:
             st, cur = self.b.api("GET", "products/" + pid)
             st, res = self.b.api("PUT", "products/" + pid, {"data": p["data"]}, rev=cur["rev"])
             self.assertEqual(st, 200, res)
-        self.assertIn("All %d &rarr;" % n, self.page("index.html"))
+        self.assertIn("%s &rarr;" % html.escape(self.shelf_link("house_ouds", n)), self.page("index.html"))
 
     def test_reorder_moves_the_shelf(self):
         st, lst = self.b.api("GET", "products?category=attars")
