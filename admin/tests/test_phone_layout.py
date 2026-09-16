@@ -248,7 +248,9 @@ class PhoneLayout(unittest.TestCase):
     def test_the_buy_bar_keeps_its_details_on_one_line(self):
         for w, h in ((280, 653), (320, 568), (360, 640)):
             self.view(w, h)
-            for pid in ("royal-amber", "eid-royal-hamper"):
+            # Majlis OUD, with two sizes and the highest prices, stands in for the Eid
+            # Royal Hamper, which is off the shop until it has a photo
+            for pid in ("royal-amber", "majlis-oud"):
                 self.open("product.html?p=" + pid)
                 self.js("scrollTo(0, 1100)")
                 self.c.wait("!document.querySelector('.stickybuy').classList.contains('hidden')", 5, what="the buy bar")

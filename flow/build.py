@@ -214,8 +214,11 @@ PRODUCTS = C["products"]
 EXTRA_GLOBALS = []
 
 def published(cat=None):
-    """Documents in display order, optionally one category."""
-    rows = [dict(p, id=k) for k, p in PRODUCTS.items() if p.get("published", True)]
+    """Documents in display order, optionally one category. A product without
+    a photo is left out of the shop (its card on every shelf and page, its
+    category's count, the catalogue and search) until it has one, so no card
+    shows an empty picture; it comes back by itself once a photo is added."""
+    rows = [dict(p, id=k) for k, p in PRODUCTS.items() if p.get("published", True) and p.get("images")]
     if cat:
         rows = [r for r in rows if r.get("category") == cat]
     return sorted(rows, key=lambda r: r.get("order") or 0)
