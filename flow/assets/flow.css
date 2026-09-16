@@ -2981,4 +2981,10 @@ code{border:1px solid var(--line)}
   .shelf-reserve .sec-h > a{display:none}
   /* the footer's address placeholder is for the owner, not for shoppers */
   footer p:has(> .slot:only-child),footer .slot{display:none !important}
+  /* the two-row category bar scrolls away with the page instead of holding 88px
+     of a phone's screen above everything (the tab bar stays at the bottom), and
+     the product gallery's 1/5 counter goes, as the banner's did: the thumbnails
+     under the photo already show where you are */
+  .catnav{position:static !important}
+  .galcount{display:none !important}
 }
