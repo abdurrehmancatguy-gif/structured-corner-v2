@@ -266,12 +266,28 @@ bgsRun(function () {
         : bgsFill(bgsCopy("cart.progress.ladder_top", "Saving {pct}%, the top rung"), { pct: top.percent });
     }
 
-    /* §10.3 - COD withheld over AED 300 */
-    var cod = document.querySelector("[data-pay] .off");
+    /* §10.3 - cash on delivery only up to the store's limit (settings,
+       BGS_RULES.cod_max_order). Over it the bag page strikes COD through and
+       says why; checkout dims its Cash on delivery button, which cannot be
+       chosen until the bag is back under the limit, says why under the
+       payment choices, and moves a choice of COD back to the first method. */
+    var COD_MAX = bgsRule("cod_max_order", 300);
+    var over = subtotal > COD_MAX;
+    var cod = document.querySelector("[data-pay] [data-cod]");
     var note = q("[data-codnote]");
-    var over = subtotal > 300;
     if (cod) cod.classList.toggle("off", over);
     if (note) note.style.display = over ? "" : "none";
+    var codBtn = document.querySelector("[data-paypick] [data-codbtn]");
+    if (codBtn) {
+      codBtn.disabled = over;
+      if (over && codBtn.classList.contains("on")) {
+        codBtn.classList.remove("on");
+        var first = document.querySelector("[data-paypick] button:not([data-codbtn])");
+        if (first) first.classList.add("on");
+      }
+    }
+    var why = q("[data-codwhy]");
+    if (why) why.hidden = !over;
   }
   window.BGS_RECALC = recalc;
   recalc();

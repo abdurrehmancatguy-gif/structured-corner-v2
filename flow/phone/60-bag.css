@@ -280,3 +280,16 @@
 .page-checkout .coqty i{font-style:normal;font-weight:600;color:var(--body)}
 .page-checkout .coprice{align-self:start;padding-top:2px;font:700 15px/1.3 var(--font);color:var(--ink);white-space:nowrap}
 .page-checkout [data-coempty]{padding:22px 20px;border-radius:var(--r-xl);background:var(--soft);font-size:16px}
+
+/* ---------- checkout: cash on delivery over the limit ----------
+   The Cash on delivery choice is dimmed and cannot be picked while the bag is
+   over the store's limit (shop.js sets disabled); the line under the choices
+   says why and goes once the bag is back under it. */
+.page-checkout .pay[data-paypick] button[disabled]{opacity:.42;cursor:not-allowed;background:var(--soft);box-shadow:none;transform:none}
+.page-checkout .pay[data-paypick] button[disabled]::before{box-shadow:inset 0 0 0 1.5px var(--line)}
+.page-checkout .codwhy{display:flex;gap:10px;align-items:flex-start;margin:0 0 26px;padding:14px 16px;border-radius:var(--r);background:var(--soft);
+  font-size:14px;line-height:1.5;color:var(--body)}
+.page-checkout .codwhy[hidden]{display:none}
+.page-checkout .codwhy::before{content:"i";flex:none;display:flex;align-items:center;justify-content:center;width:20px;height:20px;margin-top:1px;
+  border-radius:50%;background:var(--ink);color:#fff;font:700 12px/1 Georgia,serif}
+[dir="rtl"] .page-checkout .codwhy{unicode-bidi:plaintext}

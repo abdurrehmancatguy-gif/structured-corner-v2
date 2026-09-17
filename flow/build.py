@@ -143,6 +143,8 @@ RULES = {
     "gift_with_purchase": {"threshold": _whole("gift_with_purchase threshold", _GIFT.get("threshold"), 300, 1),
                            "label": _GIFT_LABEL},
     "low_stock_at": _whole("low_stock_at", SETTINGS.get("low_stock_at"), 5),
+    # cash on delivery is offered on orders up to this (a locked field)
+    "cod_max_order": _whole("cod_max_order", SETTINGS.get("cod_max_order"), 300, 1),
 }
 if _BAD_RULES:
     sys.exit("build failed:\n  " + "\n  ".join("settings.store: " + p for p in _BAD_RULES))
@@ -186,6 +188,7 @@ RULE_TEXT = {
                                           _aed(RULES["gift_with_purchase"]["threshold"])),
     "rule_tier_pct": "%d" % RULES["volume_ladder"][0]["percent"],
     "rule_p3_text": _P3[0], "rule_p3_label": _P3[1], "rule_p3_width": _P3[2],
+    "rule_cod_max": _aed(RULES["cod_max_order"]),
 }
 
 # One-line description per page for <meta name=description> and OG.
@@ -1464,8 +1467,8 @@ cart = """
       <div class="r"><span>%(c_delivery)s</span><span data-delivery style="color:var(--green)">%(c_free)s</span></div>
       <div class="r t"><span>%(c_total)s</span><span data-total>AED 825.50</span></div>
       <a class="btn solid block" href="checkout.html" data-checkout style="margin-top:12px">%(c_checkout)s</a>
-      <div class="pay" data-pay style="margin-top:14px;justify-content:center"><span>Card</span><span>Apple Pay</span><span>Tabby</span><span>Tamara</span><span class="off">COD</span></div>
-      <p class="codnote" data-codnote>Cash on delivery is withheld over AED 300.</p>
+      <div class="pay" data-pay style="margin-top:14px;justify-content:center"><span>Card</span><span>Apple Pay</span><span>Tabby</span><span>Tamara</span><span class="off" data-cod>COD</span></div>
+      <p class="codnote" data-codnote>Cash on delivery is available on orders up to %(rule_cod_max)s.</p>
     </div></div>
   </div>
 </div></section>
@@ -1490,8 +1493,8 @@ checkout = """
         <div><span><b>Scheduled</b></span><span>Tomorrow to +30 days</span></div>
       </div>
       <span class="eyebrow">3 &middot; Payment</span>
-      <div class="pay" data-paypick style="margin:10px 0 14px"><button type="button" class="on">Card</button><button type="button">Apple Pay</button><button type="button">Tabby</button><button type="button">Tamara</button><button type="button" data-codbtn>Cash on delivery</button></div>
-      <div class="note">COD is withheld here because the bag is over AED 300. Under that it carries an AED 8 fee, waived when paid online. It is also withheld on QR-video orders and from customers with a prior refusal.</div>
+      <div class="pay" data-paypick style="margin:10px 0 14px"><button type="button" class="on">Card</button><button type="button">Apple Pay</button><button type="button">Tabby</button><button type="button">Tamara</button><button type="button" data-codbtn aria-describedby="codwhy">Cash on delivery</button></div>
+      <p class="codwhy" id="codwhy" data-codwhy hidden>Cash on delivery is available on orders up to %(rule_cod_max)s. Your bag is over that, so please choose another way to pay.</p>
     </div>
     <div>
       <div data-coempty class="empty" hidden>
@@ -1509,7 +1512,7 @@ checkout = """
     </div></div>
   </div>
 </div></section>
-""" % CART_TEXT
+""" % dict(CART_TEXT, **RULE_TEXT)
 confirmed = """
 <section><div class="wrap" style="max-width:760px">
   <div style="text-align:center;padding:20px 0 34px">

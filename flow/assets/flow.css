@@ -3067,3 +3067,9 @@ html:not(.js) .strip-msg:not(.on){display:none}
 .cometa,.coqty{font-size:12.5px;line-height:1.35;color:var(--mut);overflow-wrap:anywhere}
 .coqty i{font-style:normal}
 .coprice{font-size:14px;font-weight:600;white-space:nowrap}
+
+/* ---------- checkout: cash on delivery over the limit ----------
+   Over the store's cash on delivery limit the button is dimmed and cannot be
+   chosen (shop.js sets disabled), and the line under the choices says why. */
+.pay button[disabled],.pay button[disabled]:hover{opacity:.4;cursor:not-allowed;border-color:var(--line);border-width:1px;font-weight:400}
+.codwhy{margin:0 0 10px;padding:12px 14px;border-radius:var(--r-sm);background:var(--hair);font-size:13px;line-height:1.5;color:var(--body)}
