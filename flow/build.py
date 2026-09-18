@@ -906,6 +906,46 @@ def discovery_band():
             "db_cta": page_text("index.discovery_band.cta_label"),
             "db_href": page_href("index.discovery_band.cta_href")}
 
+def faq_section():
+    """The questions at the foot of the homepage, from pages.json index.faq.
+    Each one opens on its own (no script), and the answers hold the shop's
+    own rules through the same tokens the rest of the page uses."""
+    rows = page_rows("index.faq.items", ("q", "a"), RULE_TOKENS)
+    items = "\n    ".join(
+        '<details class="faq-q"><summary>%s</summary><p>%s</p></details>' % (q, a) for q, a in rows)
+    return """
+<section class="faqsec"><div class="wrap">
+  <div class="sec-h"><h2>%(heading)s</h2><a href="%(more_href)s">%(more_label)s &rarr;</a></div>
+  <div class="faq">
+    %(items)s
+  </div>
+</div></section>""" % {"heading": page_text("index.faq.heading"), "items": items,
+                       "more_label": page_text("index.faq.more_label"),
+                       "more_href": page_href("index.faq.more_href")}
+
+
+def newsletter_section():
+    """The sign-up at the foot of the homepage. The list is not open yet, so
+    the reply says so rather than pretending an address was taken."""
+    return """
+<section class="nlsec"><div class="wrap">
+  <div class="nlbox">
+    <div>
+      <h2>%(heading)s</h2>
+      <p>%(body)s</p>
+    </div>
+    <form class="nlform" data-nlform novalidate>
+      <label class="sr" for="nl-email">%(placeholder)s</label>
+      <input id="nl-email" type="email" name="email" autocomplete="email" placeholder="%(placeholder)s" data-nlemail>
+      <button type="submit" class="btn solid">%(button)s</button>
+    </form>
+    <p class="nlnote" data-nlresult hidden></p>
+  </div>
+</div></section>""" % {"heading": page_text("index.newsletter.heading"), "body": page_text("index.newsletter.body"),
+                       "placeholder": page_text("index.newsletter.placeholder"),
+                       "button": page_text("index.newsletter.button")}
+
+
 def promos():
     """The promo tiles: their words and links. flow.css colours them, and the
        hills that rise from their bottom edge are added with the banners'."""
@@ -1083,7 +1123,9 @@ home = """
 <section class="shelf-edp"><div class="wrap">
   %(edp_h)s
   <div class="grid g5">%(edp)s</div>
-</div></section>""" % dict(discovery_band(), promos=promos(), reels=reels(), catstrip=catstrip(), usp=usp_strip(),
+</div></section>
+%(faq)s
+%(newsletter)s""" % dict(discovery_band(), promos=promos(), reels=reels(), catstrip=catstrip(), usp=usp_strip(),
            hero=hero_slides(), hero_img=hero_images(), hero_dots=hero_dots(),
            hero_n=len(HOME["hero_slides"]),
            qb_eyebrow=COPY["quiz_banner"]["eyebrow"], qb_heading=COPY["quiz_banner"]["heading"],
@@ -1093,7 +1135,7 @@ home = """
            attars_h=_SH["house_ouds"][0], attars=_SH["house_ouds"][1], oud_h=_SH["reserve"][0], oud=_SH["reserve"][1],
            sets_h=_SH["gift_sets"][0], sets=_SH["gift_sets"][1], fam_h=heading("scent_family"),
            bakhoor_h=_SH["bakhoor"][0], bakhoor=_SH["bakhoor"][1], edp_h=_SH["edp"][0], edp=_SH["edp"][1],
-           fam_tiles=family_tiles())
+           fam_tiles=family_tiles(), faq=faq_section(), newsletter=newsletter_section())
 if _BAD_HOME:
     sys.exit("build failed:\n  " + "\n  ".join("home.json " + p for p in _BAD_HOME))
 
@@ -1593,6 +1635,8 @@ CORPORATE_TEXT = {
 }
 for _k in ("name", "email", "occasion", "units", "send"):
     CORPORATE_TEXT["k_" + _k] = page_text("corporate.form." + _k)
+COPY_JS["newsletter"] = {"invalid_email": js_text("index.newsletter.invalid_email"),
+                         "not_sent": js_text("index.newsletter.not_sent")}
 COPY_JS["corporate"] = {"replies": {
     "invalid_email": js_text("corporate.replies.invalid_email"),
     "thanks": js_text("corporate.replies.thanks"),

@@ -1513,6 +1513,27 @@ bgsRun(function () {
 });
 
 
+/* ---------- the homepage's newsletter sign-up -------------------------------
+   The list is not open yet: the form takes no address anywhere, and says so
+   rather than pretending it did. The words are content (BGS_COPY.newsletter).
+--------------------------------------------------------------------------- */
+bgsRun(function () {
+  "use strict";
+  var form = document.querySelector("[data-nlform]");
+  if (!form) return;
+  var out = form.parentNode.querySelector("[data-nlresult]");
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var box = form.querySelector("[data-nlemail]");
+    var address = (box.value || "").trim();
+    var ok = /^[^@\s]+@[^@\s.]+(\.[^@\s.]+)+$/.test(address);
+    bgsText(out, bgsCopy(ok ? "newsletter.not_sent" : "newsletter.invalid_email", ok ? "Nothing was sent." : "Enter an email address."));
+    out.hidden = false;
+    out.classList.toggle("err", !ok);
+    if (!ok) box.focus();
+  });
+});
+
 /* ---------- checkout: selectable payment method ---------- */
 bgsRun(function () {
   "use strict";

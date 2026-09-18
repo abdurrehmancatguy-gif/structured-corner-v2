@@ -605,6 +605,26 @@ _NOT_FOUND = [
     text("/not_found/button", "Button", NOT_FOUND, 40, help="It opens the homepage."),
 ]
 
+# The questions and the sign-up at the foot of the homepage.
+_HOME_FOOT = [
+    text("/index/faq/heading", "Questions: heading", HOME, 40, section="Questions"),
+    text("/index/faq/more_label", "Questions: link", HOME, 40, section="Questions"),
+    href("/index/faq/more_href", "Questions: link goes to", HOME, section="Questions"),
+    {"path": "/index/faq/items", "type": "rows", "label": "Questions", "min": 1, "max": 12, "itemLabel": "q",
+     "canAdd": True, "group": HOME, "section": "Questions",
+     "help": "Each one opens on its own at the foot of the homepage. " + RULE_HELP, "fields": [
+         text("/q", "Question", HOME, 90),
+         text("/a", "Answer", HOME, 400, kind="textarea", pattern=tokens(*RULES), patternHelp=RULE_PATTERN_HELP)]},
+    text("/index/newsletter/heading", "Sign-up: heading", HOME, 40, section="Newsletter sign-up"),
+    text("/index/newsletter/body", "Sign-up: words", HOME, 200, kind="textarea", section="Newsletter sign-up"),
+    text("/index/newsletter/placeholder", "Sign-up: box hint", HOME, 40, section="Newsletter sign-up"),
+    text("/index/newsletter/button", "Sign-up: button", HOME, 30, section="Newsletter sign-up"),
+    text("/index/newsletter/invalid_email", "Sign-up: reply to a bad address", HOME, 120, section="Newsletter sign-up"),
+    text("/index/newsletter/not_sent", "Sign-up: reply when it works", HOME, 200, kind="textarea",
+         section="Newsletter sign-up",
+         help="The list takes no address anywhere yet, so this says so. It changes when the list opens."),
+]
+
 # The four policy pages. Their words are the owner's legal text, so the fields
 # are plain and roomy: the title, the date it carries, the words the footer
 # links with, and the policy itself as lines.
@@ -639,7 +659,7 @@ _LEGAL = [
      "help": "One line per paragraph. A line starting \"## \" is a heading, a line starting \"- \" is a point in a list."},
 ]
 
-FIELDS = (_SHELL + _HOME + _COLLECTION + _PRODUCT + _GIFT_BOX + _BAG + _TRACK + _CORPORATE + _ACCOUNT + _LEGAL
+FIELDS = (_SHELL + _HOME + _HOME_FOOT + _COLLECTION + _PRODUCT + _GIFT_BOX + _BAG + _TRACK + _CORPORATE + _ACCOUNT + _LEGAL
           + _NOT_FOUND)
 
 # A text with no {token} of its own takes no brace at all, rows' parts

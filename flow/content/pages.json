@@ -98,6 +98,53 @@
     "reels_link": {
       "label": "View all",
       "href": "collection.html?cat=edp"
+    },
+    "faq": {
+      "heading": "Questions",
+      "items": [
+        {
+          "q": "Where do you deliver?",
+          "a": "Within the United Arab Emirates only. We do not ship outside the UAE."
+        },
+        {
+          "q": "How long does it take?",
+          "a": "Orders are dispatched in {dispatch}. After that, 1 to 2 business days in Dubai, 2 to 4 in the other emirates and 3 to 7 in remote areas."
+        },
+        {
+          "q": "What does delivery cost?",
+          "a": "Free over {free_over}, and {delivery_fee} below that. What you pay is shown at checkout before you order."
+        },
+        {
+          "q": "How can I pay?",
+          "a": "By card and the online payment options shown at checkout. We do not offer cash on delivery."
+        },
+        {
+          "q": "Can I return an order?",
+          "a": "Yes, within 14 calendar days of delivery, unused and in its original packaging, with proof of purchase. Used or altered products cannot be returned."
+        },
+        {
+          "q": "How do I follow my order?",
+          "a": "You get a dispatch email with a tracking link where one is available. Tracking can take up to 24 hours to go live."
+        },
+        {
+          "q": "Is VAT added?",
+          "a": "No. We are not registered for VAT, so no VAT is added at checkout or on delivery."
+        },
+        {
+          "q": "Are the ouds alcohol-free?",
+          "a": "The oud attars are oil based and alcohol-free. Each batch carries its own number."
+        }
+      ],
+      "more_label": "Read the policies",
+      "more_href": "shipping-and-delivery.html"
+    },
+    "newsletter": {
+      "heading": "Subscribe for discounts",
+      "body": "Offers, new blends and early access, by email. One message at a time, and you can leave whenever you like.",
+      "placeholder": "Your email",
+      "button": "Subscribe",
+      "invalid_email": "Enter an email address we can write to.",
+      "not_sent": "The list is not open yet, so nothing was sent. It opens with the shop's accounts."
     }
   },
   "collection": {
