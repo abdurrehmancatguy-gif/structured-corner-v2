@@ -7,8 +7,10 @@
 #
 # build.py generates the HTML locally and the output is committed. This
 # workflow rebuilds it and fails if the result differs, so a forgotten rebuild
-# never ships, then publishes the HTML, favicon.ico, robots.txt and assets/,
-# less the stylesheet source. The generator, content and tools stay out of it.
+# never ships, then publishes the HTML, favicon.ico, robots.txt, sw.js (the
+# cache worker, which has to sit at the root to hold the whole site in scope)
+# and assets/, less the stylesheet source. The generator, content and tools
+# stay out of it.
 # assets/ still holds the few original images the tools resize (logos,
 # category photos), which nothing links to.
 
@@ -53,7 +55,7 @@ jobs:
       - name: Stage only what the site serves
         run: |
           rm -rf _site && mkdir _site
-          cp flow/*.html flow/favicon.ico flow/robots.txt _site/
+          cp flow/*.html flow/favicon.ico flow/robots.txt flow/sw.js _site/
           cp -R flow/assets _site/assets
           rm -f _site/assets/cat/SOURCES.txt _site/assets/flow.css
 

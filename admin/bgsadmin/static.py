@@ -1,8 +1,8 @@
 """Files: the storefront preview and the admin's own UI.
 
 The preview serves exactly what the deploys publish (flow/*.html,
-favicon.ico, robots.txt and flow/assets/ less the stylesheet source and
-SOURCES.txt), so a page that works here cannot 404 live because it leaned on
+favicon.ico, robots.txt, sw.js and flow/assets/ less the stylesheet source
+and SOURCES.txt), so a page that works here cannot 404 live because it leaned on
 content/, tools/ or flow.css. A miss gets the site's own 404.html, as on
 Netlify and GitHub Pages.
 """
@@ -24,7 +24,7 @@ CHUNK = 64 * 1024
 
 
 def published(rel):
-    if rel in ("favicon.ico", "robots.txt"):
+    if rel in ("favicon.ico", "robots.txt", "sw.js"):
         return True
     if "/" not in rel:
         return rel.endswith(".html")

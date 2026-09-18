@@ -2877,3 +2877,17 @@ bgsRun(function () {
   /* the language switch has changed the page's language by the time this runs */
   document.querySelectorAll("[data-langtoggle]").forEach(function (t) { t.addEventListener("click", show); });
 });
+
+/* The cache (sw.js). Every page sits at the root of the site, so "sw.js" next
+   to this page is the worker whatever the site is served under, and its scope
+   is that root. updateViaCache "none" keeps the browser from taking the worker
+   itself out of the ten minute cache GitHub Pages sends, so a new one is found
+   on the next visit. A browser without service workers, or one that refuses
+   (a private window, an insecure origin), simply goes to the network. */
+window.addEventListener("load", function () {
+  if (!("serviceWorker" in navigator) || location.protocol === "file:") return;
+  try {
+    navigator.serviceWorker.register(new URL("sw.js", location.href).href, { updateViaCache: "none" })
+      .catch(function () {});
+  } catch (e) {}
+});

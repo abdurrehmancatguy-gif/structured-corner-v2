@@ -67,7 +67,7 @@ structured-corner-v2/
 │   └── devtools/           compare_build.py and dom_diff.py: prove a content move left
 │                           the pages as they were; viewport_audit.py: every page state
 │                           at 28 screen sizes in headless Chrome
-└── flow/                   ←←← THE SITE. Its HTML, favicon.ico, robots.txt and assets/ are published.
+└── flow/                   ←←← THE SITE. Its HTML, favicon.ico, robots.txt, sw.js and assets/ are published.
     ├── build.py            the generator. Run it to rebuild every page.
     ├── server.py           a two-line launcher for admin/server.py (python3 flow/server.py 4310)
     ├── content/            ←←← THE DATA. Edit here or in the admin, not in the HTML.
@@ -173,7 +173,7 @@ ADMIN_RULES_PORT=4741 /usr/bin/python3 -m unittest discover -s admin/tests -p 't
 `admin/README.md` lists the 15 files with their port variables. Each runs on a temporary
 clone with `--no-push` and never touches `flow/content`.
 
-### Cache-busting
+### Caching
 
 Every asset URL carries `?v=` with the md5 of that one file (`V()` in `build.py`): the pages
 load `flow.min.css`, which `build.py` writes from `flow.css`, plus `shop.js` and
@@ -182,6 +182,17 @@ version of the 1000 px original (`PV()`), salted with `DERIVATIVES`, which has t
 when the copies change without the original changing (a new quality or size).
 **Always edit the assets first, then rebuild** - rebuilding before the edit leaves the
 browser on the old module.
+
+`flow/sw.js`, the cache worker, is the other half. `shop.js` registers it on every page
+(`new URL("sw.js", location.href)`, so it works under any address the site is served at, with
+`updateViaCache: "none"` so the browser does not hold on to an old worker). It keeps the
+versioned files in a cache called `bgs-1` and answers from it without asking the network,
+which is what makes a second visit paint from disk on GitHub Pages, where `max-age=600` is
+all the host will send. Pages themselves are fetched from the network first and only fall
+back to the cache, so a deploy is seen at once and the shop still opens offline. When a file
+is fetched at a new `?v=`, the entries for its older versions are deleted, so one copy per
+file is kept. Film is left alone: a player asks for one piece of a file at a time and a cache
+can only answer with the whole of it. `/admin` is left alone too.
 
 **After importing photos**, run `python3 tools/make_derivatives.py` from `flow/` before
 `build.py`. It writes the sized copies the pages use (`-600`, `-card-360` and `-thumb` for
@@ -472,8 +483,11 @@ user's instruction. Do not resurrect it. The whole `app/` React tree, `flow/admi
 ## 7. Deployment
 
 Both hosts deploy every push to `main` and publish the same list of files: the eleven pages,
-`404.html`, `favicon.ico`, `robots.txt` and `assets/`. The generator (`build.py`,
+`404.html`, `favicon.ico`, `robots.txt`, `sw.js` and `assets/`. The generator (`build.py`,
 `server.py`), `content/`, `tools/` and `edp_data.json` are not published.
+
+`sw.js` is the cache worker (section 4, Caching). It has to sit at the root of the site,
+because a service worker only takes charge of the pages beneath its own address.
 
 Before publishing, both rebuild `flow/` and stop if anything differs from what is committed,
 new files included (`git status --porcelain`), so a forgotten rebuild never ships. The build
@@ -489,7 +503,8 @@ refuses `flow/`'s sources, then rewrites everything else into `flow/` (forced, `
 
 ### GitHub Pages
 `.github/workflows/pages.yml` runs the same check and uploads `_site` as the Pages artifact.
-Pages sends `max-age=600` on everything and ignores query strings when caching. Its terms
+Pages sends `max-age=600` on everything, headers cannot be set there, and it ignores query
+strings when caching, which is why the cache worker exists. Its terms
 rule out running a shop on it (§10), so it should become a browse-only mirror or be retired
 once the shop has one host.
 

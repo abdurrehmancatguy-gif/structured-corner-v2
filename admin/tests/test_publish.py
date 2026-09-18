@@ -102,30 +102,36 @@ class PublishServerTests(unittest.TestCase):
         self.assertEqual(st, 200, res)
         return res
 
-    def test_a_locked_page_mismatch_blocks_the_commit(self):
+    def test_a_delivery_rule_reaches_the_checkout_pages(self):
+        """Checkout and the order-confirmed page are locked to the developer,
+        but they keep no delivery numbers of their own any more: build.py
+        prints their rows from the rules. So a raised threshold reaches them
+        with everything else, nothing warns that a locked page has fallen
+        behind (lint.LOCKED_PAGES is empty), and the change goes live."""
         b = self.b
-        # A settings change that leaves checkout and confirmed as they are
-        # commits fine: the store name touches no delivery rule.
+        # A settings change that touches no delivery rule commits fine.
         self.settings_change(name="BGS Corner Test")
         ch = self.changes()
         self.assertNotIn("locked_pages", [x["id"] for x in ch["blocking"]])
         self.assertTrue(ch["can_commit"], ch["blocking"])
         git(b.repo, "checkout", "-q", "--", ".")
         git(b.repo, "clean", "-q", "-f", "-d")
-        # Raising free delivery updates the strip, product page and bag, but the
-        # locked checkout page still says AED 150. The mismatch must not go live.
+        # Raising free delivery updates the strip, product page and bag, and
+        # the two locked pages with them.
         res = self.settings_change(free_delivery_over=200)
-        self.assertTrue(any(w["code"] == "locked_page" for w in res["warnings"]), res["warnings"])
+        self.assertEqual([w for w in res["warnings"] if w["code"] == "locked_page"], [])
+        for page in ("checkout.html", "confirmed.html"):
+            text = (b.repo / "flow" / page).read_text(encoding="utf-8")
+            self.assertIn("AED 200", text, page)
+            self.assertNotIn("AED 150", text, page)
         ch = self.changes()
-        block = [x for x in ch["blocking"] if x["id"] == "locked_pages"]
-        self.assertTrue(block, ch["blocking"])
-        self.assertIn("Checkout", block[0]["message"])
-        self.assertFalse(ch["can_commit"])
-        head = self.head()
+        self.assertNotIn("locked_pages", [x["id"] for x in ch["blocking"]])
+        self.assertTrue(ch["can_commit"], ch["blocking"])
         st, res = self.commit("Raise free delivery to AED 200", ch["paths_digest"])
-        self.assertEqual(st, 422, res)
-        self.assertEqual(res["error"]["code"], "checks_failed")
-        self.assertEqual(self.head(), head)
+        self.assertEqual(st, 200, res)
+        self.assertEqual(self.head(), res["sha"])
+        self.assertIn("flow/checkout.html",
+                      git(b.repo, "show", "--name-only", "--format=", res["sha"]).split("\n"))
 
     def test_commit_takes_only_admin_paths(self):
         b = self.b

@@ -24,7 +24,8 @@ from .service import field_for
 
 GROUPS = ("content", "media", "generated", "code", "other")
 ADMIN_GROUPS = ("content", "media", "generated")
-CODE = {"flow/build.py", "flow/assets/shop.js", "flow/assets/flow.css", "flow/edp_data.json"}
+CODE = {"flow/build.py", "flow/assets/shop.js", "flow/assets/flow.css", "flow/edp_data.json",
+        "flow/sw.js"}
 # the phone design's stylesheets, which build.py joins into assets/phone.min.css
 PHONE_CSS = re.compile(r"^flow/phone/[a-z0-9_-]+\.css$")
 GENERATED = ({"flow/" + p for p in PAGES}
@@ -388,12 +389,12 @@ _ROOMS = {}            # (repo, sha) -> clean-room result: a commit never change
 
 def published(path):
     """Whether a repo-relative path is in what both deploys publish:
-    flow/*.html, favicon.ico, robots.txt and flow/assets less two files."""
+    flow/*.html, favicon.ico, robots.txt, sw.js and flow/assets less two files."""
     if not path.startswith("flow/"):
         return False
     rel = path[5:]
     if "/" not in rel:
-        return rel.endswith(".html") or rel in ("favicon.ico", "robots.txt")
+        return rel.endswith(".html") or rel in ("favicon.ico", "robots.txt", "sw.js")
     return rel.startswith("assets/") and rel not in UNPUBLISHED_ASSETS
 
 
