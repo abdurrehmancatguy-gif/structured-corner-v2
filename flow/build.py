@@ -120,6 +120,7 @@ def _ladder(rungs):
         _BAD_RULES.append("volume_ladder must be rungs with units rising from one to the next")
     return out
 
+PAYMENTS = C["settings"].get("payments") or {}
 _CUTOFF = SETTINGS.get("sameday_cutoff", "2:00 PM")
 if _cutoff_minutes(_CUTOFF) is None:
     _BAD_RULES.append("sameday_cutoff must read like 2:00 PM")
@@ -145,9 +146,24 @@ RULES = {
     "low_stock_at": _whole("low_stock_at", SETTINGS.get("low_stock_at"), 5),
     # cash on delivery is offered on orders up to this (a locked field)
     "cod_max_order": _whole("cod_max_order", SETTINGS.get("cod_max_order"), 300, 1),
+    # What the shop promises about getting an order out and what it charges
+    # for it. The policies the owner published are what these have to say:
+    # same-day off, no cash on delivery, no VAT while the business is not
+    # registered for it.
+    "sameday": bool(SETTINGS.get("sameday", True)),
+    "dispatch_days": str(SETTINGS.get("dispatch_days") or "1 to 3 business days"),
+    "cod": bool(PAYMENTS.get("cod", True)),
+    "vat_percent": _whole("vat_rate_percent", SETTINGS.get("vat_rate_percent"), 5),
 }
 if _BAD_RULES:
     sys.exit("build failed:\n  " + "\n  ".join("settings.store: " + p for p in _BAD_RULES))
+
+PAY_WAYS = (("card", "Cards", "Card"), ("apple_pay", "Apple Pay", "Apple Pay"), ("tabby", "Tabby", "Tabby"),
+            ("tamara", "Tamara", "Tamara"), ("cod", "Cash on delivery", "COD"))
+
+def pay_labels(short=False):
+    """The ways to pay that settings.payments has switched on, in order."""
+    return [(s if short else long) for key, long, s in PAY_WAYS if PAYMENTS.get(key, True)]
 
 def _aed(n):
     return "AED {:,}".format(n)
@@ -188,6 +204,7 @@ RULE_TEXT = {
                                           _aed(RULES["gift_with_purchase"]["threshold"])),
     "rule_tier_pct": "%d" % RULES["volume_ladder"][0]["percent"],
     "rule_p3_text": _P3[0], "rule_p3_label": _P3[1], "rule_p3_width": _P3[2],
+    "rule_dispatch": RULES["dispatch_days"],
     "rule_cod_max": _aed(RULES["cod_max_order"]),
 }
 
@@ -275,7 +292,8 @@ EXTRA_GLOBALS.append(("BGS_CATS", lambda: CAT_TEXT))
 # others, rather than print a blank or a brace.
 _BAD_PAGES = []
 _TOKEN = re.compile(r"\{([a-z_]*)\}")
-RULE_TOKENS = {"free_over": RULE_TEXT["rule_free_over"], "delivery_fee": RULE_TEXT["rule_delivery_fee"],
+RULE_TOKENS = {"dispatch": RULE_TEXT["rule_dispatch"],
+               "free_over": RULE_TEXT["rule_free_over"], "delivery_fee": RULE_TEXT["rule_delivery_fee"],
                "sameday_fee": RULE_TEXT["rule_sameday_fee"], "cutoff": RULE_TEXT["rule_cutoff"],
                "cutoff_short": RULE_TEXT["rule_cutoff_short"]}
 RULE_TOKENS = {k: esc(v) for k, v in RULE_TOKENS.items()}
@@ -608,7 +626,7 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
 %(preload)s%(fontload)s%(stylesheets)s</head><body class="%(page)s">
 <noscript><div class="nojs">%(noscript)s</div></noscript>
 <div class="strip"><div class="wrap">
-  <span class="strip-msgs" data-stripmsgs><span class="strip-msg on">%(clock)s %(countdown)s<span data-cutoff hidden> &middot; <b></b></span></span>%(strip_second)s</span>
+  <span class="strip-msgs" data-stripmsgs><span class="strip-msg on">%(clock)s %(countdown)s%(cutdown)s</span>%(strip_second)s</span>
   <span class="r">%(strip_links)s<a href="#" data-langtoggle>العربية</a></span>
 </div></div>
 <div class="mast"><div class="wrap">
@@ -631,7 +649,7 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
     <p>%(addr)s</p><div class="nl"><span class="field">%(nl_placeholder)s</span><span class="btn">%(nl_button)s</span></div></div>
 %(footcols)s
 </div><div class="bot"><span>%(copyright)s</span>
-<span>Cards &middot; Apple Pay &middot; Tabby &middot; Tamara &middot; Cash on delivery</span></div></div></footer>
+<span>%(paylist)s</span></div></div></footer>
 <div class="tabbar">%(tabs)s</div>
 <script src="%(catjs)s"></script>
 <script src="%(shopjs)s"></script></body></html>
@@ -651,9 +669,11 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
    desc=esc(desc), canon=esc(canon),
    ogimg=esc(((SITE_URL + "/") if SITE_URL else "") + (V(SEO["og_image"]) if SEO.get("og_image") else "")),
    catnav=catnav(), tabs="".join(tab_link(l, h, ic, tab) for l, h, ic in TABS),
+   cutdown='<span data-cutoff hidden> &middot; <b></b></span>' if RULES["sameday"] else "",
    clock=sv("clock",13,2), menu=sv("menu",22), chev=sv("chev",14,2), search=sv("search",17),
    user=sv("user"), heart=sv("heart"), bag=sv("bag"),
    brandlogo=header_logo(), footlogo=footer_logo(), footcols=footer_cols(), icons=favicon_links(),
+   paylist=esc(" \u00b7 ".join(pay_labels())),
    # while no contact detail is filled in, the footer keeps the placeholder it has always shown
    addr=" &middot; ".join(x for x in _CONTACT if x) or slot("address, hours, phone"))
 
@@ -1171,6 +1191,8 @@ PRODUCT_TEXT = {
     "p_gift": page_text("product.gift_cta.label"), "p_gift_href": page_href("product.gift_cta.href"),
     "p_voucher": page_text("product.voucher_note"),
     "p_fact_label": page_text("product.facts.delivery_label"),
+    # the ways to pay this shop takes, short, from settings.payments
+    "p_pay_ways": esc(" \u00b7 ".join(pay_labels(short=True))),
     "p_fact": page_text("product.facts.delivery", RULE_TOKENS),
     "p_pyr_missing": page_text("product.pyramid.missing"),
     "p_apply": grid_rows(page_rows("product.apply_steps", ("title", "body"))),
@@ -1250,7 +1272,7 @@ product = """
         </div>
         <div class="kv facts" style="margin-top:16px">
           <div><span>%(truck)s %(p_fact_label)s</span><span>%(p_fact)s</span></div>
-          <div><span>%(cash)s Payment</span><span>Card &middot; Apple Pay &middot; Tabby &middot; Tamara &middot; COD</span></div>
+          <div><span>%(cash)s Payment</span><span>%(p_pay_ways)s</span></div>
         </div>
       </div>
     </div>
@@ -1469,13 +1491,19 @@ cart = """
       <div class="r"><span>%(c_delivery)s</span><span data-delivery style="color:var(--green)">%(c_free)s</span></div>
       <div class="r t"><span>%(c_total)s</span><span data-total>AED 825.50</span></div>
       <a class="btn solid block" href="checkout.html" data-checkout style="margin-top:12px">%(c_checkout)s</a>
-      <div class="pay" data-pay style="margin-top:14px;justify-content:center"><span>Card</span><span>Apple Pay</span><span>Tabby</span><span>Tamara</span><span class="off" data-cod>COD</span></div>
-      <p class="codnote" data-codnote>Cash on delivery is available on orders up to %(rule_cod_max)s.</p>
+      <div class="pay" data-pay style="margin-top:14px;justify-content:center">%(c_pay_chips)s</div>
+      %(c_cod_note)s
     </div></div>
   </div>
 </div></section>
 <div class="bagbar" data-bagbar aria-hidden="true"><div class="bb-t"><span>%(c_total)s</span><b data-bagbartotal>AED 0</b></div><a class="btn solid" href="checkout.html">%(c_checkout)s</a></div>
-""" % dict(RULE_TEXT, vat=slot("VAT registration expected ~month 9"), **CART_TEXT)
+""" % dict(RULE_TEXT, vat=slot("VAT registration expected ~month 9"),
+           c_pay_chips="".join('<span%s>%s</span>' % (' class="off" data-cod' if w == "Cash on delivery" else "",
+                                                      esc("COD" if w == "Cash on delivery" else w))
+                               for w in pay_labels()),
+           c_cod_note=('<p class="codnote" data-codnote>Cash on delivery is available on orders up to %s.</p>'
+                       % RULE_TEXT["rule_cod_max"]) if RULES["cod"] else "",
+           **CART_TEXT)
 
 # The bag and the gift box above print these rules; shop.js prices with them.
 EXTRA_GLOBALS.append(("BGS_RULES", lambda: RULES))
@@ -1489,14 +1517,10 @@ checkout = """
       <div class="grid g2" style="margin:10px 0 18px"><span class="field">Full name</span><span class="field">Phone &middot; UAE</span><span class="field" style="grid-column:1/-1">Email</span></div>
       <label class="optin" style="margin-bottom:26px"><input type="checkbox">Send me order updates on WhatsApp <span class="norm">, unticked by default, consent logged</span></label>
       <span class="eyebrow">2 &middot; Delivery</span>
-      <div class="kv" style="margin:10px 0 26px">
-        <div><span><b>Standard</b> &middot; free over AED 150</span><span>AED 12 below</span></div>
-        <div><span><b>Same-day Dubai</b> &middot; before 2:00 PM</span><span>+AED 25</span></div>
-        <div><span><b>Scheduled</b></span><span>Tomorrow to +30 days</span></div>
-      </div>
+      <div class="kv" style="margin:10px 0 26px">%(delivery_rows)s</div>
       <span class="eyebrow">3 &middot; Payment</span>
-      <div class="pay" data-paypick style="margin:10px 0 14px"><button type="button" class="on">Card</button><button type="button">Apple Pay</button><button type="button">Tabby</button><button type="button">Tamara</button><button type="button" data-codbtn aria-describedby="codwhy">Cash on delivery</button></div>
-      <p class="codwhy" id="codwhy" data-codwhy hidden>Cash on delivery is available on orders up to %(rule_cod_max)s. Your bag is over that, so please choose another way to pay.</p>
+      <div class="pay" data-paypick style="margin:10px 0 14px">%(pay_buttons)s</div>
+      %(cod_why)s
     </div>
     <div>
       <div data-coempty class="empty" hidden>
@@ -1508,13 +1532,32 @@ checkout = """
       <div class="r"><span data-coitems></span><span data-subtotal>AED 0</span></div>
       <div class="r" style="color:var(--green);display:none" data-tierrow><span>Volume discount &middot; <b data-tierpct>0</b>%%</span><span data-tieramt>&minus; AED 0</span></div>
       <div class="r"><span>Delivery</span><span data-delivery>AED 0</span></div>
-      <div class="r vat" data-vatrow><span>Includes VAT at 5%%</span><span data-vat>AED 0</span></div>
-      <div class="r t"><span>Total</span><span data-total>AED 0</span></div>
+      %(vat_row)s      <div class="r t"><span>Total</span><span data-total>AED 0</span></div>
       <a class="btn solid block" href="confirmed.html" style="margin-top:12px">Place order</a>
     </div></div>
   </div>
 </div></section>
-""" % dict(CART_TEXT, **RULE_TEXT)
+""" % dict(CART_TEXT, **dict(RULE_TEXT, **{
+    # Checkout is locked, so its rows are printed here, from the rules: the
+    # ways to pay that are switched on, the delivery it offers, and the VAT
+    # line only while the business charges VAT.
+    "pay_buttons": "".join('<button type="button"%s%s>%s</button>'
+                           % (' class="on"' if i == 0 else "",
+                              ' data-codbtn aria-describedby="codwhy"' if w == "Cash on delivery" else "", esc(w))
+                           for i, w in enumerate(pay_labels())),
+    "cod_why": ('<p class="codwhy" id="codwhy" data-codwhy hidden>Cash on delivery is available on orders up to %s. '
+                'Your bag is over that, so please choose another way to pay.</p>' % RULE_TEXT["rule_cod_max"])
+               if RULES["cod"] else "",
+    "vat_row": ('<div class="r vat" data-vatrow><span>Includes VAT at %d%%</span><span data-vat>AED 0</span></div>\n      '
+                % RULES["vat_percent"]) if RULES["vat_percent"] else "",
+    "delivery_rows": "".join(
+        ['<div><span><b>Standard</b> &middot; free over %s</span><span>%s below</span></div>'
+         % (RULE_TEXT["rule_free_over"], RULE_TEXT["rule_delivery_fee"])]
+        + (['<div><span><b>Same-day Dubai</b> &middot; before %s</span><span>+%s</span></div>'
+            % (RULE_TEXT["rule_cutoff"], RULE_TEXT["rule_sameday_fee"])] if RULES["sameday"] else [])
+        + ['<div><span><b>Dispatch</b></span><span>%s</span></div>' % esc(RULES["dispatch_days"]),
+           '<div><span><b>Scheduled</b></span><span>Tomorrow to +30 days</span></div>']),
+}))
 confirmed = """
 <section><div class="wrap" style="max-width:760px">
   <div style="text-align:center;padding:20px 0 34px">
@@ -1523,7 +1566,7 @@ confirmed = """
     <p style="color:var(--mut);margin:0">Order number %(num)s</p>
   </div>
   <div class="kv">
-    <div><span>Delivery</span><span>Free &middot; same-day if placed before 2 PM</span></div>
+    <div><span>Delivery</span><span>%(c_delivery_line)s</span></div>
     <div><span>Tax registration number</span><span>%(trn)s</span></div>
     <div><span>Credit back</span><span>AED 45 voucher, issued the day it is delivered</span></div>
     <div><span>Review request</span><span>Delivery + 3 days</span></div>
@@ -1531,7 +1574,10 @@ confirmed = """
   </div>
   <div style="display:flex;gap:12px;margin-top:24px"><a class="btn solid" href="track-order.html">Track this order</a><a class="btn" href="index.html">Keep shopping</a></div>
 </div></section>
-""" % dict(check=sv("check",26,2.6), num=slot("generated at checkout"), trn=slot("TRN, registration expected ~month 9"))
+""" % dict(check=sv("check",26,2.6), num=slot("generated at checkout"), trn=slot("TRN, registration expected ~month 9"),
+           c_delivery_line=("Free over %s &middot; same-day if placed before %s" % (RULE_TEXT["rule_free_over"], RULE_TEXT["rule_cutoff_short"]))
+                           if RULES["sameday"] else
+                           ("Free over %s &middot; dispatched in %s" % (RULE_TEXT["rule_free_over"], esc(RULES["dispatch_days"]))))
 # The corporate page's words are content, pages.json "corporate". The band's
 # button jumps to the form below it, so its target stays here. The name and
 # email boxes' hints are also their names for screen readers; the other two

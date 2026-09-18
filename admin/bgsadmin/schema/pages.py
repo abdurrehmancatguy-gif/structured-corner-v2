@@ -60,8 +60,8 @@ RESOURCE = {"name": "pages", "label": "Pages", "kind": "document",
 
 # Some texts carry a {token} the build fills in; a field's pattern names the
 # ones it may use, so any other brace is refused before it reaches the site.
-RULES = ("free_over", "delivery_fee", "sameday_fee", "cutoff", "cutoff_short")
-RULE_HELP = ("{free_over} prints the free delivery threshold, {delivery_fee} the delivery fee, {sameday_fee} the "
+RULES = ("dispatch", "free_over", "delivery_fee", "sameday_fee", "cutoff", "cutoff_short")
+RULE_HELP = ("{dispatch} prints how long dispatch takes, {free_over} prints the free delivery threshold, {delivery_fee} the delivery fee, {sameday_fee} the "
              "same-day fee, {cutoff} the same-day cutoff written like 2:00 PM and {cutoff_short} written like 2 PM. "
              "They come from Settings, so the text follows a change there.")
 RULE_PATTERN_HELP = "Use only {free_over}, {delivery_fee}, {sameday_fee}, {cutoff} or {cutoff_short}; leave out any other braces."

@@ -237,8 +237,10 @@ bgsRun(function () {
     }
     if (q("[data-total]")) q("[data-total]").textContent = aed(total);
 
-    /* §10.6 - UAE VAT at 5%, shown as the component inside a tax-inclusive total */
-    var VAT_RATE = 0.05, VAT_ON = true;
+    /* UAE VAT, shown as the component inside a tax-inclusive total, at the
+       rate the shop is registered for (settings). At 0 the row is not shown
+       at all: the business is not registered for VAT today. */
+    var VAT_RATE = bgsRule("vat_percent", 0) / 100, VAT_ON = VAT_RATE > 0;
     var vat = VAT_ON ? total - (total / (1 + VAT_RATE)) : 0;
     if (q("[data-vat]")) q("[data-vat]").textContent = aed(Math.round(vat * 100) / 100);
     var vrow = q("[data-vatrow]");
@@ -272,7 +274,7 @@ bgsRun(function () {
        chosen until the bag is back under the limit, says why under the
        payment choices, and moves a choice of COD back to the first method. */
     var COD_MAX = bgsRule("cod_max_order", 300);
-    var over = subtotal > COD_MAX;
+    var over = bgsRule("cod", false) && subtotal > COD_MAX;
     var cod = document.querySelector("[data-pay] [data-cod]");
     var note = q("[data-codnote]");
     if (cod) cod.classList.toggle("off", over);

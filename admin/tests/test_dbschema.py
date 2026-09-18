@@ -560,14 +560,17 @@ class RefusalTests(DatabaseCase):
                 "UPDATE bgs.products SET pos = CASE id WHEN %s THEN (SELECT pos FROM bgs.products WHERE id = %s) "
                 "ELSE (SELECT pos FROM bgs.products WHERE id = %s) END WHERE id IN (%s, %s)", P, other, P, P, other),
              "accepted"),
-            ("VAT 0", doc("settings", put("store", "vat_rate_percent", value=0)), "23514 documents_locked_values"),
-            ("cash on delivery off", doc("settings", put("payments", "cod", value=False)), "23514 documents_locked_values"),
+            # VAT and cash on delivery are locked at what the published policies
+            # say (migration 003): off. Turning either back on is the change the
+            # database refuses now.
+            ("VAT 5", doc("settings", put("store", "vat_rate_percent", value=5)), "23514 documents_locked_values"),
+            ("cash on delivery on", doc("settings", put("payments", "cod", value=True)), "23514 documents_locked_values"),
             ("card payments removed", doc("settings", drop("payments", "card")), "23514 documents_locked_values"),
             ("a GA4 id typed in", doc("settings", put("analytics", "ga4_id", value="G-123")),
              "23514 documents_locked_values"),
             ("the store's name", doc("settings", put("store", "name", value="BGS Corner Test")), "accepted"),
             ("a locked value changed on its own", lambda c: c.execute(
-                "UPDATE bgs.locked_values SET value = '0' WHERE ptr = '/store/vat_rate_percent'"),
+                "UPDATE bgs.locked_values SET value = '5' WHERE ptr = '/store/vat_rate_percent'"),
              roles("23514 locked_values_held", "42501")),
             ("a link to no product", doc("navigation", put("x_link", value="product.html?p=ghost")),
              "23503 product_refs_target"),

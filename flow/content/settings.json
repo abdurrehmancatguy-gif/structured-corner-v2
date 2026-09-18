@@ -18,12 +18,14 @@
     "legal_name": "BGS Corner General Trading LLC",
     "location": "Dubai, UAE",
     "currency": "AED",
-    "vat_rate_percent": 5,
-    "vat_inclusive": true,
+    "vat_rate_percent": 0,
+    "vat_inclusive": false,
     "free_delivery_over": 150,
     "delivery_fee": 12,
     "sameday_fee": 25,
     "sameday_cutoff": "2:00 PM",
+    "sameday": false,
+    "dispatch_days": "1 to 3 business days",
     "cod_max_order": 300,
     "cod_fee": 8,
     "giftbox_fee": 25,
@@ -65,7 +67,7 @@
     "apple_pay": true,
     "tabby": true,
     "tamara": true,
-    "cod": true
+    "cod": false
   },
   "languages": {
     "english": true,

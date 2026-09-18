@@ -299,7 +299,7 @@ class AdminTests(unittest.TestCase):
         b = self.b
         st, d = b.api("GET", "documents/settings")
         data = json.loads(json.dumps(d["data"]))
-        data["payments"]["cod"] = False
+        data["payments"]["cod"] = True          # the policies say the shop takes none
         st, res = b.api("PUT", "documents/settings", {"data": data}, rev=d["rev"])
         self.assertEqual(st, 403)
         self.assertEqual(res["error"]["code"], "locked_field")

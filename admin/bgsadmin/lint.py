@@ -138,14 +138,11 @@ def stale_rules(copy_data, settings_data, copy_schema):
     return out
 
 
-# Checkout and the order-confirmed page are locked with payments, and build.py
-# prints them as fixed text that states the delivery rules as they stood when
-# the rules moved into settings. test_rules.py holds these against the built
-# pages, so a code change to either page has to change them here as well.
-LOCKED_PAGES = (
-    ("Checkout", {"free_delivery_over": 150, "delivery_fee": 12, "sameday_fee": 25, "sameday_cutoff": "2:00 PM"}),
-    ("The order-confirmed page", {"sameday_cutoff": "2:00 PM"}),
-)
+# Checkout and the order-confirmed page are locked with payments, but they no
+# longer keep numbers of their own: build.py prints their delivery rows from
+# the rules in settings, so nothing on them can fall behind. A page that goes
+# back to fixed text belongs here again, with what it says.
+LOCKED_PAGES = ()
 
 
 def _differs(rule, now, said):

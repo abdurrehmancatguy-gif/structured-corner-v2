@@ -256,7 +256,7 @@ class StoreTests(unittest.TestCase):
                 ("a price of 0", "products", price, (422, "validation")),
                 ("a product related to no product", "products", ghost, (422, "validation")),
                 ("a product the quiz names, removed", "products", gone, (409, "referenced")),
-                ("VAT 0", "settings", lambda d: d["store"].update(vat_rate_percent=0), (403, "locked_field"))):
+                ("VAT 5", "settings", lambda d: d["store"].update(vat_rate_percent=5), (403, "locked_field"))):
             with self.assertRaises(ApiError, msg=label) as cm:
                 self.save(s, label, change, name)
             self.assertEqual((cm.exception.status, cm.exception.code), want, label)

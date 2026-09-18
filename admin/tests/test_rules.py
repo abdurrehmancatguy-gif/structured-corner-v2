@@ -64,19 +64,17 @@ class RulesTests(unittest.TestCase):
             self.assertIn("free over AED 200.", home)
             product = self.page("product.html")
             # the line is page text now (pages.json), with the middle dot as a character
-            self.assertIn("Free over AED 200 %s same-day before 2 PM" % chr(0xb7), product)
+            self.assertIn("Free over AED 200 %s same-day before 2 PM" % chr(0xb7), product)   # pages.json, unchanged here
             self.assertIn("Free over AED 200. AED 12 below that.", product)
             self.assertIn("<span>Free UAE delivery over AED 200</span><b data-p1lb", self.page("cart.html"))
-            # checkout is locked and keeps its own copy of the numbers
-            self.assertIn("free over AED 150", self.page("checkout.html"))
+            # checkout prints the rules, so it follows the new threshold too
+            self.assertIn("free over AED 200", self.page("checkout.html"))
             # the promises under the banner still say 150: named, not blocking. The
             # top strip writes the rule as {free_over}, so it follows and is not named.
             paths = {w["path"] for w in res["warnings"] if w["code"] == "stale_rule"}
             self.assertEqual(paths, {"/usp/0/title"})
-            # and checkout says so in text nobody can edit here
-            locked = [w for w in res["warnings"] if w["code"] == "locked_page"]
-            self.assertEqual([w["rules"] for w in locked], [["free_delivery_over"]])
-            self.assertIn("Checkout is locked and still says free delivery starts over AED 150.", locked[0]["message"])
+            # and no page keeps a number of its own to fall behind
+            self.assertEqual([w for w in res["warnings"] if w["code"] == "locked_page"], [])
         finally:
             self.restore(before)
         self.assertEqual(rules_in(self.flow)["free_delivery_over"], 150)
@@ -115,9 +113,7 @@ class RulesTests(unittest.TestCase):
             # the delivery fee, same-day fee and cutoff now differ from the promises under the banner
             rules = {w["rule"] for w in res["warnings"] if w["code"] == "stale_rule"}
             self.assertTrue({"delivery_fee", "sameday_fee", "sameday_cutoff"} <= rules, rules)
-            locked = {w["message"].split(" is locked")[0]: w["rules"] for w in res["warnings"] if w["code"] == "locked_page"}
-            self.assertEqual(locked, {"Checkout": ["delivery_fee", "sameday_fee", "sameday_cutoff"],
-                                      "The order-confirmed page": ["sameday_cutoff"]})
+            self.assertEqual([w for w in res["warnings"] if w["code"] == "locked_page"], [])
         finally:
             self.restore(before)
 
@@ -136,13 +132,14 @@ class RulesTests(unittest.TestCase):
         finally:
             self.restore(before)
 
-    def test_locked_pages_still_say_what_lint_expects(self):
-        # lint.LOCKED_PAGES holds what these two locked pages say; the built
-        # pages are the check that it is still true
+    def test_locked_pages_print_the_rules_rather_than_their_own_numbers(self):
+        # checkout and the order-confirmed page are locked with payments, but
+        # their delivery rows come from the rules, so lint has nothing to hold
+        # them to (lint.LOCKED_PAGES is empty) and neither can fall behind
         checkout = self.page("checkout.html")
-        for s in ("free over AED 150</span><span>AED 12 below", "before 2:00 PM</span><span>+AED 25"):
+        for s in ("free over AED 150</span><span>AED 12 below", "<b>Dispatch</b></span><span>1 to 3 business days"):
             self.assertIn(s, checkout)
-        self.assertIn("same-day if placed before 2 PM", self.page("confirmed.html"))
+        self.assertIn("Free over AED 150 &middot; dispatched in 1 to 3 business days", self.page("confirmed.html"))
         data, rev = self.settings()
         data["store"]["name"] = data["store"]["name"] + " "
         st, res = self.b.api("PUT", "documents/settings", {"data": data}, rev=rev)
@@ -198,7 +195,9 @@ class RulesTests(unittest.TestCase):
             self.restore(before)
 
     def test_cash_on_delivery_and_vat_stay_locked(self):
-        for key, value in (("cod_max_order", 400), ("cod_fee", 5), ("vat_rate_percent", 0), ("vat_inclusive", False)):
+        # the values themselves are what the published policies say: no cash on
+        # delivery and no VAT, so a change away from them is what is refused
+        for key, value in (("cod_max_order", 400), ("cod_fee", 5), ("vat_rate_percent", 5), ("vat_inclusive", True)):
             st, res = self.put_settings(lambda s: s.update({key: value}))
             self.assertEqual(st, 403, key)
             self.assertEqual(res["error"]["code"], "locked_field")
