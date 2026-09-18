@@ -3030,7 +3030,7 @@ code{border:1px solid var(--line)}
    text (settings.brand emblem and wordmark), set in Cormorant Garamond Bold,
    and the header's is dimmed a little as the logo was. */
 @font-face{font-family:"Cormorant Garamond";src:url(fonts/cormorant-garamond-700.woff2) format("woff2");font-weight:700;font-style:normal;font-display:swap}
-.logo.logo-type{display:flex;align-items:center;gap:10px;color:var(--primary);opacity:.8;flex-shrink:0}
+.logo.logo-type{display:flex;align-items:center;gap:10px;color:#000;flex-shrink:0}
 .logo-emb{display:block;width:36px;height:36px}
 .logo-wm{font:700 31px/1 "Cormorant Garamond",Georgia,"Times New Roman",serif;letter-spacing:.02em;white-space:nowrap;padding-top:2px}
 .foot-brand{display:flex;align-items:center;gap:9px;margin-bottom:14px;color:var(--primary)}

@@ -33,12 +33,16 @@ html:not(.js) .strip-msg:not(.on){display:none}
 .logo .wm{font:700 17px/1 var(--font-d);letter-spacing:.08em;color:var(--gold-d);white-space:nowrap}
 /* the emblem and the wordmark in Cormorant Garamond Bold, dimmed a little; the
    type shrinks with the screen so the logo always clears the three icons */
-.logo.logo-type{gap:.32em;color:#A8791E;opacity:.82;font-size:min(25px,calc((100vw - 176px) / 6.6))}
+/* The wordmark is sized against the widest face it can fall back to
+   (Georgia, 7.36em for BGS CORNER against Cormorant's 6.41em), plus the
+   emblem and the gap, so the whole logo fits beside the three icons at any
+   width and is never cut off when the web font has not arrived. */
+.logo.logo-type{gap:.32em;color:#000;font-size:clamp(13px,calc((100vw - 166px) / 8.8),25px)}
 .logo-emb{display:block;flex:none;width:1.12em;height:1.12em}
 .logo-wm{font:700 1em/1 "Cormorant Garamond",Georgia,"Times New Roman",serif;letter-spacing:.02em;white-space:nowrap;padding-top:.08em}
 /* the wordmark is the brand's mark, not reading text: a phone's larger text
    setting leaves it at its size, and it can never push the icons off */
-.logo.logo-type{min-width:0;overflow:hidden}
+.logo.logo-type{min-width:0}
 .logo-wm,.foot-wm{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .logo .logomark{display:none}
 .acts{display:flex;align-items:center;gap:0;flex:none}
