@@ -3117,3 +3117,10 @@ html:not(.js) .strip-msg:not(.on){display:none}
    third of the row empty. The columns now fit the number of cards: two fill
    the row between them, three make thirds, and more wrap. */
 .feat{grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:24px}
+/* A wide card would be as tall as it is wide with a square photograph, which
+   pushes its name, price and button off the screen. On these cards the
+   photograph takes a wide frame and sits whole inside it, so the card is seen
+   in one view. */
+.feat .p .ph{aspect-ratio:3 / 2;background:#fff}
+.feat .p .ph img{object-fit:contain;padding:14px}
+.feat .p .b{padding:16px 18px 18px}
