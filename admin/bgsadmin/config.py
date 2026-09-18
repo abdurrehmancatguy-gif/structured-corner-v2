@@ -24,7 +24,8 @@ LIMITS = {
 # what both deploys publish.
 PAGES = ("index.html", "collection.html", "product.html", "gift-box.html", "cart.html",
          "checkout.html", "confirmed.html", "track-order.html", "account.html", "quiz.html",
-         "corporate.html")
+         "corporate.html", "shipping-and-delivery.html", "returns-and-refunds.html", "privacy-policy.html",
+         "terms-and-conditions.html")
 
 # Files under flow/assets that the deploys leave out: never served locally either.
 UNPUBLISHED_ASSETS = {"assets/flow.css", "assets/cat/SOURCES.txt", "assets/fam/SOURCES.txt", "assets/fonts/SOURCES.txt"}

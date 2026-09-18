@@ -3073,3 +3073,16 @@ html:not(.js) .strip-msg:not(.on){display:none}
    chosen (shop.js sets disabled), and the line under the choices says why. */
 .pay button[disabled],.pay button[disabled]:hover{opacity:.4;cursor:not-allowed;border-color:var(--line);border-width:1px;font-weight:400}
 .codwhy{margin:0 0 10px;padding:12px 14px;border-radius:var(--r-sm);background:var(--hair);font-size:13px;line-height:1.5;color:var(--body)}
+
+/* ---------- the policy pages ----------
+   Shipping and delivery, returns and refunds, privacy and terms: the owner's
+   legal text (pages.json "legal"), one column, plain and readable. */
+.legal .wrap{max-width:760px}
+.legal .pagetitle{margin:6px 0 4px}
+.legal-date{margin:0 0 26px;font-size:13px;color:var(--mut)}
+.legal-body{font-size:15px;line-height:1.7;color:var(--body)}
+.legal-body h2{margin:30px 0 10px;font:600 18px/1.35 inherit;color:var(--ink);letter-spacing:-.01em}
+.legal-body h2:first-child{margin-top:0}
+.legal-body p{margin:0 0 14px}
+.legal-body ul{margin:0 0 16px;padding-inline-start:20px}
+.legal-body li{margin:0 0 7px}

@@ -26,7 +26,7 @@ import cdp_pipe
 PORT = int(os.environ.get("ADMIN_PAGES_PORT", "4743"))
 PORT2 = int(os.environ.get("ADMIN_PAGES2_PORT", "4744"))
 GROUPS = {"Header and footer", "Homepage bands", "Collection", "Product page", "Gift box", "Bag", "Track order",
-          "Corporate", "Account", "404"}
+          "Corporate", "Account", "Legal pages", "404"}
 
 
 def global_in(flow, name):
@@ -128,7 +128,8 @@ class PagesTests(_Pages, unittest.TestCase):
             else:
                 yield p
         data = self.doc()["data"]
-        rows = [f["path"] for f in fields if f["type"] == "rows"]
+        # rows and lines hold their own values: /promos/0/title, /legal/terms/body/3
+        rows = [f["path"] for f in fields if f["type"] in ("rows", "lines")]
         plain = {f["path"] for f in fields}
         for p in leaves(data):
             self.assertTrue(p in plain or any(p.startswith(r + "/") for r in rows), p)
@@ -338,8 +339,8 @@ class PagesTests(_Pages, unittest.TestCase):
             shutil.rmtree(str(tmp), ignore_errors=True)
 
 
-KEYS = ["shell", "home", "collection", "product", "gift-box", "bag", "track-order", "corporate", "account", "404",
-        "checkout", "confirmed"]
+KEYS = ["shell", "home", "collection", "product", "gift-box", "bag", "track-order", "corporate", "account",
+        "legal", "404", "checkout", "confirmed"]
 
 
 class PagesPartTwoTests(_Pages, unittest.TestCase):

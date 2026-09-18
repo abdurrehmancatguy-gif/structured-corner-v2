@@ -11,6 +11,7 @@ strip and the search hint are under Site text; the legal name, the location
 and the tab-title suffix are under Settings.
 """
 SHELL, HOME, COLLECTION, PRODUCT = "Header and footer", "Homepage bands", "Collection", "Product page"
+LEGAL = "Legal pages"
 GIFT_BOX, BAG, TRACK, CORPORATE, ACCOUNT, NOT_FOUND = "Gift box", "Bag", "Track order", "Corporate", "Account", "404"
 LOCKED = "Changed by a developer in code"
 
@@ -40,6 +41,10 @@ GROUPS = [
      "about": "The account page's sign-in panel, its headings and its programme, wallet, referral and consent text. "
               "A signed-in shopper's name, email and picture come from sign-in; their other details stay placeholders "
               "until the database arrives."},
+    {"key": "legal", "label": LEGAL, "page": "privacy-policy.html",
+     "about": "The four policy pages linked in the footer: shipping and delivery, returns and refunds, privacy, and "
+              "terms and conditions. Each one is a title, the date it was last updated and its text, one line per "
+              "paragraph: a line starting \"## \" is a heading and a line starting \"- \" is a point in a list."},
     {"key": "404", "label": NOT_FOUND, "page": "404.html",
      "about": "The page a visitor sees when a link leads nowhere."},
     {"key": "checkout", "label": "Checkout", "page": "checkout.html", "locked": LOCKED,
@@ -600,7 +605,41 @@ _NOT_FOUND = [
     text("/not_found/button", "Button", NOT_FOUND, 40, help="It opens the homepage."),
 ]
 
-FIELDS = (_SHELL + _HOME + _COLLECTION + _PRODUCT + _GIFT_BOX + _BAG + _TRACK + _CORPORATE + _ACCOUNT
+# The four policy pages. Their words are the owner's legal text, so the fields
+# are plain and roomy: the title, the date it carries, the words the footer
+# links with, and the policy itself as lines.
+_LEGAL = [
+    text("/legal/shipping/title", "Shipping and delivery: title", LEGAL, 80, section="Shipping and delivery"),
+    text("/legal/shipping/link_label", "Shipping and delivery: footer link", LEGAL, 40, section="Shipping and delivery",
+         help="The words the footer links with. The link itself is under Navigation."),
+    text("/legal/shipping/updated", "Shipping and delivery: last updated", LEGAL, 60, section="Shipping and delivery"),
+    {"path": "/legal/shipping/body", "type": "lines", "label": "Shipping and delivery: the policy", "group": LEGAL, "section": "Shipping and delivery",
+     "min": 1, "max": 200, "itemMaxLength": 1200,
+     "help": "One line per paragraph. A line starting \"## \" is a heading, a line starting \"- \" is a point in a list."},
+    text("/legal/returns/title", "Returns and refunds: title", LEGAL, 80, section="Returns and refunds"),
+    text("/legal/returns/link_label", "Returns and refunds: footer link", LEGAL, 40, section="Returns and refunds",
+         help="The words the footer links with. The link itself is under Navigation."),
+    text("/legal/returns/updated", "Returns and refunds: last updated", LEGAL, 60, section="Returns and refunds"),
+    {"path": "/legal/returns/body", "type": "lines", "label": "Returns and refunds: the policy", "group": LEGAL, "section": "Returns and refunds",
+     "min": 1, "max": 200, "itemMaxLength": 1200,
+     "help": "One line per paragraph. A line starting \"## \" is a heading, a line starting \"- \" is a point in a list."},
+    text("/legal/privacy/title", "Privacy: title", LEGAL, 80, section="Privacy"),
+    text("/legal/privacy/link_label", "Privacy: footer link", LEGAL, 40, section="Privacy",
+         help="The words the footer links with. The link itself is under Navigation."),
+    text("/legal/privacy/updated", "Privacy: last updated", LEGAL, 60, section="Privacy"),
+    {"path": "/legal/privacy/body", "type": "lines", "label": "Privacy: the policy", "group": LEGAL, "section": "Privacy",
+     "min": 1, "max": 200, "itemMaxLength": 1200,
+     "help": "One line per paragraph. A line starting \"## \" is a heading, a line starting \"- \" is a point in a list."},
+    text("/legal/terms/title", "Terms and conditions: title", LEGAL, 80, section="Terms and conditions"),
+    text("/legal/terms/link_label", "Terms and conditions: footer link", LEGAL, 40, section="Terms and conditions",
+         help="The words the footer links with. The link itself is under Navigation."),
+    text("/legal/terms/updated", "Terms and conditions: last updated", LEGAL, 60, section="Terms and conditions"),
+    {"path": "/legal/terms/body", "type": "lines", "label": "Terms and conditions: the policy", "group": LEGAL, "section": "Terms and conditions",
+     "min": 1, "max": 200, "itemMaxLength": 1200,
+     "help": "One line per paragraph. A line starting \"## \" is a heading, a line starting \"- \" is a point in a list."},
+]
+
+FIELDS = (_SHELL + _HOME + _COLLECTION + _PRODUCT + _GIFT_BOX + _BAG + _TRACK + _CORPORATE + _ACCOUNT + _LEGAL
           + _NOT_FOUND)
 
 # A text with no {token} of its own takes no brace at all, rows' parts

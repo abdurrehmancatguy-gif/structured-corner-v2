@@ -159,6 +159,27 @@
           "href": "corporate.html"
         }
       ]
+    },
+    {
+      "heading": "Legal",
+      "links": [
+        {
+          "label": "Shipping & delivery",
+          "href": "shipping-and-delivery.html"
+        },
+        {
+          "label": "Returns & refunds",
+          "href": "returns-and-refunds.html"
+        },
+        {
+          "label": "Privacy policy",
+          "href": "privacy-policy.html"
+        },
+        {
+          "label": "Terms & conditions",
+          "href": "terms-and-conditions.html"
+        }
+      ]
     }
   ]
 }

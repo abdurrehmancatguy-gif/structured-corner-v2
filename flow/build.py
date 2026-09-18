@@ -581,7 +581,9 @@ EXTRA_GLOBALS.append(("BGS_AUTH", lambda: AUTH))
 NOINDEX = {"page-cart", "page-checkout", "page-confirmed", "page-account", "page-track-order"}
 # The pages whose phone design is the one in phone/*.css (see PHONE_CSS).
 PHONE_PAGES = {"page-index", "page-collection", "page-product", "page-cart", "page-checkout", "page-confirmed",
-               "page-account", "page-track-order", "page-quiz", "page-gift-box", "page-corporate"}
+               "page-account", "page-track-order", "page-quiz", "page-gift-box", "page-corporate",
+               "page-shipping-and-delivery", "page-returns-and-refunds", "page-privacy-policy",
+               "page-terms-and-conditions"}
 
 def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
     """No category strip here. The circles are a homepage shelf now - the sticky
@@ -1902,6 +1904,51 @@ def emit_catalogue():
 
 # An empty title leaves the tab with the Title suffix from Settings alone:
 # the homepage is just "BGS Corner".
+# ---------------------------------------------------------------- LEGAL
+# The four policies the owner supplied, each its own page and its own link in
+# the footer. The words are content (pages.json "legal"), kept as lines: one
+# starting "## " is a heading, one starting "- " is a point in a list, and
+# anything else is a paragraph. The file names and the order are code.
+LEGAL = (("shipping", "shipping-and-delivery.html"), ("returns", "returns-and-refunds.html"),
+         ("privacy", "privacy-policy.html"), ("terms", "terms-and-conditions.html"))
+
+def legal_body(key):
+    """One policy's lines as markup: headings, lists and paragraphs."""
+    out, items = [], []
+    def close():
+        if items:
+            out.append("<ul>" + "".join("<li>%s</li>" % x for x in items) + "</ul>")
+            del items[:]
+    for line in _value("legal.%s.body" % key) or []:
+        if not isinstance(line, str) or not line.strip():
+            _BAD_PAGES.append("pages.json legal.%s.body holds a line that is not text" % key)
+            continue
+        line = line.strip()
+        if line.startswith("## "):
+            close()
+            out.append("<h2>%s</h2>" % esc(line[3:].strip()))
+        elif line.startswith("- "):
+            items.append(esc(line[2:].strip()))
+        else:
+            close()
+            out.append("<p>%s</p>" % esc(line))
+    close()
+    return "\n    ".join(out)
+
+def legal_page(key):
+    return """
+<section class="legal"><div class="wrap">
+  <span class="eyebrow" data-crumb>%(crumb)s</span>
+  <h1 class="pagetitle">%(title)s</h1>
+  <p class="legal-date">%(updated)s</p>
+  <div class="legal-body">
+    %(body)s
+  </div>
+</div></section>""" % {"crumb": "%s / %s" % (CRUMB_HOME, page_text("legal.%s.link_label" % key)),
+                       "title": page_text("legal.%s.title" % key),
+                       "updated": page_text("legal.%s.updated" % key),
+                       "body": legal_body(key)}
+
 PAGES = [("index.html","",home,"","Home"),
          ("collection.html","Oud Attar: Alcohol-Free, 3 ml and 6 ml",collection,"Oud Attar","Shop"),
          ("product.html","Royal Amber",product,"Oud Attar","Shop"),
@@ -1913,6 +1960,7 @@ PAGES = [("index.html","",home,"","Home"),
          ("account.html","Your Account: BGS One, Wallet and Referrals",account,"","Account"),
          ("quiz.html","Test Your Scent: Five Questions, One Minute",quiz,"","Home"),
          ("corporate.html","Corporate Gifting: Co-Branded Oud and Bakhoor",corporate,"Corporate Gifting","Home")]
+PAGES += [(fn, raw_text("legal.%s.title" % key), legal_page(key), "", "Home") for key, fn in LEGAL]
 # 404.html is written after the pages, but its words (pages.json
 # "not_found") are read here with the rest. Its tab title ends with the same
 # suffix from Settings as every other page's.
