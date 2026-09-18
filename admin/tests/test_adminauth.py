@@ -86,7 +86,7 @@ BOX = IDP = None
 
 def setUpModule():
     global BOX, IDP
-    IDP = FakeOIDC(IDP_PORT, CLIENT, [BASE + "/admin/callback"], [BASE + "/admin/"], [BASE])
+    IDP = FakeOIDC(IDP_PORT, CLIENT, [BASE + "/admin/callback"], [BASE + "/admin/signedout"], [BASE])
     IDP.user = {"sub": "auth0|admin-1", "name": "The Owner", "email": OWNER}
     BOX = AuthBox(PORT)
 
@@ -194,9 +194,13 @@ class SigningIn(unittest.TestCase):
         IDP.reset()
 
     def test_an_allowed_address_gets_in_and_can_work(self):
-        st, head, _, session, sent = sign_in()
-        self.assertEqual(st, 303)
-        self.assertEqual(head["Location"], "/admin/")
+        # the callback answers a page of ours, since the browser arrives from
+        # the provider and /admin/ is served only to a navigation that started
+        # here; that page carries it on
+        st, head, body, session, sent = sign_in()
+        self.assertEqual(st, 200)
+        self.assertIn(b'url=/admin/', body)
+        self.assertIn(b"Signed in", body)
         self.assertTrue(session)
         cookie = "%s=%s" % (adminauth.COOKIE, session)
         self.assertEqual(BOX.token_now(cookie), 200)
@@ -225,6 +229,15 @@ class SigningIn(unittest.TestCase):
         self.assertIsNone(session)
         self.assertIn(b"not verified", body)
 
+    def test_signing_out_cannot_be_done_from_another_site(self):
+        """A link on any page would otherwise sign the owner out of the admin
+        and of the provider."""
+        st, head, _ = BOX.raw("GET", "/admin/signout", headers={"Sec-Fetch-Mode": "navigate",
+                                                                "Sec-Fetch-Dest": "document",
+                                                                "Sec-Fetch-Site": "cross-site"})
+        self.assertEqual(st, 403)
+        self.assertIsNone(cookie_of(head, adminauth.COOKIE))
+
     def test_a_state_that_does_not_match_is_refused(self):
         st, _, _, session, _ = sign_in(break_state=True)
         self.assertEqual(st, 400)
@@ -252,7 +265,7 @@ class SigningIn(unittest.TestCase):
         where = urllib.parse.urlsplit(head["Location"])
         back = at_provider(where.query)
         cookie = {"Cookie": "%s=%s" % (adminauth.FLOW_COOKIE, flow)}
-        self.assertEqual(BOX.raw("GET", "/admin/callback?" + back, headers=cookie)[0], 303)
+        self.assertEqual(BOX.raw("GET", "/admin/callback?" + back, headers=cookie)[0], 200)
         self.assertEqual(BOX.raw("GET", "/admin/callback?" + back, headers=cookie)[0], 502)
 
 
@@ -295,7 +308,18 @@ class TheCookie(unittest.TestCase):
         self.assertEqual(cookie_of(head, adminauth.COOKIE), "")
         where = urllib.parse.urlsplit(head["Location"])
         p = dict(urllib.parse.parse_qsl(where.query))
-        self.assertEqual((where.path, p["client_id"], p["returnTo"]), ("/v2/logout", CLIENT, BASE + "/admin/"))
+        self.assertEqual((where.path, p["client_id"], p["returnTo"]), ("/v2/logout", CLIENT, BASE + "/admin/signedout"))
+        # and where the provider sends the browser back to says so and carries on
+        st, head, body = BOX.raw("GET", "/admin/signedout")
+        self.assertEqual(st, 200)
+        self.assertIn(b"Signed out", body)
+        self.assertEqual(cookie_of(head, adminauth.COOKIE), "")
+
+    def test_the_same_cookie_sent_twice_cannot_push_the_real_one_aside(self):
+        planted = "%s=%s; %s=%s" % (adminauth.COOKIE, self.session, adminauth.COOKIE, "planted.value")
+        self.assertEqual(BOX.raw("GET", "/admin/", headers=dict(NAV, Cookie=planted))[0], 200)
+        planted = "%s=%s; %s=%s" % (adminauth.COOKIE, "planted.value", adminauth.COOKIE, self.session)
+        self.assertEqual(BOX.raw("GET", "/admin/", headers=dict(NAV, Cookie=planted))[0], 200)
 
 
 class Settings(unittest.TestCase):
@@ -340,7 +364,9 @@ class Settings(unittest.TestCase):
                     ({"domain": "dev-abc123.us.auth0.com", "client_id": CLIENT, "base_url": "http://admin.example.com",
                       "allowed": [OWNER]}, "must be https"),
                     ({"domain": "dev-abc123.us.auth0.com", "client_id": CLIENT, "base_url": BASE,
-                      "allowed": ["not-an-address"]}, "not an email address")):
+                      "allowed": ["not-an-address"]}, "not an email address"),
+                    ({"domain": "dev-abc123.us.auth0.com", "client_id": CLIENT,
+                      "base_url": "https://example.com/admin", "allowed": [OWNER]}, "with no path after it")):
                 path.write_text(json.dumps(doc), encoding="utf-8")
                 with self.assertRaises(adminauth.NotConfigured) as cm:
                     adminauth.settings(folder)

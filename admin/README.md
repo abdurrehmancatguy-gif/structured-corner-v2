@@ -214,7 +214,11 @@ and Secure over https, good for twelve hours. It does not replace the
 per-run token or the Origin checks: an API call still carries both, so a
 signed-in person on another site still cannot drive the admin.
 
-`/admin/signout` drops the cookie and ends the session at the provider.
+`/admin/signout` drops the cookie and ends the session at the provider; it
+is refused from another site, so no page can sign the owner out. The
+provider's redirects land on a small page of the admin's own, which carries
+the browser on, because `/admin/` is served only to a navigation that started
+here.
 Removing an address from `allowed` shuts that person out at their next
 sign-in; deleting `admin/local/session-key` signs everyone out at once.
 

@@ -148,11 +148,13 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
     def admin(self, method, path):
         app = self.server.app
-        if app.auth and path in ("/admin/signin", "/admin/callback", "/admin/signout"):
+        if app.auth and path in ("/admin/signin", "/admin/callback", "/admin/signout", "/admin/signedout"):
             if method not in ("GET", "HEAD"):
                 raise ApiError(405, "method", "Not allowed.", headers={"Allow": "GET, HEAD"})
             return self.signin(path, method)
         if app.auth_required and path != "/admin/signin" and not adminauth.who(app.cfg, self):
+            # the storefront preview beside the admin is served to signed-in
+            # people only when the admin asks for a sign-in at all
             # nobody is signed in: a page is sent to the provider, an API call
             # is told to, since a fetch cannot follow a sign-in
             if path.startswith("/admin/api/"):
@@ -211,9 +213,15 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return self.redirect(url, [adminauth.cookie_header(adminauth.FLOW_COOKIE, cookie,
                                                                adminauth.FLOW_SECONDS, cfg.https)])
         if path == "/admin/signout":
+            security.check_admin_page(self)
             return self.redirect(conf.url("/v2/logout", client_id=conf.client_id,
-                                          returnTo=conf.base_url + "/admin/"),
+                                          returnTo=conf.base_url + "/admin/signedout"),
                                  [adminauth.cookie_header(adminauth.COOKIE, "", 0, cfg.https)])
+        if path == "/admin/signedout":
+            # where the provider sends the browser after signing out: our own
+            # page again, since it comes from another site
+            return self.hop("/admin/signin", method, [adminauth.cookie_header(adminauth.COOKIE, "", 0, cfg.https)],
+                            "Signed out", "")
         query = urllib.parse.parse_qs(urllib.parse.urlsplit(self.path).query, keep_blank_values=True)
         params = {k: v[-1] for k, v in query.items()}
         drop = adminauth.cookie_header(adminauth.FLOW_COOKIE, "", 0, cfg.https)
@@ -224,8 +232,37 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return self.signin_page(method, e, [drop])
         print("admin sign-in: %s" % person["email"])
         session = adminauth.seal(adminauth.key(cfg.repo), person, adminauth.SESSION_SECONDS)
-        return self.redirect("/admin/", [drop, adminauth.cookie_header(adminauth.COOKIE, session,
-                                                                       adminauth.SESSION_SECONDS, cfg.https)])
+        # The browser arrives here from the provider, so this navigation
+        # started on another site. /admin/ is served only to a navigation that
+        # started here (check_admin_page), so the way in is a page of our own
+        # that sends the browser on: that next navigation is same-origin.
+        return self.hop("/admin/", method, [drop, adminauth.cookie_header(adminauth.COOKIE, session,
+                                                                          adminauth.SESSION_SECONDS, cfg.https)],
+                        "Signed in", person["name"])
+
+    def hop(self, where, method, cookies=(), heading="", name=""):
+        """A small page of our own that carries the browser on to where. The
+        navigation it starts is same-origin, which is what the admin page asks
+        for; a browser with no scripting follows the refresh or the link."""
+        body = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
+                '<meta name="viewport" content="width=device-width, initial-scale=1">'
+                '<meta http-equiv="refresh" content="0; url=%s"><title>%s</title>'
+                '<style>body{margin:0;min-height:100vh;display:grid;place-items:center;'
+                'font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#faf9f7;color:#1d1509}'
+                'a{color:#5b21b6}</style></head><body><main><p>%s%s</p>'
+                '<p><a href="%s">Carry on to the admin</a></p></main></body></html>'
+                % (html.escape(where), html.escape(heading), html.escape(heading),
+                   (", " + html.escape(name)) if name else "", html.escape(where))).encode("utf-8")
+        self.send_response(200)
+        for k, v in ADMIN_HEADERS.items():
+            self.send_header(k, v)
+        for c in cookies:
+            self.send_header("Set-Cookie", c)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        if method != "HEAD":
+            self.wfile.write(body)
 
     def signin_page(self, method, err, cookies=()):
         """What a refused sign-in sees: what happened and a way to try again.

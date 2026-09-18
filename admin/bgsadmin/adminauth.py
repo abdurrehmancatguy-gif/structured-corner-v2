@@ -162,14 +162,28 @@ def settings(repo):
     if not allowed:
         raise NotConfigured("The admin's login needs at least one allowed address (\"allowed\" in %s)."
                             % path_of(repo))
-    return Settings(domain, client_id, base_url.rstrip("/") + parts.path.rstrip("/"), allowed)
+    if parts.path.strip("/"):
+        raise NotConfigured("The admin's base_url is the address it is served at, with no path after it.")
+    return Settings(domain, client_id, parts.scheme + "://" + parts.netloc.lower(), allowed)
+
+
+LOCAL = ("127.0.0.1", "localhost", "::1")
 
 
 def required(cfg):
-    """A login is asked for off this machine, and wherever it is set to be."""
-    if os.environ.get("BGS_ADMIN_REQUIRE_LOGIN") == "1":
+    """A login is asked for off this machine: when the admin binds anything
+    but the loopback, when its own address is a public one (a proxy in front
+    of it still serves it to the world), and wherever it is set to be."""
+    if str(os.environ.get("BGS_ADMIN_REQUIRE_LOGIN") or "").strip().lower() not in ("", "0", "false", "no", "off"):
         return True
-    return cfg.host not in ("127.0.0.1", "localhost")
+    if cfg.host not in LOCAL:
+        return True
+    base = getattr(cfg, "base_url", None)
+    if base:
+        host = (urllib.parse.urlsplit(base).hostname or "").lower()
+        if host and host not in LOCAL:
+            return True
+    return False
 
 
 # ---- the signed cookies ---------------------------------------------------------------
@@ -181,14 +195,20 @@ def key(repo):
     try:
         raw = path.read_bytes().strip()
         if len(raw) >= 32:
+            # O_CREAT sets a mode only for a file it makes, so one that was
+            # already there is put back to its owner alone before it is used
+            if stat.S_IMODE(path.stat().st_mode) != stat.S_IRUSR | stat.S_IWUSR:
+                os.chmod(str(path), stat.S_IRUSR | stat.S_IWUSR)
             return raw
     except OSError:
         pass
     path.parent.mkdir(parents=True, exist_ok=True)
     raw = base64.b64encode(secrets.token_bytes(48))
-    fd = os.open(str(path), os.O_WRONLY | os.O_CREAT | os.O_TRUNC, stat.S_IRUSR | stat.S_IWUSR)
+    tmp = path.with_name(".%s.%s.tmp" % (path.name, os.getpid()))
+    fd = os.open(str(tmp), os.O_WRONLY | os.O_CREAT | os.O_EXCL, stat.S_IRUSR | stat.S_IWUSR)
     with os.fdopen(fd, "wb") as f:
         f.write(raw)
+    os.replace(str(tmp), str(path))
     return raw
 
 
@@ -219,13 +239,26 @@ def unseal(secret, value):
 
 
 def cookies(handler):
+    """Every value the browser sent for each cookie name, in order. A name can
+    arrive more than once (another path, another domain, or planted by a page
+    on a neighbouring site), so nothing here picks a winner: the callers try
+    each value and take the one that is signed."""
     out = {}
     for header in handler.headers.get_all("Cookie") or []:
         for part in header.split(";"):
             name, _, value = part.strip().partition("=")
             if name:
-                out[name] = value
+                out.setdefault(name, []).append(value)
     return out
+
+
+def sealed(handler, secret, name):
+    """The first value of this cookie that carries our signature, or None."""
+    for value in cookies(handler).get(name, []):
+        body = unseal(secret, value)
+        if body is not None:
+            return body
+    return None
 
 
 def cookie_header(name, value, seconds, https, path="/admin"):
@@ -240,7 +273,7 @@ def cookie_header(name, value, seconds, https, path="/admin"):
 
 def who(cfg, handler):
     """The person this request is signed in as, or None."""
-    body = unseal(key(cfg.repo), cookies(handler).get(COOKIE))
+    body = sealed(handler, key(cfg.repo), COOKIE)
     if not body or not isinstance(body.get("email"), str):
         return None
     return body
@@ -292,7 +325,7 @@ def finish(cfg, conf, handler, params):
     """The provider sent the browser back: check the state against the cookie,
     trade the code for a token and ask the provider whose it is. Returns the
     person, or raises ApiError with what to tell them."""
-    attempt = unseal(key(cfg.repo), cookies(handler).get(FLOW_COOKIE))
+    attempt = sealed(handler, key(cfg.repo), FLOW_COOKIE)
     if not attempt:
         raise ApiError(400, "signin_expired", "That sign-in took too long or was started elsewhere. Try again.")
     if params.get("error"):
