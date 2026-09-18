@@ -34,7 +34,10 @@ def PV(name, suffix=""):
 # 360 is enough. The "Never discounted" row is one card per line up to 900px
 # and a third of the wrap above it, so it has its own.
 CARD_SIZES = "(max-width:560px) calc(50vw - 23px), (max-width:700px) 33vw, (max-width:900px) 25vw, 240px"
-FEAT_SIZES = "(max-width:900px) calc(100vw - 34px), 410px"
+# The Never discounted cards fill their row (.feat fits its columns to the
+# number of cards), so they are half the wrap on a desktop and take the 600
+# and 1000 px photographs rather than the card-sized ones.
+FEAT_SIZES = "(max-width:900px) 45vw, (max-width:1360px) 46vw, 620px"
 GALLERY_SIZES = "(max-width:700px) 245px, (max-width:900px) 330px, 470px"
 def png_size(path):
     """Width and height from a PNG header, so the <img> reserves its box before
@@ -689,7 +692,7 @@ SETS = [("Discovery Trio","3 &times; 3 ml","129"),("His &amp; Hers Duo","2 &time
         ("Eid Royal Hamper","2 &times; 6 ml + EDP + bakhoor","299"),("Dubai in a Bottle","3 ml + mini bakhoor","79")]
 
 def card(name, meta, price, sizes=None, halo=False, notes=None, barcode=None, low=None,
-         pid=None, images=None, img_sizes=CARD_SIZES):
+         pid=None, images=None, img_sizes=CARD_SIZES, big=False):
     key = pid or slug(name)
     b = '<span class="badge res">Reserve</span>' if halo else ''
     if low: b = '<span class="badge low">%s left</span>' % low
@@ -712,9 +715,9 @@ def card(name, meta, price, sizes=None, halo=False, notes=None, barcode=None, lo
   <div class="b"><span class="meta">%s</span><span class="nm">%s</span>%s
   %s<div class="pr"><b>AED %s</b></div>%s
   <button type="button" class="btn sm solid" data-add="%s" style="margin-top:4px">Add to bag</button></div></a>""" % (
-    key, ph_img(images, name, img_sizes), b, heart, meta, esc(name), nt, sz, price, hl, key)
+    key, ph_img(images, name, img_sizes, big), b, heart, meta, esc(name), nt, sz, price, hl, key)
 
-def ph_img(images, alt, img_sizes=CARD_SIZES):
+def ph_img(images, alt, img_sizes=CARD_SIZES, big=False):
     """A real photograph if the product has one, the placeholder if not.
 
        Two frames are emitted when the product has them: the close-up, and the
@@ -725,10 +728,12 @@ def ph_img(images, alt, img_sizes=CARD_SIZES):
         return '<span class="none">Product image</span>'
     a = alt.replace('"', "&quot;")
     def srcs(n):
+        if big:          # a wide card: the 600 px copy and the 1000 px original
+            return PV(n, "-600"), "%s 600w, %s 1000w" % (PV(n, "-600"), PV(n))
         return PV(n, "-card"), "%s 360w, %s 520w" % (PV(n, "-card-360"), PV(n, "-card"))
     s, ss = srcs(images[0])
     out = ('<img class="ph-a" src="%s" srcset="%s" sizes="%s" alt="%s" loading="lazy" '
-           'decoding="async" width="520" height="520">' % (s, ss, img_sizes, a))
+           'decoding="async" width="%d" height="%d">' % (s, ss, img_sizes, a, 1000 if big else 520, 1000 if big else 520))
     if len(images) > 1:
         # The hover-only second photo waits for a pointer or focus (shop.js). At
         # opacity 0 with a src it downloaded with the first on every card.
@@ -759,7 +764,7 @@ def _meta(pr):
 def _cards(cat, n=None):
     return _cards_from(published(cat)[:n])
 
-def _cards_from(rows, img_sizes=CARD_SIZES):
+def _cards_from(rows, img_sizes=CARD_SIZES, big=False):
     out = []
     for pr in rows:
         sizes = ["%s &middot; AED %s" % (esc(z["label"]), money(z["price"])) for z in pr.get("sizes", [])] or None
@@ -768,7 +773,7 @@ def _cards_from(rows, img_sizes=CARD_SIZES):
         if pr.get("top") or pr.get("heart"):
             notes = " &middot; ".join(x for x in (pr.get("top"), pr.get("heart")) if x)
         out.append(card(pr["name"], _meta(pr), money(pr["price"]), sizes=sizes, pid=pr["id"],
-                        images=pr.get("images"), img_sizes=img_sizes,
+                        images=pr.get("images"), img_sizes=img_sizes, big=big,
                         halo=pr.get("never_discount", False), notes=notes,
                         barcode=pr.get("barcode") or None,
                         low=(stock if isinstance(stock, int) and stock <= RULES["low_stock_at"] else None)))
@@ -780,7 +785,7 @@ def halo_cards(n=None):
     """The pieces that sit outside every discount. This used to be the Reserve
        category; now that Reserve is folded into attars it selects on
        never_discount, which is what made them Reserve in the first place."""
-    return _cards_from([r for r in published() if r.get("never_discount")][:n], FEAT_SIZES)
+    return _cards_from([r for r in published() if r.get("never_discount")][:n], FEAT_SIZES, big=True)
 def bakhoor_cards(n=None): return _cards("bakhoor", n)
 def edp_cards(n=None):     return _cards("edp", n)
 def set_cards(n=None):     return _cards("gift-sets", n)
@@ -830,7 +835,7 @@ def shelf(key):
         label = ""
     head = '<div class="sec-h"><h2>%s</h2><a href="%s">%s &rarr;</a></div>' % (
         heading(key), href, esc(label.replace("{n}", str(len(rows)))))
-    return head, _cards_from(rows[:limit], sizes)
+    return head, _cards_from(rows[:limit], sizes, big=(sizes is FEAT_SIZES))
 
 
 def usp_strip():
