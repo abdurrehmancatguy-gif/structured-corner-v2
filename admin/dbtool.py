@@ -296,14 +296,16 @@ def _migrate(cfg, conn, ident, params, apply, t0):
 
 # ---- verify -------------------------------------------------------------------------
 
-# The triggers migration 001 makes; every one must be there and enabled.
+# The triggers the migrations make; every one must be there and enabled.
 TRIGGERS_001 = (
     "products_before", "products_guard_never_discount", "products_refs_on_write", "products_refs_on_change",
     "products_revision_on_write", "products_revision_on_change", "products_bump", "products_no_truncate",
     "documents_before", "documents_refs_on_write", "documents_refs_on_change", "documents_revision_on_write",
     "documents_revision_on_change", "documents_bump", "documents_no_truncate", "revisions_audited",
     "locked_values_held", "revisions_append_only", "audit_log_append_only", "revisions_no_truncate",
-    "audit_log_no_truncate")
+    "audit_log_no_truncate",
+    # 002: never_discount survives a delete and a fresh insert
+    "products_guard_never_discount_reborn")
 TRIGGERS = ("SELECT t.tgname, t.tgenabled FROM pg_trigger AS t JOIN pg_class AS c ON c.oid = t.tgrelid "
             "JOIN pg_namespace AS n ON n.oid = c.relnamespace WHERE n.nspname = 'bgs' AND NOT t.tgisinternal")
 NOT_VALID = ("SELECT c.conrelid::regclass::text || ' ' || c.conname FROM pg_constraint AS c "

@@ -234,7 +234,8 @@ class MigrateTests(DatabaseCase):
         self.assertEqual(self.q(name, "SELECT (SELECT count(*) FROM bgs.products) || ' ' || (SELECT count(*) FROM "
                                       "bgs.documents) || ' ' || (SELECT count(*) FROM bgs.audit_log)"),
                          "%d 7 1" % len(products))
-        self.assertEqual(self.q(name, "SELECT version || ' ' || name FROM bgs.schema_migrations"), "1 001_foundation.sql")
+        self.assertEqual(self.q(name, "SELECT version || ' ' || name FROM bgs.schema_migrations ORDER BY version"),
+                         "\n".join("%d %s" % (m.version, m.name) for m in migrate.available()))
         self.assertEqual(self.q(name, "SELECT repo_path FROM bgs.store_meta"), str(self.repo))
         with psycopg.connect(dsn) as conn:
             state = content.read(conn.cursor())
@@ -283,10 +284,12 @@ class MigrateTests(DatabaseCase):
         name, dsn = self.migrated()
         folder = pathlib.Path(tempfile.mkdtemp(prefix="bgsdb-mig-"))
         self.addCleanup(shutil.rmtree, str(folder), True)
-        mine = migrate.FOLDER / "001_foundation.sql"
+        ours = [m.path for m in migrate.available()]
+        mine = ours[-1]                                   # the newest one this checkout has
         with psycopg.connect(dsn) as conn:
             cur = conn.cursor()
-            shutil.copy2(str(mine), str(folder / mine.name))
+            for path in ours:
+                shutil.copy2(str(path), str(folder / path.name))
             self.assertEqual(migrate.pending(cur, folder), [])
             (folder / mine.name).write_bytes(mine.read_bytes() + b"\n-- one more line\n")
             with self.assertRaises(CannotStart) as cm:
@@ -297,7 +300,7 @@ class MigrateTests(DatabaseCase):
                 migrate.pending(cur, folder)
             self.assertIn("newer than this checkout", cm.exception.message)
             shutil.copy2(str(mine), str(folder / mine.name))
-            (folder / "003_later.sql").write_text("SELECT 1;\n")
+            (folder / ("%03d_later.sql" % (len(ours) + 2))).write_text("SELECT 1;\n")
             with self.assertRaises(CannotStart) as cm:
                 migrate.pending(cur, folder)
             self.assertIn("without gaps", cm.exception.message)
@@ -478,6 +481,19 @@ class RefusalTests(DatabaseCase):
                 cur.execute("UPDATE bgs.products SET body = %s::json WHERE id = %s", (compact(d), i))
             audited(cur, t)
 
+        def delete_then_insert(flipped, **kw):
+            """Take the product out and put it back the same second, as a
+            script in psql could: 002 holds never_discount across it."""
+            def fn(cur):
+                t = who(cur, "delete and create again", **kw)
+                d = body_of(cur, "products", P)
+                if flipped:
+                    d["never_discount"] = not d["never_discount"]
+                cur.execute("DELETE FROM bgs.products WHERE id = %s", (P,))
+                cur.execute("INSERT INTO bgs.products (id, body) VALUES (%s, %s::json)", (P, compact(d)))
+                audited(cur, t)
+            return fn
+
         def trigger_off_and_on(cur):
             cur.execute("ALTER TABLE bgs.products DISABLE TRIGGER products_before")
             cur.execute("ALTER TABLE bgs.products ENABLE TRIGGER products_before")
@@ -509,6 +525,13 @@ class RefusalTests(DatabaseCase):
              "23514 products_never_discount_guarded"),
             ("never_discount flipped and confirmed", prod(flip, confirmed="%s/never_discount" % P), "accepted"),
             ("and flipped back, confirmed", prod(flip, confirmed="%s/never_discount" % P), "accepted"),
+            ("deleted and created again as it was", delete_then_insert(False), "accepted"),
+            ("deleted and created again with never_discount flipped", delete_then_insert(True),
+             "23514 products_never_discount_guarded"),
+            ("the same, another product confirmed", delete_then_insert(True, confirmed="%s/never_discount" % other),
+             "23514 products_never_discount_guarded"),
+            ("the same, confirmed", delete_then_insert(True, confirmed="%s/never_discount" % P), "accepted"),
+            ("and back as it was now, confirmed", delete_then_insert(True, confirmed="%s/never_discount" % P), "accepted"),
             ("a key twice", raw("UPDATE bgs.products SET body = (%s || substr(body::text, 2))::json WHERE id = %s",
                                 '{"name":"A","name":"B",', P), "23514 products_body_sane"),
             ("NUL in a string", prod(put("name", value="Vi" + chr(0) + "be")), "22P05"),
