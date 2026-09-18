@@ -38,7 +38,8 @@ class Config:
     "json" (flow/content/*.json are the content) or "postgres" (the
     database is, and dsn names it); server.py chooses (choose_store)."""
 
-    def __init__(self, repo, port=4310, storefront_only=False, no_push=False, store="json", dsn=None):
+    def __init__(self, repo, port=4310, storefront_only=False, no_push=False, store="json", dsn=None,
+                 host="127.0.0.1", base_url=None):
         self.repo = pathlib.Path(repo).resolve()
         self.flow = self.repo / "flow"
         self.content = self.flow / "content"
@@ -50,8 +51,18 @@ class Config:
         self.store = store
         self.dsn = dsn
         self.python = sys.executable
+        self.host = host
+        # Off this machine the admin is reached at its own address, which the
+        # Host and Origin checks have to know about as well as the local pair.
+        self.base_url = (base_url or "").rstrip("/") or None
         self.hosts = {"localhost:%d" % self.port, "127.0.0.1:%d" % self.port}
         self.origins = {"http://localhost:%d" % self.port, "http://127.0.0.1:%d" % self.port}
+        if self.base_url:
+            import urllib.parse as _u
+            parts = _u.urlsplit(self.base_url)
+            self.hosts.add(parts.netloc)
+            self.origins.add(parts.scheme + "://" + parts.netloc)
+        self.https = bool(self.base_url and self.base_url.startswith("https://"))
 
     def content_file(self, name):
         return self.content / ("%s.json" % name)

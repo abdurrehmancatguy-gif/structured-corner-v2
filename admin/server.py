@@ -20,7 +20,7 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
-from bgsadmin import config, httpd              # noqa: E402
+from bgsadmin import adminauth, config, httpd   # noqa: E402
 from bgsadmin.app import App                    # noqa: E402
 from bgsadmin.store.base import CannotStart     # noqa: E402
 
@@ -46,8 +46,8 @@ def main():
                                   'user=...", never a password')
     args = ap.parse_args()
 
-    if args.host not in ("127.0.0.1", "localhost"):
-        sys.exit("The admin only listens on 127.0.0.1: it has no login yet.")
+    # Off this machine the admin needs its own login (adminauth): App refuses
+    # to start without one, so a wider address can never be the open admin.
     port = args.port or args.port_pos or 4310
     repo = pathlib.Path(args.repo).resolve() if args.repo else config.ADMIN.parent
     store, dsn = "json", None
@@ -56,7 +56,12 @@ def main():
             store, dsn = config.choose_store(repo, args.store, args.dsn)
         except ValueError as e:
             stop(str(e), 2)
-    cfg = config.Config(repo, port, args.storefront_only, args.no_push, store=store, dsn=dsn)
+    try:
+        auth = adminauth.settings(repo)
+    except CannotStart as e:
+        sys.exit(e.message if hasattr(e, "message") else str(e))
+    cfg = config.Config(repo, port, args.storefront_only, args.no_push, store=store, dsn=dsn,
+                        host=args.host, base_url=auth.base_url if auth else None)
     if (cfg.flow / "admin").exists():
         sys.exit("flow/admin exists. flow/ is published, so nothing of the admin may live there.")
     if not cfg.content.is_dir():
@@ -68,7 +73,7 @@ def main():
     except CannotStart as e:
         stop(e.message + (" The admin did not start; nothing was changed." if e.status == 3 else ""), e.status)
     try:
-        srv = httpd.Server(("127.0.0.1", port), httpd.Handler, app)
+        srv = httpd.Server((args.host, port), httpd.Handler, app)
     except OSError as e:
         if app.store is not None:
             app.store.close()
@@ -76,6 +81,10 @@ def main():
     print("storefront  http://localhost:%d/" % port)
     if app.admin_enabled:
         print("admin       http://localhost:%d/admin/" % port)
+        if app.auth:
+            print("sign-in     %s, %d %s allowed%s" % (app.auth.domain, len(app.auth.allowed),
+                                                       "person" if len(app.auth.allowed) == 1 else "people",
+                                                       "" if app.auth_required else " (not asked for on this machine)"))
         print("store       %s" % app.store.describe())
         for w in app.store.warnings():
             print("warning     %s" % w)

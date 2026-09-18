@@ -22,6 +22,9 @@ It answers as Auth0 does for a Single Page Application:
   an OPTIONS preflight is answered the same way.
 - GET /v2/logout checks the client id and that returnTo is allowed, then
   redirects there.
+- GET /userinfo answers the profile for an access token it gave out (the
+  admin's own sign-in reads who someone is from here, as it does from Auth0).
+  .email_verified False and .user say what it answers.
 - GET /picture.png is the shopper's picture; /.well-known/openid-configuration
   lists the endpoints.
 
@@ -70,6 +73,7 @@ class FakeOIDC:
         self.user = {"sub": "auth0|fake-shopper-1", "name": "Noor Haddad", "email": "noor@example.com"}
         self.lifetime = 36000
         self.codes = {}
+        self.tokens = {}                 # access token -> the profile /userinfo gives back
         self.log, self.events = [], []
         self.reset()
         idp = self
@@ -95,6 +99,7 @@ class FakeOIDC:
     def reset(self):
         """Back to a plain sign-in, with nothing recorded."""
         self.deny = self.wrong_state = self.wrong_nonce = False
+        self.email_verified = True
         del self.log[:]
         del self.events[:]
 
@@ -154,6 +159,8 @@ class FakeOIDC:
                 "Access-Control-Max-Age": "600"}))
         if route == ("POST", "/oauth/token"):
             return self.token(h, body)
+        if route == ("GET", "/userinfo"):
+            return self.userinfo(h)
         if route == ("GET", "/v2/logout"):
             return self.logout(h, params)
         if route == ("GET", "/picture.png"):
@@ -214,9 +221,23 @@ class FakeOIDC:
                 return self._refuse(h, "token", why, cors, True)
         self.events.append({"kind": "token", "ok": True, "origin": h.headers.get("Origin"),
                             "cookie": "Cookie" in h.headers})
-        out = {"access_token": b64url(os.urandom(24)), "id_token": self.id_token(grant["nonce"]),
+        access = b64url(os.urandom(24))
+        self.tokens[access] = dict(self.user, picture=self.base + "/picture.png",
+                                   email_verified=self.email_verified)
+        out = {"access_token": access, "id_token": self.id_token(grant["nonce"]),
                "token_type": "Bearer", "expires_in": 86400, "scope": "openid profile email"}
         return self._send(h, 200, json.dumps(out, ensure_ascii=False).encode("utf-8"), "application/json", cors)
+
+    def userinfo(self, h):
+        """Who the access token belongs to. Auth0 answers 401 for a token it
+        did not give out, and so does this."""
+        sent = (h.headers.get("Authorization") or "").split(" ", 1)
+        token = sent[1] if len(sent) == 2 and sent[0].lower() == "bearer" else ""
+        who = self.tokens.get(token)
+        if not who:
+            return self._send(h, 401, b'{"error":"invalid_token"}', "application/json")
+        self.events.append({"kind": "userinfo", "ok": True, "email": who.get("email")})
+        return self._send(h, 200, json.dumps(who, ensure_ascii=False).encode("utf-8"), "application/json")
 
     def logout(self, h, p):
         if p.get("client_id") != self.client_id:

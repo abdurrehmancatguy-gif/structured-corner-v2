@@ -2,7 +2,7 @@
 import secrets
 import shutil
 
-from . import routes
+from . import adminauth, routes
 from .store.base import CannotStart
 from .store.jsonstore import JSONStore
 
@@ -33,6 +33,16 @@ class App:
         self.token = secrets.token_urlsafe(32) if self.admin_enabled else None
         self.routes = routes.load() if self.admin_enabled else []
         self.store = make_store(cfg) if self.admin_enabled else None
+        # who may open the admin (adminauth): its own Auth0 application and its
+        # own list of people, apart from the shop's sign-in
+        self.auth = adminauth.settings(cfg.repo) if self.admin_enabled else None
+        self.auth_required = self.admin_enabled and adminauth.required(cfg)
+        if self.auth_required and not self.auth:
+            raise CannotStart(
+                "The admin needs a login when it is not on this machine. Set its own Auth0 application and "
+                "the people allowed in (%s or the environment: BGS_ADMIN_AUTH_DOMAIN, BGS_ADMIN_AUTH_CLIENT_ID, "
+                "BGS_ADMIN_BASE_URL, BGS_ADMIN_ALLOWED). admin/README.md, Who may open the admin."
+                % adminauth.path_of(cfg.repo))
         self.build = {"ok": None, "at": None, "ms": None, "problems": []}
         self.probes = {}
         self.recovered = []

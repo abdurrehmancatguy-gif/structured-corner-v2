@@ -6,6 +6,7 @@ queued behind it. TCPServer rather than HTTPServer, whose server_bind looks
 up the host's FQDN and can stall on macOS.
 """
 import contextlib
+import html
 import http.server
 import os
 import socketserver
@@ -13,7 +14,7 @@ import sys
 import traceback
 import urllib.parse
 
-from . import routes, security, static
+from . import adminauth, routes, security, static
 from .config import LIMITS, UI
 from .errors import ApiError
 from .jsonutil import dumps, strict_loads
@@ -146,6 +147,17 @@ class Handler(http.server.BaseHTTPRequestHandler):
     # ---- admin -------------------------------------------------------------
 
     def admin(self, method, path):
+        app = self.server.app
+        if app.auth and path in ("/admin/signin", "/admin/callback", "/admin/signout"):
+            if method not in ("GET", "HEAD"):
+                raise ApiError(405, "method", "Not allowed.", headers={"Allow": "GET, HEAD"})
+            return self.signin(path, method)
+        if app.auth_required and path != "/admin/signin" and not adminauth.who(app.cfg, self):
+            # nobody is signed in: a page is sent to the provider, an API call
+            # is told to, since a fetch cannot follow a sign-in
+            if path.startswith("/admin/api/"):
+                raise ApiError(401, "signin_required", "Sign in to the admin again.")
+            return self.redirect("/admin/signin")
         if path == "/admin":
             self.send_response(308)
             for k, v in ADMIN_HEADERS.items():
@@ -168,6 +180,75 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if path.startswith("/admin/api/v1/"):
             return self.api(method, path[len("/admin/api/v1/"):])
         raise ApiError(404, "not_found", "Nothing here.")
+
+    # ---- sign-in -----------------------------------------------------------
+    #
+    # The admin's own Auth0 application, apart from the shop's (adminauth).
+    # /admin/signin sends the browser to the provider and remembers the
+    # attempt in a signed cookie; /admin/callback checks what comes back,
+    # asks the provider who it is, and signs that person in when the admin's
+    # list has their address; /admin/signout drops the cookie and ends the
+    # session at the provider too.
+
+    def redirect(self, where, cookies=()):
+        self.send_response(303)
+        for k, v in ADMIN_HEADERS.items():
+            self.send_header(k, v)
+        for c in cookies:
+            self.send_header("Set-Cookie", c)
+        self.send_header("Location", where)
+        self.send_header("Content-Length", "0")
+        self.end_headers()
+
+    def signin(self, path, method):
+        app = self.server.app
+        conf, cfg = app.auth, self.server.app.cfg
+        if path == "/admin/signin":
+            security.check_admin_page(self)
+            if adminauth.who(cfg, self):
+                return self.redirect("/admin/")
+            url, cookie = adminauth.start(cfg, conf)
+            return self.redirect(url, [adminauth.cookie_header(adminauth.FLOW_COOKIE, cookie,
+                                                               adminauth.FLOW_SECONDS, cfg.https)])
+        if path == "/admin/signout":
+            return self.redirect(conf.url("/v2/logout", client_id=conf.client_id,
+                                          returnTo=conf.base_url + "/admin/"),
+                                 [adminauth.cookie_header(adminauth.COOKIE, "", 0, cfg.https)])
+        query = urllib.parse.parse_qs(urllib.parse.urlsplit(self.path).query, keep_blank_values=True)
+        params = {k: v[-1] for k, v in query.items()}
+        drop = adminauth.cookie_header(adminauth.FLOW_COOKIE, "", 0, cfg.https)
+        try:
+            person = adminauth.finish(cfg, conf, self, params)
+        except ApiError as e:
+            print("admin sign-in refused: %s" % e.code)
+            return self.signin_page(method, e, [drop])
+        print("admin sign-in: %s" % person["email"])
+        session = adminauth.seal(adminauth.key(cfg.repo), person, adminauth.SESSION_SECONDS)
+        return self.redirect("/admin/", [drop, adminauth.cookie_header(adminauth.COOKIE, session,
+                                                                       adminauth.SESSION_SECONDS, cfg.https)])
+
+    def signin_page(self, method, err, cookies=()):
+        """What a refused sign-in sees: what happened and a way to try again.
+        It names no address and no setting."""
+        body = ("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">"
+                "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
+                "<title>Admin sign-in</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;"
+                "font:16px/1.55 -apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,sans-serif;background:#faf9f7;color:#1d1509}"
+                "main{max-width:34rem;padding:32px;text-align:center}h1{font-size:22px;margin:0 0 10px}"
+                "p{margin:0 0 20px;color:#4b4336}a{display:inline-block;padding:12px 20px;border-radius:12px;"
+                "background:#1d1509;color:#fff;text-decoration:none;font-weight:600}</style></head><body><main>"
+                "<h1>%s</h1><p>%s</p><a href=\"/admin/signin\">Try again</a></main></body></html>"
+                % (html.escape("You are not signed in to the admin"), html.escape(err.message))).encode("utf-8")
+        self.send_response(err.status)
+        for k, v in ADMIN_HEADERS.items():
+            self.send_header(k, v)
+        for c in cookies:
+            self.send_header("Set-Cookie", c)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        if method != "HEAD":
+            self.wfile.write(body)
 
     def send_index(self, method):
         page = (UI / "index.html").read_text(encoding="utf-8")

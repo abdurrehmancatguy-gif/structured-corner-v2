@@ -171,6 +171,53 @@ server as its host, so a web page open in another tab cannot use the admin
 behind your back. Text cannot contain page code, links must point at pages of
 this shop, and the admin never serves or edits the site's code.
 
+## Who may open the admin
+
+Shoppers sign in to the shop with the Auth0 application in
+`flow/content/settings.json`. The admin has a **second, separate application**
+of its own and its own list of people, so a shopper account is never an admin
+account. On this machine the admin opens with no sign-in, as it always has;
+it is asked for the moment the admin is served anywhere else, and
+`BGS_ADMIN_REQUIRE_LOGIN=1` asks for it here too.
+
+The settings live outside `flow/` (which is published) and outside git, in
+`admin/local/admin-auth.json`, or in the environment, which is how a host
+sets them:
+
+```json
+{
+  "domain": "dev-xxxx.us.auth0.com",
+  "client_id": "the admin application's Client ID",
+  "base_url": "https://admin.example.com",
+  "allowed": ["owner@example.com", "staff@example.com"]
+}
+```
+
+`BGS_ADMIN_AUTH_DOMAIN`, `BGS_ADMIN_AUTH_CLIENT_ID`, `BGS_ADMIN_BASE_URL` and
+`BGS_ADMIN_ALLOWED` (addresses separated by commas) say the same thing and
+win over the file.
+
+In Auth0, make a second application (Single Page Application) beside the
+shop's, and give it the admin's own address:
+
+- **Allowed Callback URLs:** `<base_url>/admin/callback`
+- **Allowed Logout URLs:** `<base_url>/admin/`
+- **Allowed Web Origins:** `<base_url>`
+
+The admin keeps no client secret: it signs in with the Authorization Code
+flow and PKCE, trades the code from the server over TLS, and reads who
+signed in from the provider's own `/userinfo`. An address is let in only when
+the provider says it is verified and the list holds it, whatever else the
+account may be. The signed-in browser holds one cookie, signed with
+`admin/local/session-key` (made on demand, `0600`), HttpOnly, SameSite=Lax
+and Secure over https, good for twelve hours. It does not replace the
+per-run token or the Origin checks: an API call still carries both, so a
+signed-in person on another site still cannot drive the admin.
+
+`/admin/signout` drops the cookie and ends the session at the provider.
+Removing an address from `allowed` shuts that person out at their next
+sign-in; deleting `admin/local/session-key` signs everyone out at once.
+
 ## Database
 
 The admin can keep its content in PostgreSQL instead of the JSON files.
@@ -276,6 +323,7 @@ ports between 4700 and 4799; 4310 is your preview.
 | `test_bag_path.py` | The storefront's way to checkout: the panel after Add to bag on a phone and a desktop, and the bag page's checkout bar; needs Chrome | `ADMIN_BAG_PATH_PORT` | 4791 |
 | `test_signin.py` | Shopper sign-in against a stand-in for Auth0 on a phone and a desktop: the account page's panel, Sign in and Create account, refused callbacks, an expired profile, Sign out, the header and tab bar, the Settings fields, and the GitHub Pages, Netlify and bgscorner.com addresses against the lists in Auth0; needs Chrome | `ADMIN_SIGNIN_PORT` and `ADMIN_SIGNIN_OIDC_PORT` | 4792 and 4793 |
 | `test_phone_layout.py` | The storefront on phones and other touch screens: the notch, type on the big landscape phones, Arabic word order, the masthead, the buy bar and the bag at 200% text; needs Chrome | `ADMIN_PHONE_LAYOUT_PORT` | 4792 |
+| `test_adminauth.py` | Who may open the admin: the admin opens with no sign-in on this machine; with one asked for, the round trip to the stand-in provider, the list of people, a refused sign-in, a changed, stale or foreign cookie, that a signed-in browser still needs the admin's token, signing out, the settings the admin refuses and the admin refusing to start without them | `ADMIN_ADMINAUTH_PORT` (and the next) | 4746 |
 | `test_dbschema.py` | The throwaway PostgreSQL clusters (private, no TCP, the owner's roles and database rights, nothing left after a failure, the alarm or a kill); the migrations through `dbtool migrate` and `verify`; the writes the database refuses by itself, as the owner and as the admin's role; dump and restore; exact round trips; what the database says about a save that died while committing. Needs PostgreSQL's programs, no admin server; everything past the clusters needs psycopg (`admin/.venv/bin/python`) | `ADMIN_PG_PORT` (and the next port) | 5453 |
 | `test_pgstore.py` | The PostgreSQL store itself: reads and revs, a save's order, the database's refusals behind the admin's, busy, one admin per checkout and per database, the saves a crash cut short, files changed outside the admin, a database changed in psql, a missing file, the start refusals and start lines, dbtool use. Always PostgreSQL; needs psycopg (`admin/.venv/bin/python`) | `ADMIN_PGSTORE_PORT` (and the next port), `ADMIN_PG_PORT` | 4745 and 5453 |
 
