@@ -593,8 +593,13 @@ def sized_copies(cfg, path):
             return [img / (name[:-4] + s + ".jpg") for s in ("-600", "-card-360", "-thumb")]
         if name in LOGOS.values():
             return [img / (name[:-4] + "-486.png")]
+        if name == EMBLEM:
+            return [img / (name[:-4] + "-128.png")]
     if folder == "assets/cat" and name.endswith(".jpg") and not name.endswith("-216.jpg"):
         return [cat / (name[:-4] + "-216.jpg")]
+    # the cut-outs are PNGs, and their 216 px copy is one too
+    if folder == "assets/cat" and name.endswith(".png") and not name.endswith("-216.png"):
+        return [cat / (name[:-4] + "-216.png")]
     if folder == "assets/fam" and name.endswith(".jpg") and not name.endswith("-450.jpg"):
         return [cfg.assets / "fam" / (name[:-4] + "-450.jpg")]
     return []
@@ -607,13 +612,15 @@ def orphan_copies(cfg):
     snapshots them so a failed build puts them back and the sweep is not
     reported as a file the build should not have changed."""
     out = []
-    for folder, suffixes in ((cfg.assets / "img", ("-600", "-card-360", "-thumb")), (cfg.assets / "cat", ("-216",)),
-                             (cfg.assets / "fam", ("-450",))):
+    for folder, suffixes, ext in ((cfg.assets / "img", ("-600", "-card-360", "-thumb"), ".jpg"),
+                                  (cfg.assets / "cat", ("-216",), ".jpg"),
+                                  (cfg.assets / "cat", ("-216",), ".png"),
+                                  (cfg.assets / "fam", ("-450",), ".jpg")):
         if not folder.is_dir():
             continue
         for suf in suffixes:
-            for d in folder.glob("*" + suf + ".jpg"):
-                if not (folder / (d.name[: -len(suf + ".jpg")] + ".jpg")).exists():
+            for d in folder.glob("*" + suf + ext):
+                if not (folder / (d.name[: -len(suf + ext)] + ext)).exists():
                     out.append(d)
     return out
 

@@ -9,6 +9,11 @@
   "0c873c87a7caf0e607c6bc796ae4892d",
   "jpeg q78 wNone s216"
  ],
+ "assets/cat/corporate-gifts-216.png": [
+  "assets/cat/corporate-gifts.png",
+  "d703f158b48129aeaf10b18916f8dfec",
+  "png w216"
+ ],
  "assets/cat/floral-216.jpg": [
   "assets/cat/floral.jpg",
   "197899be241e9aa89b04f08f84737ad8",
@@ -18,6 +23,16 @@
   "assets/cat/fresh.jpg",
   "c482d0e33fb59476712f09348b0b7300",
   "jpeg q78 wNone s216"
+ ],
+ "assets/cat/gift-box-216.png": [
+  "assets/cat/gift-box.png",
+  "16f0abb06bc1e8acde9fd35f2cd9e292",
+  "png w216"
+ ],
+ "assets/cat/gift-sets-216.png": [
+  "assets/cat/gift-sets.png",
+  "f960bc34e20ad0cd9b5b8858a7df3e3f",
+  "png w216"
  ],
  "assets/fam/amber-and-spice-450.jpg": [
   "assets/fam/amber-and-spice.jpg",
@@ -1008,6 +1023,11 @@
   "assets/img/imperial-crown-4.jpg",
   "da8163e4b5621a5f8d5686a8719a7069",
   "jpeg q78 w160 sNone"
+ ],
+ "assets/img/logo-emblem-128.png": [
+  "assets/img/logo-emblem.png",
+  "155ef9c4a904d686aebdfd00ce9c992c",
+  "png w128"
  ],
  "assets/img/logo-gold-486.png": [
   "assets/img/logo-gold.png",

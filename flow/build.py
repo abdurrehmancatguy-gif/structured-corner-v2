@@ -22,6 +22,13 @@ def _md5(path, salt=b""):
 def V(path):
     h = _md5(path)
     return path + ("?v=" + h if h else "")
+def D(path, suffix):
+    """The smaller copy tools/make_derivatives.py writes beside a picture, when
+    it made one: the cut-out category pictures and the emblem are stored at the
+    size the admin uploads and shown at a fraction of it. A picture that is
+    already small enough has no copy, and then the file itself is used."""
+    alt = re.sub(r"\.(png|jpg)$", suffix + r".\1", path)
+    return alt if alt != path and pathlib.Path(alt).exists() else path
 # Product photos: one version per photo, from its 1000 px original, shared by the
 # copies tools/make_derivatives.py makes of it (-600, -card, -card-360, -thumb).
 # Bump DERIVATIVES when those copies change without the original changing.
@@ -452,6 +459,7 @@ def _emblem_wordmark():
     picture with the wordmark beside it as text, in Cormorant Garamond Bold."""
     emb, word = BRAND.get("emblem"), BRAND.get("wordmark")
     if isinstance(emb, str) and emb and isinstance(word, str) and word.strip():
+        emb = D(emb, "-128")            # the header shows it at 36 px at most
         w, h = png_size(emb)
         return emb, word.strip(), (' width="%d" height="%d"' % (w, h) if w else "")
     return None
@@ -549,7 +557,7 @@ def catstrip():
         # across the circle instead of rising out of it.
         '<a class="c-{2}{4}" href="{0}"><span class="circle"><img src="{3}" alt="" '
         'width="108" height="108"></span><span>{1}</span></a>'.format(
-            esc(h), esc(n).replace("/", "/<wbr>"), k, esc(V(img)),
+            esc(h), esc(n).replace("/", "/<wbr>"), k, esc(V(D(img, "-216"))),
             " pop wide" if cut == "wide" else " pop" if cut else "")
         for n, h, k, img, cut in CATS) + '</div></div></div>')
 

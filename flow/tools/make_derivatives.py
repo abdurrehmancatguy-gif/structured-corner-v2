@@ -9,8 +9,9 @@ never sent a desktop file:
   <id>-<n>-card-360.jpg   product cards on phones (shown at about 166 px)
   <id>-<n>-thumb.jpg      gallery thumbnails and bag lines (51 to 108 px)
 Banners get a 750 px phone copy and a 1320 px desktop copy, category photos a
-216 px square (twice the largest circle), the logos a 486 px copy (three
-times the phone logo, over twice the desktop one), and the scent family
+216 px square (twice the largest circle, and a 216 px PNG for the cut-outs),
+the logos a 486 px copy (three times the phone logo, over twice the desktop
+one) and the emblem a 128 px one, and the scent family
 photos (900x675 in assets/fam) a 450 px copy, since their tiles are 138 to
 227px wide.
 
@@ -111,17 +112,31 @@ for src in sorted(IMG.glob("*.jpg")):
 for src in sorted(CAT.glob("*.jpg")):
     if not src.stem.endswith("-216"):
         jpeg(src, CAT / (src.stem + "-216.jpg"), square=216)
+# The cut-out category pictures are PNGs, for their transparency, and a PNG of
+# a photograph is heavy: the two gift ones were 171 and 130 KB for a circle
+# 108 px wide. They get a 216 px copy of their own, in PNG so the cut-out
+# survives, and build.py asks for it wherever the circle is shown.
+for src in sorted(CAT.glob("*.png")):
+    # only the ones that are bigger than the circle needs: a copy of a picture
+    # that is already 204 px wide is an enlargement, and came out heavier
+    if not src.stem.endswith("-216") and Image.open(src).width > 216:
+        png(src, CAT / (src.stem + "-216.png"), 216)
 for src in sorted(FAM.glob("*.jpg")):
     if not src.stem.endswith("-450"):
         jpeg(src, FAM / (src.stem + "-450.jpg"), 450)
 for name in ("logo-gold", "logo-gold-light"):
     png(IMG / (name + ".png"), IMG / (name + "-486.png"), 486)
+# The emblem beside the wordmark is never shown wider than 36 px, so a 128 px
+# copy covers even a three times screen. The full file is the one the admin
+# uploads and the one the favicons are cut from, so it stays as it is.
+if (IMG / "logo-emblem.png").exists():
+    png(IMG / "logo-emblem.png", IMG / "logo-emblem-128.png", 128)
 
 # Copies whose original is gone (a re-import with fewer frames) go too, or they
 # would sit in assets/ referenced by nothing.
 removed = 0
 for folder, suffixes, ext in ((IMG, ("-600", "-card-360", "-thumb"), ".jpg"), (CAT, ("-216",), ".jpg"),
-                              (FAM, ("-450",), ".jpg")):
+                              (CAT, ("-216",), ".png"), (FAM, ("-450",), ".jpg")):
     for suf in suffixes:
         for d in folder.glob("*" + suf + ext):
             if not (folder / (d.name[: -len(suf + ext)] + ext)).exists():
