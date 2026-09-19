@@ -846,7 +846,20 @@ def shelf(key):
         label = ""
     head = '<div class="sec-h"><h2>%s</h2><a href="%s">%s &rarr;</a></div>' % (
         heading(key), href, esc(label.replace("{n}", str(len(rows)))))
-    return head, _cards_from(rows[:limit], sizes, big=(sizes is FEAT_SIZES))
+    shown = rows[:limit]
+    return head, _cards_from(shown, sizes, big=(sizes is FEAT_SIZES)), cols(len(shown))
+
+
+def cols(n):
+    """The grid class for a row of n cards: as many columns as there are cards,
+       so the row is full and the cards are the same size across the shelf.
+
+       A shelf of five prints five; the gift sets, of which there are four,
+       print four wide rather than four and a hole where a fifth would be. Below
+       three it stops narrowing: two cards across the whole page would be two
+       enormous squares, which is a worse answer than a gap on a shelf that is
+       nearly empty anyway. The phone and tablet rules override all of this."""
+    return "g5" if n >= 5 else "g4" if n == 4 else "g3"
 
 
 def usp_strip():
@@ -1098,7 +1111,7 @@ home = """
 
 <section class="alt shelf-attars"><div class="wrap">
   %(attars_h)s
-  <div class="grid g5">%(attars)s</div>
+  <div class="grid %(attars_cols)s">%(attars)s</div>
 </div></section>
 
 <section><div class="wrap"><div class="band">
@@ -1115,7 +1128,7 @@ home = """
 
 <section class="alt shelf-sets"><div class="wrap">
   %(sets_h)s
-  <div class="grid g5">%(sets)s</div>
+  <div class="grid %(sets_cols)s">%(sets)s</div>
 </div></section>
 
 <section><div class="wrap">
@@ -1133,12 +1146,12 @@ home = """
 
 <section class="alt shelf-bakhoor"><div class="wrap">
   %(bakhoor_h)s
-  <div class="grid g5">%(bakhoor)s</div>
+  <div class="grid %(bakhoor_cols)s">%(bakhoor)s</div>
 </div></section>
 
 <section class="shelf-edp"><div class="wrap">
   %(edp_h)s
-  <div class="grid g5">%(edp)s</div>
+  <div class="grid %(edp_cols)s">%(edp)s</div>
 </div></section>
 %(faq)s
 %(newsletter)s""" % dict(discovery_band(), promos=promos(), reels=reels(), catstrip=catstrip(), usp=usp_strip(),
@@ -1148,9 +1161,12 @@ home = """
            qb_body=COPY["quiz_banner"]["body"], qb_cta=COPY["quiz_banner"]["cta_label"],
            qb_href=COPY["quiz_banner"]["cta_href"],
            prev=sv("left",22,2), next=sv("right",22,2),
-           attars_h=_SH["house_ouds"][0], attars=_SH["house_ouds"][1], oud_h=_SH["reserve"][0], oud=_SH["reserve"][1],
-           sets_h=_SH["gift_sets"][0], sets=_SH["gift_sets"][1], fam_h=heading("scent_family"),
-           bakhoor_h=_SH["bakhoor"][0], bakhoor=_SH["bakhoor"][1], edp_h=_SH["edp"][0], edp=_SH["edp"][1],
+           attars_h=_SH["house_ouds"][0], attars=_SH["house_ouds"][1], attars_cols=_SH["house_ouds"][2],
+           oud_h=_SH["reserve"][0], oud=_SH["reserve"][1],
+           sets_h=_SH["gift_sets"][0], sets=_SH["gift_sets"][1], sets_cols=_SH["gift_sets"][2],
+           fam_h=heading("scent_family"),
+           bakhoor_h=_SH["bakhoor"][0], bakhoor=_SH["bakhoor"][1], bakhoor_cols=_SH["bakhoor"][2],
+           edp_h=_SH["edp"][0], edp=_SH["edp"][1], edp_cols=_SH["edp"][2],
            fam_tiles=family_tiles(), faq=faq_section(), newsletter=newsletter_section())
 if _BAD_HOME:
     sys.exit("build failed:\n  " + "\n  ".join("home.json " + p for p in _BAD_HOME))
@@ -1864,9 +1880,9 @@ account = """
 </div></section>
 <section class="alt acct-picks"><div class="wrap">
   %(picks_head)s
-  <div class="grid g4">%(picks)s</div>
+  <div class="grid %(picks_cols)s">%(picks)s</div>
 </div></section>
-""" % dict(ACCOUNT_TEXT, **SIGNIN_PARTS, picks_head=_ACCT_PICKS[0], picks=_ACCT_PICKS[1],
+""" % dict(ACCOUNT_TEXT, **SIGNIN_PARTS, picks_head=_ACCT_PICKS[0], picks=_ACCT_PICKS[1], picks_cols=_ACCT_PICKS[2],
            name=slot("customer name"), contact=slot("phone"), email=slot("email"),
            drops=slot("0"), credit=slot("AED 0"), orders=slot("0"), tierpct="0%",
            voucher=slot("none active"), refcode=slot("unique code per customer"),
