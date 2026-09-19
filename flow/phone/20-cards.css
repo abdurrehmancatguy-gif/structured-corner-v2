@@ -50,7 +50,7 @@
    screen readers (and for the moment it says Added) */
 .p [data-add]{grid-area:add;align-self:center;position:relative;margin:8px 0 0 !important;width:42px;min-width:0;height:42px;min-height:0;padding:0;
   border:0;border-radius:50%;background:var(--cta);color:transparent;font-size:0;line-height:0;overflow:hidden;
-  box-shadow:0 4px 12px rgba(91,33,182,.28)}
+  box-shadow:0 4px 12px rgba(23,15,5,.28)}
 .p [data-add]::before,.p [data-add]::after{content:"";position:absolute;left:50%;top:50%;background:#fff;border-radius:2px;
   transform:translate(-50%,-50%);transition:transform .25s var(--ease)}
 .p [data-add]::before{width:16px;height:2.2px}

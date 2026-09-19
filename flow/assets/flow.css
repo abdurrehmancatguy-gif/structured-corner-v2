@@ -3124,3 +3124,11 @@ html:not(.js) .strip-msg:not(.on){display:none}
 .feat .p .ph{aspect-ratio:3 / 2;background:#fff}
 .feat .p .ph img{object-fit:contain;padding:14px}
 .feat .p .b{padding:16px 18px 18px}
+
+/* ---- the call colour: black, not purple -------------------------------------
+   The owner asked for no blue or purple buttons. The deep purple above
+   (--cta) becomes the shop's own near-black, its pressed shade true black,
+   and the pale lavender a warm grey, so buttons, links in the call colour,
+   focus rings and the selection colour all follow. The gold call banners
+   further up are set from --banner and are untouched. */
+:root{--cta:#170F05;--cta-d:#000000;--cta-l:#EFEAE2}

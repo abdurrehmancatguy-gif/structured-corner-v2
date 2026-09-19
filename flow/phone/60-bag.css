@@ -106,7 +106,7 @@
   font:700 17px/1.2 var(--font-d);color:var(--ink)}
 :is(.page-cart,.page-checkout) .sum .r.t > span:last-child{font:800 24px/1.1 var(--font-d);letter-spacing:-.025em}
 :is(.page-cart,.page-checkout) .sum .btn.solid.block{min-height:54px;margin-top:16px !important;border-radius:14px;font-size:16px;
-  box-shadow:0 8px 20px rgba(91,33,182,.24)}
+  box-shadow:0 8px 20px rgba(23,15,5,.24)}
 
 /* the ways to pay, a row of quiet chips; cash on delivery greys out over AED 300 */
 .page-cart .pay[data-pay]{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:16px !important}
@@ -126,7 +126,7 @@
     linear-gradient(var(--cta),var(--cta)) calc(50% - 17px) 38px / 2.5px 30px no-repeat,
     linear-gradient(var(--cta),var(--cta)) calc(50% + 17px) 38px / 2.5px 30px no-repeat,
     var(--cta-l);
-  box-shadow:0 0 0 10px rgba(91,33,182,.04)}
+  box-shadow:0 0 0 10px rgba(23,15,5,.04)}
 .page-cart [data-cartempty].empty::after{content:"";position:absolute;left:50%;top:65px;width:16px;height:12px;margin-left:-8px;
   border:2.5px solid var(--cta);border-bottom:0;border-radius:9px 9px 0 0}
 .page-cart [data-cartempty].empty p{margin:0 0 20px !important;font:700 22px/1.2 var(--font-d);letter-spacing:-.02em;color:var(--ink);text-wrap:balance}
@@ -151,7 +151,7 @@
 .page-cart .bagbar .bb-t b{display:block;font:800 21px/1.15 var(--font-d);letter-spacing:-.02em;color:var(--ink);
   white-space:normal;overflow-wrap:anywhere}
 .page-cart .bagbar .btn{flex:0 0 auto;min-width:48%;min-height:50px;padding:0 22px;border-radius:14px;font-size:16px;
-  box-shadow:0 6px 16px rgba(91,33,182,.24)}
+  box-shadow:0 6px 16px rgba(23,15,5,.24)}
 /* the foot of the page keeps clear of the bar */
 .page-cart:has([data-cartsummary]:not([hidden])) footer{padding-bottom:calc(var(--tabbar-top) + 104px)}
 @media (prefers-reduced-motion:reduce){ .page-cart .bagbar,.page-cart .bagbar.on{transition:none} }
@@ -230,7 +230,7 @@
 .page-confirmed > section .kv > div > span:last-child{font-size:16px;font-weight:500;line-height:1.4;color:var(--ink);overflow-wrap:anywhere}
 .page-confirmed > section div:has(> .btn){display:grid !important;grid-template-columns:minmax(0,1fr);gap:10px !important;margin-top:22px !important}
 .page-confirmed > section div:has(> .btn) .btn{width:100%;min-height:54px;padding:0 16px;border-radius:14px;font-size:16px;white-space:normal;line-height:1.2}
-.page-confirmed > section div:has(> .btn) .btn.solid{box-shadow:0 8px 20px rgba(91,33,182,.24)}
+.page-confirmed > section div:has(> .btn) .btn.solid{box-shadow:0 8px 20px rgba(23,15,5,.24)}
 .page-confirmed > section div:has(> .btn) .btn:not(.solid){background:#fff;color:var(--ink);border-color:var(--line)}
 @media (min-width:430px){ .page-confirmed > section div:has(> .btn){grid-template-columns:repeat(2,minmax(0,1fr))} }
 

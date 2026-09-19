@@ -146,11 +146,11 @@
 .page-gift-box .two:has([data-slots] > :nth-child(4)):has([data-slots] > .slot-filled:nth-child(3)){--frac:.5}
 .page-gift-box .two:has([data-slots] > :nth-child(4)):has([data-slots] > .slot-filled:nth-child(4)){--frac:.6667}
 .page-gift-box .two:has([data-slots] > :nth-child(4)):has([data-slots] > .slot-filled:nth-child(5)){--frac:.8333}
-.page-gift-box .two [data-boxcta].ghost{border-color:rgba(91,33,182,.3);color:var(--cta-d);
-  background:linear-gradient(rgba(91,33,182,.14),rgba(91,33,182,.14)) 0 0 / calc(var(--frac) * 100%) 100% no-repeat,#fff;
+.page-gift-box .two [data-boxcta].ghost{border-color:rgba(23,15,5,.3);color:var(--cta-d);
+  background:linear-gradient(rgba(23,15,5,.14),rgba(23,15,5,.14)) 0 0 / calc(var(--frac) * 100%) 100% no-repeat,#fff;
   transition:background-size .45s var(--ease),transform .15s var(--ease)}
 [dir="rtl"] .page-gift-box .two [data-boxcta].ghost{background-position:100% 0}
-.page-gift-box .two [data-boxcta].solid{box-shadow:0 6px 16px rgba(91,33,182,.3)}
+.page-gift-box .two [data-boxcta].solid{box-shadow:0 6px 16px rgba(23,15,5,.3)}
 
 /* floating: once a scent is in the box the bar rises onto the tab bar and
    stays there while the builder is in view; it settles under the receipt

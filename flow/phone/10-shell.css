@@ -130,7 +130,7 @@ footer .bot{display:flex;flex-direction:column;gap:6px;margin-top:28px;padding-t
 .tabbar a{position:relative;display:flex;align-items:center;justify-content:center;border-radius:var(--r-pill);color:var(--mut);
   transition:color .2s,background-color .25s var(--ease)}
 .tabbar a svg{width:23px;height:23px;display:block}
-.tabbar a.on{color:var(--cta);background:rgba(91,33,182,.1)}
+.tabbar a.on{color:var(--cta);background:rgba(23,15,5,.1)}
 .tabbar a.on svg{stroke-width:2}
 .tabbar a:active{background:rgba(23,15,5,.06)}
 .tabbar a.signed > svg,.act-acct.signed > svg{display:none}

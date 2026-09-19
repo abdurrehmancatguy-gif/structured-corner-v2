@@ -8,7 +8,7 @@
 
 .page-quiz > section{position:relative;padding-block:14px 32px;isolation:isolate}
 .page-quiz > section::before{content:"";position:absolute;z-index:-1;inset:0 0 auto;height:420px;pointer-events:none;
-  background:radial-gradient(70% 60% at 100% 0%,rgba(91,33,182,.07) 0%,rgba(91,33,182,0) 70%),
+  background:radial-gradient(70% 60% at 100% 0%,rgba(23,15,5,.07) 0%,rgba(23,15,5,0) 70%),
     radial-gradient(60% 50% at 0% 0%,rgba(184,145,74,.09) 0%,rgba(184,145,74,0) 70%)}
 .page-quiz > section > .wrap > .eyebrow{display:flex;align-items:center;min-height:32px;font-size:13px;font-weight:500;color:var(--mut)}
 

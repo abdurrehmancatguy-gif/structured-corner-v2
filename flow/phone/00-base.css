@@ -16,7 +16,9 @@
   --ink:#1D1509; --body:#4B4336; --mut:#756B5C; --faint:#8C8272;
   --line:#E6E2DA; --hair:#F0EDE7; --bg:#fff; --tile:#F3F2EF; --soft:#F8F7F4;
   --gold:#B8914A; --gold-t:#D8B775; --gold-d:#8A5A14;
-  --cta:#5B21B6; --cta-d:#4C1D95; --cta-l:#F1EAFE; --cta-t:#6D3CC8;
+  /* the call colour is the shop's own near-black, not a purple: every
+     button, the bag count, the tab bar's mark and the focus ring */
+  --cta:#170F05; --cta-d:#000; --cta-l:#EFEAE2; --cta-t:#33250E;
   --rose:#8B2E48; --rose-d:#74263C;
   --banner:#86621F; --banner-t:#F6EBD5;
   --red:#B3261E; --green:#2E6B3E; --blue:#2B5B7A;
