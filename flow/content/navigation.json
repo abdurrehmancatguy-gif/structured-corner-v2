@@ -180,6 +180,23 @@
           "href": "terms-and-conditions.html"
         }
       ]
+    },
+    {
+      "heading": "Official partner",
+      "links": [
+        {
+          "label": "BGS Medical Center",
+          "href": "https://bgsmedicalcenter.ae"
+        },
+        {
+          "label": "BGS Travel & Tourism",
+          "href": "https://bgstravelandtourism.com"
+        },
+        {
+          "label": "BGS Jewellery",
+          "href": "https://bgsjewellery.com"
+        }
+      ]
     }
   ]
 }

@@ -2,7 +2,7 @@ Category circle photographs. Which file each circle shows is set in
 content/navigation.json ("image"), not in the stylesheet.
 
   attars.png  BGS Corner product, supplied in chat   Attars/Perfume Oils  (Royal Amber and BGS bottles)
-  bak.png     BGS Corner product photography   Bakhoor  (BGS BAKHOOR 4 tin)
+  bak.png     img/bakhoor-1-1.jpg, background removed   Bakhoor  (BGS BAKHOOR 1, the white jar)
   edp.png     BGS Corner product, supplied in chat   EDP Sprays  (Pride of Arabia)
   gift-sets.png  gift box pair, supplied in chat   Gift Sets
   floral.jpg  Pexels photos/1303087            (was Gift Sets, no longer shown)
@@ -13,11 +13,19 @@ content/navigation.json ("image"), not in the stylesheet.
   corporate-gifts.jpg  Pexels photos/33629670 (3D Render: black gift boxes, gold ribbons)   (the photo corporate-gifts.png is cut from)
   corporate-gifts.png  corporate-gifts.jpg with its background removed   Corporate Gifting
 
-bak.png arrived with a checkerboard painted into the pixels: an RGB image with
-no alpha channel, so it only looked transparent. The checkerboard was keyed
-out (neutral light grey connected to the border) and the tin cropped tight to
-its edges, so it can stand in front of its circle ("cutout": true in
-navigation.json). 204x240, 256 colours.
+bak.png (2026-09-19) is the white jar, BGS BAKHOOR 1, cut from
+img/bakhoor-1-1.jpg. It replaced the blue BAKHOOR 4 tin the strip used to
+show, which had arrived with a checkerboard painted into its pixels.
+
+A white jar on a white backdrop cannot be keyed by brightness alone: the jar's
+own body reads 231-244 on the darkest channel, the backdrop 250-254, and
+between them lies a soft grey veil of shadow the lens left around the jar at
+245-249. So the key is the backdrop's own value (250 and up, flooded in from
+the border), bounded by the jar's silhouette (everything under 235, which is
+solidly jar) and kept only where it hangs together with that silhouette, so
+the veil outside cannot come with it. The reflection under the jar is cut at
+the foot, where the base meets its mirror image. 204x240 like the rest, the
+jar standing on the bottom edge, 256 colours.
 
 Pexels License: free for commercial use, no attribution required.
 https://www.pexels.com/license/

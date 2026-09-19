@@ -246,18 +246,25 @@ class PagesTests(_Pages, unittest.TestCase):
             self.assertEqual(self.b.api("PUT", "documents/settings", {"data": before}, rev=d2["rev"])[0], 200)
 
     def test_contact_details_replace_the_footer_placeholder(self):
+        # The shop has an address now, so the placeholder is what emptying the
+        # three contact lines leaves behind, not what the page starts with.
         before = self.doc()["data"]
         slot = '<p><span class="slot">address, hours, phone</span></p>'
-        self.assertIn(slot, self.page("index.html"))
-        st, res = self.put(lambda d: d["shell"]["footer"]["contact"].update(address="Test address", hours="Test hours"))
         try:
+            st, res = self.put(lambda d: d["shell"]["footer"]["contact"].update(address="", hours="", phone=""))
+            self.assertEqual(st, 200, res)
+            home = self.page("index.html")
+            self.assertIn(slot, home)
+            self.assertNotIn('<div class="footmap">', home)      # a map of nowhere is no map
+            st, res = self.put(lambda d: d["shell"]["footer"]["contact"].update(address="Test address", hours="Test hours"))
             self.assertEqual(st, 200, res)
             home = self.page("index.html")
             self.assertIn("<p>Test address &middot; Test hours</p>", home)
             self.assertNotIn(slot, home)
+            self.assertIn("maps.google.com/maps?q=Test%20address&amp;output=embed", home)
         finally:
             self.restore(before)
-        self.assertIn(slot, self.page("index.html"))
+        self.assertNotIn(slot, self.page("index.html"))
 
     @unittest.skipUnless(os.path.exists(cdp_pipe.CHROME), "headless Chrome is not installed")
     def test_spaces_around_the_stock_and_batch_labels_keep_their_rows(self):

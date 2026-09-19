@@ -147,8 +147,10 @@ class PublishServerTests(unittest.TestCase):
         self.assertEqual(groups["code"], [])
         self.assertTrue(ch["can_commit"], ch["blocking"])
         texts = [e["text"] for d in ch["described"] for e in d["entries"]]
-        self.assertEqual(texts, ["Be Mine: price AED %d to AED %d" % (new - 5, new)])
-        self.assertEqual(ch["suggested_message"], "Change the price of Be Mine to AED %d" % new)
+        # by the product's name as the shop holds it: the owner renames things
+        name = b.content("products")["be-mine"]["name"]
+        self.assertEqual(texts, ["%s: price AED %d to AED %d" % (name, new - 5, new)])
+        self.assertEqual(ch["suggested_message"], "Change the price of %s to AED %d" % (name, new))
         st, res = self.commit(ch["suggested_message"], ch["paths_digest"])
         self.assertEqual(st, 200, res)
         self.assertEqual(self.head(), res["sha"])

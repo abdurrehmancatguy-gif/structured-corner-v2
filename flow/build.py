@@ -3,7 +3,7 @@
 #   B) BGS Corner Sheet.xlsx          (product lineup, weights, August selling prices)
 #   C) BGS_Perfume_Ingredients.xlsx   (EDP note profiles + barcodes)
 # No images. No data from any other source. Unsourced fields render as placeholders.
-import pathlib, hashlib, json, html, re, struct, sys
+import pathlib, hashlib, json, html, re, struct, sys, urllib.parse
 
 def esc(t):
     """Escape admin-authored free text so a typed & or < cannot break markup."""
@@ -74,6 +74,14 @@ P = {
  "share":'<path d="M4 13v6a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-6"/><path d="M12 15V3.5"/><path d="M8 7.5l4-4 4 4"/>',
  "c_gift":'<rect x="3.5" y="9" width="17" height="11" rx="1"/><path d="M3.5 13h17M12 9v11"/><path d="M12 9S9.5 4 7.5 5.5 10 9 12 9zm0 0s2.5-5 4.5-3.5S14 9 12 9z"/>',
  "left":'<path d="M15 5l-7 7 7 7"/>', "right":'<path d="M9 5l7 7-7 7"/>', "check":'<path d="M5 12l5 5L19 7"/>',
+ # The social marks, drawn as outlines in the same hand as the icons above
+ # rather than lifted from the companies: a rounded square with a lens and a
+ # flash for Instagram, a bubble with a handset for WhatsApp, a note for TikTok.
+ "instagram":'<rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4.1"/><circle cx="16.8" cy="7.2" r="0.8"/>',
+ "whatsapp":'<path d="M20.4 11.8a8.4 8.4 0 0 1-12.3 7.4L3.6 20.4 5 16a8.4 8.4 0 1 1 15.4-4.2z"/>'
+             '<path d="M9.4 9.7c.3-.6.8-.6 1.1-.4l1 1.6-.9 1c.5 1 1.3 1.8 2.3 2.3l1-.9 1.6 1c.2.3.1.8-.4 1.1'
+             ' -1.1.6-2.6 0-3.9-1.3s-1.9-2.8-1.3-3.9z"/>',
+ "tiktok":'<path d="M14 4v10.4a3.6 3.6 0 1 1-3.6-3.6"/><path d="M14 4.2c.5 2.4 2.1 3.9 4.6 4.1"/>',
 }
 def sv(k, w=18, s=1.6): return I(P[k], w, s)
 
@@ -92,6 +100,7 @@ def load_content():
 C = load_content()
 SETTINGS = C["settings"]["store"]
 SEO = C["settings"].get("seo", {})
+SOCIAL = C["settings"].get("social") or {}
 SITE_URL = (C["settings"].get("site_url") or "").rstrip("/")
 
 # ---------------------------------------------------------------- store rules
@@ -535,13 +544,47 @@ def catnav():
                       for n, h, k, img, cut in CATS)
             + '</div></nav>')
 
+SOCIAL_NAMES = [("instagram", "Instagram"), ("whatsapp", "WhatsApp"), ("tiktok", "TikTok")]
+
+def social_links():
+    """The shop's accounts elsewhere, as icons, from settings.social. An
+       account with no address is simply not there: nothing links to nothing."""
+    out = "".join(
+        '<a href="%s" target="_blank" rel="noopener" aria-label="%s on %s">%s</a>'
+        % (esc(href), esc(SETTINGS["name"]), name, sv(key, 19))
+        for key, name in SOCIAL_NAMES
+        for href in [(SOCIAL.get(key) or "").strip()] if href)
+    return '<div class="social">%s</div>' % out if out else ""
+
+def footer_map():
+    """Where the shop is, on Google's map, under the address it is drawn from.
+
+       Google's keyless embed takes the address as it is written, so the map
+       and the line above it can never disagree: change the address in the
+       admin and the map moves with it. It is loaded lazily, so a visitor who
+       never reaches the foot of a page never asks Google for anything, and
+       an empty address draws no map at all rather than a map of nowhere."""
+    where = _CONTACT[0]
+    if not where:
+        return ""
+    return ('<div class="footmap"><iframe src="https://maps.google.com/maps?q=%s&amp;output=embed"'
+            ' title="%s on the map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"'
+            ' width="600" height="320"></iframe></div>'
+            % (urllib.parse.quote(where), esc(SETTINGS["name"])))
+
+def _away(href):
+    """A link to another site opens in its own tab, and rel="noopener" keeps
+       that tab from reaching back into this one."""
+    return ' target="_blank" rel="noopener"' if href.startswith("http") else ""
+
 def footer_cols():
     """The footer's link columns, from navigation.json (they used to be written
        out in shell(), so an edit to the file changed nothing). A link with no
-       address yet is shown as text, as FAQ and Our story are."""
+       address yet is shown as text, as FAQ and Our story are; one that leaves
+       the shop (the sister companies) opens in a tab of its own."""
     return "".join(
         '  <div><h5>%s</h5>%s</div>\n' % (esc(col["heading"]), "".join(
-            '<a href="%s">%s</a>' % (esc(l["href"]), esc(l["label"])) if l.get("href")
+            '<a href="%s"%s>%s</a>' % (esc(l["href"]), _away(l["href"]), esc(l["label"])) if l.get("href")
             else '<span class="soon">%s</span>' % esc(l["label"])
             for l in col["links"]))
         for col in NAVC["footer"])
@@ -657,10 +700,10 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
 <div class="msearch" id="msearch"><form class="search" action="collection.html" method="get" role="search"><input name="q" aria-label="Search products" placeholder="%(search_ph)s"><button type="submit" class="go" aria-label="Search">%(search)s</button></form></div></div>
 %(catnav)s
 %(body)s
-<footer><div class="wrap"><div class="cols">
+<footer><div class="wrap"><div class="cols" style="--footcols:%(footn)d">
   <div>%(footlogo)s
     <p>%(legal_line)s</p>
-    <p>%(addr)s</p><div class="nl"><span class="field">%(nl_placeholder)s</span><span class="btn">%(nl_button)s</span></div></div>
+    <p>%(addr)s</p>%(footmap)s%(social)s<div class="nl"><span class="field">%(nl_placeholder)s</span><span class="btn">%(nl_button)s</span></div></div>
 %(footcols)s
 </div><div class="bot"><span>%(copyright)s</span>
 <span>%(paylist)s</span></div></div></footer>
@@ -687,6 +730,9 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
    clock=sv("clock",13,2), menu=sv("menu",22), chev=sv("chev",14,2), search=sv("search",17),
    user=sv("user"), heart=sv("heart"), bag=sv("bag"),
    brandlogo=header_logo(), footlogo=footer_logo(), footcols=footer_cols(), icons=favicon_links(),
+   # the footer's row is the brand column and one for each column of links, so
+   # a column added in the admin widens the row instead of falling below it
+   footn=len(NAVC["footer"]), footmap=footer_map(), social=social_links(),
    paylist=esc(" \u00b7 ".join(pay_labels())),
    # while no contact detail is filled in, the footer keeps the placeholder it has always shown
    addr=" &middot; ".join(x for x in _CONTACT if x) or slot("address, hours, phone"))

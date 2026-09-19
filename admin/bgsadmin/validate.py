@@ -20,6 +20,10 @@ PARAMS = {"p", "cat", "q", "tab", "sort", "gender", "price", "ready", "family"}
 HREF = re.compile(r"^(?:%s)(?:\?[a-z]+=[a-z0-9,+-]+(?:&[a-z]+=[a-z0-9,+-]+)*)?(?:#[a-z0-9-]+)?$"
                   % "|".join(re.escape(p) for p in PAGES))
 SOCIAL = re.compile(r"^https://(?:www\.)?(?:instagram\.com|wa\.me|tiktok\.com)/[A-Za-z0-9._/?=&%@+-]*$")
+# A field marked external may also hold a whole https address somewhere else,
+# which is how the footer links the sister companies. https only, a real name
+# with a dot in it, and no spaces: a link out of the shop is still a link.
+EXTERNAL = re.compile(r"^https://[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:/[^\s\x22\x27<>]*)?$")
 ID = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 RESERVED_IDS = {"constructor", "prototype", "tostring", "valueof", "hasownproperty", "isprototypeof",
                 "propertyisenumerable", "tolocalestring", "proto", "admin", "new"}
@@ -76,13 +80,17 @@ def media_problem(s, t, flow):
     return None
 
 
-def href_problem(s, social=False):
+def href_problem(s, social=False, external=False):
     if s == "":
         return None
     if social:
         return None if SOCIAL.fullmatch(s) else ("href","Use a full https link on instagram.com, wa.me or tiktok.com.")
+    if external and EXTERNAL.fullmatch(s):
+        return None
     if not HREF.fullmatch(s) or any(p not in PARAMS for p in re.findall(r"[?&]([a-z]+)=", s)):
-        return "href", "Link to a page of this shop, such as collection.html?cat=attars or product.html?p=vibe."
+        return "href", ("Link to a page of this shop, such as collection.html?cat=attars, "
+                        "or a whole https address of another site." if external else
+                        "Link to a page of this shop, such as collection.html?cat=attars or product.html?p=vibe.")
     return None
 
 
@@ -131,7 +139,7 @@ def check(fields, data, prefix, errors, ctx):
             if f.get("pattern") and v and not re.fullmatch(f["pattern"], v):
                 errors.append(err(ptr, "format", f.get("patternHelp", "This is not in the expected format.")))
             if t == "href":
-                p = href_problem(v, social=f.get("social", False))
+                p = href_problem(v, social=f.get("social", False), external=f.get("external", False))
                 if p:
                     errors.append(err(ptr, *p))
                 elif not f.get("social"):

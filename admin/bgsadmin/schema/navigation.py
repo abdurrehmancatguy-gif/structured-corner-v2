@@ -23,12 +23,15 @@ FIELDS = [
          {"path": "/href", "type": "href", "label": "Link", "required": True},
          {"path": "/icon", "type": "icon", "label": "Icon"},
      ]},
-    {"path": "/footer", "type": "rows", "label": "Footer columns", "min": 1, "max": 4, "itemLabel": "heading", "canAdd": True,
+    {"path": "/footer", "type": "rows", "label": "Footer columns", "min": 1, "max": 5, "itemLabel": "heading", "canAdd": True,
      "group": "Footer", "fields": [
          {"path": "/heading", "type": "text", "label": "Heading", "required": True, "maxLength": 30},
          {"path": "/links", "type": "rows", "label": "Links", "max": 8, "itemLabel": "label", "canAdd": True, "fields": [
              {"path": "/label", "type": "text", "label": "Text", "required": True, "maxLength": 40},
-             {"path": "/href", "type": "href", "label": "Link (empty shows it as plain text)"},
+             {"path": "/href", "type": "href", "external": True,
+              "label": "Link (empty shows it as plain text)",
+              "help": "A page of this shop, or the whole https address of another site, "
+                      "as the sister companies are linked. A link that leaves the shop opens in its own tab."},
          ]},
      ]},
     {"path": "/main", "type": "rows", "label": "Main menu (unused)", "group": "Unused", "rendered": False,

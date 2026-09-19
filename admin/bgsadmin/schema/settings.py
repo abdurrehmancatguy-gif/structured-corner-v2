@@ -7,6 +7,7 @@ RESOURCE = {"name": "settings", "label": "Settings", "kind": "document",
             "intro": "Store details, delivery rules and brand. Payments, tax and cash on delivery are locked: a developer changes those in code."}
 
 NOT_SHOWN = "Saved, but the shop does not use this yet: the site still has it written into its code."
+SOCIAL_SHOWN = "The footer shows an icon for each account that has an address here, and none for the ones left empty."
 CHECKOUT = "Part of checkout and payments, which a developer changes in code."
 UPLOAD = "Not changeable from the admin yet: there is no upload for the link preview picture."
 LOGO = "A PNG with a transparent background, at least 486 px wide; the pages show a copy 486 px wide. The logo it replaces goes to the trash."
@@ -103,9 +104,9 @@ FIELDS = [
      "help": "Follows each page's name in the browser tab and in link previews, after a bar, as in Your Bag | BGS Corner. "
              "The page-not-found page keeps its own title for now."},
     {"path": "/seo/default_description", "type": "textarea", "label": "Default description", "maxLength": 160, "group": "Search and sharing", "rendered": False, "notShown": NOT_SHOWN},
-    {"path": "/social/instagram", "type": "href", "social": True, "label": "Instagram", "group": "Social", "rendered": False, "notShown": NOT_SHOWN},
-    {"path": "/social/whatsapp", "type": "href", "social": True, "label": "WhatsApp", "group": "Social", "rendered": False, "notShown": NOT_SHOWN},
-    {"path": "/social/tiktok", "type": "href", "social": True, "label": "TikTok", "group": "Social", "rendered": False, "notShown": NOT_SHOWN},
+    {"path": "/social/instagram", "type": "href", "social": True, "label": "Instagram", "group": "Social", "help": SOCIAL_SHOWN},
+    {"path": "/social/whatsapp", "type": "href", "social": True, "label": "WhatsApp", "group": "Social", "help": SOCIAL_SHOWN},
+    {"path": "/social/tiktok", "type": "href", "social": True, "label": "TikTok", "group": "Social", "help": SOCIAL_SHOWN},
     {"path": "/auth/domain", "type": "text", "label": "Auth0 domain", "maxLength": 100, "group": SIGNIN,
      "pattern": AUTH_DOMAIN, "patternHelp": "Only the domain, in lower case, like dev-abc123.us.auth0.com: no https:// and no slash.",
      "help": SIGNIN_HELP + " The Domain on the application's Settings tab in Auth0; the shop reaches it over https."},

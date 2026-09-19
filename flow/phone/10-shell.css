@@ -174,3 +174,15 @@ footer .bot{display:flex;flex-direction:column;gap:6px;margin-top:28px;padding-t
 .pagetitle,h1.pagetitle,h2.pagetitle{font:700 30px/1.1 var(--font-d);letter-spacing:-.025em;margin:8px 0 0}
 
 [dir="rtl"] :is(.p .meta,.badge,.lmeta,footer .bot span,.hero h1,.hero p,.added-meta){unicode-bidi:plaintext}
+
+/* where the shop is, and where else it is. The map is the footer's address
+   drawn out, so it is as wide as the column it sits in and never the 600px
+   the iframe's own attributes ask for; the icons are round taps, not rows of
+   the link list above them. */
+.footmap{margin:2px 0 14px;border-radius:var(--r-sm);overflow:hidden;background:rgba(255,255,255,.06);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.footmap iframe{display:block;width:100%;height:150px;border:0}
+footer .social{display:flex;gap:10px;margin:0 0 4px}
+footer .social a{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;
+  min-height:0;flex:0 0 auto;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(255,255,255,.22);color:var(--on-night-2)}
+footer .social a:active{color:var(--on-night);background:rgba(255,255,255,.12)}

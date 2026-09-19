@@ -3142,3 +3142,40 @@ html:not(.js) .strip-msg:not(.on){display:none}
 .page-account .acct-orders .emptystate{padding:20px 14px}
 .page-account .acct-picks{padding-top:28px}
 .page-account .acct-picks .sec-h{margin-bottom:14px}
+
+/* ---- the size chips on a product page --------------------------------------
+   The chips were made buttons for the keyboard, and the rule that gave them
+   their size on a product page still named span, so it had quietly stopped
+   applying: the page was showing the small chip meant for a card, 93x23, in
+   place of the roomy one. They are the price list of the thing being bought,
+   so they are a size the eye lands on, and the chosen one is a filled pill
+   rather than a slightly darker outline. */
+.buy .sizeblock .sizes{gap:10px;flex-wrap:wrap}
+.buy .sizeblock .sizes button{padding:11px 18px;font-size:13.5px;border-radius:var(--r-pill);
+  border-color:var(--line);background:#fff;color:var(--body)}
+.buy .sizeblock .sizes button:hover{border-color:var(--ink);color:var(--ink)}
+.buy .sizeblock .sizes button.on{border-width:2px;padding:10px 17px;border-color:var(--ink);
+  color:var(--ink);font-weight:700}
+
+/* ---- the foot of the page: where the shop is, and where else it is ----------
+   The row is the brand column and one column for each column of links, set
+   from --footcols on the element, so a column added in the admin widens the
+   row instead of dropping below the brand as Legal had been doing.
+   The map is the address drawn out; the icons are the accounts that have an
+   address in Settings. */
+footer .cols{grid-template-columns:1.6fr repeat(var(--footcols,4),minmax(0,1fr));gap:28px}
+.footmap{margin:0 0 14px;border-radius:var(--r-sm);overflow:hidden;border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.06);max-width:320px}
+.footmap iframe{display:block;width:100%;height:150px;border:0;filter:grayscale(.25)}
+footer .social{display:flex;gap:10px;margin:0 0 16px}
+footer .social a{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;
+  border-radius:50%;border:1px solid rgba(255,255,255,.22);color:inherit;flex:0 0 auto}
+footer .social a:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.4)}
+footer .social a:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+@media (max-width:900px){
+  footer .cols{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .footmap{max-width:none}
+  .footmap iframe{height:130px}
+  footer .social a{width:42px;height:42px}
+}
