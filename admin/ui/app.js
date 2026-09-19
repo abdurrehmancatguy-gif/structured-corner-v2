@@ -7,31 +7,51 @@ import { mountChrome, guard, savebar, confirmDialog, banner } from "./lib/ui.js"
 // The whole navigation from the plan, in Shopify's order. Each entry names
 // its screen module (ui/screens/<screen>.js). The entries that need the
 // database or login are shown but switched off, with the reason.
+//
+// `need` is the permission the signed-in person must have for the entry to
+// appear (bgsadmin/access.py). Hiding it is a courtesy, not the control: the
+// server refuses the same call whether or not the screen offered it, so a
+// person who types the address reaches a screen that cannot save.
 const NAV = [
-  { hash: "#/", label: "Home", icon: "home", screen: "home" },
+  { hash: "#/", label: "Home", icon: "home", screen: "home", need: "read" },
   { label: "Orders", icon: "orders", off: "Arrives with the database" },
-  { hash: "#/products", label: "Products", icon: "tag", screen: "products", kids: [
-    { hash: "#/inventory", label: "Inventory", screen: "inventory" },
-    { hash: "#/bulk", label: "Bulk editor", screen: "bulk" },
-    { hash: "#/import", label: "Import and export", screen: "import" },
+  { hash: "#/products", label: "Products", icon: "tag", screen: "products", need: "read", kids: [
+    { hash: "#/inventory", label: "Inventory", screen: "inventory", need: "stock" },
+    { hash: "#/bulk", label: "Bulk editor", screen: "bulk", need: "stock" },
+    { hash: "#/import", label: "Import and export", screen: "import", need: "products" },
   ] },
-  { hash: "#/collections", label: "Collections", icon: "grid", screen: "collections" },
+  { hash: "#/collections", label: "Collections", icon: "grid", screen: "collections", need: "content" },
   { label: "Customers", icon: "users", off: "Arrives with the database" },
   { group: "Content" },
-  { hash: "#/content/home", label: "Homepage", icon: "layout", screen: "document", arg: "home" },
-  { hash: "#/content/navigation", label: "Navigation", icon: "menu", screen: "document", arg: "navigation" },
-  { hash: "#/content/copy", label: "Site text", icon: "text", screen: "document", arg: "copy" },
-  { hash: "#/content/pages", label: "Pages", icon: "text", screen: "pages" },
-  { hash: "#/content/quiz", label: "Scent quiz", icon: "help", screen: "quiz" },
-  { hash: "#/content/translations", label: "Translations", icon: "globe", screen: "translations" },
-  { hash: "#/content/files", label: "Files", icon: "image", screen: "files" },
-  { hash: "#/discounts", label: "Discounts", icon: "percent", screen: "discounts" },
+  { hash: "#/content/home", label: "Homepage", icon: "layout", screen: "document", arg: "home", need: "content" },
+  { hash: "#/content/navigation", label: "Navigation", icon: "menu", screen: "document", arg: "navigation", need: "content" },
+  { hash: "#/content/copy", label: "Site text", icon: "text", screen: "document", arg: "copy", need: "content" },
+  { hash: "#/content/pages", label: "Pages", icon: "text", screen: "pages", need: "content" },
+  { hash: "#/content/quiz", label: "Scent quiz", icon: "help", screen: "quiz", need: "content" },
+  { hash: "#/content/translations", label: "Translations", icon: "globe", screen: "translations", need: "content" },
+  { hash: "#/content/files", label: "Files", icon: "image", screen: "files", need: "media" },
+  { hash: "#/discounts", label: "Discounts", icon: "percent", screen: "discounts", need: "discounts" },
   { label: "Analytics", icon: "chart", off: "Arrives with the database" },
   { group: "Online store" },
-  { hash: "#/publish", label: "Publish", icon: "upload", screen: "publish" },
-  { hash: "#/history", label: "History", icon: "clock", screen: "history" },
-  { hash: "#/settings", label: "Settings", icon: "gear", screen: "document", arg: "settings" },
+  { hash: "#/publish", label: "Publish", icon: "upload", screen: "publish", need: "publish" },
+  { hash: "#/history", label: "History", icon: "clock", screen: "history", need: "read" },
+  { hash: "#/settings", label: "Settings", icon: "gear", screen: "document", arg: "settings", need: "settings" },
+  { group: "People" },
+  { hash: "#/staff", label: "Staff", icon: "users", screen: "staff", need: "staff" },
+  { hash: "#/audit", label: "Log", icon: "clock", screen: "audit", need: "audit" },
 ];
+
+// What this session may do. Until the session has been read, everything is
+// allowed: the first draw happens after it, and the server is the check.
+function may(need) {
+  if (!need) return true;
+  const s = app.state.session;
+  return !s || !s.permissions || s.permissions.includes(need);
+}
+
+function visible(list) {
+  return list.filter((n) => n.group || n.off || may(n.need));
+}
 
 // Screens can listen to the status poll (hooks.status) and add small things
 // to the top bar (topSlot), so a new area never has to edit this file.
@@ -55,17 +75,18 @@ function route(hash) {
     }
   }
   hit = hit || flat[0];
+  if (!may(hit.need)) hit = flat[0];
   return { screen: hit.screen, arg: hit.arg, sub, nav: hit.hash, label: hit.label };
 }
 
 function drawNav(active) {
-  clear(side).append(h("nav", { "aria-label": "Admin sections" }, h("ul", {}, NAV.map((n) => {
+  clear(side).append(h("nav", { "aria-label": "Admin sections" }, h("ul", {}, visible(NAV).map((n) => {
     if (n.group) return h("li", { class: "nav-group" }, n.group);
     if (n.off) return h("li", {}, h("span", { class: "nav-item off", title: n.off }, icon(n.icon), h("span", {}, n.label), h("small", {}, n.off)));
     const on = n.hash === active || (n.kids || []).some((k) => k.hash === active);
     return h("li", {},
       h("a", { class: "nav-item" + (n.hash === active ? " on" : ""), href: n.hash, "aria-current": n.hash === active ? "page" : null }, icon(n.icon), h("span", {}, n.label)),
-      n.kids && on ? h("ul", { class: "nav-kids" }, n.kids.map((k) => h("li", {},
+      n.kids && on ? h("ul", { class: "nav-kids" }, visible(n.kids).map((k) => h("li", {},
         h("a", { class: "nav-item kid" + (k.hash === active ? " on" : ""), href: k.hash, "aria-current": k.hash === active ? "page" : null }, k.label)))) : null);
   }))));
 }
@@ -145,7 +166,8 @@ async function boot() {
     h("header", { class: "top" },
       h("button", { class: "icon-btn menu-btn", type: "button", "aria-label": "Menu", onclick: () => document.body.classList.toggle("nav-open") }, icon("menu", 20)),
       h("a", { class: "brand", href: "#/" }, h("img", { src: "/assets/img/logo-gold-light-486.png", alt: "BGS Corner", width: "150", height: "22" })),
-      h("span", { class: "badge local", title: "This admin runs on this computer only. Nothing goes live until you publish." }, "Local admin"),
+      h("span", { class: "badge local", id: "who-badge",
+                  title: "This admin runs on one computer. Nothing goes live until you publish." }, "Local admin"),
       h("span", { class: "spacer" }),
       app.topSlot,
       chip,
@@ -158,6 +180,17 @@ async function boot() {
   } catch (e) {
     clear(main).append(banner({ tone: "critical", title: e.message }));
     return;
+  }
+  // who is signed in, and as what: the badge says the role, and hovering it
+  // gives the address. With no sign-in asked for (this computer), it stays
+  // "Local admin", which is what it has always said.
+  const s = app.state.session || {};
+  if (s.signed_in) {
+    const badge = document.getElementById("who-badge");
+    if (badge) {
+      badge.textContent = s.role_label || s.role || "Signed in";
+      badge.title = (s.actor || "") + " \u00b7 may " + (s.permissions || []).join(", ");
+    }
   }
   const links = document.getElementById("bgs-links");
   const opts = ["index.html", "collection.html", "collection.html?cat=attars", "collection.html?cat=bakhoor", "collection.html?cat=edp",

@@ -1,0 +1,15 @@
+/* Staff: the list of people, their roles and what each role means. */
+.table.staff td { vertical-align: middle; }
+.table.staff .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+.table.staff .what { color: var(--mut); font-size: 13px; max-width: 34ch; }
+.table.staff select.input { min-width: 11rem; }
+.table.staff .pill { margin-left: 8px; }
+.staff .right, .table.staff td.right { text-align: right; }
+.addrow {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  padding: 12px 16px; border-top: 1px solid var(--line);
+}
+.addrow input.input { flex: 1 1 18rem; }
+@media (max-width: 700px) {
+  .table.staff .what { display: none; }
+}
