@@ -1772,6 +1772,12 @@ else:
     SIGNIN_PARTS = dict.fromkeys(("signin", "view", "me_name", "me_email", "out_btn", "signout"), "")
     SIGNIN_PARTS.update(me_open="<div>", me_close="</div>")
 
+# The account page ends on the gift sets shelf, the same one the homepage
+# prints: signed out it is everything under the sign-in panel, and signed in
+# it fills the room under an empty order list, which was a wide white field
+# with one small box in it.
+_ACCT_PICKS = shelf("gift_sets")
+
 account = """
 <section><div class="wrap">
   <span class="eyebrow">%(a_crumb)s</span>
@@ -1834,7 +1840,7 @@ account = """
       </div>
 
       <div class="sec-h"><h2 class="subhead">%(a_orders_heading)s</h2><a href="track-order.html">%(a_orders_track_label)s &rarr;</a></div>
-      <div class="sum" style="background:#fff;margin-bottom:26px">
+      <div class="sum acct-orders" style="background:#fff;margin-bottom:26px">
         <div class="emptystate">
           <b>%(a_orders_empty_title)s</b>
           <p class="mini">%(a_orders_empty_body)s</p>
@@ -1856,7 +1862,12 @@ account = """
     </div>
   </div>
 </div></section>
-""" % dict(ACCOUNT_TEXT, **SIGNIN_PARTS, name=slot("customer name"), contact=slot("phone"), email=slot("email"),
+<section class="alt acct-picks"><div class="wrap">
+  %(picks_head)s
+  <div class="grid g4">%(picks)s</div>
+</div></section>
+""" % dict(ACCOUNT_TEXT, **SIGNIN_PARTS, picks_head=_ACCT_PICKS[0], picks=_ACCT_PICKS[1],
+           name=slot("customer name"), contact=slot("phone"), email=slot("email"),
            drops=slot("0"), credit=slot("AED 0"), orders=slot("0"), tierpct="0%",
            voucher=slot("none active"), refcode=slot("unique code per customer"),
            referred=slot("0"))

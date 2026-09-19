@@ -3132,3 +3132,13 @@ html:not(.js) .strip-msg:not(.on){display:none}
    focus rings and the selection colour all follow. The gold call banners
    further up are set from --banner and are untouched. */
 :root{--cta:#170F05;--cta-d:#000000;--cta-l:#EFEAE2}
+
+/* ---- the account page, with less white in it -------------------------------
+   Signed out it showed one small sign-in card in a wide field; signed in, an
+   empty order list held a tall box with a line of text in it and nothing else
+   until the footer. The empty list is now the height of what it says, and the
+   page ends on the gift sets shelf, the same one the homepage prints, so
+   there is something to look at in both states. */
+.page-account .acct-orders .emptystate{padding:20px 14px}
+.page-account .acct-picks{padding-top:28px}
+.page-account .acct-picks .sec-h{margin-bottom:14px}
