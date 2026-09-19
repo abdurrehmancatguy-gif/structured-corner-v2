@@ -15,6 +15,9 @@
 # with a 404 through it, and the worker has to be at the root of the site to
 # take charge of every page.
 /sw.js                   /flow/sw.js     200!
+# the same file under another name, to tell a host that reserves /sw.js
+# from a rule that never arrived
+/cache-worker.js         /flow/sw.js     200!
 /build.py                /flow/404.html  404!
 /server.py               /flow/404.html  404!
 /edp_data.json           /flow/404.html  404!
