@@ -10,10 +10,12 @@
 # build.py before pushing, or Netlify serves whatever was committed.
 [build]
   publish = "."
-  # Only the test site deploys. Netlify cancels a build whose ignore command
-  # exits 0, so every other site connected to this repository (the first
-  # Netlify address) is skipped and goes on showing what it already has.
-  ignore = "test \"$SITE_NAME\" != corner-database-test"
+  # Every push deploys. This was once a test on $SITE_NAME, to let only the
+  # test site through, and with it in place Netlify stopped deploying
+  # altogether after the first build: two pushes in a row were skipped and the
+  # site went on serving an older commit. `false` exits 1, which is how an
+  # ignore command says "build this".
+  ignore = "false"
 
 # To build here again, put back the publish directory and the command:
 #   publish = "_site"
