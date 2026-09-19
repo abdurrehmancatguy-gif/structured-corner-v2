@@ -220,12 +220,15 @@ RULE_TEXT = {
 
 # One-line description per page for <meta name=description> and OG.
 PAGE_DESC = {
-    "index.html": "Alcohol-free oud oils, bakhoor and EDP sprays, blended in Dubai. Same-day delivery in Dubai, free over %s." % RULE_TEXT["rule_free_over"],
+    # what the shop promises here follows the rules, so it cannot say
+    # same-day while the policies say an order is dispatched in 1 to 3 days
+    "index.html": "Alcohol-free oud oils, bakhoor and EDP sprays, blended in Dubai. Dispatched in %s, free delivery over %s."
+                  % (RULE_TEXT["rule_dispatch"], RULE_TEXT["rule_free_over"]),
     "collection.html": "Shop BGS Corner: oud attar, bakhoor, EDP sprays and gift sets. Filter by category, price and gender.",
     "product.html": "House-blended, alcohol-free fragrance from BGS Corner, Dubai. Oud attar, bakhoor and EDP sprays.",
     "gift-box.html": "Build a gift box of three or six house scents, wrapped, with a handwritten card. BGS Corner, Dubai.",
     "cart.html": "Your BGS Corner bag.",
-    "checkout.html": "Guest checkout with card, Apple Pay, Tabby, Tamara or cash on delivery. BGS Corner, Dubai.",
+    "checkout.html": "Guest checkout with %s. BGS Corner, Dubai." % ", ".join(pay_labels()),
     "confirmed.html": "Order confirmed. BGS Corner, Dubai.",
     "track-order.html": "Track your BGS Corner order by number or phone.",
     "account.html": "Your BGS Corner account: BGS One rewards, wallet and referrals.",

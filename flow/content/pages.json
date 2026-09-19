@@ -209,7 +209,7 @@
     },
     "facts": {
       "delivery_label": "Delivery",
-      "delivery": "Free over {free_over} · same-day before {cutoff_short}"
+      "delivery": "Free over {free_over} · dispatch in {dispatch}"
     },
     "tabs": {
       "pyramid": "Scent pyramid",
@@ -249,12 +249,12 @@
         "body": "Free over {free_over}. {delivery_fee} below that. UAE only."
       },
       {
-        "title": "Same-day Dubai",
-        "body": "{sameday_fee}, for orders placed before the {cutoff} cutoff."
+        "title": "Dispatch and delivery",
+        "body": "Dispatched in {dispatch}, then 1 to 2 days in Dubai and 2 to 4 days in the other Emirates."
       },
       {
         "title": "Returns",
-        "body": "Exchange on sealed items. Opened fragrance cannot be returned."
+        "body": "14 days from delivery, unused and in its original packaging."
       }
     ],
     "reviews_empty": {
@@ -387,11 +387,11 @@
     "stages": [
       {
         "label": "Placed",
-        "body": "Order confirmed, payment taken"
+        "body": "We have your order"
       },
       {
         "label": "Confirmed",
-        "body": "COD orders wait here until confirmed"
+        "body": "Checked and accepted"
       },
       {
         "label": "Packed",
@@ -403,7 +403,7 @@
       },
       {
         "label": "Delivered",
-        "body": "Credit-back voucher issues at this point"
+        "body": "Handed over by the courier"
       }
     ],
     "whatsapp_note": "Order updates can also come by WhatsApp, the opt-in is on the confirmation page, unticked by default."

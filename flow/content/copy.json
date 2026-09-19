@@ -1,12 +1,8 @@
 {
   "strip": {
-    "countdown_line": "Order by {cutoff} for delivery today in Dubai",
+    "countdown_line": "Orders are dispatched in {dispatch}, UAE wide",
     "second_line": "Free UAE delivery over {free_over}",
     "right_links": [
-      {
-        "label": "Cash on delivery",
-        "href": ""
-      },
       {
         "label": "Track order",
         "href": "track-order.html"
@@ -21,14 +17,14 @@
       "icon": "truck"
     },
     {
-      "title": "Same-day in Dubai",
-      "sub": "Before 2:00 PM · +AED 25",
+      "title": "Dispatch in 1 to 3 days",
+      "sub": "Then 1 to 2 days in Dubai",
       "icon": "clock"
     },
     {
-      "title": "Cash on delivery",
-      "sub": "Under AED 300 · AED 8 fee",
-      "icon": "cash"
+      "title": "14 days to return",
+      "sub": "Unused, in its packaging",
+      "icon": "check"
     },
     {
       "title": "Alcohol-free ouds",
