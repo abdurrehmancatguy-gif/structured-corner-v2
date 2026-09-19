@@ -1086,7 +1086,10 @@
     "image_alt": "",
     "related": [],
     "images": [
-      "discovery-trio-1.jpg"
+      "discovery-trio-1.jpg",
+      "discovery-trio-2.jpg",
+      "discovery-trio-3.jpg",
+      "discovery-trio-4.jpg"
     ]
   },
   "his-and-hers-duo": {
@@ -1113,7 +1116,10 @@
     "image_alt": "",
     "related": [],
     "images": [
-      "his-and-hers-duo-1.jpg"
+      "his-and-hers-duo-1.jpg",
+      "his-and-hers-duo-2.jpg",
+      "his-and-hers-duo-3.jpg",
+      "his-and-hers-duo-4.jpg"
     ]
   },
   "majlis-ritual-set": {
@@ -1162,7 +1168,10 @@
     "seo_title": "",
     "seo_description": "",
     "image_alt": "",
-    "related": []
+    "related": [],
+    "images": [
+      "oud-lover-s-flight-1.jpg"
+    ]
   },
   "eid-royal-hamper": {
     "name": "Eid Royal Hamper",
@@ -1186,7 +1195,13 @@
     "seo_title": "",
     "seo_description": "",
     "image_alt": "",
-    "related": []
+    "related": [],
+    "images": [
+      "eid-royal-hamper-1.jpg",
+      "eid-royal-hamper-2.jpg",
+      "eid-royal-hamper-3.jpg",
+      "eid-royal-hamper-4.jpg"
+    ]
   },
   "dubai-in-a-bottle": {
     "name": "Dubai in a Bottle",
