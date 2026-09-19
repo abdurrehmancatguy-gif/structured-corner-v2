@@ -10,6 +10,11 @@
 # rules above the catch-all refuse them here too. A path they miss is still
 # rewritten under flow/ first, so flow/content/products.json is reached as
 # /content/..., which is refused, and never as /flow/content/....
+# The cache worker, named on its own: the catch-all below reaches every other
+# root file (robots.txt, favicon.ico, the pages), but Netlify answered /sw.js
+# with a 404 through it, and the worker has to be at the root of the site to
+# take charge of every page.
+/sw.js                   /flow/sw.js     200!
 /build.py                /flow/404.html  404!
 /server.py               /flow/404.html  404!
 /edp_data.json           /flow/404.html  404!
