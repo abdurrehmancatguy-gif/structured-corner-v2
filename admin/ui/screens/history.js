@@ -3,7 +3,7 @@
 // saved; committed versions come from the repository's history. A version is
 // compared with today's side by side, and "Restore this version" saves it
 // like any change: checked, rebuilt, and itself kept in History.
-import { api } from "../lib/api.js";
+import { api, storeUrl } from "../lib/api.js";
 import { h, clear, useCss } from "../lib/dom.js";
 import { icon } from "../icons.js";
 import { banner, confirmDialog, toast, guard, announce } from "../lib/ui.js";
@@ -137,7 +137,7 @@ async function timeline(main, app, kind, key, first) {
         h("p", { class: "sub" }, "Local saves are the versions kept on this computer each time something was saved. Committed versions come from the repository's history.")),
       h("div", { class: "head-actions" },
         live ? h("a", { class: "btn", href: editorHref(kind, key) }, "Open editor") : null,
-        live && kind === "products" ? h("a", { class: "btn", href: "/product.html?p=" + encodeURIComponent(key), target: "_blank", rel: "noopener noreferrer" },
+        live && kind === "products" ? h("a", { class: "btn", href: storeUrl("product.html?p=" + encodeURIComponent(key)), target: "_blank", rel: "noopener noreferrer" },
           icon("external", 16), "View on store") : null));
   }
 

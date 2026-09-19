@@ -1,6 +1,6 @@
 // Home: what is true about the shop right now, counted from the content.
 // No sample numbers and no analytics: those arrive with the database.
-import { api } from "../lib/api.js";
+import { api, storeUrl } from "../lib/api.js";
 import { h, clear } from "../lib/dom.js";
 import { icon } from "../icons.js";
 import { banner, guard, toast } from "../lib/ui.js";
@@ -44,5 +44,5 @@ export async function render(main, { app }) {
           h("a", { class: "btn", href: "#/content/navigation" }, icon("menu", 16), "Navigation"),
           h("a", { class: "btn", href: "#/content/copy" }, icon("text", 16), "Site text"),
           h("a", { class: "btn", href: "#/settings" }, icon("gear", 16), "Settings"),
-          h("a", { class: "btn", href: "/", target: "_blank", rel: "noopener noreferrer" }, icon("external", 16), "View store")))));
+          h("a", { class: "btn", href: storeUrl(""), target: "_blank", rel: "noopener noreferrer" }, icon("external", 16), "View store")))));
 }

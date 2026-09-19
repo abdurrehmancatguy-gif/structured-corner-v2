@@ -224,16 +224,19 @@ class PagesTests(_Pages, unittest.TestCase):
     def test_rules_legal_name_and_title_suffix_come_from_settings(self):
         st, d = self.b.api("GET", "documents/settings")
         before = copy.deepcopy(d["data"])
-        d["data"]["store"].update(sameday_fee=30, sameday_cutoff="3:30 PM", legal_name="BGS Test Trading")
+        d["data"]["store"].update(free_delivery_over=175, delivery_fee=20, dispatch_days="2 to 4 business days",
+                                  legal_name="BGS Test Trading")
         d["data"]["seo"]["default_title_suffix"] = "BGS"
         st, res = self.b.api("PUT", "documents/settings", {"data": d["data"]}, rev=d["rev"])
         try:
             self.assertEqual(st, 200, res)
             prod = self.page("product.html")
-            self.assertIn("AED 30, for orders placed before the 3:30 PM cutoff.", prod)
-            self.assertIn("same-day before 3:30 PM</span>", prod)
+            # the rules reach the product page's delivery rows and its facts
+            self.assertIn("Dispatched in 2 to 4 business days", prod)
+            self.assertIn("Free over AED 175 \u00b7 dispatch in 2 to 4 business days</span>", prod)
+            self.assertIn("Free over AED 175. AED 20 below that. UAE only.", prod)
             coll = self.page("collection.html")
-            self.assertIn("Order by 3:30 PM for delivery today in Dubai", coll)
+            self.assertIn("Orders are dispatched in 2 to 4 business days, UAE wide", coll)
             self.assertIn("<title>Your Bag | BGS</title>", self.page("cart.html"))
             self.assertIn("<p>BGS Test Trading &middot; Dubai, UAE</p>", coll)
             self.assertIn("&copy; 2026 BGS Test Trading</span>", coll)

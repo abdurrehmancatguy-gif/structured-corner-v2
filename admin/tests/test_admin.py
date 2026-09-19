@@ -97,7 +97,9 @@ class AdminTests(unittest.TestCase):
         self.assertEqual(st, 200, res)
         self.assertTrue(res["build"]["ok"])
         cat = (b.repo / "flow" / "assets" / "catalogue.js").read_text()
-        self.assertRegex(cat, r'"be-mine": \{"name": "Be Mine", "meta": [^}]*"pn": 86')
+        # the name is the owner's to change, so the check is that the price
+        # reached the catalogue for this product, not what it is called
+        self.assertRegex(cat, r'"be-mine": \{"name": "[^"]+", "meta": [^}]*"pn": 86')
         self.assertEqual(b.content("products")["be-mine"]["price"], 86)
         # a stale rev is refused with the current version
         st, res2 = b.api("PUT", "products/be-mine", {"data": dict(data, price=87)}, rev=d["rev"])

@@ -1,6 +1,6 @@
 // One product: the fields in two columns, as the Shopify product page lays
 // them out, with the actions that need their own confirmation.
-import { api } from "../lib/api.js";
+import { api, storeUrl } from "../lib/api.js";
 import { h, clear } from "../lib/dom.js";
 import { icon } from "../icons.js";
 import { mountEditor } from "../lib/editor.js";
@@ -15,7 +15,7 @@ export function render(main, { arg: pid, app }) {
     const k = kids.flat().filter(Boolean);
     return k.length ? h("section", { class: "card" }, h("h2", {}, title), k) : null;
   };
-  const store = (d) => "/product.html?p=" + encodeURIComponent(pid);
+  const store = (d) => storeUrl("product.html?p=" + encodeURIComponent(pid));
 
   const ed = mountEditor(main, app, {
     back: { href: "#/products", label: "Products" },

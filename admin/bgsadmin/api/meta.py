@@ -32,6 +32,7 @@ def session(req):
             "permissions": access.permissions_of(req.role),
             "roles": [{"role": r, "label": access.ROLE_LABELS[r][0], "what": access.ROLE_LABELS[r][1]}
                       for r in sorted(access.ROLES)],
+            "site_url": (app.store.doc("settings")[0].get("site_url") or "").rstrip("/") if app.store else "",
             "build": app.build, "recovered": app.recovered}
 
 

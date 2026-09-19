@@ -90,3 +90,13 @@ export async function download(path, fallbackName = "download") {
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
+
+
+// Where the shop is, for the "View on store" links. The admin used to link to
+// its own address with a bare path, which worked only while one server served
+// both (this computer). Once the admin is reached at an address of its own,
+// those paths are not pages, so the links follow settings' site_url when it
+// is set and fall back to the old behaviour when it is not.
+let SITE = "";
+export function setSite(url) { SITE = (url || "").replace(/\/+$/, ""); }
+export function storeUrl(path) { return SITE + "/" + String(path).replace(/^\/+/, ""); }

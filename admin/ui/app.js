@@ -1,5 +1,5 @@
 // The admin shell: top bar, left navigation, hash router and the status poll.
-import { initToken, api } from "./lib/api.js";
+import { initToken, api, setSite, storeUrl } from "./lib/api.js";
 import { h, clear } from "./lib/dom.js";
 import { icon } from "./icons.js";
 import { mountChrome, guard, savebar, confirmDialog, banner } from "./lib/ui.js";
@@ -171,7 +171,7 @@ async function boot() {
       h("span", { class: "spacer" }),
       app.topSlot,
       chip,
-      h("a", { class: "btn ghost-light", href: "/", target: "_blank", rel: "noopener noreferrer" }, icon("external", 16), h("span", { class: "hide-sm" }, "View store"))),
+      h("a", { class: "btn ghost-light", id: "view-store", href: "/", target: "_blank", rel: "noopener noreferrer" }, icon("external", 16), h("span", { class: "hide-sm" }, "View store"))),
     h("div", { class: "layout" }, side, main));
   mountChrome(root);
   root.append(h("datalist", { id: "bgs-links" }));
@@ -185,6 +185,9 @@ async function boot() {
   // gives the address. With no sign-in asked for (this computer), it stays
   // "Local admin", which is what it has always said.
   const s = app.state.session || {};
+  setSite(s.site_url);
+  const viewStore = document.getElementById("view-store");
+  if (viewStore) viewStore.href = storeUrl("");
   if (s.signed_in) {
     const badge = document.getElementById("who-badge");
     if (badge) {

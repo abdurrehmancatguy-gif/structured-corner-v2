@@ -32,11 +32,26 @@ FIELDS = [
     {"path": "/store/location", "type": "text", "label": "Location", "maxLength": 60, "group": "Store details",
      "help": "In every page's footer, after the legal name."},
     {"path": "/store/currency", "type": "text", "label": "Currency", "group": "Store details", "locked": "The shop sells in one currency, AED."},
+    # Where the shop is served. build.py writes it into every page's canonical
+    # link and its social picture, and the admin's "View on store" links point
+    # at it: without it they point at the admin's own address, which serves no
+    # shop pages once the admin is somewhere else.
+    {"path": "/site_url", "type": "text", "label": "The shop's address", "maxLength": 120, "group": "Store details",
+     "pattern": r"https://[a-z0-9.-]+[a-z]", "patternHelp": "The address the shop is served at, like https://bgscorner.com: https, no path and no slash at the end.",
+     "help": "Used for each page's canonical link, the picture a shared link shows, and the View on store buttons here."},
     # The rules below are printed on the pages and applied by shop.js, which
     # reads them from catalogue.js (window.BGS_RULES). Cross-field checks (the
     # cutoff's hours, the ladder's order) are in validate.py.
     {"path": "/store/free_delivery_over", "type": "int", "label": "Free delivery over (AED)", "required": True, "min": 0, "max": 2000, "group": "Shipping and delivery",
      "help": "The bag delivers free from this subtotal."},
+    # How long an order waits before it is dispatched. Migration 003 put it in
+    # settings when the shop stopped promising same-day delivery; it is printed
+    # in the strip, on the product page and in the page descriptions, so it
+    # belongs to the owner rather than to the code.
+    {"path": "/store/dispatch_days", "type": "text", "label": "Dispatched in", "required": True, "maxLength": 40,
+     "group": "Shipping and delivery",
+     "help": "In the owner's own words, as the policies say it: \"1 to 3 business days\". Shown in the line above "
+             "the masthead, on every product page and in what search engines print."},
     {"path": "/store/delivery_fee", "type": "int", "label": "Delivery fee (AED)", "required": True, "min": 0, "max": 500, "group": "Shipping and delivery",
      "help": "Charged on a bag below the free delivery amount."},
     {"path": "/store/sameday_fee", "type": "int", "label": "Same-day fee (AED)", "required": True, "min": 0, "max": 500, "group": "Shipping and delivery"},

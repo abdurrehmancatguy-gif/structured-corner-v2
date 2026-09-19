@@ -76,5 +76,6 @@
   "auth": {
     "domain": "dev-i8cqekmfe57ladb2.us.auth0.com",
     "client_id": "zqJhUwHScEpek3M2EAdOazOLYgy0Z9jC"
-  }
+  },
+  "site_url": "https://bgscorner.com"
 }

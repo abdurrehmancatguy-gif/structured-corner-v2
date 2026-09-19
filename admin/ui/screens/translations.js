@@ -2,7 +2,7 @@
 // the shop's English labels, edited as one table and saved as a whole; then
 // how far each product's own Arabic name and story have got (saved with the
 // product, not shown by the shop yet).
-import { api } from "../lib/api.js";
+import { api, storeUrl } from "../lib/api.js";
 import { h, clear, append, useCss } from "../lib/dom.js";
 import { icon } from "../icons.js";
 import { banner, announce } from "../lib/ui.js";
@@ -128,7 +128,7 @@ export function render(main, { app }) {
     load: async () => { const d = await api("GET", "documents/translations"); return { rev: d.rev, data: toRows(d.data), meta: d }; },
     put,
     view: () => "/",
-    actions: () => [h("a", { class: "btn", href: "/", target: "_blank", rel: "noopener noreferrer" }, "View store")],
+    actions: () => [h("a", { class: "btn", href: storeUrl(""), target: "_blank", rel: "noopener noreferrer" }, "View store")],
     form: (ctx, data) => dictionaryCard(ctx, data.rows),
   });
   main.append(prodCard);
