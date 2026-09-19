@@ -50,12 +50,16 @@ CALLBACKS = ["https://bgscorner.com/account.html", "https://bgscorner.com/accoun
              "https://www.bgscorner.com/account.html", "https://www.bgscorner.com/account",
              "https://abdurrehmancatguy-gif.github.io/structured-corner-v2/account.html",
              "https://enchanting-daffodil-aca9b0.netlify.app/account.html",
-             "https://enchanting-daffodil-aca9b0.netlify.app/account", "http://localhost:4310/account.html"]
+             "https://enchanting-daffodil-aca9b0.netlify.app/account",
+             "https://corner-database-test.netlify.app/account.html",
+             "https://corner-database-test.netlify.app/account", "http://localhost:4310/account.html"]
 LOGOUTS = ["https://bgscorner.com/", "https://www.bgscorner.com/",
            "https://abdurrehmancatguy-gif.github.io/structured-corner-v2/",
-           "https://enchanting-daffodil-aca9b0.netlify.app/", "http://localhost:4310/"]
+           "https://enchanting-daffodil-aca9b0.netlify.app/",
+           "https://corner-database-test.netlify.app/", "http://localhost:4310/"]
 WEB_ORIGINS = ["https://bgscorner.com", "https://www.bgscorner.com", "https://abdurrehmancatguy-gif.github.io",
-               "https://enchanting-daffodil-aca9b0.netlify.app", "http://localhost:4310"]
+               "https://enchanting-daffodil-aca9b0.netlify.app", "https://corner-database-test.netlify.app",
+               "http://localhost:4310"]
 
 BOX = IDP = None
 
@@ -170,6 +174,7 @@ class Browser(cdp_pipe.Chrome):
     command back while the navigation it would run in is paused."""
     SITES = {"https://abdurrehmancatguy-gif.github.io": ("/structured-corner-v2/", False),
              "https://enchanting-daffodil-aca9b0.netlify.app": ("/", True),
+             "https://corner-database-test.netlify.app": ("/", True),
              "https://bgscorner.com": ("/", False), "https://www.bgscorner.com": ("/", False)}
     TYPES = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8",
              ".css": "text/css; charset=utf-8", ".png": "image/png", ".jpg": "image/jpeg",
@@ -727,8 +732,11 @@ class RealTenantAddresses(unittest.TestCase):
         self.walk(root, False, root + "account.html", root)
 
     def test_netlify_with_its_pretty_urls(self):
-        root = "https://enchanting-daffodil-aca9b0.netlify.app/"
-        self.walk(root, True, root + "account", root)
+        # both Netlify addresses: the first site and the one the owner tests on
+        for root in ("https://enchanting-daffodil-aca9b0.netlify.app/",
+                     "https://corner-database-test.netlify.app/"):
+            with self.subTest(root=root):
+                self.walk(root, True, root + "account", root)
 
     def test_the_shop_s_own_domain_with_and_without_www(self):
         for root in ("https://bgscorner.com/", "https://www.bgscorner.com/"):

@@ -134,14 +134,20 @@ class PhoneLayout(unittest.TestCase):
           for (const q of rg.getClientRects()) if (q.width >= 1 && !ls.some((t) => Math.abs(t - q.top) < 3)) ls.push(q.top);
           return ls.length; })""" % J(sel))
 
-    BAG_TEXT = {".lmeta": 14, ".line .lrem": 14, ".prog .lb": 14, ".stepper i": 16, ".lname": 16, ".sum .r": 15, ".codnote": 14}
+    BAG_TEXT = {".lmeta": 14, ".line .lrem": 14, ".prog .lb": 14, ".stepper i": 16, ".lname": 16, ".sum .r": 15}
+    # the cash on delivery note is printed only while the shop takes cash on
+    # delivery (build.py prints it from the rule), so it is checked only then
+    BAG_COD = {".codnote": 14}
     PDP_TEXT = {".atcrow [data-add]": 15, ".permeta": 14, ".tabs2 button": 14, ".kv div": 14, ".p .btn.sm": 15, ".p .nm": 16}
 
     def test_the_big_landscape_phones_read_the_phone_sizes(self):
         for w, h in ((915, 412), (932, 430)):
             self.view(w, h)
             self.open("cart.html", bag=FIVE)
-            self.assertEqual(self.sizes(list(self.BAG_TEXT)), self.BAG_TEXT, "the bag at %dx%d" % (w, h))
+            want = dict(self.BAG_TEXT)
+            if self.js("!!(window.BGS_RULES && window.BGS_RULES.cod)"):
+                want.update(self.BAG_COD)
+            self.assertEqual(self.sizes(list(want)), want, "the bag at %dx%d" % (w, h))
             self.open("product.html?p=royal-amber")
             self.assertEqual(self.sizes(list(self.PDP_TEXT)), self.PDP_TEXT, "the product page at %dx%d" % (w, h))
             # card size chips stack, one line each

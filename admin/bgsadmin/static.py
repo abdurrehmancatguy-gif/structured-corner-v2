@@ -104,7 +104,15 @@ def serve_storefront(handler, cfg, method):
     target = safe_join(cfg.flow, rel) if published(rel) else None
     if target is None or not target.is_file():
         return send_404(handler, cfg, method)
-    send_file(handler, target, method, storefront_headers(cfg), allow_range=True)
+    headers = storefront_headers(cfg)
+    if rel == "sw.js":
+        # A worker runs under the policy its own script was served with, and
+        # the cache worker's whole job is to fetch this site's files. The
+        # storefront's connect-src, which names the sign-in provider and
+        # nothing else, would block every one of them, so every page it
+        # answered for would fail to load. It may reach here and nowhere else.
+        headers = dict(headers, **{"Content-Security-Policy": "connect-src 'self'"})
+    send_file(handler, target, method, headers, allow_range=True)
 
 
 def ui_file(rel):
