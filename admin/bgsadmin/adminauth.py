@@ -50,6 +50,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+from . import access
 from .errors import ApiError
 from .store.base import CannotStart
 from .schema.settings import AUTH_CLIENT_ID, AUTH_DOMAIN
@@ -80,19 +81,40 @@ def _unb64(text):
     return base64.urlsafe_b64decode(text + "=" * (-len(text) % 4))
 
 
-def _emails(value):
-    """The allowed addresses, lower case, from a list or a comma-separated line."""
+def _address(item):
+    item = item.strip().lower()
+    if "@" not in item or item.startswith("@") or item.endswith("@") or " " in item:
+        raise NotConfigured("%s is not an email address." % item)
+    return item
+
+
+def _people(value):
+    """Who may open the admin, as {address: role}.
+
+    An entry is either an address on its own, which means the role it has
+    always meant (admin, everything), or an object with the address and the
+    role: {"email": "someone@example.com", "role": "inventory"}. A
+    comma-separated line still works, and still means admin, which is what
+    the environment variable can carry."""
     if isinstance(value, str):
         value = value.split(",")
-    out = []
+    out = {}
     for item in value or []:
-        if not isinstance(item, str):
-            raise NotConfigured("Every allowed address must be text.")
-        item = item.strip().lower()
-        if item:
-            if "@" not in item or item.startswith("@") or item.endswith("@") or " " in item:
-                raise NotConfigured("%s is not an email address." % item)
-            out.append(item)
+        if isinstance(item, str):
+            if not item.strip():
+                continue
+            out[_address(item)] = access.DEFAULT_ROLE
+            continue
+        if not isinstance(item, dict):
+            raise NotConfigured("Every allowed entry must be an address or an object with email and role.")
+        email = item.get("email")
+        if not isinstance(email, str) or not email.strip():
+            raise NotConfigured("Every allowed entry needs an email address.")
+        role = item.get("role", access.DEFAULT_ROLE)
+        if not access.role_ok(role):
+            raise NotConfigured("%s is not a role. The roles are: %s."
+                                % (role, ", ".join(sorted(access.ROLES))))
+        out[_address(email)] = role
     return out
 
 
@@ -119,7 +141,33 @@ class Settings:
         return self.base_url + "/admin/callback"
 
     def allows(self, email):
-        return isinstance(email, str) and email.strip().lower() in self.allowed
+        return self.role_of(email) is not None
+
+    def role_of(self, email):
+        """The role this address has, or None when it is not on the list. It
+        is looked up on every request rather than trusted from the cookie, so
+        removing someone, or changing what they may do, takes effect at once
+        instead of at their next sign-in."""
+        if not isinstance(email, str):
+            return None
+        return self.allowed.get(email.strip().lower())
+
+    def people(self):
+        """[{email, role, label}] for the Staff screen, in address order."""
+        return [{"email": e, "role": r, "label": access.ROLE_LABELS.get(r, (r, ""))[0]}
+                for e, r in sorted(self.allowed.items())]
+
+
+def write_settings(repo, doc):
+    """Put the settings file back, in one go and readable by its owner alone.
+    Only the staff endpoint calls this; the file is otherwise the owner's to
+    write by hand."""
+    path = path_of(repo)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(doc, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    os.chmod(str(tmp), stat.S_IRUSR | stat.S_IWUSR)
+    os.replace(str(tmp), str(path))
 
 
 def path_of(repo):
@@ -158,7 +206,7 @@ def settings(repo):
         raise NotConfigured("The admin's base_url must be the address the admin is served at, like https://admin.example.com.")
     if parts.scheme == "http" and parts.hostname not in ("127.0.0.1", "localhost"):
         raise NotConfigured("The admin's base_url must be https anywhere but this machine.")
-    allowed = _emails(raw.get("allowed"))
+    allowed = _people(raw.get("allowed"))
     if not allowed:
         raise NotConfigured("The admin's login needs at least one allowed address (\"allowed\" in %s)."
                             % path_of(repo))

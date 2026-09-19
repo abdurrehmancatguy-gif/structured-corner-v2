@@ -9,6 +9,7 @@ import urllib.parse
 
 from .. import schema as schema_mod
 from .. import validate
+from .. import access
 from ..errors import ApiError
 from ..routes import ID, Route
 from ..service import confirm, enforce, ordered_like, precondition, saved
@@ -110,6 +111,9 @@ def put_product(req):
             raise ApiError(404, "not_found", "There is no product with the id %s." % pid)
         cur = products[pid]
         precondition(req, rev_of(cur), cur)
+        # a role that may change stock and nothing else (access.py) is held to
+        # that here, whatever it sends: the screen is not the check
+        access.check_product_write(req.role, data, cur)
         enforce(_fields(), cur, data, confirmed)
         errors, warnings = validate.product(pid, data, products, _fields(), _ctx(req))
         if errors:

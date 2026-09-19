@@ -9,7 +9,7 @@ referential checks live above the store (validate.py, service.py and the API
 modules), so both stores apply the same rules; the database adds its own.
 
 The ContentStore, held as app.store:
-    actor                    who saves: the OS user now, the signed-in user later
+    actor                    who saves: the signed-in person, else this computer's user
     open()                -> [journal, ...]  take the admin's lock, settle the saves a crash cut
                                              short (recover()), sweep stray temporary files and
                                              prime the reads; SystemExit while another admin
@@ -64,10 +64,43 @@ import hashlib
 import os
 import pathlib
 import re
+import threading
 
 from .. import schema, tools
 from ..jsonutil import canonical
 from . import files
+
+# Who is saving, for the length of one request. The server is threaded and one
+# store object serves every request, so the signed-in person cannot be kept on
+# the store itself: two people saving at once would overwrite each other's
+# name in the audit trail. httpd sets this around each handler; the stores read
+# it when they write a journal, an audit row or a revision, and fall back to
+# the machine's own user when nobody is signed in (this Mac, no login asked).
+_acting = threading.local()
+
+
+def acting_as(actor):
+    """Use as a context manager: with acting_as("someone@example.com"): ..."""
+    return _Acting(actor)
+
+
+class _Acting:
+    def __init__(self, actor):
+        self.actor = actor
+        self.before = None
+
+    def __enter__(self):
+        self.before = getattr(_acting, "actor", None)
+        _acting.actor = self.actor
+        return self
+
+    def __exit__(self, *exc):
+        _acting.actor = self.before
+        return False
+
+
+def actor_now(default):
+    return getattr(_acting, "actor", None) or default
 
 
 def sha(b):

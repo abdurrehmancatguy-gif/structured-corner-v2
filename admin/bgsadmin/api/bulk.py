@@ -14,6 +14,7 @@ import threading
 import time
 
 from .. import csvio, validate
+from .. import access
 from ..errors import ApiError
 from ..routes import Raw, Route
 from ..service import confirm, ordered_like, refusals, saved
@@ -62,6 +63,9 @@ def bulk(req):
         errors, needs, warnings = {}, {}, {}
         for c in changes:
             pid = c["id"]
+            # a stock-only role is held to stock here too, row by row: the
+            # grid is a different screen, not a different rule (access.py)
+            access.check_product_write(req.role, c["data"], products[pid])
             need, refused = refusals(fields, products[pid], c["data"], confirmed.get(pid, []))
             found, notes = validate.product(pid, c["data"], products, fields, ctx)
             if refused or found:

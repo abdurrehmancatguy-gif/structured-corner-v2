@@ -449,7 +449,13 @@ def inspect_published(flow):
                     data = fh.read()
                 if DASH_SWEEP.match(rel) and chr(0x2014).encode("utf-8") in data:
                     found.append({"id": "dash", "path": "flow/" + rel, "message": "flow/%s has a long dash." % rel})
-                hit = next((s for s in LOCAL_REFS if s in data), None)
+                # sw.js names /admin because it must: the cache worker's whole
+                # job includes refusing to touch that path, now that the shop's
+                # host passes /admin through to the admin. The path is public
+                # anyway; what is behind it is a login. Its other two
+                # giveaways (localhost, the port) are still refused here.
+                refs = [s for s in LOCAL_REFS if not (rel == "sw.js" and s == b"/admin")]
+                hit = next((s for s in refs if s in data), None)
                 if hit:
                     found.append({"id": "local_ref", "path": "flow/" + rel,
                                   "message": "flow/%s mentions %s." % (rel, hit.decode("ascii"))})

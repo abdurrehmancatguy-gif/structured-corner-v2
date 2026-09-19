@@ -9,6 +9,7 @@ that uploads fill may be moved about, but only onto a file that is there.
 from .. import lint
 from .. import schema as schema_mod
 from .. import validate
+from .. import access
 from ..errors import ApiError
 from ..routes import DOC, Route
 from ..service import enforce, flatten, ordered_like, precondition, saved
@@ -37,6 +38,10 @@ def put_doc(req):
     with store.transaction("edit %s" % name) as txn:
         cur = txn.load(name)
         precondition(req, store.doc(name)[1], cur)
+        if name == "settings":
+            # the discounts role may change the discount rules in settings and
+            # nothing else in it (access.py)
+            access.check_settings_write(req.role, data, cur)
         enforce(_fields(name), cur, data)
         products, _ = store.products()
         # flow_dir lets a picture or film field check that a new value names a

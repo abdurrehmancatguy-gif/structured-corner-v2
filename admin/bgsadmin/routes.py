@@ -7,6 +7,7 @@ import importlib
 import pkgutil
 import re
 
+from . import access
 from . import api as api_pkg
 from . import schema
 from .errors import ApiError
@@ -29,7 +30,9 @@ class Route:
         if body == "raw" and not (limit and types):
             raise ValueError("a raw-body route needs its accepted types and a size limit")
         self.method = method
+        self.pattern = pattern
         self.regex = re.compile("^" + pattern + "$")
+        self.permission = None          # routes.load() fills this from access.py
         self.handler = handler
         self.body = body
         self.limit = limit
@@ -48,10 +51,20 @@ class Raw:
 
 
 def load():
+    """Every route, with the permission it needs from access.py. A route with
+    no permission there stops the admin starting: a new endpoint cannot be
+    served until someone has decided who may call it."""
     out = []
     for m in sorted(pkgutil.iter_modules(api_pkg.__path__), key=lambda m: m.name):
         mod = importlib.import_module("%s.%s" % (api_pkg.__name__, m.name))
         out.extend(getattr(mod, "ROUTES", []))
+    missing = []
+    for r in out:
+        r.permission = access.route_permission(r.method, r.pattern)
+        if r.permission is None:
+            missing.append("%s %s" % (r.method, r.pattern))
+    if missing:
+        raise RuntimeError("These endpoints have no permission in access.py: %s" % ", ".join(missing))
     return out
 
 

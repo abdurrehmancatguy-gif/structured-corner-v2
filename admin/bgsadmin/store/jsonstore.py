@@ -28,7 +28,7 @@ from .. import tools
 from ..errors import ApiError
 from ..jsonutil import canonical
 from . import files
-from .base import ContentStore, Failed, Txn as _Txn, content_names, rev_of, sha  # noqa: F401 (rev_of: kept importable from here)
+from .base import ContentStore, Failed, actor_now, Txn as _Txn, content_names, rev_of, sha  # noqa: F401 (rev_of: kept importable from here)
 
 
 class JSONStore(ContentStore):
@@ -186,7 +186,7 @@ class Txn(_Txn):
             self.result = {"changed": [], "build": None}
             return
         paths = files.journal_paths(cfg, [cfg.content_file(n) for n in writes], self.extra, self.media)
-        journal = files.Journal(cfg, paths, {"reason": self.reason, "actor": self.store.actor})
+        journal = files.Journal(cfg, paths, {"reason": self.reason, "actor": actor_now(self.store.actor)})
         before = tools.scan(cfg.flow)
         try:
             for name, (new, _) in writes.items():
@@ -197,7 +197,7 @@ class Txn(_Txn):
         except Failed as f:
             journal.restore()
             files.audit(cfg, {"action": self.reason, "ok": False, "problems": f.problems,
-                              "changed": sorted(writes), "actor": self.store.actor})
+                              "changed": sorted(writes), "actor": actor_now(self.store.actor)})
             journal.remove()
             self.store._cache.clear()
             raise ApiError(422, "build_failed", "Your change was not applied: the site would not build with it.",
@@ -213,7 +213,7 @@ class Txn(_Txn):
             self.store._known[name] = sha(new)
         journal.set_state("committed")
         entry = {"action": self.reason, "ok": True, "changed": sorted(writes), "build_ms": build["ms"],
-                 "actor": self.store.actor}
+                 "actor": actor_now(self.store.actor)}
         if self.confirmed:
             entry["confirmed"] = list(self.confirmed)
         files.audit(cfg, entry)

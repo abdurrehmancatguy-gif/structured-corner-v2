@@ -1,6 +1,7 @@
 """Session, schema, status and "Rebuild now"."""
 import sys
 
+from .. import access
 from .. import schema as schema_mod
 from ..config import PAGES
 from ..routes import Route
@@ -17,10 +18,21 @@ def schemas():
 
 
 def session(req):
+    """Who is signed in, what they may do, and what this machine has. The UI
+    reads permissions only to stop offering what the server would refuse; the
+    refusal itself is on the server (access.py)."""
     app = req.app
     return {"python": sys.version.split()[0], "pillow": app.probes.get("pillow"),
             "ffmpeg": bool(app.probes.get("ffmpeg")), "no_push": app.cfg.no_push,
-            "actor": app.store.actor, "build": app.build, "recovered": app.recovered}
+            "actor": (req.who or {}).get("email") or app.store.actor,
+            "name": (req.who or {}).get("name"),
+            "signed_in": bool(req.who),
+            "role": req.role,
+            "role_label": access.ROLE_LABELS.get(req.role, (req.role, ""))[0],
+            "permissions": access.permissions_of(req.role),
+            "roles": [{"role": r, "label": access.ROLE_LABELS[r][0], "what": access.ROLE_LABELS[r][1]}
+                      for r in sorted(access.ROLES)],
+            "build": app.build, "recovered": app.recovered}
 
 
 def get_schema(req):

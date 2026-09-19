@@ -15,6 +15,7 @@ import unittest
 
 REPO = pathlib.Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
+from bgsadmin import access  # noqa: E402
 from bgsadmin import jobs  # noqa: E402
 from bgsadmin.config import Config  # noqa: E402
 from bgsadmin.errors import ApiError  # noqa: E402
@@ -53,12 +54,18 @@ def download(req):
 
 class FakeApp:
     admin_enabled = True
+    # no sign-in on this stand-in, which is how the admin runs on the owner's
+    # own machine: every permission, and no person to name in the log
+    auth = None
+    auth_required = False
 
     def __init__(self):
         self.cfg = Config(tempfile.gettempdir(), port=PORT)
         self.token = "test-token"
         self.routes = [Route("POST", r"up", upload, body="raw", types={"image/png"}, limit=64),
                        Route("GET", r"down", download)]
+        for r in self.routes:            # routes.load() does this for the real ones
+            r.permission = access.READ
 
 
 class PlumbingTests(unittest.TestCase):

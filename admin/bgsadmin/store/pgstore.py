@@ -49,7 +49,7 @@ from ..db import connect, content, errors as dberrors, migrate
 from ..errors import ApiError
 from ..jsonutil import canonical, strict_loads
 from . import files
-from .base import CannotStart, ContentStore, Failed, Txn as _Txn, content_names, rev_of, sha
+from .base import CannotStart, ContentStore, Failed, actor_now, Txn as _Txn, content_names, rev_of, sha
 
 OUTSIDE = ("file", "both")        # changed outside the admin: refused until the file is put back
 STALE = ("database", "missing")   # the file is behind the database: written by the next save
@@ -468,7 +468,7 @@ class PGTxn(_Txn):
         journal = None
         try:
             paths = files.journal_paths(cfg, [cfg.content_file(n) for n in file_writes], self.extra, self.media)
-            journal = files.Journal(cfg, paths, {"reason": self.reason, "actor": store.actor, "store": "postgres",
+            journal = files.Journal(cfg, paths, {"reason": self.reason, "actor": actor_now(store.actor), "store": "postgres",
                                                  "txn": str(txid) if txid else None, "xid": xid, "stamp": stamp,
                                                  "written": sorted(file_writes)})
             before = tools.scan(cfg.flow)
@@ -482,7 +482,7 @@ class PGTxn(_Txn):
             self._rollback(w)
             self._audit_failed(f.problems, file_writes)
             files.audit(cfg, {"action": self.reason, "ok": False, "problems": f.problems,
-                              "changed": sorted(file_writes), "actor": store.actor})
+                              "changed": sorted(file_writes), "actor": actor_now(store.actor)})
             journal.remove()
             store._state = None
             raise ApiError(422, "build_failed", "Your change was not applied: the site would not build with it.",
@@ -501,7 +501,7 @@ class PGTxn(_Txn):
                 files.write_backup(cfg, n, stamp, disk[n])
         journal.set_state("committed")
         changed = sorted(set(file_writes) | set(db_writes))
-        entry = {"action": self.reason, "ok": True, "changed": changed, "build_ms": build["ms"], "actor": store.actor}
+        entry = {"action": self.reason, "ok": True, "changed": changed, "build_ms": build["ms"], "actor": actor_now(store.actor)}
         if self.confirmed:
             entry["confirmed"] = list(self.confirmed)
         files.audit(cfg, entry)
@@ -526,10 +526,10 @@ class PGTxn(_Txn):
             if content.lock_version(cur) != st.version:
                 raise ApiError(412, "stale_rev", "This changed since you opened it: another program changed the "
                                                  "database. Reload and try again.")
-            content.begin(cur, txid, store.actor, self.reason, self.confirmed)
+            content.begin(cur, txid, actor_now(store.actor), self.reason, self.confirmed)
             content.write_changes(cur, st, products, {n: self.docs[n] for n in names if n != "products"})
             content.set_bases(cur, {n: (sha(new[n]), sha(new[n])) for n in names})
-            content.audit(cur, txid, store.actor, self.reason, names)
+            content.audit(cur, txid, actor_now(store.actor), self.reason, names)
             cur.execute("SAVEPOINT bgs_checks")
             try:
                 cur.execute("SET CONSTRAINTS ALL IMMEDIATE")
@@ -601,4 +601,4 @@ class PGTxn(_Txn):
         with contextlib.suppress(Exception):
             w = store._conn("writer")
             with w.transaction():
-                content.audit(w.cursor(), uuid.uuid4(), store.actor, self.reason, names, ok=False, problems=problems)
+                content.audit(w.cursor(), uuid.uuid4(), actor_now(store.actor), self.reason, names, ok=False, problems=problems)

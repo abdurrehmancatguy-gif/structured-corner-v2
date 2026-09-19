@@ -2,7 +2,7 @@
 import secrets
 import shutil
 
-from . import adminauth, routes
+from . import adminauth, events, routes
 from .store.base import CannotStart
 from .store.jsonstore import JSONStore
 
@@ -46,6 +46,22 @@ class App:
         self.build = {"ok": None, "at": None, "ms": None, "problems": []}
         self.probes = {}
         self.recovered = []
+        if self.admin_enabled:
+            # lines older than the retention period go at start-up, never
+            # inside a request; the admin warns before the oldest are due
+            events.prune(cfg.repo)
+
+    def reload_auth(self):
+        """Read the people and roles again, after the staff endpoint wrote
+        them, so a change takes effect without restarting the admin."""
+        self.auth = adminauth.settings(self.cfg.repo)
+        return self.auth
+
+    def record(self, kind, message, actor=None, ok=True, extra=None):
+        """One line in the admin's own log (events.py): sign-ins, refusals,
+        and changes to people and roles. Content changes are recorded by the
+        store itself, with the person's address on each."""
+        return events.append(self.cfg.repo, kind, message, actor=actor, ok=ok, extra=extra)
 
     def start(self):
         if not self.admin_enabled:

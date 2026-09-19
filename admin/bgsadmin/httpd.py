@@ -14,7 +14,8 @@ import sys
 import traceback
 import urllib.parse
 
-from . import adminauth, routes, security, static
+from . import access, adminauth, routes, security, static
+from .store import base as store_base
 from .config import LIMITS, UI
 from .errors import ApiError
 from .jsonutil import dumps, strict_loads
@@ -37,6 +38,23 @@ class Server(socketserver.ThreadingMixIn, socketserver.TCPServer):
             super().handle_error(request, client_address)
 
 
+# What a refusal calls each permission, so the message reads as English.
+ROUTE_WORDS = {
+    access.READ: "open the admin",
+    access.CONTENT: "change the shop's words",
+    access.PRODUCTS: "change products",
+    access.STOCK: "change stock",
+    access.MEDIA: "change pictures and films",
+    access.SETTINGS: "change the store's settings",
+    access.DISCOUNTS: "change the discounts",
+    access.PUBLISH: "publish",
+    access.HISTORY: "restore an earlier version",
+    access.STAFF: "manage people and roles",
+    access.ORDERS: "see orders",
+    access.ANALYTICS: "see the numbers",
+}
+
+
 class Request:
     """What an API handler gets: the app, the parsed body and query, the route's
     named groups (already matched against their patterns) and the headers.
@@ -45,8 +63,10 @@ class Request:
     read: the handler takes it once, with save_body(path) to stream it to a
     file or read_body() for a small one."""
 
-    def __init__(self, app, method, query, params, body, headers, upload=None):
+    def __init__(self, app, method, query, params, body, headers, upload=None, who=None, role=None):
         self.app = app
+        self.who = who                  # the signed-in person, or None on this machine
+        self.role = role                # what they may do (access.py)
         self.method = method
         self.query = query
         self.params = params
@@ -214,6 +234,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
                                                                adminauth.FLOW_SECONDS, cfg.https)])
         if path == "/admin/signout":
             security.check_admin_page(self)
+            gone = adminauth.who(cfg, self)
+            if gone:
+                app.record("signout", "signed out", actor=gone.get("email"))
             return self.redirect(conf.url("/v2/logout", client_id=conf.client_id,
                                           returnTo=conf.base_url + "/admin/signedout"),
                                  [adminauth.cookie_header(adminauth.COOKIE, "", 0, cfg.https)])
@@ -229,8 +252,11 @@ class Handler(http.server.BaseHTTPRequestHandler):
             person = adminauth.finish(cfg, conf, self, params)
         except ApiError as e:
             print("admin sign-in refused: %s" % e.code)
+            # the address is masked in the log (events.py); the reason is not
+            app.record("signin", "refused: %s" % e.message, actor="", ok=False, extra={"code": e.code})
             return self.signin_page(method, e, [drop])
         print("admin sign-in: %s" % person["email"])
+        app.record("signin", "signed in as %s" % conf.role_of(person["email"]), actor=person["email"])
         session = adminauth.seal(adminauth.key(cfg.repo), person, adminauth.SESSION_SECONDS)
         # The browser arrives here from the provider, so this navigation
         # started on another site. /admin/ is served only to a navigation that
@@ -299,6 +325,20 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if method != "HEAD":
             self.wfile.write(data)
 
+    def whoami(self, app):
+        """(the signed-in person, their role). On this machine with no login
+        asked for, the admin opens as it always has, with every permission.
+        The role is read from the settings on every request, not from the
+        cookie, so removing someone or changing their role takes effect at
+        once rather than at their next sign-in."""
+        if not app.auth_required:
+            return None, access.DEFAULT_ROLE
+        who = adminauth.who(app.cfg, self)
+        role = app.auth.role_of(who.get("email")) if who and app.auth else None
+        if not role:
+            raise ApiError(403, "not_allowed", "This account is not on the admin's list.")
+        return who, role
+
     def api(self, method, rest):
         app = self.server.app
         if method == "OPTIONS":
@@ -306,14 +346,25 @@ class Handler(http.server.BaseHTTPRequestHandler):
             raise ApiError(405, "method", "Not allowed.")
         security.check_api(self, app.cfg, app.token, method)
         route, params = routes.match(app.routes, method, rest)
+        who, role = self.whoami(app)
+        # the document routes are one pattern for every document, so which
+        # permission they need depends on which document is being written
+        needed = route.permission
+        if route.pattern.startswith("documents/"):
+            needed = access.document_permission(params.get("name", ""), method)
+        access.require(role, needed, ROUTE_WORDS.get(needed))
         body, upload = None, None
         if route.body == "json":
             body = self.read_json(route.limit or LIMITS["json"])
         elif route.body == "raw":
             upload = self.check_upload(route)
         q = urllib.parse.parse_qs(urllib.parse.urlsplit(self.path).query, keep_blank_values=True)
-        req = Request(app, method, {k: v[-1] for k, v in q.items()}, params, body, self.headers, upload)
-        result = route.handler(req)
+        req = Request(app, method, {k: v[-1] for k, v in q.items()}, params, body, self.headers, upload,
+                      who=who, role=role)
+        # every journal, audit row and revision this request writes is stamped
+        # with the person, not with this computer's user
+        with store_base.acting_as(who.get("email") if who else None):
+            result = route.handler(req)
         if isinstance(result, routes.Raw):
             return self.send_raw(result, method)
         status, obj, extra = 200, result, {}
