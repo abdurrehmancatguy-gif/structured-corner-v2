@@ -381,7 +381,7 @@
     },
     "replies": {
       "missing": "Enter your order number, or the phone you ordered with.",
-      "looking": "Looking for {query}. Live courier tracking connects with the backend; the stages below are the standard sequence your order moves through."
+      "looking": "We cannot look orders up on the site yet, so {query} has not been checked. Your order number is on your confirmation, and the stages below are the ones every order goes through."
     },
     "stages_heading": "Where it will be",
     "stages": [

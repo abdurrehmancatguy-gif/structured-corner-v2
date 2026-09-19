@@ -577,6 +577,20 @@ def _away(href):
        that tab from reaching back into this one."""
     return ' target="_blank" rel="noopener"' if href.startswith("http") else ""
 
+def footer_where():
+    """The map and the accounts, in the room under the columns of links.
+
+       They were in the brand column, which is a quarter of the footer wide
+       and already holds the logo, the company's name, the address and the
+       sign-up: the map came out the size of a stamp while the space under
+       the five columns of links sat empty. This band takes that space, from
+       the second column to the last, so the map is the width of the links
+       above it. Neither printed, there is no band."""
+    where, accounts = footer_map(), social_links()
+    if not (where or accounts):
+        return ""
+    return '\n  <div class="footwhere">%s%s</div>' % (where, accounts)
+
 def footer_cols():
     """The footer's link columns, from navigation.json (they used to be written
        out in shell(), so an edit to the file changed nothing). A link with no
@@ -703,8 +717,8 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
 <footer><div class="wrap"><div class="cols" style="--footcols:%(footn)d">
   <div>%(footlogo)s
     <p>%(legal_line)s</p>
-    <p>%(addr)s</p>%(footmap)s%(social)s<div class="nl"><span class="field">%(nl_placeholder)s</span><span class="btn">%(nl_button)s</span></div></div>
-%(footcols)s
+    <p>%(addr)s</p><div class="nl"><span class="field">%(nl_placeholder)s</span><span class="btn">%(nl_button)s</span></div></div>
+%(footcols)s%(footwhere)s
 </div><div class="bot"><span>%(copyright)s</span>
 <span>%(paylist)s</span></div></div></footer>
 <div class="tabbar">%(tabs)s</div>
@@ -732,7 +746,7 @@ def shell(title, body, nav_on="", tab="Home", page="", desc="", canon=""):
    brandlogo=header_logo(), footlogo=footer_logo(), footcols=footer_cols(), icons=favicon_links(),
    # the footer's row is the brand column and one for each column of links, so
    # a column added in the admin widens the row instead of falling below it
-   footn=len(NAVC["footer"]), footmap=footer_map(), social=social_links(),
+   footn=len(NAVC["footer"]), footwhere=footer_where(),
    paylist=esc(" \u00b7 ".join(pay_labels())),
    # while no contact detail is filled in, the footer keeps the placeholder it has always shown
    addr=" &middot; ".join(x for x in _CONTACT if x) or slot("address, hours, phone"))
@@ -1628,6 +1642,17 @@ cart = """
 # The bag and the gift box above print these rules; shop.js prices with them.
 EXTRA_GLOBALS.append(("BGS_RULES", lambda: RULES))
 
+# What the shop promises about getting an order to the door, from the rules:
+# the checkout prints it while the order is being placed and the tracking page
+# while it is on its way, so the two can never say different things.
+DELIVERY_ROWS = "".join(
+    ['<div><span><b>Standard</b> &middot; free over %s</span><span>%s below</span></div>'
+     % (RULE_TEXT["rule_free_over"], RULE_TEXT["rule_delivery_fee"])]
+    + (['<div><span><b>Same-day Dubai</b> &middot; before %s</span><span>+%s</span></div>'
+        % (RULE_TEXT["rule_cutoff"], RULE_TEXT["rule_sameday_fee"])] if RULES["sameday"] else [])
+    + ['<div><span><b>Dispatch</b></span><span>%s</span></div>' % esc(RULES["dispatch_days"]),
+       '<div><span><b>Scheduled</b></span><span>Tomorrow to +30 days</span></div>'])
+
 checkout = """
 <section><div class="wrap">
   <div class="sec-h"><h2 class="pagetitle">Checkout</h2><span class="aside">Guest checkout &middot; account optional</span></div>
@@ -1670,13 +1695,7 @@ checkout = """
                if RULES["cod"] else "",
     "vat_row": ('<div class="r vat" data-vatrow><span>Includes VAT at %d%%</span><span data-vat>AED 0</span></div>\n      '
                 % RULES["vat_percent"]) if RULES["vat_percent"] else "",
-    "delivery_rows": "".join(
-        ['<div><span><b>Standard</b> &middot; free over %s</span><span>%s below</span></div>'
-         % (RULE_TEXT["rule_free_over"], RULE_TEXT["rule_delivery_fee"])]
-        + (['<div><span><b>Same-day Dubai</b> &middot; before %s</span><span>+%s</span></div>'
-            % (RULE_TEXT["rule_cutoff"], RULE_TEXT["rule_sameday_fee"])] if RULES["sameday"] else [])
-        + ['<div><span><b>Dispatch</b></span><span>%s</span></div>' % esc(RULES["dispatch_days"]),
-           '<div><span><b>Scheduled</b></span><span>Tomorrow to +30 days</span></div>']),
+    "delivery_rows": DELIVERY_ROWS,
 }))
 confirmed = """
 <section><div class="wrap" style="max-width:760px">
@@ -1753,23 +1772,50 @@ TRACK_TEXT = {
     "t_stages_h": page_text("track.stages_heading"),
     "t_stages": kv_rows(page_rows("track.stages", ("label", "body")), "\n    "),
     "t_note": page_text("track.whatsapp_note"),
+    # the aside: the delivery rules the checkout prints, and the two policy
+    # pages, named as the pages themselves are
+    "t_side_h": "Delivery", "t_delivery": DELIVERY_ROWS,
+    "t_side_ship": "Shipping &amp; delivery", "t_side_ret": "Returns &amp; refunds",
 }
 COPY_JS["track"] = {"replies": {"missing": js_text("track.replies.missing"),
                                 "looking": js_text("track.replies.looking", allow=("query",))}}
 
+# The page is the width of every other page now, in two columns: the lookup
+# and the stages an order goes through on the left, and on the right what the
+# shop promises about delivery, which is the next thing a person wonders about
+# while waiting. It used to be a 720px column down the middle of a 1440px
+# page, so two thirds of the page was margin.
+#
+# The stages keep their .kv markup, which the phone stylesheet draws as a rail
+# of rings; .stages tells them apart from the delivery rows beside them, which
+# are the same markup and must not become a rail too.
 track = """
-<section><div class="wrap" style="max-width:720px">
+<section><div class="wrap">
   <span class="eyebrow">%(t_crumb)s</span>
   <div class="sec-h" style="margin-top:10px"><div><h2 class="pagetitle">%(t_title)s</h2>
   <p class="intro">%(t_intro)s</p></div></div>
-  <div class="grid g2" style="margin-bottom:14px"><input class="field" data-ordernum aria-label="%(t_number)s" placeholder="%(t_number)s"><input class="field" data-orderphone type="tel" aria-label="Phone number" placeholder="%(t_phone)s"></div>
-  <button type="button" class="btn solid block" data-findorder style="margin-bottom:10px">%(t_button)s</button>
-  <p class="note" data-findresult hidden style="margin:0 0 26px"></p>
-  <span class="eyebrow">%(t_stages_h)s</span>
-  <div class="kv" style="margin-top:10px">
+  <div class="two trackpage">
+    <div>
+      <div class="grid g2" style="margin-bottom:14px"><input class="field" data-ordernum aria-label="%(t_number)s" placeholder="%(t_number)s"><input class="field" data-orderphone type="tel" aria-label="Phone number" placeholder="%(t_phone)s"></div>
+      <button type="button" class="btn solid block" data-findorder style="margin-bottom:10px">%(t_button)s</button>
+      <p class="note" data-findresult hidden style="margin:0 0 26px"></p>
+      <span class="eyebrow">%(t_stages_h)s</span>
+      <div class="kv stages" style="margin-top:10px">
     %(t_stages)s
+      </div>
+    </div>
+    <div class="trackside">
+      <div class="sum">
+        <span class="eyebrow">%(t_side_h)s</span>
+        <div class="kv" style="margin-top:10px">%(t_delivery)s</div>
+        <div class="sidelinks">
+          <a href="shipping-and-delivery.html">%(t_side_ship)s &rarr;</a>
+          <a href="returns-and-refunds.html">%(t_side_ret)s &rarr;</a>
+        </div>
+      </div>
+      <div class="note">%(t_note)s</div>
+    </div>
   </div>
-  <div class="note" style="margin-top:20px">%(t_note)s</div>
 </div></section>
 """ % TRACK_TEXT
 

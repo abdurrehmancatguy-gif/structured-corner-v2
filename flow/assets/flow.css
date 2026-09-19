@@ -3179,3 +3179,52 @@ footer .social a:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
   .footmap iframe{height:130px}
   footer .social a{width:42px;height:42px}
 }
+
+/* ---- the band under the links: the map, and the accounts ---------------------
+   Both used to sit in the brand column, a quarter of the footer wide and
+   already holding the logo, the company's name, the address and the sign-up:
+   the map came out the size of a stamp while the room under the five columns
+   of links sat empty down to the copyright line. The band takes that room,
+   from the second column to the last, and the brand column now runs the whole
+   height beside it with the sign-up at its foot. */
+footer .cols > div:first-child{grid-row:1 / span 2;display:flex;flex-direction:column}
+footer .cols > div:first-child .nl{margin-top:auto}
+.footwhere{grid-column:2 / -1;display:flex;flex-direction:column;gap:14px;align-self:end}
+.footwhere .footmap{max-width:none;margin:0}
+.footwhere .footmap iframe{height:210px}
+.footwhere .social{margin:0}
+
+/* ---- tracking: the stages as a rail, and what is beside them ----------------
+   The phone has drawn these stages as a rail of rings since it was designed;
+   the desktop had them as five rows of a table in a column down the middle of
+   an otherwise empty page. Same markup, same idea: a ring for each stage, a
+   line running through them, the words beside it.
+
+   Nothing is marked as reached, because nothing looks an order up yet. When
+   something does, a stage gets .on for where the order is and .done for the
+   ones behind it, and the rail fills in to there. */
+.page-track-order .kv.stages{border-top:0;gap:0}
+.page-track-order .kv.stages > div{position:relative;display:block;padding:0 0 22px 34px;border-bottom:0;font-size:13px}
+.page-track-order .kv.stages > div:last-child{padding-bottom:0}
+.page-track-order .kv.stages > div::before{content:"";position:absolute;left:0;top:2px;width:16px;height:16px;
+  border-radius:50%;background:#fff;box-shadow:inset 0 0 0 2px var(--line);z-index:1}
+.page-track-order .kv.stages > div::after{content:"";position:absolute;left:7px;top:18px;bottom:0;width:2px;
+  border-radius:2px;background:var(--hair)}
+.page-track-order .kv.stages > div:last-child::after{display:none}
+.page-track-order .kv.stages > div > span{display:block}
+.page-track-order .kv.stages > div > span:first-child{color:var(--ink);font-weight:600;font-size:14px;line-height:1.3}
+.page-track-order .kv.stages > div > span:last-child{color:var(--mut);font-size:12.5px;line-height:1.5;margin-top:2px}
+.page-track-order .kv.stages > div.done::before,.page-track-order .kv.stages > div.on::before{
+  background:var(--ink);box-shadow:inset 0 0 0 2px var(--ink)}
+.page-track-order .kv.stages > div.done::after{background:var(--ink)}
+
+/* the column beside it: the delivery the checkout promises, the two policy
+   pages, and the note about order updates */
+.trackside{display:flex;flex-direction:column;gap:14px}
+.trackside .sum{padding:18px 20px}
+.trackside .sum .kv{border-top:0}
+.trackside .sum .kv div:last-child{border-bottom:0;padding-bottom:0}
+.sidelinks{display:flex;flex-direction:column;gap:2px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.sidelinks a{font-size:13px;color:var(--ink);font-weight:500}
+.sidelinks a:hover{color:var(--cta-d);text-decoration:underline}
+.page-track-order .trackside .note{margin:0}
